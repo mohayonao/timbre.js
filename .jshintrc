@@ -1,0 +1,5 @@
+{
+    "browser": true,
+    "node"   : true,
+    "predef" : ["pico"]
+}
