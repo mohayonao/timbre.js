@@ -1,1 +1,1 @@
-module.exports = require("./src/core");
+module.exports = require("./timbre.dev").bind(require("./libs/PicoNodePlayer"));
