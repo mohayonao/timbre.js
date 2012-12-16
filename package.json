@@ -1,7 +1,7 @@
 {
     "name": "timbre",
-    "description": "JavaScript library for objective sound programming"
-    "author": "nao yonamine <mohayonao@gmail.com>"
+    "description": "JavaScript library for objective sound programming",
+    "author": "nao yonamine <mohayonao@gmail.com>",
     "repository": {
         "type": "git",
         "url": "https://github.com/mohayonao/timbre.js.git"
@@ -12,9 +12,12 @@
           "url" : "https://raw.github.com/mohayonao/timbre.js/master/LICENSE" }
     ],
     "dependencies": {
-        "node-pico": ">=0.0.4"
+        "speaker": ">=0.0.5",
+        "readable-stream": ">=0.0.4",
+        "lame": "1.0.0"
     },
     "devDependencies": {
+        "coffee-script": "1.4.0",
         "uglify-js": "*",
         "jshint"   : "*"
     }
