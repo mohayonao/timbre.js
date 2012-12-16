@@ -1,0 +1,42 @@
+<html lang="en">
+  <head>
+    <title>T("timbre.js") - A JavaScript Library for Objective Sound Programming</title>
+  </head>
+  <body style="text-align:center">
+    <div style="margin-top:50px;font-size:8em;font-family:monospace;text-shadow:0 0 5px #ccc">
+      T("timbre.js")
+    </div>
+    <canvas id="filter" style="width:320px;height:240px"></canvas>
+    <canvas id="wave" style="width:320px;height:240px"></canvas>
+    <canvas id="fft" style="width:320px;height:240px"></canvas>
+    <div>
+      <button onclick="timbre.amp = 1 - timbre.amp;">SOUND</button>
+    </div>
+    <div style="margin-top:25px">
+      new version; now under development
+    </div>
+    <script src="./timbre.dev.js"></script>
+    <script>
+      var wave_canvas   = document.getElementById("wave");
+      var filter_canvas = document.getElementById("filter");
+      var fft_canvas    = document.getElementById("fft");
+      
+      T("audio", {isLooped:true}).on("loadeddata", function() {
+          var freq   = T("param");
+          var wave   = T("wave", {interval:500}).listen(this);
+          var filter = T("biquad", {type:"HPF", freq:freq, Q:5}, this);
+          var fft    = T("fft", {interval:80}, this).listen(this).on("fft", function() {
+              wave.plot({target:wave_canvas});
+              filter.plot({target:filter_canvas});
+              fft.plot({target:fft_canvas});
+          });
+          freq.setValueAtTime(3400, 0).on("done", function() {
+              var nextValue = this.value === 3400 ? 200 : 3400;
+              freq.lin(nextValue, timbre.currentTime + 2500);
+          });
+          filter.play();
+      }).load("./misc/amen.wav");
+      timbre.amp = 0;
+    </script>
+  </body>
+</html>
