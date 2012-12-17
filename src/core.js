@@ -1252,8 +1252,6 @@
         };
 
         $.reset = function() {
-            this.pause();
-            this.amp  = 0.8;
             this.currentTime = 0;
             this.nextTicks = [];
             this.dacs      = [];
