@@ -2,7 +2,7 @@
 # http://mohayonao.github.com/pico.js/index.html
 
 T = require '..'
-require '../libs/pico-binder'
+require '../src/extras/pico-binder'
 
 demo = require '../misc/demo'
 
