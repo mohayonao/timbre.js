@@ -4,7 +4,7 @@
     function WaveListener(_args) {
         timbre.ListenerObject.call(this, _args);
         
-        this._.buffer = new Float32Array(2048);
+        this._.buffer = new Float32Array(1024);
         this._.samples    = 0;
         this._.writeIndex = 0;
         
@@ -28,7 +28,7 @@
                 var _ = this._;
                 if (typeof value === "number" && value > 0) {
                     _.interval    = value;
-                    _.samplesIncr = value * 0.001 * timbre.samplerate / 2048;
+                    _.samplesIncr = value * 0.001 * timbre.samplerate / 1024;
                     if (_.samplesIncr < 1) {
                         _.samplesIncr = 1;
                     }
@@ -44,7 +44,7 @@
         var _ = this._;
         var buffer = _.buffer;
         
-        for (var i = 2048; i--; ) {
+        for (var i = 1024; i--; ) {
             buffer[i] = 0;
         }
         _.samples    = 0;
@@ -86,7 +86,7 @@
             for (j = 0; j < jmax; ++j) {
                 if (samples <= 0) {
                     buffer[writeIndex++] = cell[j];
-                    writeIndex &= 2047;
+                    writeIndex &= 1023;
                     emit = _.plotFlush = true;
                     samples += samplesIncr;
                 }
@@ -107,10 +107,10 @@
     $.plot = function(opts) {
         var _ = this._;
         if (_.plotFlush) {
-            var data   = new Float32Array(2048);
+            var data   = new Float32Array(1024);
             var buffer = _.buffer;
-            for (var i = 0, j = _.writeIndex; i < 2048; i++) {
-                data[i] = buffer[++j & 2047];
+            for (var i = 0, j = _.writeIndex; i < 1024; i++) {
+                data[i] = buffer[++j & 1023];
             }
             _.plotData  = data;
             _.plotFlush = null;
