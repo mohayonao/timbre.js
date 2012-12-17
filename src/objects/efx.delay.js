@@ -56,7 +56,7 @@
         }
     });
     
-    $.create = function(opts) {
+    $.createInnerInstance = function(opts) {
         return new EfxDelay(opts);
     };
     

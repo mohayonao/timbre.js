@@ -102,7 +102,7 @@
         }
     });
     
-    $.create = function(n) {
+    $.createInnerInstance = function(n) {
         return new FFT(n);
     };
     

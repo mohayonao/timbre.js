@@ -66,7 +66,7 @@
         }
     });
     
-    $.create = function(type) {
+    $.createInnerInstance = function(type) {
         return new BiquadFilter(type);
     };
     
@@ -126,7 +126,7 @@
     };
     
     $.plot = (function() {
-        var fft = timbre("fft").create(256);
+        var fft = timbre("fft").createInnerInstance(256);
         return function(opts) {
             if (this._.plotFlush) {
                 var biquad = new BiquadFilter({type:this.type,samplerate:timbre.samplerate});
