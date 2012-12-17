@@ -44,6 +44,11 @@ lang_process = (doc)->
             doc  = head + rep + tail
     doc
 
+table_td = (x)->
+    x = x.trim()
+    m = /^md:\s*([\w\W]+)$/.exec x
+    if m then marked m[1] else x
+
 table = (src)->
     theads  = []
     tbodies = []
@@ -62,7 +67,7 @@ table = (src)->
         items.push "<thead>"
         for x in theads
             items.push "<tr>"
-            x = x.replace /\|/g, '</th><th>'
+            x = x.split('|').map(table_td).join('</th><th>')
             items.push "<th>#{x}</th>"
             items.push "</tr>"
         items.push "</thead>"
@@ -70,7 +75,7 @@ table = (src)->
         items.push "<tbody>"
         for x in tbodies
             items.push "<tr>"
-            x = x.replace /\|/g, '</td><td>'
+            x = x.split('|').map(table_td).join('</td><td>')
             items.push "<td>#{x}</td>"
             items.push "</tr>"
         items.push "</tbody>"
