@@ -208,24 +208,22 @@
     
     var __register = function(key, ctor) {
         if (__constructorof(ctor, TimbreObject)) {
-            if (typeof key === "string") {
-                _constructors[key] = ctor;
-            } else if (isArray(key)) {
-                for (var i = key.length; i--; ) {
-                    _constructors[key[i]] = ctor;
-                }
-            }
+            _constructors[key] = ctor;
         } else {
-            if (typeof key === "string") {
-                _factories[key] = ctor;
-            } else if (isArray(key)) {
-                for (var j = key.length; j--; ) {
-                    _constructors[key[j]] = ctor;
-                }
-            }
+            _factories[key] = ctor;
         }
     };
     timbre.fn.register = __register;
+
+    var __alias = function(key, alias) {
+        if (_constructors[alias]) {
+            _constructors[key] = _constructors[alias];
+        } else if (_factories[alias]) {
+            _factories[key] = _factories[alias];
+        }
+        
+    };
+    timbre.fn.alias = __alias;
     
     var __getClass = function(key) {
         return _constructors[key];

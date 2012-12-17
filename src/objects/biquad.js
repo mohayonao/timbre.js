@@ -437,13 +437,13 @@
     
     timbre.fn.register("biquad", Biquad);
     
-    timbre.fn.register(["lowpass","LPF"], function(_args) {
+    timbre.fn.register("lowpass", function(_args) {
         return new Biquad(_args).set("type", "lowpass");
     });
-    timbre.fn.register(["highpass","HPF"], function(_args) {
+    timbre.fn.register("highpass", function(_args) {
         return new Biquad(_args).set("type", "highpass");
     });
-    timbre.fn.register(["bandpass","BPF"], function(_args) {
+    timbre.fn.register("bandpass", function(_args) {
         return new Biquad(_args).set("type", "bandpass");
     });
     timbre.fn.register("lowshelf", function(_args) {
@@ -455,10 +455,17 @@
     timbre.fn.register("peaking", function(_args) {
         return new Biquad(_args).set("type", "peaking");
     });
-    timbre.fn.register(["notch","BEF","BRF"], function(_args) {
+    timbre.fn.register("notch", function(_args) {
         return new Biquad(_args).set("type", "notch");
     });
-    timbre.fn.register(["allpass","APF"], function(_args) {
+    timbre.fn.register("allpass", function(_args) {
         return new Biquad(_args).set("type", "allpass");
     });
+    
+    timbre.fn.alias("LPF", "lowpass");
+    timbre.fn.alias("HPF", "highpass");
+    timbre.fn.alias("BPF", "bandpass");
+    timbre.fn.alias("BEF", "notch");
+    timbre.fn.alias("BRF", "notch");
+    timbre.fn.alias("APF", "allpass");
 })();

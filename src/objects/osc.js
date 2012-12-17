@@ -408,7 +408,7 @@
     };
     
     timbre.fn.register("osc", Oscillator);
-
+    
     timbre.fn.register("sin", function(_args) {
         return new Oscillator(_args).set("wave", "sin");
     });
@@ -442,4 +442,6 @@
     timbre.fn.register("+saw", function(_args) {
         return new Oscillator(_args).set("wave", "+saw");
     });
+    
+    timbre.fn.alias("square", "pulse");
 })();
