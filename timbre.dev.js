@@ -2324,7 +2324,7 @@
         }
     });
     
-    $.create = function(n) {
+    $.createInnerInstance = function(n) {
         return new FFT(n);
     };
     
@@ -2730,7 +2730,7 @@
         }
     });
     
-    $.create = function(type) {
+    $.createInnerInstance = function(type) {
         return new BiquadFilter(type);
     };
     
@@ -2790,7 +2790,7 @@
     };
     
     $.plot = (function() {
-        var fft = timbre("fft").create(256);
+        var fft = timbre("fft").createInnerInstance(256);
         return function(opts) {
             if (this._.plotFlush) {
                 var biquad = new BiquadFilter({type:this.type,samplerate:timbre.samplerate});
@@ -3191,7 +3191,7 @@
         }
     });
     
-    $.create = function(opts) {
+    $.createInnerInstance = function(opts) {
         return new EfxDelay(opts);
     };
     
@@ -3640,31 +3640,51 @@
         
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
+
+            var inputs  = this.inputs;
+            var i, imax = inputs.length;
+            var j, jmax = cell.length;
+            var mul = _.mul, add = _.add;
+            var tmp;
+            
+            if (inputs.length) {
+                for (j = jmax; j--; ) {
+                    cell[j] = 0;
+                }
+                for (i = 0; i < imax; ++i) {
+                    tmp = inputs[i].seq(seq_id);
+                    for (j = jmax; j--; ) {
+                        cell[j] += tmp[j];
+                    }
+                }
+            } else {
+                for (j = jmax; j--; ) {
+                    cell[j] = 1;
+                }
+            }
             
             var freq = _.freq.seq(seq_id);
-            var mul  = _.mul , add = _.add;
             var wave = _.wave, x   = _.x, coeff = _.coeff;
             var index, delta, x0, x1, xx, dx;
-            var i, imax;
             
             if (_.ar) { // audio-rate
                 if (_.freq.isAr) {
-                    for (i = 0, imax = cell.length; i < imax; ++i) {
+                    for (j = 0; j < jmax; ++j) {
                         index = x|0;
                         delta = x - index;
                         x0 = wave[index & 1023];
                         x1 = wave[(index+1) & 1023];
-                        cell[i] = ((1.0 - delta) * x0 + delta * x1) * mul + add;
-                        x += freq[i] * coeff;
+                        cell[j] *= ((1.0 - delta) * x0 + delta * x1);
+                        x += freq[j] * coeff;
                     }
                 } else { // _.freq.isKr
                     dx = freq[0] * coeff;
-                    for (i = 0, imax = cell.length; i < imax; ++i) {
+                    for (j = 0; j < jmax; ++j) {
                         index = x|0;
                         delta = x - index;
                         x0 = wave[index & 1023];
                         x1 = wave[(index+1) & 1023];
-                        cell[i] = ((1.0 - delta) * x0 + delta * x1) * mul + add;
+                        cell[j] *= ((1.0 - delta) * x0 + delta * x1);
                         x += dx;
                     }
                 }
@@ -3673,16 +3693,20 @@
                 delta = x - index;
                 x0 = wave[index & 1023];
                 x1 = wave[(index+1) & 1023];
-                xx = ((1.0 - delta) * x0 + delta * x1) * mul + add;
-                for (i = imax = cell.length; i--; ) {
-                    cell[i] = xx;
+                xx = ((1.0 - delta) * x0 + delta * x1);
+                for (j = jmax; j--; ) {
+                    cell[j] *= xx;
                 }
-                x += freq[0] * coeff * imax;
+                x += freq[0] * coeff * jmax;
             }
             while (x > 1024) {
                 x -= 1024;
             }
             _.x = x;
+            
+            for (j = jmax; j--; ) {
+                cell[j] = cell[j] * mul + add;
+            }
         }
         
         return cell;
@@ -3989,6 +4013,90 @@
     
     timbre.fn.alias("square", "pulse");
 })(timbre);
+(function() {
+    "use strict";
+    
+    function Panner(_args) {
+        timbre.StereoObject.call(this, _args);
+        
+        this._.panL = 0.5;
+        this._.panR = 0.5;
+        
+        this.once("init", function() {
+            if (!this._.value) {
+                this.value = 0;
+            }
+        });
+        
+        this.on("ar", function() { this._.ar = true; });
+    }
+    timbre.fn.extend(Panner, timbre.StereoObject);
+    
+    var $ = Panner.prototype;
+    
+    Object.defineProperties($, {
+        value: {
+            set: function(value) {
+                this._.value = timbre(value);
+            },
+            get: function() {
+                return this._.value;
+            }
+        }
+    });
+    
+    $.seq = function(seq_id) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.seq_id !== seq_id) {
+            this.seq_id = seq_id;
+            
+            var changed = false;
+            
+            var value = _.value.seq(seq_id)[0];
+            if (_.prevValue !== value) {
+                _.prevValue = value;
+                changed = true;
+            }
+            if (changed) {
+                _.panL = Math.cos(0.5 * Math.PI * ((value * 0.5) + 0.5));
+                _.panR = Math.sin(0.5 * Math.PI * ((value * 0.5) + 0.5));
+            }
+            
+            var inputs = this.inputs;
+            var i, imax = inputs.length;
+            var j, jmax = cell.length;
+            var mul = _.mul, add = _.add;
+            var tmp, x;
+            
+            var cellL = this.cellL;
+            var cellR = this.cellR;
+            
+            for (j = jmax; j--; ) {
+                cellL[j] = cellR[j] = cell[j] = 0;
+            }
+            for (i = 0; i < imax; ++i) {
+                tmp = inputs[i].seq(seq_id);
+                for (j = jmax; j--; ) {
+                    cellL[j] = cellR[j] = cell[j] += tmp[j];
+                }
+            }
+            
+            var panL = _.panL;
+            var panR = _.panR;
+            for (j = jmax; j--; ) {
+                x  = cellL[j] = cellL[j] * panL * mul + add;
+                x += cellR[j] = cellR[j] * panR * mul + add;
+                cell[j] = x * 0.5;
+            }
+        }
+        
+        return cell;
+    };
+    
+    timbre.fn.register("pan", Panner);
+})();
 (function(timbre) {
     "use strict";
 
@@ -4222,7 +4330,7 @@
     function WaveListener(_args) {
         timbre.ListenerObject.call(this, _args);
         
-        this._.buffer = new Float32Array(2048);
+        this._.buffer = new Float32Array(1024);
         this._.samples    = 0;
         this._.writeIndex = 0;
         
@@ -4246,7 +4354,7 @@
                 var _ = this._;
                 if (typeof value === "number" && value > 0) {
                     _.interval    = value;
-                    _.samplesIncr = value * 0.001 * timbre.samplerate / 2048;
+                    _.samplesIncr = value * 0.001 * timbre.samplerate / 1024;
                     if (_.samplesIncr < 1) {
                         _.samplesIncr = 1;
                     }
@@ -4262,7 +4370,7 @@
         var _ = this._;
         var buffer = _.buffer;
         
-        for (var i = 2048; i--; ) {
+        for (var i = 1024; i--; ) {
             buffer[i] = 0;
         }
         _.samples    = 0;
@@ -4304,7 +4412,7 @@
             for (j = 0; j < jmax; ++j) {
                 if (samples <= 0) {
                     buffer[writeIndex++] = cell[j];
-                    writeIndex &= 2047;
+                    writeIndex &= 1023;
                     emit = _.plotFlush = true;
                     samples += samplesIncr;
                 }
@@ -4325,10 +4433,10 @@
     $.plot = function(opts) {
         var _ = this._;
         if (_.plotFlush) {
-            var data   = new Float32Array(2048);
+            var data   = new Float32Array(1024);
             var buffer = _.buffer;
-            for (var i = 0, j = _.writeIndex; i < 2048; i++) {
-                data[i] = buffer[++j & 2047];
+            for (var i = 0, j = _.writeIndex; i < 1024; i++) {
+                data[i] = buffer[++j & 1023];
             }
             _.plotData  = data;
             _.plotFlush = null;
