@@ -96,31 +96,51 @@
         
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
+
+            var inputs  = this.inputs;
+            var i, imax = inputs.length;
+            var j, jmax = cell.length;
+            var mul = _.mul, add = _.add;
+            var tmp;
+            
+            if (inputs.length) {
+                for (j = jmax; j--; ) {
+                    cell[j] = 0;
+                }
+                for (i = 0; i < imax; ++i) {
+                    tmp = inputs[i].seq(seq_id);
+                    for (j = jmax; j--; ) {
+                        cell[j] += tmp[j];
+                    }
+                }
+            } else {
+                for (j = jmax; j--; ) {
+                    cell[j] = 1;
+                }
+            }
             
             var freq = _.freq.seq(seq_id);
-            var mul  = _.mul , add = _.add;
             var wave = _.wave, x   = _.x, coeff = _.coeff;
             var index, delta, x0, x1, xx, dx;
-            var i, imax;
             
             if (_.ar) { // audio-rate
                 if (_.freq.isAr) {
-                    for (i = 0, imax = cell.length; i < imax; ++i) {
+                    for (j = 0; j < jmax; ++j) {
                         index = x|0;
                         delta = x - index;
                         x0 = wave[index & 1023];
                         x1 = wave[(index+1) & 1023];
-                        cell[i] = ((1.0 - delta) * x0 + delta * x1) * mul + add;
-                        x += freq[i] * coeff;
+                        cell[j] *= ((1.0 - delta) * x0 + delta * x1);
+                        x += freq[j] * coeff;
                     }
                 } else { // _.freq.isKr
                     dx = freq[0] * coeff;
-                    for (i = 0, imax = cell.length; i < imax; ++i) {
+                    for (j = 0; j < jmax; ++j) {
                         index = x|0;
                         delta = x - index;
                         x0 = wave[index & 1023];
                         x1 = wave[(index+1) & 1023];
-                        cell[i] = ((1.0 - delta) * x0 + delta * x1) * mul + add;
+                        cell[j] *= ((1.0 - delta) * x0 + delta * x1);
                         x += dx;
                     }
                 }
@@ -129,16 +149,20 @@
                 delta = x - index;
                 x0 = wave[index & 1023];
                 x1 = wave[(index+1) & 1023];
-                xx = ((1.0 - delta) * x0 + delta * x1) * mul + add;
-                for (i = imax = cell.length; i--; ) {
-                    cell[i] = xx;
+                xx = ((1.0 - delta) * x0 + delta * x1);
+                for (j = jmax; j--; ) {
+                    cell[j] *= xx;
                 }
-                x += freq[0] * coeff * imax;
+                x += freq[0] * coeff * jmax;
             }
             while (x > 1024) {
                 x -= 1024;
             }
             _.x = x;
+            
+            for (j = jmax; j--; ) {
+                cell[j] = cell[j] * mul + add;
+            }
         }
         
         return cell;
