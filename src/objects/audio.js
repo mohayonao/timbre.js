@@ -8,7 +8,8 @@
         this._.isReversed = false;
         this._.isLoaded = false;
         this._.isEnded  = true;
-        this._.duration = 0;
+        this._.duration    = 0;
+        this._.loadedTime  = 0;
         this._.currentTime = 0;
         this._.currentTimeIncr = this.cell * 1000 / timbre.samplerate;
         
@@ -78,6 +79,11 @@
         duration: {
             get: function() {
                 return this._.duration;
+            }
+        },
+        loadedTime: {
+            get: function() {
+                return this._.loadedTime;
             }
         },
         currentTime: {
@@ -240,6 +246,7 @@
                     callback.call(this, false);
                     return this;
                 }
+                _.loadedTime = 0;
                 
                 var src = _.src;
                 var decoderList;
@@ -315,6 +322,7 @@
                 if (!_.src) {
                     return this;
                 }
+                _.loadedTime = 0;
                 
                 var src = _.src;
                 
@@ -437,6 +445,7 @@
                 _.phase      = 0;
                 _.phaseIncr  = result.samplerate / timbre.samplerate;
                 _.duration   = result.duration * 1000;
+                _.loadedTime = _.duration;
                 _.isEnded    = false;
                 _.currentTime = 0;
                 if (_.isReversed) {
@@ -486,7 +495,7 @@
                     buffer    : buffer,
                     duration  : duration
                 });
-
+                
                 this._.isLoaded  = true;
                 this._.plotFlush = true;
                 this.emit("loadeddata");
@@ -514,6 +523,7 @@
                             for (var i = 0, imax = samples.length; i < imax; i += 2) {
                                 buffer[writeIndex++] = (samples[i] + samples[i+1]) * 0.5;
                             }
+                            self._.loadedTime = samples.length * 1000 / samplerate;
                         }, false);
                     } else {
                         audio.addEventListener("MozAudioAvailable", function(e) {
@@ -521,6 +531,7 @@
                             for (var i = 0, imax = samples.length; i < imax; ++i) {
                                 buffer[writeIndex++] = samples[i];
                             }
+                            self._.loadedTime = samples.length * 1000 / samplerate;
                         }, false);
                     }
                     audio.play();
