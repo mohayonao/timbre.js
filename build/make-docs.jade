@@ -2,6 +2,21 @@ doctype 5
 html(lang=lang)
   head
     title #{title}
+    link(rel="stylesheet", href="../../misc/bootstrap.min.css", type="text/css")
+    link(rel="stylesheet", href="../../misc/prettify.css" , type="text/css")
+    link(rel="stylesheet", href="../../misc/docs-main.css", type="text/css")
   body
-    !{doc}
-    script(src="../../timbre.dev.js")
+    .container
+      .row
+        #index.span2
+          h4 timbre.js
+          ul
+            each name in index
+              li
+                a(href=name + ".html") #{name}
+        #doc.span9
+          !{doc}
+    script(src="../../timbre.dev.js")    
+    script(src="../../misc/jquery.min.js")
+    script(src="../../misc/prettify.js")
+    script(src="../../misc/docs-main.js")

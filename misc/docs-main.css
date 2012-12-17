@@ -1,0 +1,43 @@
+body {
+    margin-top: 25px;
+}
+
+#index {
+    border: solid 1px #ccc;
+    padding: 10px;
+}
+
+#index h4 {
+    font-family: 'Arial'
+    text-shadow: 0 2px 2px #999;
+}
+
+#index ul {
+    margin-top: 10px;
+}
+
+#doc h1 {
+    margin-bottom: 10px;
+    font-family: 'Arial';
+}
+
+#doc h2 {
+    border: solid 0 #333;
+    border-width: 0 0 1px 5px;
+    margin: 40px 0 10px; padding-left: 10px;
+    font-size: 22px; line-height: 24px;
+}
+
+#doc h3 {
+    margin: 15px 0 5px;
+}
+
+#doc h3:before {
+    content: "- "
+}
+
+.lang-timbre {
+    background-image: url("../../misc/play.png");
+    background-repeat: no-repeat;
+    background-position: top right;
+}

@@ -3,10 +3,24 @@ path   = require 'path'
 jade   = require 'jade'
 marked = require 'marked'
 
-make_doc = (lang, name, index=[])->
+get_filelist = (lang)->
+    dirpath = path.normalize "#{__dirname}/../src/docs/#{lang}"
+    dstpath = path.normalize "#{__dirname}/../docs/#{lang}"
+    fs.mkdir dstpath
+    list = fs.readdirSync dirpath
+    list = list.filter (x)-> /\.md$/.test x
+    list = list.map    (x)-> x.replace /\.md$/, ''
+    list.sort()
+    list
+
+make_doc = (lang, name, index=null)->
     template = jade.compile fs.readFileSync("#{__dirname}/make-docs.jade")
     filepath = path.normalize "#{__dirname}/../src/docs/#{lang}/#{name}.md"
     if fs.existsSync(filepath)
+        if index is null
+            list  = get_filelist lang
+            index = list.map (x)-> x.replace /^(\d)+\./, ''
+
         lang    = if lang is '' then 'en' else lang
         title   = "#{name}"
         params =
@@ -17,14 +31,9 @@ make_doc = (lang, name, index=[])->
 
 if not module.parent
     for lang in ['en', 'ja']
-        dirpath = path.normalize "#{__dirname}/../src/docs/#{lang}"
         dstpath = path.normalize "#{__dirname}/../docs/#{lang}"
-        fs.mkdir dstpath
-        list = fs.readdirSync dirpath
-        list = list.filter (x)-> /\.md$/.test x
-        list = list.map    (x)-> x.replace /\.md$/, ''
-        list.sort()
-        index = list.map   (x)-> x.replace /^(\d)+\./, ''
+        list  = get_filelist lang
+        index = list.map (x)-> x.replace /^(\d)+\./, ''
 
         for name in list
             name = name.replace /^(\d)+\./, ''
