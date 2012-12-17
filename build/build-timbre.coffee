@@ -28,10 +28,14 @@ for i of dependencies
             object_files.splice a, 0, j
 
 # build source code
-source_core = fs.readFileSync("#{SRC_DIR}/core.js", 'utf-8')
+build_timbre = ->
+    source_core = fs.readFileSync("#{SRC_DIR}/core.js", 'utf-8')
+    source = [source_core].concat object_files.map (x)->
+        fs.readFileSync "#{SRC_DIR}/objects/#{x}.js", 'utf-8'
+    source.join ''
 
-source = [source_core].concat object_files.map (x)->
-    fs.readFileSync "#{SRC_DIR}/objects/#{x}.js", 'utf-8'
-source = source.join ''
-
-fs.writeFileSync "#{DST_DIR}/timbre.dev.js", source, 'utf-8'
+if not module.parent
+    source = build_timbre()
+    fs.writeFileSync "#{DST_DIR}/timbre.dev.js", source, 'utf-8'
+else
+    module.exports = build_timbre
