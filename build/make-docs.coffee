@@ -4,7 +4,7 @@ jade   = require 'jade'
 marked = require 'marked'
 
 get_filelist = (lang)->
-    dirpath = path.normalize "#{__dirname}/../src/docs/#{lang}"
+    dirpath = path.normalize "#{__dirname}/../docs.md/#{lang}"
     dstpath = path.normalize "#{__dirname}/../docs/#{lang}"
     unless fs.existsSync dirpath then return []
     fs.mkdir dstpath
@@ -17,7 +17,7 @@ get_filelist = (lang)->
     list
 
 find_path = (lang, name)->
-    dirpath = path.normalize "#{__dirname}/../src/docs/#{lang}"
+    dirpath = path.normalize "#{__dirname}/../docs.md/#{lang}"
     filepath = "#{dirpath}/#{name}.md"
     if fs.existsSync(filepath)
         return filepath
