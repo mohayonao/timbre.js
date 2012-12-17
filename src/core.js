@@ -120,6 +120,11 @@
                 return _sys.currentTime;
             }
         },
+        isPlaying: {
+            get: function() {
+                return _sys.isPlaying;
+            }
+        },
         amp: {
             set: function(value) {
                 if (typeof value === "number") {
