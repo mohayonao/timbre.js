@@ -19,6 +19,9 @@
     "devDependencies": {
         "coffee-script": "1.4.0",
         "uglify-js": "*",
-        "jshint"   : "*"
+        "jshint"   : "*",
+        "express"  : "*",
+        "jade"     : "0.27.7",
+        "marked"   : "0.2.6"
     }
 }
