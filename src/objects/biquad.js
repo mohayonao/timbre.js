@@ -202,7 +202,7 @@
         var f;
         if ((f = setParams[type])) {
             this.type = type;
-            f.call(this, this.frequency, this.Q, this.dbGain);
+            f.call(this, this.frequency, this.Q, this.gain);
         }
     };
     
