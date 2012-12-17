@@ -12,6 +12,8 @@ build_timbre = ->
         dirpath = "#{SRC_DIR}/objects"
         list = fs.readdirSync dirpath
         list = list.filter (x)-> /.*\.js$/.test(x)
+        if not isDev
+            list = list.filter (x)-> not /^_/.test(x)
         list = list.map (x)-> x.replace /\.js$/, ''
         list.sort()
         list
@@ -38,4 +40,5 @@ if not module.parent
     source = build_timbre()
     fs.writeFileSync "#{DST_DIR}/timbre.dev.js", source, 'utf-8'
 else
+    isDev = true
     module.exports = build_timbre

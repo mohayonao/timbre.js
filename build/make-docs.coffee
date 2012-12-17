@@ -6,17 +6,32 @@ marked = require 'marked'
 get_filelist = (lang)->
     dirpath = path.normalize "#{__dirname}/../src/docs/#{lang}"
     dstpath = path.normalize "#{__dirname}/../docs/#{lang}"
+    unless fs.existsSync dirpath then return []
     fs.mkdir dstpath
     list = fs.readdirSync dirpath
     list = list.filter (x)-> /\.md$/.test x
-    list = list.map    (x)-> x.replace /\.md$/, ''
+    if not isDev
+        list = list.filter (x)-> not /^_/.test x
+    list = list.map (x)-> x.replace /\.md$/, ''
     list.sort()
     list
 
+find_path = (lang, name)->
+    dirpath = path.normalize "#{__dirname}/../src/docs/#{lang}"
+    filepath = "#{dirpath}/#{name}.md"
+    if fs.existsSync(filepath)
+        return filepath
+    for i in [0..99]
+        num = "0#{i}".substr -2
+        filepath = "#{dirpath}/#{num}.#{name}.md"
+        console.log filepath
+        if fs.existsSync(filepath)
+            return filepath
+
 make_doc = (lang, name, index=null)->
     template = jade.compile fs.readFileSync("#{__dirname}/make-docs.jade")
-    filepath = path.normalize "#{__dirname}/../src/docs/#{lang}/#{name}.md"
-    if fs.existsSync(filepath)
+    filepath = find_path lang, name
+    if filepath
         if index is null
             list  = get_filelist lang
             index = list.map (x)-> x.replace /^(\d)+\./, ''
@@ -41,4 +56,5 @@ if not module.parent
             htmlfilepath = "#{dstpath}/#{name}.html"
             fs.writeFileSync htmlfilepath, html, 'utf-8'
 else
+    isDev = true
     module.exports = make_doc
