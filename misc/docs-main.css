@@ -36,8 +36,9 @@ body {
     content: "- "
 }
 
-.lang-timbre {
+.timbre {
     background-image: url("../../misc/play.png");
     background-repeat: no-repeat;
     background-position: top right;
+    cursor: pointer
 }
