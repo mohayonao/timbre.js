@@ -3,12 +3,10 @@
     <title>T("timbre.js") - A JavaScript Library for Objective Sound Programming</title>
   </head>
   <body style="text-align:center">
-    <div style="margin-top:50px;font-size:8em;font-family:monospace;text-shadow:0 0 5px #ccc">
+    <h1 style="margin-top:50px;font-family:'Arial';text-shadow:0 2px 8px #999">
       T("timbre.js")
-    </div>
-    <canvas id="filter" style="width:320px;height:240px"></canvas>
-    <canvas id="wave" style="width:320px;height:240px"></canvas>
-    <canvas id="fft" style="width:320px;height:240px"></canvas>
+    </h1>
+    <canvas id="canvas" style="margin:25px;width:480px;height:80px"></canvas>
     <div>
       <button onclick="timbre.amp = 1 - timbre.amp;">SOUND</button>
     </div>
@@ -17,26 +15,41 @@
     </div>
     <script src="./timbre.dev.js"></script>
     <script>
-      var wave_canvas   = document.getElementById("wave");
-      var filter_canvas = document.getElementById("filter");
-      var fft_canvas    = document.getElementById("fft");
+      var canvas = document.getElementById("canvas");
+      canvas.width = 480; canvas.height = 80;
+      var freq   = T("param", {value:220});
+      var wave   = T("wave", {interval:5000});
+      var filter = T("biquad", {type:"HPF", freq:freq, Q:5});
+      var fft    = T("fft", {interval:80});
+
+      var lastTime = 0;
+      function animate(time) {
+          if (time - lastTime > 60) {
+              lastTime = time;
+              filter.plot({target:canvas,x:  0,width:160,height:80});
+              wave.plot  ({target:canvas,x:160,width:160,height:80});
+              fft.plot   ({target:canvas,x:320,width:160,height:80});
+          }
+          animate.id = requestAnimationFrame(animate);
+      }
       
-      T("audio", {isLooped:true}).on("loadeddata", function() {
-          var freq   = T("param");
-          var wave   = T("wave", {interval:500}).listen(this);
-          var filter = T("biquad", {type:"HPF", freq:freq, Q:5}, this);
-          var fft    = T("fft", {interval:80}, this).listen(this).on("fft", function() {
-              wave.plot({target:wave_canvas});
-              filter.plot({target:filter_canvas});
-              fft.plot({target:fft_canvas});
-          });
-          freq.setValueAtTime(3400, 0).on("done", function() {
-              var nextValue = this.value === 3400 ? 200 : 3400;
-              freq.lin(nextValue, timbre.currentTime + 2500);
-          });
-          filter.play();
+      timbre.on("play", function() {
+          animate.id = requestAnimationFrame(animate);
+      }).on("pause", function() {
+          cancelAnimationFrame(animate.id);
+      }).amp = 0;
+      
+      var audio = T("audio", {isLooped:true}).on("loadeddata", function() {
+          wave.listen(this);
+          fft.listen(this);
+          filter.append(this).play();
       }).load("./misc/amen.wav");
-      timbre.amp = 0;
+
+      var choice = [100, 200, 800, 1200, 1600, 2000, 2400, 4800, 8000];
+      var interval = T("interval", {delay:10000,interval:10000}, function() {
+          var nextValue = choice[(Math.random() * choice.length)|0];
+          freq.lin(nextValue, timbre.currentTime + 500);
+      });
     </script>
   </body>
 </html>
