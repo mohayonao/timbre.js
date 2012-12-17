@@ -235,7 +235,7 @@
                 
                 if (typeof args[i] === "string") {
                     _.src = args[i++];
-                } else if (args[i] instanceof Buffer) {
+                } else if (args[i] instanceof File) {
                     _.src = args[i++];
                 }
                 if (typeof args[i] === "function") {
