@@ -69,6 +69,12 @@
             instance._.isUndefined = false;
         }
         
+        if (instance.isStereo === undefined) {
+            Object.defineProperty(instance, "isStereo", {
+                value:false, configurable:false
+            });
+        }
+        
         instance.emit("init");
         
         return instance;
@@ -728,20 +734,35 @@
     })();
     timbre.Object = TimbreObject;
     
-    var TimbreDacObject = (function() {
-        function TimbreDacObject(_args) {
+    var TimbreStereoObject = (function() {
+        function TimbreStereoObject(_args) {
             TimbreObject.call(this, _args);
             
-            this.L = new Float32Array(_sys.cellsize);
-            this.R = new Float32Array(_sys.cellsize);
+            this.L = new TimbreObject([]);
+            this.R = new TimbreObject([]);
+            this.cellL = this.L.cell;
+            this.cellR = this.R.cell;
             
+            Object.defineProperty(this, "isStereo", {
+                value:true, configurate:false
+            });
+        }
+        __extend(TimbreStereoObject, TimbreObject);
+        
+        return TimbreStereoObject;
+    })();
+    timbre.StereoObject = TimbreStereoObject;
+    
+    var TimbreDacObject = (function() {
+        function TimbreDacObject(_args) {
+            TimbreStereoObject.call(this, _args);
             this.on("append", function(list) {
                 for (var i = list.length; i--; ) {
                     list[i]._.dac = this;
                 }
             });
         }
-        __extend(TimbreDacObject, TimbreObject);
+        __extend(TimbreDacObject, TimbreStereoObject);
         
         var $ = TimbreDacObject.prototype;
         
@@ -1072,36 +1093,51 @@
             TimbreDacObject.call(this, _args);
         }
         __extend(Dac , TimbreDacObject);
-
+        
         var $ = Dac.prototype;
-
+        
         $.seq = function(seq_id) {
             var _ = this._;
-            var cell = this.cell;
-            var L = this.L, R = this.R;
+            var cell  = this.cell;
+            var cellL = this.cellL;
+            var cellR = this.cellR;
             var inputs = this.inputs;
             var i, imax = inputs.length;
             var j, jmax = cell.length;
             var add = _.add, mul = _.mul;
-            var tmp;
+            var tmp, tmpL, tmpR, x;
             
             if (this.seq_id !== seq_id) {
                 this.seq_id = seq_id;
                 
                 for (j = jmax; j--; ) {
-                    L[j] = R[j] = cell[j] = 0;
+                    cellL[j] = cellR[j] = cell[j] = 0;
                 }
                 
                 for (i = 0; i < imax; ++i) {
-                    tmp = inputs[i].seq(seq_id);
-                    for (j = jmax; j--; ) {
-                        L[j] = R[j] = cell[j] += tmp[j] * mul + add;
+                    tmp = inputs[i];
+                    tmp.seq(seq_id);
+                    if (tmp.isStereo) {
+                        tmpL = tmp.cellL;
+                        tmpR = tmp.cellR;
+                    } else {
+                        tmpL = tmpR = tmp.cell;
                     }
+                    for (j = jmax; j--; ) {
+                        cellL[j] += tmpL[j];
+                        cellR[j] += tmpR[j];
+                    }
+                }
+                for (j = jmax; j--; ) {
+                    x  = cellL[j] = cellL[j] * mul + add;
+                    x += cellR[j] = cellR[j] * mul + add;
+                    cell[j] = x * 0.5;
                 }
             }
             
             return cell;
         };
+        
         __register("dac", Dac);
     })();
     
@@ -1255,8 +1291,8 @@
                 for (j = 0, jmax = dacs.length; j < jmax; ++j) {
                     x = dacs[j];
                     x.seq(seq_id);
-                    tmpL = x.L;
-                    tmpR = x.R;
+                    tmpL = x.cellL;
+                    tmpR = x.cellR;
                     for (k = 0, i = saved_i; k < kmax; ++k, ++i) {
                         strmL[i] += tmpL[k];
                         strmR[i] += tmpR[k];
