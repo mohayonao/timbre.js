@@ -140,6 +140,11 @@
         _sys.pause();
         return timbre;
     };
+    
+    timbre.reset = function() {
+        _sys.reset();
+        return timbre;
+    };
 
     timbre.on = function(type, listener) {
         _sys.on(type, listener);
@@ -1209,6 +1214,17 @@
                 this.impl.pause();
                 this.emit("pause");
             }
+            return this;
+        };
+
+        $.reset = function() {
+            this.pause();
+            this.amp  = 0.8;
+            this.currentTime = 0;
+            this.nextTicks = [];
+            this.dacs      = [];
+            this.timers    = [];
+            this.listeners = [];
             return this;
         };
         
