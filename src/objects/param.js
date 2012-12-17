@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
 
     function ParamEvent(type, value, time) {
@@ -224,4 +224,4 @@
     };
     
     timbre.fn.register("param", Param);
-})();
+})(timbre);

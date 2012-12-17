@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     function ObjectTemplate(_args) {
@@ -44,4 +44,4 @@
     };
     
     timbre.fn.register("object-template", ObjectTemplate);
-})();
+})(timbre);

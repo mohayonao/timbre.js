@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     function Mul(_args) {
@@ -53,4 +53,4 @@
     };
     
     timbre.fn.register("*", Mul);
-})();
+})(timbre);

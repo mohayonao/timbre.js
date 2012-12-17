@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
 
     function Interval(_args) {
@@ -134,4 +134,4 @@
             this.limit = 1;
         });
     });
-})();
+})(timbre);

@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     function AudioFile(_args) {
@@ -625,4 +625,4 @@
     };
     
     timbre.fn.register("audio", AudioFile);
-})();
+})(timbre);

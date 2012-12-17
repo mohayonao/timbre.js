@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
 
     function WaveListener(_args) {
@@ -119,4 +119,4 @@
     };
     
     timbre.fn.register("wave", WaveListener);
-})();
+})(timbre);

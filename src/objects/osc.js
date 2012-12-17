@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     function Oscillator(_args) {
@@ -444,4 +444,4 @@
     });
     
     timbre.fn.alias("square", "pulse");
-})();
+})(timbre);

@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     function Noise(_args) {
@@ -33,4 +33,4 @@
     };
     
     timbre.fn.register("noise", Noise);
-})();
+})(timbre);

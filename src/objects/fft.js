@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
 
     function FFTListener(_args) {
@@ -439,4 +439,4 @@
     }());
     
     timbre.fn.register("fft", FFTListener);
-})();
+})(timbre);

@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     function Biquad(_args) {
@@ -468,4 +468,4 @@
     timbre.fn.alias("BEF", "notch");
     timbre.fn.alias("BRF", "notch");
     timbre.fn.alias("APF", "allpass");
-})();
+})(timbre);
