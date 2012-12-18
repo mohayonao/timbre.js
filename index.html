@@ -6,7 +6,7 @@
     <h1 style="margin-top:50px;font-family:'Arial';text-shadow:0 2px 8px #999">
       T("timbre.js")
     </h1>
-    <canvas id="canvas" style="margin:25px;width:480px;height:80px"></canvas>
+    <canvas id="viewer" style="margin:25px;width:480px;height:80px"></canvas>
     <div>
       <button onclick="timbre.amp = 1 - timbre.amp;">SOUND</button>
     </div>
@@ -15,42 +15,47 @@
     </div>
     <script src="./misc/requestAnimationFrame.js"></script>
     <script src="./timbre.dev.js"></script>
+    <script src="./src/extras/mouse.js"></script>
     <script>
-      var canvas = document.getElementById("canvas");
-      canvas.width = 480; canvas.height = 80;
-      var freq   = T("param", {value:220});
-      var wave   = T("wave", {interval:5000});
-      var filter = T("biquad", {type:"HPF", freq:freq, Q:5});
-      var fft    = T("fft", {interval:80});
-
-      var lastTime = 0;
+      var viewer = document.getElementById("viewer");
+      viewer.width  = 480;
+      viewer.height =  80;
+      
+      var mouse = T("mouse").on("click", function() {
+          filter.type = (filter.type === "LPF") ? "HPF" : "LPF";
+      }).start();
+      var mouseX = T("mouse.x", {minval:80, maxval:12000});
+      var mouseY = T("mouse.y", {minval:.1, maxval:40, warp:"linexp"});
+      
+      var audio  = T("audio", {isLooped:true});
+      var filter = T("biquad", {type:"LPF", freq:mouseX, Q:mouseY}, audio);
+      var wave   = T("wave", {size:512,interval:2500}).listen(filter);
+      var fft    = T("fft", {interval:80}).listen(filter);
+      
+      audio.on("loadeddata", function() {
+          filter.play();
+      });
+      
+      var lastTime    = 0;
+      var animationId = 0;
       function animate(time) {
           if (time - lastTime > 60) {
               lastTime = time;
-              filter.plot({target:canvas,x:  0,width:160,height:80});
-              wave.plot  ({target:canvas,x:160,width:160,height:80});
-              fft.plot   ({target:canvas,x:320,width:160,height:80});
+              filter.plot({target:viewer,x:  0,width:160,height:80});
+              wave.plot  ({target:viewer,x:160,width:160,height:80});
+              fft.plot   ({target:viewer,x:320,width:160,height:80});
           }
-          animate.id = requestAnimationFrame(animate);
+          animationId = requestAnimationFrame(animate);
+
       }
       
       timbre.on("play", function() {
-          animate.id = requestAnimationFrame(animate);
+          animationId = requestAnimationFrame(animate);
       }).on("pause", function() {
-          cancelAnimationFrame(animate.id);
+          cancelAnimationFrame(animationId);
       }).amp = 0;
       
-      var audio = T("audio", {isLooped:true}).on("loadeddata", function() {
-          wave.listen(this);
-          fft.listen(this);
-          filter.append(this).play();
-      }).load("./misc/amen.wav");
-
-      var choice = [100, 200, 800, 1200, 1600, 2000, 2400, 4800, 8000];
-      var interval = T("interval", {delay:10000,interval:10000}, function() {
-          var nextValue = choice[(Math.random() * choice.length)|0];
-          freq.lin(nextValue, timbre.currentTime + 500);
-      });
+      audio.load("./misc/amen.wav");
     </script>
   </body>
 </html>
