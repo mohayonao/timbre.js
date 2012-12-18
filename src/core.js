@@ -1482,34 +1482,6 @@
             window.Float32Array = Array; // fake Float32Array (for IE9)
         }
         
-        window.requestAnimationFrame = window.requestAnimationFrame ||
-            window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame    ||
-            window.oRequestAnimationFrame      ||
-            window.msRequestAnimationFrame;
-        window.cancelAnimationFrame = window.cancelAnimationFrame ||
-            window.webkitCancelAnimationFrame ||
-            window.mozCancelAnimationFrame    ||
-            window.oCancelAnimationFrame      ||
-            window.msCancelAnimationFrame;
-        if (!window.requestAnimationFrame) {
-            (function() {
-                var lastTime = 0;
-                window.requestAnimationFrame = function(callback) {
-                    var currTime   = Date.now();
-                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function() {
-                        callback(currTime + timeToCall);
-                    }, timeToCall);
-                    lastTime = currTime + timeToCall;
-                    return id;
-                };
-                window.cancelAnimationFrame = function (id) {
-                    clearTimeout(id);
-                };
-            })();
-        }
-        
         exports.noConflict = (function() {
            var _t = window.timbre, _T = window.T;
             return function(deep) {
