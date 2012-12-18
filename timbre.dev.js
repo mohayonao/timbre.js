@@ -241,6 +241,34 @@
     };
     timbre.fn.getClass = __getClass;
     
+    var __fixAR = (function() {
+        var f = function() {
+            this._.ar = true;
+        };
+        Object.defineProperty(f, "unremovable", {
+            value:true, configurable:false
+        });
+        return function(object) {
+            object._.ar = true;
+            object.on("ar", f);
+        };
+    })();
+    timbre.fn.fixAR = __fixAR;
+    
+    var __fixKR = (function() {
+        var f = function() {
+            this._.ar = false;
+        };
+        Object.defineProperty(f, "unremovable", {
+            value:true, configurable:false
+        });
+        return function(object) {
+            object._.ar = false;
+            object.on("ar", f);
+        };
+    })();
+    timbre.fn.fixKR = __fixKR;
+    
     // borrowed from node.js
     var EventEmitter = (function() {
         function EventEmitter() {
@@ -380,15 +408,27 @@
                 return this;
             }
             
+            var remain = false;
             var listeners = _.events[type];
             if (isArray(listeners)) {
-                while (listeners.length) {
-                    this.removeListener(type, listeners[listeners.length - 1]);
+                for (var i = listeners.length; i--; ) {
+                    var listener = listeners[i];
+                    if (listener.unremovable) {
+                        remain = true;
+                        continue;
+                    }
+                    this.removeListener(type, listener);
                 }
             } else if (listeners) {
-                this.removeListener(type, listeners);
+                if (!listeners.unremovable) {
+                    this.removeListener(type, listeners);
+                } else {
+                    remain = true;
+                }
             }
-            _.events[type] = null;
+            if (!remain) {
+                _.events[type] = null;
+            }
             
             return this;
         };
@@ -412,17 +452,10 @@
         function TimbreObject(_args) {
             this._ = {}; // private members
             
-            var params;
             if (isDictionary(_args[0])) {
-                params = _args.shift();
+                var params = _args.shift();
                 this.once("init", function() {
                     this.set(params);
-                });
-            } else if (_args[0] instanceof ObjectWrapper) {
-                params = _args.shift();
-                params.bind(this);
-                this.once("init", function() {
-                    params.emit("initValue", this);
                 });
             }
             
@@ -474,6 +507,20 @@
                 },
                 get: function() {
                     return this._.add;
+                }
+            },
+            dac: {
+                set: function(value) {
+                    var _ = this._;
+                    if (value instanceof SystemInlet && _.dac !== value) {
+                        if (_.dac) {
+                            _.dac.remove(this);
+                        }
+                        value.append(this);
+                    }
+                },
+                get: function() {
+                    return this._.dac;
                 }
             }
         });
@@ -589,7 +636,7 @@
             var dac = this._.dac;
             var emit = false;
             if (dac === null) {
-                dac = this._.dac = timbre("dac", this);
+                dac = this._.dac = new SystemInlet(this);
                 emit = true;
             } else if (dac.inputs.indexOf(this) === -1) {
                 dac.append(this);
@@ -758,56 +805,6 @@
     })();
     timbre.StereoObject = TimbreStereoObject;
     
-    var TimbreDacObject = (function() {
-        function TimbreDacObject(_args) {
-            TimbreStereoObject.call(this, _args);
-            this.on("append", function(list) {
-                for (var i = list.length; i--; ) {
-                    list[i]._.dac = this;
-                }
-            });
-        }
-        __extend(TimbreDacObject, TimbreStereoObject);
-        
-        var $ = TimbreDacObject.prototype;
-        
-        Object.defineProperties($, {
-            dac: {
-                set: function() {
-                },
-                get: function() {
-                    return this;
-                }
-            }
-        });
-        
-        $.play = function() {
-            var self = this;
-            _sys.nextTick(function() {
-                if (_sys.dacs.indexOf(self) === -1) {
-                    _sys.dacs.push(self);
-                    _sys.emit("addObject");
-                    self.emit("play");
-                }
-            });
-            return this;
-        };
-        
-        $.pause = function() {
-            if (_sys.dacs.indexOf(this) !== -1) {
-                this._.remove_check = true;
-                _sys.nextTick(function() {
-                    _sys.emit("removeObject");
-                });
-                this.emit("pause");
-            }
-            return this;
-        };
-        
-        return TimbreDacObject;
-    })();
-    timbre.DacObject = TimbreDacObject;
-    
     var TimbreTimerObject = (function() {
         function TimbreTimerObject(_args) {
             TimbreObject.call(this, _args);
@@ -902,12 +899,10 @@
             
             this.on("setAdd", changeTheValue);
             this.on("setMul", changeTheValue);
-            this.on("ar", function() { this._.ar = false; });
+            __fixKR(this);
         }
         __extend(NumberWrapper, TimbreObject);
         
-        var $ = NumberWrapper.prototype;
-
         var changeTheValue = function() {
             var _ = this._;
             var x = _.value * _.mul + _.add;
@@ -916,6 +911,11 @@
                 cell[i] = x;
             }
         };
+        Object.defineProperty(changeTheValue, "unremovable", {
+            value:true, configurable:false
+        });
+        
+        var $ = NumberWrapper.prototype;
         
         Object.defineProperties($, {
             value: {
@@ -942,12 +942,10 @@
             
             this.on("setAdd", changeTheValue);
             this.on("setMul", changeTheValue);
-            this.on("ar", function() { this._.ar = false; });
+            __fixKR(this);
         }
         __extend(BooleanWrapper, TimbreObject);
-
-        var $ = BooleanWrapper.prototype;
-
+        
         var changeTheValue = function() {
             var _ = this._;
             var x = _.value * _.mul + _.add;
@@ -956,6 +954,11 @@
                 cell[i] = x;
             }
         };
+        Object.defineProperty(changeTheValue, "unremovable", {
+            value:true, configurable:false
+        });
+        
+        var $ = BooleanWrapper.prototype;
         
         Object.defineProperties($, {
             value: {
@@ -980,13 +983,12 @@
             this.value = _args[0];
             this._.args = _args.slice(1);
             this._.ar = false;
-            
-            this.on("ar", function() { this._.ar = false; });
+            __fixKR(this);
         }
         __extend(FunctionWrapper, TimbreObject);
         
         var $ = FunctionWrapper.prototype;
-
+        
         Object.defineProperties($, {
             value: {
                 set: function(value) {
@@ -1031,75 +1033,65 @@
     })();
     
     var ObjectWrapper = (function() {
-        function ObjectWrapper(_args) {
+        function ObjectWrapper() {
             TimbreObject.call(this, []);
-            
-            this._.binded = [];
-            this._.values = {};
-            
-            var dict = _args[0];
-            
-            for (var key in dict) {
-                Object.defineProperty(this, key, {
-                    set: setter(key),
-                    get: getter(key)
-                });
-            }
-            
-            this.once("initValue", function(object) {
-                if (object) {
-                    for (var key in dict) {
-                        object.set(key, dict[key]);
-                    }
-                }
-            });
         }
         __extend(ObjectWrapper, TimbreObject);
-        
-        var setter = function(key) {
-            return function(value) {
-                var binded = this._.binded;
-                this._.values[key] = value;
-                for (var i = 0, imax = binded.length; i < imax; ++i) {
-                    binded[i].set(key, value);
-                }
-            };
-        };
-        var getter = function(key) {
-            return function() {
-                return this._.values[key];
-            };
-        };
-        
-        var $ = ObjectWrapper.prototype;
-        
-        $.bind = function(object) {
-            var _ = this._;
-            if (_.binded.indexOf(object) === -1) {
-                _.binded.push(object);
-            }
-            return this;
-        };
-        
-        $.unbind = function(object) {
-            var _ = this._, i;
-            if ((i = _.binded.indexOf(object)) !== -1) {
-                _.binded.splice(i, 1);
-            }
-            return this;
-        };
         
         return ObjectWrapper;
     })();
     
-    // defalut T("dac")
-    (function() {
-        function Dac(_args) {
-            TimbreDacObject.call(this, _args);
+    var SystemInlet = (function() {
+        function SystemInlet(object) {
+            TimbreStereoObject.call(this, []);
+            this.inputs.push(object);
+            this.on("append", onappend);
         }
-        __extend(Dac , TimbreDacObject);
+        __extend(SystemInlet , TimbreStereoObject);
         
-        var $ = Dac.prototype;
+        var onappend = function(list) {
+            for (var i = list.length; i--; ) {
+                list[i]._.dac = this;
+            }
+        };
+        Object.defineProperty(onappend, "unremovable", {
+            value:true, configurable:false
+        });
+        
+        var $ = SystemInlet.prototype;
+        
+        Object.defineProperties($, {
+            dac: {
+                set: function() {
+                },
+                get: function() {
+                    return this;
+                }
+            }
+        });
+        
+        $.play = function() {
+            var self = this;
+            _sys.nextTick(function() {
+                if (_sys.inlets.indexOf(self) === -1) {
+                    _sys.inlets.push(self);
+                    _sys.emit("addObject");
+                    self.emit("play");
+                }
+            });
+            return this;
+        };
+        
+        $.pause = function() {
+            if (_sys.inlets.indexOf(this) !== -1) {
+                this._.remove_check = true;
+                _sys.nextTick(function() {
+                    _sys.emit("removeObject");
+                });
+                this.emit("pause");
+            }
+            return this;
+        };
         
         $.seq = function(seq_id) {
             var _ = this._;
@@ -1143,7 +1135,7 @@
             return cell;
         };
         
-        __register("dac", Dac);
+        return SystemInlet;
     })();
     
     var SoundSystem = (function() {
@@ -1161,20 +1153,20 @@
             this.currentTime = 0;
             this.currentTimeIncr = 0;
             this.nextTicks = [];
-            this.dacs      = [];
+            this.inlets    = [];
             this.timers    = [];
             this.listeners = [];
             
             this.on("addObject", function() {
                 if (!this.isPlaying) {
-                    if (this.dacs.length > 0 || this.timers.length > 0) {
+                    if (this.inlets.length > 0 || this.timers.length > 0) {
                         this.play();
                     }
                 }
             });
             this.on("removeObject", function() {
                 if (this.isPlaying) {
-                    if (this.dacs.length === 0 && this.timers.length === 0) {
+                    if (this.inlets.length === 0 && this.timers.length === 0) {
                         this.pause();
                     }
                 }
@@ -1259,7 +1251,7 @@
         $.reset = function() {
             this.currentTime = 0;
             this.nextTicks = [];
-            this.dacs      = [];
+            this.inlets    = [];
             this.timers    = [];
             this.listeners = [];
             return this;
@@ -1276,7 +1268,7 @@
             var n = this.streamsize / this.cellsize;
             var nextTicks;
             var timers    = this.timers;
-            var dacs      = this.dacs;
+            var inlets    = this.inlets;
             var listeners = this.listeners;
             var currentTimeIncr = this.currentTimeIncr;
             
@@ -1291,8 +1283,8 @@
                     timers[j].seq(seq_id);
                 }
                 
-                for (j = 0, jmax = dacs.length; j < jmax; ++j) {
-                    x = dacs[j];
+                for (j = 0, jmax = inlets.length; j < jmax; ++j) {
+                    x = inlets[j];
                     x.seq(seq_id);
                     tmpL = x.cellL;
                     tmpR = x.cellR;
@@ -1313,10 +1305,10 @@
                         timers.splice(j, 1);
                     }
                 }
-                for (j = dacs.length; j--; ) {
-                    if (dacs[j]._.remove_check) {
-                        dacs[j]._.remove_check = null;
-                        dacs.splice(j, 1);
+                for (j = inlets.length; j--; ) {
+                    if (inlets[j]._.remove_check) {
+                        inlets[j]._.remove_check = null;
+                        inlets.splice(j, 1);
                     }
                 }
                 for (j = listeners.length; j--; ) {
@@ -1482,34 +1474,6 @@
             window.Float32Array = Array; // fake Float32Array (for IE9)
         }
         
-        window.requestAnimationFrame = window.requestAnimationFrame ||
-            window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame    ||
-            window.oRequestAnimationFrame      ||
-            window.msRequestAnimationFrame;
-        window.cancelAnimationFrame = window.cancelAnimationFrame ||
-            window.webkitCancelAnimationFrame ||
-            window.mozCancelAnimationFrame    ||
-            window.oCancelAnimationFrame      ||
-            window.msCancelAnimationFrame;
-        if (!window.requestAnimationFrame) {
-            (function() {
-                var lastTime = 0;
-                window.requestAnimationFrame = function(callback) {
-                    var currTime   = Date.now();
-                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function() {
-                        callback(currTime + timeToCall);
-                    }, timeToCall);
-                    lastTime = currTime + timeToCall;
-                    return id;
-                };
-                window.cancelAnimationFrame = function (id) {
-                    clearTimeout(id);
-                };
-            })();
-        }
-        
         exports.noConflict = (function() {
            var _t = window.timbre, _T = window.T;
             return function(deep) {
@@ -1596,7 +1560,7 @@
         this._.currentTime = 0;
         this._.currentTimeIncr = this.cell * 1000 / timbre.samplerate;
         
-        this.on("ar", function() { this._.ar = true; });
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(AudioFile, timbre.Object);
     
@@ -2235,19 +2199,21 @@
         this._.plotRange = [0, 0.5];
         this._.plotBarStyle = true;
         
-        this.once("init", function() {
-            var _ = this._;
-            if (!_.fft) {
-                this.size = 512;
-            }
-            if (!_.interval) {
-                this.interval = 500;
-            }
-        });
+        this.once("init", oninit);
         
-        this.on("ar", function() { this._.ar = true; });
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(FFTListener, timbre.ListenerObject);
+    
+    var oninit = function() {
+        var _ = this._;
+        if (!_.fft) {
+            this.size = 512;
+        }
+        if (!_.interval) {
+            this.interval = 500;
+        }
+    };
     
     var $ = FFTListener.prototype;
     
@@ -2672,22 +2638,24 @@
         
         this._.plotRange = [0, 1.2];
         this._.plotFlush = true;
-
-        this.once("init", function() {
-            if (!this._.freq) {
-                this.freq = 340;
-            }
-            if (!this._.Q) {
-                this.Q = 1;
-            }
-            if (!this._.gain) {
-                this.gain = 0;
-            }
-        });
         
-        this.on("ar", function() { this._.ar = true; });
+        this.once("init", oninit);
+        
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(Biquad, timbre.Object);
+    
+    var oninit = function() {
+        if (!this._.freq) {
+            this.freq = 340;
+        }
+        if (!this._.Q) {
+            this.Q = 1;
+        }
+        if (!this._.gain) {
+            this.gain = 0;
+        }
+    };
     
     var $ = Biquad.prototype;
     
@@ -3140,22 +3108,24 @@
         timbre.Object.call(this, _args);
         
         this._.delay = new EfxDelay();
-
-        this.once("init", function() {
-            if (!this._.time) {
-                this.time = 100;
-            }
-            if (!this._.feedback) {
-                this.feedback = 0.25;
-            }
-            if (!this._.wet) {
-                this.wet = 0.2;
-            }
-        });
         
-        this.on("ar", function() { this._.ar = true; });
+        this.once("init", oninit);
+        
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(EfxDelayNode, timbre.Object);
+    
+    var oninit = function() {
+        if (!this._.time) {
+            this.time = 100;
+        }
+        if (!this._.feedback) {
+            this.feedback = 0.25;
+        }
+        if (!this._.wet) {
+            this.wet = 0.2;
+        }
+    };
     
     var $ = EfxDelayNode.prototype;
     
@@ -3317,11 +3287,9 @@
     "use strict";
 
     function Interval(_args) {
-        var pending =  (_args[0] && _args[0].pending);
         timbre.TimerObject.call(this, _args);
         
         this._.interval = 1000;
-        this._.delay    =    0;
         this._.count    =    0;
         this._.limit    = Infinity;
         this._.currentTime = 0;
@@ -3330,19 +3298,25 @@
         this._.delaySamples = 0;
         this._.countSamples = 0;
         
-        this.on("start", function() {
-            this._.currentTime  = timbre.currentTime;
-        });
+        this.once("init", oninit);
+        this.on("start", onstart);
         
-        if (!pending && this.inputs.length) {
-            this.once("init", function() {
-                this.start();
-            });
-        }
-        
-        this.on("ar", function() { this._.ar = false; });
+        timbre.fn.fixKR(this);
     }
     timbre.fn.extend(Interval, timbre.TimerObject);
+    
+    var oninit = function() {
+        if (this._.delay === undefined) {
+            this.delay = this.interval;
+        }
+    };
+    
+    var onstart = function() {
+        this._.currentTime  = timbre.currentTime;
+    };
+    Object.defineProperty(onstart, "unremovable", {
+        value:true, configurable:false
+    });
     
     var $ = Interval.prototype;
     
@@ -3450,6 +3424,171 @@
         });
     });
 })(timbre);
+(function() {
+    "use strict";
+    
+    function Map(_args) {
+        timbre.Object.call(this, _args);
+        
+        this._.inMin  = 0;
+        this._.inMax  = 1;
+        this._.outMin = 0;
+        this._.outMax = 1;
+        
+        this.once("init", oninit);
+        
+        timbre.fn.fixKR(this);
+    }
+    timbre.fn.extend(Map, timbre.Object);
+    
+    var oninit = function() {
+        if (!this._.warp) {
+            this.warp = "linlin";
+        }
+    };
+    
+    var $ = Map.prototype;
+    
+    Object.defineProperties($, {
+        inMin: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    this._.inMin = value;
+                }
+            },
+            get: function() {
+                return this._.inMin;
+            }
+        },
+        inMax: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    this._.inMax = value;
+                }
+            },
+            get: function() {
+                return this._.inMax;
+            }
+        },
+        outMin: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    this._.outMin = value;
+                }
+            },
+            get: function() {
+                return this._.outMin;
+            }
+        },
+        outMax: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    this._.outMax = value;
+                }
+            },
+            get: function() {
+                return this._.outMax;
+            }
+        },
+        warp: {
+            set: function(value) {
+                if (typeof value === "string") {
+                    var f = WarpFunctions[value];
+                    if (f) {
+                        this._.warp = f;
+                        this._.warpName = value;
+                    }
+                }
+            },
+            get: function() {
+                return this._.warpName;
+            }
+        }
+    });
+    
+    $.seq = function(seq_id) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.seq_id !== seq_id) {
+            this.seq_id = seq_id;
+            
+            var inputs  = this.inputs;
+            var i, imax = inputs.length;
+            var j, jmax = cell.length;
+            var x;
+            
+            x = 0;
+            for (i = 0; i < imax; ++i) {
+                x += inputs[i].seq(seq_id)[0];
+            }
+
+            var inMin  = _.inMin, inMax   = _.inMax;
+            var outMin = _.outMin, outMax = _.outMax;
+            var warp   = _.warp;
+            
+            x = warp(x, inMin, inMax, outMin, outMax) * _.mul + _.add;
+            
+            for (j = jmax; j--; ) {
+                cell[j] = x;
+            }
+        }
+        
+        return cell;
+    };
+    
+    var WarpFunctions = {
+        linlin: function(x, inMin, inMax, outMin, outMax) {
+            if (x < inMin) {
+                return outMin;
+            } else if (x > inMax) {
+                return outMax;
+            }
+            if (inMax === inMin) {
+                return outMin;
+            }
+            return (x-inMin) / (inMax-inMin) * (outMax-outMin) + outMin;
+        },
+        linexp: function(x, inMin, inMax, outMin, outMax) {
+            if (x < inMin) {
+                return outMin;
+            } else if (x > inMax) {
+                return outMax;
+            }
+            if (outMin === 0) {
+                return 0;
+            }
+            if (inMax === inMin) {
+                return outMax;
+            }
+            return Math.pow(outMax/outMin, (x-inMin)/(inMax-inMin)) * outMin;
+        },
+        explin: function(x, inMin, inMax, outMin, outMax) {
+            if (x < inMin) {
+                return outMin;
+            } else if (x > inMax) {
+                return outMax;
+            }
+            if (inMin === 0) {
+                return outMax;
+            }
+            return Math.log(x/inMin) / Math.log(inMax/inMin) * (outMax-outMin) + outMin;
+        },
+        expexp: function(x, inMin, inMax, outMin, outMax) {
+            if (x < inMin) {
+                return outMin;
+            } else if (x > inMax) {
+                return outMax;
+            }
+            if (inMin === 0 || outMin === 0) {
+                return 0;
+            }
+            return Math.pow(outMax/outMin, Math.log(x/inMin) / Math.log(inMax/inMin)) * outMin;
+        }
+    };
+    
+    timbre.fn.register("map", Map);
+})();
 (function(timbre) {
     "use strict";
     
@@ -3551,22 +3690,24 @@
         this._.phase = 0;
         this._.x     = 0;
         this._.coeff = 1024 / timbre.samplerate;
-
-        this.once("init", function() {
-            var _ = this._;
-            if (!_.wave) {
-                this.wave = "sin";
-            }
-            if (!_.freq) {
-                this.freq = 440;
-            }
-            this._.plotData = this._.wave;
-            this._.plotLineWidth = 2;
-            this._.plotCyclic = true;
-            this._.plotBefore = plotBefore;
-        });
+        
+        this.once("init", oninit);
     }
     timbre.fn.extend(Oscillator, timbre.Object);
+    
+    var oninit = function() {
+        var _ = this._;
+        if (!_.wave) {
+            this.wave = "sin";
+        }
+        if (!_.freq) {
+            this.freq = 440;
+        }
+        this._.plotData = this._.wave;
+        this._.plotLineWidth = 2;
+        this._.plotCyclic = true;
+        this._.plotBefore = plotBefore;
+    };
     
     var $ = Oscillator.prototype;
     
@@ -4022,15 +4163,17 @@
         this._.panL = 0.5;
         this._.panR = 0.5;
         
-        this.once("init", function() {
-            if (!this._.value) {
-                this.value = 0;
-            }
-        });
+        this.once("init", oninit);
         
-        this.on("ar", function() { this._.ar = true; });
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(Panner, timbre.StereoObject);
+    
+    var oninit = function() {
+        if (!this._.value) {
+            this.value = 0;
+        }
+    };
     
     var $ = Panner.prototype;
     
@@ -4123,15 +4266,11 @@
         
         this._.schedules = [];
         
-        this._.ar = false;
-        
         this.on("setAdd", changeTheValue);
         this.on("setMul", changeTheValue);
-        this.on("ar", function() { this._.ar = false; });
+        timbre.fn.fixKR(this);
     }
     timbre.fn.extend(Param, timbre.Object);
-    
-    var $ = Param.prototype;
     
     var changeTheValue = function() {
         var _ = this._;
@@ -4141,6 +4280,11 @@
             cell[i] = x;
         }
     };
+    Object.defineProperty(changeTheValue, "unremovable", {
+        value:true, configurable:false
+    });
+    
+    var $ = Param.prototype;
     
     Object.defineProperties($, {
         value: {
@@ -4329,34 +4473,60 @@
 
     function WaveListener(_args) {
         timbre.ListenerObject.call(this, _args);
-        
-        this._.buffer = new Float32Array(1024);
+
         this._.samples    = 0;
         this._.writeIndex = 0;
         
         this._.plotFlush = true;
         
-        this.once("init", function() {
-            if (!this._.interval) {
-                this.interval = 1000;
-            }
-        });
+        this.once("init", oninit);
         
-        this.on("ar", function() { this._.ar = true; });
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(WaveListener, timbre.ListenerObject);
+    
+    var oninit = function() {
+        if (!this._.buffer) {
+            this.size = 1024;
+        }
+        if (!this._.interval) {
+            this.interval = 1000;
+        }
+    };
     
     var $ = WaveListener.prototype;
     
     Object.defineProperties($, {
+        size: {
+            set: function(value) {
+                var _ = this._;
+                if (!_.buffer) {
+                    if (typeof value === "number") {
+                        var n = (value < 64) ? 64 : (value > 2048) ? 2048 : value;
+                        _.buffer = new Float32Array(n);
+                        if (_.reservedinterval) {
+                            this.interval = _.reservedinterval;
+                            _.reservedinterval = null;
+                        }
+                    }
+                }
+            },
+            get: function() {
+                return this._.buffer.length;
+            }
+        },
         interval: {
             set: function(value) {
                 var _ = this._;
                 if (typeof value === "number" && value > 0) {
-                    _.interval    = value;
-                    _.samplesIncr = value * 0.001 * timbre.samplerate / 1024;
-                    if (_.samplesIncr < 1) {
-                        _.samplesIncr = 1;
+                    if (!_.buffer) {
+                        _.reservedinterval = value;
+                    } else {
+                        _.interval    = value;
+                        _.samplesIncr = value * 0.001 * timbre.samplerate / _.buffer.length;
+                        if (_.samplesIncr < 1) {
+                            _.samplesIncr = 1;
+                        }
                     }
                 }
             },
@@ -4370,7 +4540,7 @@
         var _ = this._;
         var buffer = _.buffer;
         
-        for (var i = 1024; i--; ) {
+        for (var i = buffer.length; i--; ) {
             buffer[i] = 0;
         }
         _.samples    = 0;
@@ -4408,11 +4578,12 @@
             var writeIndex  = _.writeIndex;
             var emit = false;
             var mul = _.mul, add = _.add;
+            var mask = buffer.length - 1;
             
             for (j = 0; j < jmax; ++j) {
                 if (samples <= 0) {
                     buffer[writeIndex++] = cell[j];
-                    writeIndex &= 1023;
+                    writeIndex &= mask;
                     emit = _.plotFlush = true;
                     samples += samplesIncr;
                 }
@@ -4433,10 +4604,12 @@
     $.plot = function(opts) {
         var _ = this._;
         if (_.plotFlush) {
-            var data   = new Float32Array(1024);
             var buffer = _.buffer;
-            for (var i = 0, j = _.writeIndex; i < 1024; i++) {
-                data[i] = buffer[++j & 1023];
+            var mask   = buffer.length - 1;
+            var data   = new Float32Array(buffer.length);
+            var j = _.writeIndex;
+            for (var i = 0, imax = buffer.length; i < imax; i++) {
+                data[i] = buffer[++j & mask];
             }
             _.plotData  = data;
             _.plotFlush = null;
