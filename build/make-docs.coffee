@@ -5,9 +5,8 @@ marked = require 'marked'
 
 get_filelist = (lang)->
     dirpath = path.normalize "#{__dirname}/../docs.md/#{lang}"
-    dstpath = path.normalize "#{__dirname}/../docs/#{lang}"
     unless fs.existsSync dirpath then return []
-    fs.mkdir dstpath
+
     list = fs.readdirSync dirpath
     list = list.filter (x)-> /\.md$/.test x
     if not isDev
@@ -100,16 +99,17 @@ make_doc = (lang, name, index=null)->
     else 'NOT FOUND'
 
 if not module.parent
-    for lang in ['en', 'ja']
-        dstpath = path.normalize "#{__dirname}/../docs/#{lang}"
-        list  = get_filelist lang
-        index = list.map (x)-> x.replace /^(\d)+\./, ''
-
-        for name in list
-            name = name.replace /^(\d)+\./, ''
-            html = make_doc lang, name, index
-            htmlfilepath = "#{dstpath}/#{name}.html"
-            fs.writeFileSync htmlfilepath, html, 'utf-8'
+    dstpath = path.normalize "#{__dirname}/../docs/"
+    if fs.existsSync dstpath
+        for lang in ['en', 'ja']
+            fs.mkdir "#{dstpath}/#{lang}"
+            list  = get_filelist lang
+            index = list.map (x)-> x.replace /^(\d)+\./, ''
+            for name in list
+                name = name.replace /^(\d)+\./, ''
+                html = make_doc lang, name, index
+                htmlfilepath = "#{dstpath}/#{lang}/#{name}.html"
+                fs.writeFileSync htmlfilepath, html, 'utf-8'
 else
     isDev = true
     module.exports = make_doc

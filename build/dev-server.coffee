@@ -16,7 +16,6 @@ app.get /^\/timbre(\.dev)?.js$/, (req, res)->
     res.send build_timbre()
 
 app.get '*', (req, res)->
-    console.log("#{req.url}")
     filepath = path.normalize "#{__dirname}/../#{req.url}"
     res.sendfile filepath
 
