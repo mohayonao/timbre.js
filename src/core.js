@@ -241,32 +241,18 @@
     };
     timbre.fn.getClass = __getClass;
     
-    var __fixAR = (function() {
-        var f = function() {
-            this._.ar = true;
-        };
-        Object.defineProperty(f, "unremovable", {
-            value:true, configurable:false
+    var __fixAR = function(object) {
+        Object.defineProperty(object._ , "ar", {
+            value:true, writable:false
         });
-        return function(object) {
-            object._.ar = true;
-            object.on("ar", f);
-        };
-    })();
+    };
     timbre.fn.fixAR = __fixAR;
     
-    var __fixKR = (function() {
-        var f = function() {
-            this._.ar = false;
-        };
-        Object.defineProperty(f, "unremovable", {
-            value:true, configurable:false
+    var __fixKR = function(object) {
+        Object.defineProperty(object._ , "ar", {
+            value:false, writable:false
         });
-        return function(object) {
-            object._.ar = false;
-            object.on("ar", f);
-        };
-    })();
+    };
     timbre.fn.fixKR = __fixKR;
     
     // borrowed from node.js
@@ -664,14 +650,18 @@
         };
         
         $.ar = function() {
-            this._.ar = true;
-            this.emit("ar", true);
+            if (Object.getOwnPropertyDescriptor(this._, "ar").writable) {
+                this._.ar = true;
+                this.emit("ar", true);
+            }
             return this;
         };
         
         $.kr = function() {
-            this._.ar = false;
-            this.emit("ar", false);
+            if (Object.getOwnPropertyDescriptor(this._, "ar").writable) {
+                this._.ar = false;
+                this.emit("ar", false);
+            }
             return this;
         };
         
