@@ -1,21 +1,16 @@
 (function(timbre) {
     "use strict";
     
+    var SoundBuffer = timbre.fn.getClass("buffer");
+    
     function AudioFile(_args) {
-        timbre.Object.call(this, _args);
+        SoundBuffer.call(this, _args);
         
-        this._.isLooped   = false;
-        this._.isReversed = false;
         this._.isLoaded = false;
         this._.isEnded  = true;
-        this._.duration    = 0;
         this._.loadedTime  = 0;
-        this._.currentTime = 0;
-        this._.currentTimeIncr = this.cell * 1000 / timbre.samplerate;
-        
-        timbre.fn.fixAR(this);
     }
-    timbre.fn.extend(AudioFile, timbre.Object);
+    timbre.fn.extend(AudioFile, SoundBuffer);
     
     var $ = AudioFile.prototype;
     
@@ -37,77 +32,17 @@
                 return this._.src;
             }
         },
-        isLooped: {
-            set: function(value) {
-                this._.isLooped = !!value;
-            },
-            get: function() {
-                return this._.isLooped;
-            }
-        },
-        isReversed: {
-            set: function(value) {
-                var _ = this._;
-                _.isReversed = !!value;
-                if (_.isReversed) {
-                    if (_.phaseIncr > 0) {
-                        _.phaseIncr *= -1;
-                    }
-                    if (_.phase === 0) {
-                        _.phase = _.buffer.length + _.phaseIncr;
-                    }
-                } else {
-                    if (_.phaseIncr < 0) {
-                        _.phaseIncr *= -1;
-                    }
-                }
-            },
-            get: function() {
-                return this._.isReversed;
-            }
-        },
         isLoaded: {
             get: function() {
                 return this._.isLoaded;
-            }
-        },
-        isEnded: {
-            get: function() {
-                return this._.isEnded;
-            }
-        },
-        duration: {
-            get: function() {
-                return this._.duration;
             }
         },
         loadedTime: {
             get: function() {
                 return this._.loadedTime;
             }
-        },
-        currentTime: {
-            set: function(value) {
-                if (typeof value === "number") {
-                    var _ = this._;
-                    if (0 <= value && value <= _.duration) {
-                        _.phase = (value / 1000) * _.samplerate;
-                        _.currentTime = value;
-                    }
-                }
-            },
-            get: function() {
-                return this._.currentTime;
-            }
         }
     });
-    
-    $.bang = function() {
-        this._.phase      = 0;
-        this._.isEnded    = false;
-        this.emit("bang");
-        return this;
-    };
     
     $.slice = function(begin, end) {
         var _ = this._;
@@ -138,65 +73,6 @@
         instance.isReversed = this.isReversed;
         
         return instance;
-    };
-    
-    $.seq = function(seq_id) {
-        var _ = this._;
-        var cell = this.cell;
-        
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
-            
-            if (!_.isEnded && _.buffer) {
-                var buffer = _.buffer;
-                var phase  = _.phase;
-                var phaseIncr = _.phaseIncr;
-                var mul = _.mul, add = _.add;
-                
-                for (var i = 0, imax = cell.length; i < imax; ++i) {
-                    cell[i] = (buffer[phase|0] || 0) * mul + add;
-                    phase += phaseIncr;
-                }
-                
-                if (phase >= buffer.length) {
-                    if (_.isLooped) {
-                        phase = 0;
-                        this.emit("looped");
-                    } else {
-                        _.isEnded = true;
-                        this.emit("ended");
-                    }
-                } else if (phase < 0) {
-                    if (_.isLooped) {
-                        phase = buffer.length + phaseIncr;
-                        this.emit("looped");
-                    } else {
-                        _.isEnded = true;
-                        this.emit("ended");
-                    }
-                }
-                _.phase = phase;
-                _.currentTime += _.currentTimeIncr;
-            }
-        }
-        
-        return cell;
-    };
-    
-    $.plot = function(opts) {
-        var _ = this._;
-        var buffer = _.buffer;
-        if (_.plotFlush) {
-            var data = new Float32Array(2048);
-            var x = 0, xIncr = buffer.length / 2048;
-            for (var i = 0; i < 2048; i++) {
-                data[i] = buffer[x|0];
-                x += xIncr;
-            }
-            _.plotData  = data;
-            _.plotFlush = null;
-        }
-        return AudioFile.__super__.plot.call(this, opts);
     };
     
     var deinterleave = function(list) {

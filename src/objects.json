@@ -1,5 +1,6 @@
 {
     "dependencies": {
+        "audio" : ["buffer"],
         "biquad": ["fft"]
     }
 }
