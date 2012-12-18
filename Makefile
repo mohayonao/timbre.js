@@ -10,7 +10,7 @@ docs: clear-docs
 	coffee build/make-docs.coffee
 
 hint:
-	jshint src/core.js src/objects/*.js
+	jshint src/core.js src/objects/*.js src/extras/*.js
 
 clear:
 	rm -f timbre.dev.js
