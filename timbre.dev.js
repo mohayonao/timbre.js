@@ -241,32 +241,18 @@
     };
     timbre.fn.getClass = __getClass;
     
-    var __fixAR = (function() {
-        var f = function() {
-            this._.ar = true;
-        };
-        Object.defineProperty(f, "unremovable", {
-            value:true, configurable:false
+    var __fixAR = function(object) {
+        Object.defineProperty(object._ , "ar", {
+            value:true, writable:false
         });
-        return function(object) {
-            object._.ar = true;
-            object.on("ar", f);
-        };
-    })();
+    };
     timbre.fn.fixAR = __fixAR;
     
-    var __fixKR = (function() {
-        var f = function() {
-            this._.ar = false;
-        };
-        Object.defineProperty(f, "unremovable", {
-            value:true, configurable:false
+    var __fixKR = function(object) {
+        Object.defineProperty(object._ , "ar", {
+            value:false, writable:false
         });
-        return function(object) {
-            object._.ar = false;
-            object.on("ar", f);
-        };
-    })();
+    };
     timbre.fn.fixKR = __fixKR;
     
     // borrowed from node.js
@@ -664,14 +650,18 @@
         };
         
         $.ar = function() {
-            this._.ar = true;
-            this.emit("ar", true);
+            if (Object.getOwnPropertyDescriptor(this._, "ar").writable) {
+                this._.ar = true;
+                this.emit("ar", true);
+            }
             return this;
         };
         
         $.kr = function() {
-            this._.ar = false;
-            this.emit("ar", false);
+            if (Object.getOwnPropertyDescriptor(this._, "ar").writable) {
+                this._.ar = false;
+                this.emit("ar", false);
+            }
             return this;
         };
         
@@ -1548,40 +1538,40 @@
 (function(timbre) {
     "use strict";
     
-    function AudioFile(_args) {
+    function SoundBuffer(_args) {
         timbre.Object.call(this, _args);
         
         this._.isLooped   = false;
         this._.isReversed = false;
-        this._.isLoaded = false;
-        this._.isEnded  = true;
         this._.duration    = 0;
-        this._.loadedTime  = 0;
         this._.currentTime = 0;
-        this._.currentTimeIncr = this.cell * 1000 / timbre.samplerate;
+        this._.currentTimeIncr = this.cell.length * 1000 / timbre.samplerate;
+        this._.samplerate  = 0;
+        this._.phase = 0;
+        this._.phaseIncr = 0;
         
         timbre.fn.fixAR(this);
     }
-    timbre.fn.extend(AudioFile, timbre.Object);
+    timbre.fn.extend(SoundBuffer, timbre.Object);
     
-    var $ = AudioFile.prototype;
+    var $ = SoundBuffer.prototype;
     
     Object.defineProperties($, {
-        src: {
+        buffer: {
             set: function(value) {
                 var _ = this._;
-                if (_.value !== value) {
-                    if (typeof value === "string") {
-                        this._.src = value;
-                        this._.isLoaded = false;
-                    } else if (timbre.envtype === "browser" && value instanceof File) {
-                        this._.src = value;
-                        this._.isLoaded = false;
+                if (!_.buffer && typeof value === "object") {
+                    if (typeof value.samplerate === "number" &&
+                        value.buffer instanceof Float32Array) {
+                        _.samplerate = value.samplerate;
+                        _.buffer    = new Float32Array(value.buffer);
+                        _.phaseIncr = _.samplerate / timbre.samplerate;
+                        _.duration  = _.buffer.length * 1000 / _.samplerate;
                     }
                 }
             },
             get: function() {
-                return this._.src;
+                return this._.buffer;
             }
         },
         isLooped: {
@@ -1613,24 +1603,19 @@
                 return this._.isReversed;
             }
         },
-        isLoaded: {
-            get: function() {
-                return this._.isLoaded;
-            }
-        },
         isEnded: {
             get: function() {
                 return this._.isEnded;
             }
         },
+        samplerate: {
+            get: function() {
+                return this._.samplerate;
+            }
+        },
         duration: {
             get: function() {
                 return this._.duration;
-            }
-        },
-        loadedTime: {
-            get: function() {
-                return this._.loadedTime;
             }
         },
         currentTime: {
@@ -1650,11 +1635,129 @@
     });
     
     $.bang = function() {
-        this._.phase      = 0;
-        this._.isEnded    = false;
+        this._.phase   = 0;
+        this._.isEnded = false;
         this.emit("bang");
         return this;
     };
+    
+    $.seq = function(seq_id) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.seq_id !== seq_id) {
+            this.seq_id = seq_id;
+            
+            if (!_.isEnded && _.buffer) {
+                var buffer = _.buffer;
+                var phase  = _.phase;
+                var phaseIncr = _.phaseIncr;
+                var mul = _.mul, add = _.add;
+                
+                for (var i = 0, imax = cell.length; i < imax; ++i) {
+                    cell[i] = (buffer[phase|0] || 0) * mul + add;
+                    phase += phaseIncr;
+                }
+                
+                if (phase >= buffer.length) {
+                    if (_.isLooped) {
+                        phase = 0;
+                        this.emit("looped");
+                    } else {
+                        _.isEnded = true;
+                        this.emit("ended");
+                        timbre.nextTick(clearCell.bind(this));
+                    }
+                } else if (phase < 0) {
+                    if (_.isLooped) {
+                        phase = buffer.length + phaseIncr;
+                        this.emit("looped");
+                    } else {
+                        _.isEnded = true;
+                        this.emit("ended");
+                        timbre.nextTick(clearCell.bind(this));
+                    }
+                }
+                _.phase = phase;
+                _.currentTime += _.currentTimeIncr;
+            }
+        }
+        
+        return cell;
+    };
+    
+    var clearCell = function() {
+        var cell = this.cell;
+        for (var i = cell.length; i--; ) {
+            cell[i] = 0;
+        }
+    };
+    
+    var super_plot = timbre.Object.prototype.plot;
+    
+    $.plot = function(opts) {
+        var _ = this._;
+        var buffer = _.buffer;
+        if (_.plotFlush) {
+            var data = new Float32Array(2048);
+            var x = 0, xIncr = buffer.length / 2048;
+            for (var i = 0; i < 2048; i++) {
+                data[i] = buffer[x|0];
+                x += xIncr;
+            }
+            _.plotData  = data;
+            _.plotFlush = null;
+        }
+        return super_plot.call(this, opts);
+    };
+    
+    timbre.fn.register("buffer", SoundBuffer);
+})(timbre);
+(function(timbre) {
+    "use strict";
+    
+    var SoundBuffer = timbre.fn.getClass("buffer");
+    
+    function AudioFile(_args) {
+        SoundBuffer.call(this, _args);
+        
+        this._.isLoaded = false;
+        this._.isEnded  = true;
+        this._.loadedTime  = 0;
+    }
+    timbre.fn.extend(AudioFile, SoundBuffer);
+    
+    var $ = AudioFile.prototype;
+    
+    Object.defineProperties($, {
+        src: {
+            set: function(value) {
+                var _ = this._;
+                if (_.value !== value) {
+                    if (typeof value === "string") {
+                        this._.src = value;
+                        this._.isLoaded = false;
+                    } else if (timbre.envtype === "browser" && value instanceof File) {
+                        this._.src = value;
+                        this._.isLoaded = false;
+                    }
+                }
+            },
+            get: function() {
+                return this._.src;
+            }
+        },
+        isLoaded: {
+            get: function() {
+                return this._.isLoaded;
+            }
+        },
+        loadedTime: {
+            get: function() {
+                return this._.loadedTime;
+            }
+        }
+    });
     
     $.slice = function(begin, end) {
         var _ = this._;
@@ -1685,65 +1788,6 @@
         instance.isReversed = this.isReversed;
         
         return instance;
-    };
-    
-    $.seq = function(seq_id) {
-        var _ = this._;
-        var cell = this.cell;
-        
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
-            
-            if (!_.isEnded && _.buffer) {
-                var buffer = _.buffer;
-                var phase  = _.phase;
-                var phaseIncr = _.phaseIncr;
-                var mul = _.mul, add = _.add;
-                
-                for (var i = 0, imax = cell.length; i < imax; ++i) {
-                    cell[i] = (buffer[phase|0] || 0) * mul + add;
-                    phase += phaseIncr;
-                }
-                
-                if (phase >= buffer.length) {
-                    if (_.isLooped) {
-                        phase = 0;
-                        this.emit("looped");
-                    } else {
-                        _.isEnded = true;
-                        this.emit("ended");
-                    }
-                } else if (phase < 0) {
-                    if (_.isLooped) {
-                        phase = buffer.length + phaseIncr;
-                        this.emit("looped");
-                    } else {
-                        _.isEnded = true;
-                        this.emit("ended");
-                    }
-                }
-                _.phase = phase;
-                _.currentTime += _.currentTimeIncr;
-            }
-        }
-        
-        return cell;
-    };
-    
-    $.plot = function(opts) {
-        var _ = this._;
-        var buffer = _.buffer;
-        if (_.plotFlush) {
-            var data = new Float32Array(2048);
-            var x = 0, xIncr = buffer.length / 2048;
-            for (var i = 0; i < 2048; i++) {
-                data[i] = buffer[x|0];
-                x += xIncr;
-            }
-            _.plotData  = data;
-            _.plotFlush = null;
-        }
-        return AudioFile.__super__.plot.call(this, opts);
     };
     
     var deinterleave = function(list) {
@@ -3285,6 +3329,351 @@
 })();
 (function(timbre) {
     "use strict";
+    
+    function EfxDistortion(_args) {
+        timbre.Object.call(this, _args);
+        
+        this.once("init", oninit);
+        
+        timbre.fn.fixAR(this);
+    }
+    timbre.fn.extend(EfxDistortion, timbre.Object);
+    
+    var oninit = function() {
+        if (!this._.preGain) {
+            this.preGain = -60;
+        }
+        if (!this._.postGain) {
+            this.postGain = 18;
+        }
+    };
+    
+    var $ = EfxDistortion.prototype;
+    
+    Object.defineProperties($, {
+        preGain: {
+            set: function(value) {
+                this._.preGain = timbre(value);
+            },
+            get: function() {
+                return this._.preGain;
+            }
+        },
+        postGain: {
+            set: function(value) {
+                this._.postGain = timbre(value);
+            },
+            get: function() {
+                return this._.postGain;
+            }
+        }
+    });
+    
+    $.seq = function(seq_id) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.seq_id !== seq_id) {
+            this.seq_id = seq_id;
+            
+            var inputs  = this.inputs;
+            var i, imax = inputs.length;
+            var j, jmax = cell.length;
+            var mul = _.mul, add = _.add;
+            var tmp;
+            
+            for (j = jmax; j--; ) {
+                cell[j] = 0;
+            }
+            for (i = 0; i < imax; ++i) {
+                tmp = inputs[i].seq(seq_id);
+                for (j = jmax; j--; ) {
+                    cell[j] += tmp[j];
+                }
+            }
+            
+            var changed = false;
+
+            var preGain = _.preGain.seq(seq_id)[0];
+            if (_.prevPreGain !== preGain) {
+                _.prevPreGain = preGain;
+                changed = true;
+            }
+            var postGain = _.postGain.seq(seq_id)[0];
+            if (_.prevPostGain !== postGain) {
+                _.prevPostGain = postGain;
+                changed = true;
+            }
+            if (changed) {
+                var postScale = Math.pow(2, -postGain * 0.166666666);
+                _.preScale = Math.pow(2, -preGain * 0.166666666) * postScale;
+                _.limit = postScale;
+            }
+            
+            var preScale = _.preScale;
+            var limit    = _.limit;
+            var x;
+            
+            for (j = jmax; j--; ) {
+                x = cell[j] * preScale;
+                x = (x > limit) ? limit : (x < -limit) ? -limit : x;
+                cell[j] = x * mul + add;
+            }
+        }
+        
+        return cell;
+    };
+    
+    timbre.fn.register("efx.dist", EfxDistortion);
+})(timbre);
+(function() {
+    "use strict";
+    
+    // TODO: loopNode, releaseNode
+    
+    function Envelope(_args) {
+        timbre.Object.call(this, _args);
+        
+        this._.value0  = 0;
+        this._.value1  = 0;
+        this._.index   = 0;
+        this._.samples = 0;
+        this._.curve   = CurveTypeNone;
+        this._.goalValue = 0;
+        this._.variation = 0;
+        this._.status = StatusWait;
+        
+        this._.defaultCurve = CurveTypeLin;
+        this._.table = [0];
+        
+        this._.kr = true;
+    }
+    timbre.fn.extend(Envelope, timbre.Object);
+    
+    var CurveTypeNone = 0;
+    var CurveTypeLin  = 1;
+    var CurveTypeExp  = 2;
+    var StatusWait    = 0;
+    var StatusGate    = 1;
+    var StatusRelease = 2;
+    var StatusEnd     = 3;
+    
+    var CURVE_TYPES = {
+        "lin": CurveTypeLin,
+        "exp": CurveTypeExp,
+        1: CurveTypeLin,
+        2: CurveTypeExp
+    };
+    var CURVE_NAMES  = [ "lin", "exp" ];
+    var STATUS_NAMES = [ "wait", "gate", "release", "end" ];
+    
+    var $ = Envelope.prototype;
+    
+    Object.defineProperties($, {
+        table: {
+            set: function(value) {
+                if (Array.isArray(value)) {
+                    this._.table = value;
+                }
+            },
+            get: function() {
+                return this._.table;
+            }
+        },
+        curve: {
+            set: function(value) {
+                var i = CURVE_TYPES[value];
+                if (i !== undefined) {
+                    this._.defaultCurve = i;
+                    this._.curveName = CURVE_NAMES[i];
+                }
+            },
+            get: function() {
+                return this._.defaultCurve;
+            }
+        },
+        index: {
+            get: function() {
+                return this._.index;
+            }
+        },
+        status: {
+            get: function() {
+                return STATUS_NAMES[this._.status];
+            }
+        }
+    });
+    
+    $.reset = function() {
+        var _ = this._;
+        if (typeof _.table[0] === "number") {
+            _.value0 = _.goalValue = _.table[0];
+            _.index = 1;
+        } else {
+            _.value0 = _.goalValue = _.index = 0;
+        }
+        _.value1  = 1;
+        _.samples = 0;
+        _.curve   = CurveTypeNone;
+        _.variation = 0;
+        _.status = StatusWait;
+        return this;
+    };
+    
+    $.release = function(time, curve) {
+        var _ = this._;
+        
+        if (_.status !== StatusGate) {
+            _.value0  = _.value1 = _.goalValue = 0;
+            _.status  = StatusEnd;
+            _.samples = Infinity;
+            _.curve   = CurveTypeNone;
+            this.emit("release-done");
+            return this;
+        }
+        
+        _.samples = time * 0.001 * timbre.samplerate;
+        if (_.samples > 0) {
+            _.value1 = _.value0;
+            _.value0 = 1;
+            _.curve  = CURVE_TYPES[curve] || _.defaultCurve;
+            if (_.curve === CurveTypeExp) {
+                if (_.value0 === 0) {
+                    _.value0 = 1e-6;
+                }
+                _.variation = Math.pow(
+                    _.goalValue / _.value0, 1 / (_.samples / this.cell.length)
+                );
+            } else {
+                _.curve = CurveTypeLin;
+                _.variation = (_.goalValue - _.value0) / (_.samples / this.cell.length);
+            }
+        }
+        _.status = StatusRelease;
+        return this;
+    };
+    
+    $.bang = function() {
+        var _ = this._;
+        this.reset();
+        _.status = StatusGate;
+        this.emit("bang");
+        return this;
+    };
+    
+    $.seq = function(seq_id) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.seq_id !== seq_id) {
+            this.seq_id = seq_id;
+            
+            var inputs  = this.inputs;
+            var i, imax = inputs.length;
+            var j, jmax = cell.length;
+            var mul = _.mul, add = _.add;
+            var tmp;
+
+            if (inputs.length) {
+                for (j = jmax; j--; ) {
+                    cell[j] = 0;
+                }
+                for (i = 0; i < imax; ++i) {
+                    tmp = inputs[i].seq(seq_id);
+                    for (j = jmax; j--; ) {
+                        cell[j] += tmp[j];
+                    }
+                }
+            } else {
+                for (j = jmax; j--; ) {
+                    cell[j] = 1;
+                }
+            }
+            
+            var items, samples;
+            var time, value;
+            var emit = false;
+            
+            switch (_.status) {
+            case StatusWait:
+            case StatusEnd:
+                break;
+            case StatusGate:
+                while (_.samples <= 0) {
+                    if (_.index >= _.table.length) {
+                        _.samples = Infinity;
+                        _.value0  = _.goalValue;
+                        _.curve   = CurveTypeNone;
+                        emit = "done";
+                        continue;
+                    }
+                    items = _.table[_.index++];
+                    if (typeof items === "number") {
+                        _.value0 = items;
+                        continue;
+                    }
+                    
+                    _.value0    = _.goalValue;
+                    _.goalValue = items[0] || 0;
+                    _.curve  = CURVE_TYPES[items[2]] || _.defaultCurve;
+                    
+                    time = items[1] || 1000;
+                    
+                    samples = time * 0.001 * timbre.samplerate;
+                    if (samples > 0) {
+                        if (_.curve === CurveTypeExp) {
+                            if (_.value0 === 0) {
+                                _.value0 = 1e-6;
+                            }
+                            _.variation = Math.pow(
+                                _.goalValue / _.value0, 1 / (samples / cell.length)
+                            );
+                        } else {
+                            _.curve = CurveTypeLin;
+                            _.variation = (_.goalValue - _.value0) / (samples / cell.length);
+                        }
+                        _.samples += samples;
+                    }
+                }
+                break;
+            case StatusRelease:
+                if (_.samples <= 0) {
+                    emit = "release-done";
+                    _.value0  = _.value1 = _.goalValue = 0;
+                    _.status  = StatusEnd;
+                    _.samples = Infinity;
+                    _.curve   = CurveTypeNone;
+                }
+                break;
+            }
+            
+            value = _.value0 * _.value1;
+            for (j = jmax; j--; ) {
+                cell[j] = (cell[j] * value) * mul + add;
+            }
+            
+            switch (_.curve) {
+            case CurveTypeLin:
+                _.value0 += _.variation;
+                break;
+            case CurveTypeExp:
+                _.value0 *= _.variation;
+                break;
+            }
+            _.samples -= cell.length;
+            
+            if (emit) {
+                this.emit(emit);
+            }
+        }
+        
+        return cell;
+    };
+    
+    timbre.fn.register("env", Envelope);
+})();
+(function(timbre) {
+    "use strict";
 
     function Interval(_args) {
         timbre.TimerObject.call(this, _args);
@@ -4324,13 +4713,8 @@
         }
     });
     
-    var insertEvent = function(object, type, value, time) {
-        var s = object._.schedules;
-        var e = new ParamEvent(type, value, time);
-        s.push(e);
-        s.sort(function(a, b) {
-            return a.time - b.time;
-        });
+    var insertEvent = function(schedules, type, value, time) {
+        schedules.push(new ParamEvent(type, value, time));
     };
     
     $.setValueAtTime = function(value, time) {
@@ -4339,7 +4723,7 @@
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
             _.currentTime = timbre.currentTime;
-            insertEvent(this, ParamEvent.SetValue, value, time);
+            insertEvent(_.schedules, ParamEvent.SetValue, value, time);
         }
         return this;
     };
@@ -4350,7 +4734,7 @@
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(this, ParamEvent.LinearRampToValue, value, time);
+            insertEvent(_.schedules, ParamEvent.LinearRampToValue, value, time);
         }
         return this;
     };
@@ -4362,7 +4746,7 @@
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(this, ParamEvent.ExponentialRampToValue, value, time);
+            insertEvent(_.schedules, ParamEvent.ExponentialRampToValue, value, time);
         }
         return this;
     };
@@ -4395,31 +4779,29 @@
             var schedules = _.schedules;
             var e, samples;
             
-            while (_.eventtype === ParamEvent.None &&
-                   schedules.length > 0 && _.currentTime <= schedules[0].time) {
-                
+            while (_.eventtype === ParamEvent.None && schedules.length > 0) {
                 e = schedules.shift();
                 switch (e.type) {
                 case ParamEvent.SetValue:
                     _.eventtype = ParamEvent.SetValue;
                     _.goalValue = e.value;
-                    _.goalTime  = e.time;
+                    _.goalTime  = e.time + _.currentTime;
                     break;
                 case ParamEvent.LinearRampToValue:
-                    samples = (e.time - _.currentTime) * 0.001 * timbre.samplerate;
+                    samples = e.time * 0.001 * timbre.samplerate;
                     if (samples > 0) {
                         _.eventtype = ParamEvent.LinearRampToValue;
                         _.goalValue = e.value;
-                        _.goalTime  = e.time;
+                        _.goalTime  = e.time + _.currentTime;
                         _.variation = (e.value - _.value) / (samples / cell.length);
                     }
                     break;
                 case ParamEvent.ExponentialRampToValue:
-                    samples = (e.time - _.currentTime) * 0.001 * timbre.samplerate;
+                    samples = e.time * 0.001 * timbre.samplerate;
                     if (_.value !== 0 && samples > 0) {
                         _.eventtype = ParamEvent.ExponentialRampToValue;
                         _.goalValue = e.value;
-                        _.goalTime  = e.time;
+                        _.goalTime  = e.time + _.currentTime;
                         _.variation = Math.pow(e.value/_.value, 1/(samples/cell.length));
                     }
                     break;
