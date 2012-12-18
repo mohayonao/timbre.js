@@ -82,13 +82,8 @@
         }
     });
     
-    var insertEvent = function(object, type, value, time) {
-        var s = object._.schedules;
-        var e = new ParamEvent(type, value, time);
-        s.push(e);
-        s.sort(function(a, b) {
-            return a.time - b.time;
-        });
+    var insertEvent = function(schedules, type, value, time) {
+        schedules.push(new ParamEvent(type, value, time));
     };
     
     $.setValueAtTime = function(value, time) {
@@ -97,7 +92,7 @@
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
             _.currentTime = timbre.currentTime;
-            insertEvent(this, ParamEvent.SetValue, value, time);
+            insertEvent(_.schedules, ParamEvent.SetValue, value, time);
         }
         return this;
     };
@@ -108,7 +103,7 @@
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(this, ParamEvent.LinearRampToValue, value, time);
+            insertEvent(_.schedules, ParamEvent.LinearRampToValue, value, time);
         }
         return this;
     };
@@ -120,7 +115,7 @@
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(this, ParamEvent.ExponentialRampToValue, value, time);
+            insertEvent(_.schedules, ParamEvent.ExponentialRampToValue, value, time);
         }
         return this;
     };
@@ -153,31 +148,29 @@
             var schedules = _.schedules;
             var e, samples;
             
-            while (_.eventtype === ParamEvent.None &&
-                   schedules.length > 0 && _.currentTime <= schedules[0].time) {
-                
+            while (_.eventtype === ParamEvent.None && schedules.length > 0) {
                 e = schedules.shift();
                 switch (e.type) {
                 case ParamEvent.SetValue:
                     _.eventtype = ParamEvent.SetValue;
                     _.goalValue = e.value;
-                    _.goalTime  = e.time;
+                    _.goalTime  = e.time + _.currentTime;
                     break;
                 case ParamEvent.LinearRampToValue:
-                    samples = (e.time - _.currentTime) * 0.001 * timbre.samplerate;
+                    samples = e.time * 0.001 * timbre.samplerate;
                     if (samples > 0) {
                         _.eventtype = ParamEvent.LinearRampToValue;
                         _.goalValue = e.value;
-                        _.goalTime  = e.time;
+                        _.goalTime  = e.time + _.currentTime;
                         _.variation = (e.value - _.value) / (samples / cell.length);
                     }
                     break;
                 case ParamEvent.ExponentialRampToValue:
-                    samples = (e.time - _.currentTime) * 0.001 * timbre.samplerate;
+                    samples = e.time * 0.001 * timbre.samplerate;
                     if (_.value !== 0 && samples > 0) {
                         _.eventtype = ParamEvent.ExponentialRampToValue;
                         _.goalValue = e.value;
-                        _.goalTime  = e.time;
+                        _.goalTime  = e.time + _.currentTime;
                         _.variation = Math.pow(e.value/_.value, 1/(samples/cell.length));
                     }
                     break;
