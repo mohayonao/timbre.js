@@ -995,7 +995,7 @@
     })();
     
     var ObjectWrapper = (function() {
-        function ObjectWrapper(_args) {
+        function ObjectWrapper() {
             TimbreObject.call(this, []);
         }
         __extend(ObjectWrapper, TimbreObject);
