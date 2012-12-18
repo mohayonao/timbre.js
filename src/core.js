@@ -479,7 +479,7 @@
             dac: {
                 set: function(value) {
                     var _ = this._;
-                    if (value instanceof Dac && _.dac !== value) {
+                    if (value instanceof SystemInlet && _.dac !== value) {
                         if (_.dac) {
                             _.dac.remove(this);
                         }
@@ -603,7 +603,7 @@
             var dac = this._.dac;
             var emit = false;
             if (dac === null) {
-                dac = this._.dac = new Dac(this);
+                dac = this._.dac = new SystemInlet(this);
                 emit = true;
             } else if (dac.inputs.indexOf(this) === -1) {
                 dac.append(this);
@@ -1003,8 +1003,8 @@
         return ObjectWrapper;
     })();
     
-    var Dac = (function() {
-        function Dac(object) {
+    var SystemInlet = (function() {
+        function SystemInlet(object) {
             TimbreStereoObject.call(this, []);
             this.inputs.push(object);
             this.on("append", function(list) {
@@ -1013,9 +1013,9 @@
                 }
             });
         }
-        __extend(Dac , TimbreStereoObject);
+        __extend(SystemInlet , TimbreStereoObject);
         
-        var $ = Dac.prototype;
+        var $ = SystemInlet.prototype;
         
         Object.defineProperties($, {
             dac: {
@@ -1030,8 +1030,8 @@
         $.play = function() {
             var self = this;
             _sys.nextTick(function() {
-                if (_sys.dacs.indexOf(self) === -1) {
-                    _sys.dacs.push(self);
+                if (_sys.inlets.indexOf(self) === -1) {
+                    _sys.inlets.push(self);
                     _sys.emit("addObject");
                     self.emit("play");
                 }
@@ -1040,7 +1040,7 @@
         };
         
         $.pause = function() {
-            if (_sys.dacs.indexOf(this) !== -1) {
+            if (_sys.inlets.indexOf(this) !== -1) {
                 this._.remove_check = true;
                 _sys.nextTick(function() {
                     _sys.emit("removeObject");
@@ -1092,7 +1092,7 @@
             return cell;
         };
         
-        return Dac;
+        return SystemInlet;
     })();
     
     var SoundSystem = (function() {
@@ -1110,20 +1110,20 @@
             this.currentTime = 0;
             this.currentTimeIncr = 0;
             this.nextTicks = [];
-            this.dacs      = [];
+            this.inlets    = [];
             this.timers    = [];
             this.listeners = [];
             
             this.on("addObject", function() {
                 if (!this.isPlaying) {
-                    if (this.dacs.length > 0 || this.timers.length > 0) {
+                    if (this.inlets.length > 0 || this.timers.length > 0) {
                         this.play();
                     }
                 }
             });
             this.on("removeObject", function() {
                 if (this.isPlaying) {
-                    if (this.dacs.length === 0 && this.timers.length === 0) {
+                    if (this.inlets.length === 0 && this.timers.length === 0) {
                         this.pause();
                     }
                 }
@@ -1208,7 +1208,7 @@
         $.reset = function() {
             this.currentTime = 0;
             this.nextTicks = [];
-            this.dacs      = [];
+            this.inlets    = [];
             this.timers    = [];
             this.listeners = [];
             return this;
@@ -1225,7 +1225,7 @@
             var n = this.streamsize / this.cellsize;
             var nextTicks;
             var timers    = this.timers;
-            var dacs      = this.dacs;
+            var inlets    = this.inlets;
             var listeners = this.listeners;
             var currentTimeIncr = this.currentTimeIncr;
             
@@ -1240,8 +1240,8 @@
                     timers[j].seq(seq_id);
                 }
                 
-                for (j = 0, jmax = dacs.length; j < jmax; ++j) {
-                    x = dacs[j];
+                for (j = 0, jmax = inlets.length; j < jmax; ++j) {
+                    x = inlets[j];
                     x.seq(seq_id);
                     tmpL = x.cellL;
                     tmpR = x.cellR;
@@ -1262,10 +1262,10 @@
                         timers.splice(j, 1);
                     }
                 }
-                for (j = dacs.length; j--; ) {
-                    if (dacs[j]._.remove_check) {
-                        dacs[j]._.remove_check = null;
-                        dacs.splice(j, 1);
+                for (j = inlets.length; j--; ) {
+                    if (inlets[j]._.remove_check) {
+                        inlets[j]._.remove_check = null;
+                        inlets.splice(j, 1);
                     }
                 }
                 for (j = listeners.length; j--; ) {
