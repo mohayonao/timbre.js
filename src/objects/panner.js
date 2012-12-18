@@ -7,15 +7,17 @@
         this._.panL = 0.5;
         this._.panR = 0.5;
         
-        this.once("init", function() {
-            if (!this._.value) {
-                this.value = 0;
-            }
-        });
+        this.once("init", oninit);
         
-        this.on("ar", function() { this._.ar = true; });
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(Panner, timbre.StereoObject);
+    
+    var oninit = function() {
+        if (!this._.value) {
+            this.value = 0;
+        }
+    };
     
     var $ = Panner.prototype;
     

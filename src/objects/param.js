@@ -24,15 +24,11 @@
         
         this._.schedules = [];
         
-        this._.ar = false;
-        
         this.on("setAdd", changeTheValue);
         this.on("setMul", changeTheValue);
-        this.on("ar", function() { this._.ar = false; });
+        timbre.fn.fixKR(this);
     }
     timbre.fn.extend(Param, timbre.Object);
-    
-    var $ = Param.prototype;
     
     var changeTheValue = function() {
         var _ = this._;
@@ -42,6 +38,11 @@
             cell[i] = x;
         }
     };
+    Object.defineProperty(changeTheValue, "unremovable", {
+        value:true, configurable:false
+    });
+    
+    var $ = Param.prototype;
     
     Object.defineProperties($, {
         value: {

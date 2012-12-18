@@ -241,6 +241,34 @@
     };
     timbre.fn.getClass = __getClass;
     
+    var __fixAR = (function() {
+        var f = function() {
+            this._.ar = true;
+        };
+        Object.defineProperty(f, "unremovable", {
+            value:true, configurable:false
+        });
+        return function(object) {
+            object._.ar = true;
+            object.on("ar", f);
+        };
+    })();
+    timbre.fn.fixAR = __fixAR;
+    
+    var __fixKR = (function() {
+        var f = function() {
+            this._.ar = false;
+        };
+        Object.defineProperty(f, "unremovable", {
+            value:true, configurable:false
+        });
+        return function(object) {
+            object._.ar = false;
+            object.on("ar", f);
+        };
+    })();
+    timbre.fn.fixKR = __fixKR;
+    
     // borrowed from node.js
     var EventEmitter = (function() {
         function EventEmitter() {
@@ -380,15 +408,27 @@
                 return this;
             }
             
+            var remain = false;
             var listeners = _.events[type];
             if (isArray(listeners)) {
-                while (listeners.length) {
-                    this.removeListener(type, listeners[listeners.length - 1]);
+                for (var i = listeners.length; i--; ) {
+                    var listener = listeners[i];
+                    if (listener.unremovable) {
+                        remain = true;
+                        continue;
+                    }
+                    this.removeListener(type, listener);
                 }
             } else if (listeners) {
-                this.removeListener(type, listeners);
+                if (!listeners.unremovable) {
+                    this.removeListener(type, listeners);
+                } else {
+                    remain = true;
+                }
             }
-            _.events[type] = null;
+            if (!remain) {
+                _.events[type] = null;
+            }
             
             return this;
         };
@@ -412,17 +452,10 @@
         function TimbreObject(_args) {
             this._ = {}; // private members
             
-            var params;
             if (isDictionary(_args[0])) {
-                params = _args.shift();
+                var params = _args.shift();
                 this.once("init", function() {
                     this.set(params);
-                });
-            } else if (_args[0] instanceof ObjectWrapper) {
-                params = _args.shift();
-                params.bind(this);
-                this.once("init", function() {
-                    params.emit("initValue", this);
                 });
             }
             
@@ -866,12 +899,10 @@
             
             this.on("setAdd", changeTheValue);
             this.on("setMul", changeTheValue);
-            this.on("ar", function() { this._.ar = false; });
+            __fixKR(this);
         }
         __extend(NumberWrapper, TimbreObject);
         
-        var $ = NumberWrapper.prototype;
-
         var changeTheValue = function() {
             var _ = this._;
             var x = _.value * _.mul + _.add;
@@ -880,6 +911,11 @@
                 cell[i] = x;
             }
         };
+        Object.defineProperty(changeTheValue, "unremovable", {
+            value:true, configurable:false
+        });
+        
+        var $ = NumberWrapper.prototype;
         
         Object.defineProperties($, {
             value: {
@@ -906,12 +942,10 @@
             
             this.on("setAdd", changeTheValue);
             this.on("setMul", changeTheValue);
-            this.on("ar", function() { this._.ar = false; });
+            __fixKR(this);
         }
         __extend(BooleanWrapper, TimbreObject);
-
-        var $ = BooleanWrapper.prototype;
-
+        
         var changeTheValue = function() {
             var _ = this._;
             var x = _.value * _.mul + _.add;
@@ -920,6 +954,11 @@
                 cell[i] = x;
             }
         };
+        Object.defineProperty(changeTheValue, "unremovable", {
+            value:true, configurable:false
+        });
+        
+        var $ = BooleanWrapper.prototype;
         
         Object.defineProperties($, {
             value: {
@@ -944,13 +983,12 @@
             this.value = _args[0];
             this._.args = _args.slice(1);
             this._.ar = false;
-            
-            this.on("ar", function() { this._.ar = false; });
+            __fixKR(this);
         }
         __extend(FunctionWrapper, TimbreObject);
         
         var $ = FunctionWrapper.prototype;
-
+        
         Object.defineProperties($, {
             value: {
                 set: function(value) {
@@ -1007,13 +1045,18 @@
         function SystemInlet(object) {
             TimbreStereoObject.call(this, []);
             this.inputs.push(object);
-            this.on("append", function(list) {
-                for (var i = list.length; i--; ) {
-                    list[i]._.dac = this;
-                }
-            });
+            this.on("append", onappend);
         }
         __extend(SystemInlet , TimbreStereoObject);
+        
+        var onappend = function(list) {
+            for (var i = list.length; i--; ) {
+                list[i]._.dac = this;
+            }
+        };
+        Object.defineProperty(onappend, "unremovable", {
+            value:true, configurable:false
+        });
         
         var $ = SystemInlet.prototype;
         

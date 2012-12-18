@@ -10,15 +10,17 @@
         
         this._.plotFlush = true;
         
-        this.once("init", function() {
-            if (!this._.interval) {
-                this.interval = 1000;
-            }
-        });
+        this.once("init", oninit);
         
-        this.on("ar", function() { this._.ar = true; });
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(WaveListener, timbre.ListenerObject);
+    
+    var oninit = function() {
+        if (!this._.interval) {
+            this.interval = 1000;
+        }
+    };
     
     var $ = WaveListener.prototype;
     

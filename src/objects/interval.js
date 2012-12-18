@@ -13,19 +13,25 @@
         this._.delaySamples = 0;
         this._.countSamples = 0;
         
-        this.once("init", function() {
-            if (this._.delay === undefined) {
-                this.delay = this.interval;
-            }
-        });
+        this.once("init", oninit);
+        this.on("start", onstart);
         
-        this.on("start", function() {
-            this._.currentTime  = timbre.currentTime;
-        });
-        
-        this.on("ar", function() { this._.ar = false; });
+        timbre.fn.fixKR(this);
     }
     timbre.fn.extend(Interval, timbre.TimerObject);
+    
+    var oninit = function() {
+        if (this._.delay === undefined) {
+            this.delay = this.interval;
+        }
+    };
+    
+    var onstart = function() {
+        this._.currentTime  = timbre.currentTime;
+    };
+    Object.defineProperty(onstart, "unremovable", {
+        value:true, configurable:false
+    });
     
     var $ = Interval.prototype;
     

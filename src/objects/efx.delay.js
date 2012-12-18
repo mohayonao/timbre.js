@@ -5,22 +5,24 @@
         timbre.Object.call(this, _args);
         
         this._.delay = new EfxDelay();
-
-        this.once("init", function() {
-            if (!this._.time) {
-                this.time = 100;
-            }
-            if (!this._.feedback) {
-                this.feedback = 0.25;
-            }
-            if (!this._.wet) {
-                this.wet = 0.2;
-            }
-        });
         
-        this.on("ar", function() { this._.ar = true; });
+        this.once("init", oninit);
+        
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(EfxDelayNode, timbre.Object);
+    
+    var oninit = function() {
+        if (!this._.time) {
+            this.time = 100;
+        }
+        if (!this._.feedback) {
+            this.feedback = 0.25;
+        }
+        if (!this._.wet) {
+            this.wet = 0.2;
+        }
+    };
     
     var $ = EfxDelayNode.prototype;
     

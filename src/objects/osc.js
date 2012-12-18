@@ -7,22 +7,24 @@
         this._.phase = 0;
         this._.x     = 0;
         this._.coeff = 1024 / timbre.samplerate;
-
-        this.once("init", function() {
-            var _ = this._;
-            if (!_.wave) {
-                this.wave = "sin";
-            }
-            if (!_.freq) {
-                this.freq = 440;
-            }
-            this._.plotData = this._.wave;
-            this._.plotLineWidth = 2;
-            this._.plotCyclic = true;
-            this._.plotBefore = plotBefore;
-        });
+        
+        this.once("init", oninit);
     }
     timbre.fn.extend(Oscillator, timbre.Object);
+    
+    var oninit = function() {
+        var _ = this._;
+        if (!_.wave) {
+            this.wave = "sin";
+        }
+        if (!_.freq) {
+            this.freq = 440;
+        }
+        this._.plotData = this._.wave;
+        this._.plotLineWidth = 2;
+        this._.plotCyclic = true;
+        this._.plotBefore = plotBefore;
+    };
     
     var $ = Oscillator.prototype;
     

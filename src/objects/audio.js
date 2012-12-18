@@ -13,7 +13,7 @@
         this._.currentTime = 0;
         this._.currentTimeIncr = this.cell * 1000 / timbre.samplerate;
         
-        this.on("ar", function() { this._.ar = true; });
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(AudioFile, timbre.Object);
     

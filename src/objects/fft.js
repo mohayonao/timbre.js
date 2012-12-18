@@ -13,19 +13,21 @@
         this._.plotRange = [0, 0.5];
         this._.plotBarStyle = true;
         
-        this.once("init", function() {
-            var _ = this._;
-            if (!_.fft) {
-                this.size = 512;
-            }
-            if (!_.interval) {
-                this.interval = 500;
-            }
-        });
+        this.once("init", oninit);
         
-        this.on("ar", function() { this._.ar = true; });
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(FFTListener, timbre.ListenerObject);
+    
+    var oninit = function() {
+        var _ = this._;
+        if (!_.fft) {
+            this.size = 512;
+        }
+        if (!_.interval) {
+            this.interval = 500;
+        }
+    };
     
     var $ = FFTListener.prototype;
     

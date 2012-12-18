@@ -8,22 +8,24 @@
         
         this._.plotRange = [0, 1.2];
         this._.plotFlush = true;
-
-        this.once("init", function() {
-            if (!this._.freq) {
-                this.freq = 340;
-            }
-            if (!this._.Q) {
-                this.Q = 1;
-            }
-            if (!this._.gain) {
-                this.gain = 0;
-            }
-        });
         
-        this.on("ar", function() { this._.ar = true; });
+        this.once("init", oninit);
+        
+        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(Biquad, timbre.Object);
+    
+    var oninit = function() {
+        if (!this._.freq) {
+            this.freq = 340;
+        }
+        if (!this._.Q) {
+            this.Q = 1;
+        }
+        if (!this._.gain) {
+            this.gain = 0;
+        }
+    };
     
     var $ = Biquad.prototype;
     
