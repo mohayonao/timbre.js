@@ -1033,61 +1033,8 @@
     var ObjectWrapper = (function() {
         function ObjectWrapper(_args) {
             TimbreObject.call(this, []);
-            
-            this._.binded = [];
-            this._.values = {};
-            
-            var dict = _args[0];
-            
-            for (var key in dict) {
-                Object.defineProperty(this, key, {
-                    set: setter(key),
-                    get: getter(key)
-                });
-            }
-            
-            this.once("initValue", function(object) {
-                if (object) {
-                    for (var key in dict) {
-                        object.set(key, dict[key]);
-                    }
-                }
-            });
         }
         __extend(ObjectWrapper, TimbreObject);
-        
-        var setter = function(key) {
-            return function(value) {
-                var binded = this._.binded;
-                this._.values[key] = value;
-                for (var i = 0, imax = binded.length; i < imax; ++i) {
-                    binded[i].set(key, value);
-                }
-            };
-        };
-        var getter = function(key) {
-            return function() {
-                return this._.values[key];
-            };
-        };
-        
-        var $ = ObjectWrapper.prototype;
-        
-        $.bind = function(object) {
-            var _ = this._;
-            if (_.binded.indexOf(object) === -1) {
-                _.binded.push(object);
-            }
-            return this;
-        };
-        
-        $.unbind = function(object) {
-            var _ = this._, i;
-            if ((i = _.binded.indexOf(object)) !== -1) {
-                _.binded.splice(i, 1);
-            }
-            return this;
-        };
         
         return ObjectWrapper;
     })();
