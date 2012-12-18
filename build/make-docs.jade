@@ -12,11 +12,14 @@ html(lang=lang)
     .container
       .row
         #index.span2
-          h4 timbre.js
-          ul
-            each name in index
-              li
-                a(href=name + ".html") #{name}
+          h1 timbre.js
+          for items in categories
+            if indexes[items.key].length
+              h2 #{items.caption}
+              ul
+                each name in indexes[items.key]
+                  li
+                    a(href=name + ".html") #{name}
         #doc.span9
           !{doc}
     script(src="../../misc/jquery.min.js")

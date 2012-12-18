@@ -3,29 +3,28 @@ path   = require 'path'
 jade   = require 'jade'
 marked = require 'marked'
 
-get_filelist = (lang)->
-    dirpath = path.normalize "#{__dirname}/../docs.md/#{lang}"
-    unless fs.existsSync dirpath then return []
+class DocFile
+    re = /\/(\w+)\/(_?)(?:(tut|ext|uti|dev)-)?(?:(\d+)-)?([\w.]+?)\.md$/
 
-    list = fs.readdirSync dirpath
-    list = list.filter (x)-> /\.md$/.test x
-    if not isDev
-        list = list.filter (x)-> not /^_/.test x
-    list = list.map (x)-> x.replace /\.md$/, ''
-    list.sort()
-    list
+    constructor: (@path)->
+        if (m = re.exec @path)
+            @lang     =   m[1]
+            @dev      = !!m[2]
+            @category =   m[3] or 'obj'
+            @sort     =  +m[4] or Infinity
+            @name     =   m[5]
+        else @error = true
 
-find_path = (lang, name)->
+get_docfiles = (lang)->
     dirpath = path.normalize "#{__dirname}/../docs.md/#{lang}"
-    filepath = "#{dirpath}/#{name}.md"
-    if fs.existsSync(filepath)
-        return filepath
-    for i in [0..99]
-        num = "0#{i}".substr -2
-        filepath = "#{dirpath}/#{num}.#{name}.md"
-        console.log filepath
-        if fs.existsSync(filepath)
-            return filepath
+    unless fs.existsSync dirpath then return {}
+
+    map = {}
+    for filename in fs.readdirSync dirpath
+        doc = new DocFile("#{dirpath}/#{filename}")
+        if doc.dev and not isDev then continue
+        map[doc.name] = doc
+    map
 
 lang_process = (doc)->
     re = /<pre><code class="lang-(.+)">([\w\W]+?)<\/code><\/pre>/g
@@ -81,20 +80,38 @@ table = (src)->
     items.push "</table>"
     items.join ''
 
-make_doc = (lang, name, index=null)->
-    template = jade.compile fs.readFileSync("#{__dirname}/make-docs.jade")
-    filepath = find_path lang, name
-    if filepath
-        if index is null
-            list  = get_filelist lang
-            index = list.map (x)-> x.replace /^(\d)+\./, ''
+sort_indexes = (docfiles)->
+    map = tut:[], obj:[], ext:[], uti:[], dev:[]
+    for name in Object.keys(docfiles)
+        doc = docfiles[name]
+        map[doc.category]?.push doc
+    for name in Object.keys(map)
+        map[name].sort (a, b)->
+            a.sort - b.sort
+        map[name] = map[name].map (x)-> x.name
+    map
 
-        lang  = if lang is '' then 'en' else lang
-        title = "#{name}"
-        doc   = lang_process marked fs.readFileSync(filepath, 'utf-8')
+make_doc = (lang, name, docfiles=null, indexes=null)->
+    template = jade.compile fs.readFileSync("#{__dirname}/make-docs.jade")
+
+    unless docfiles
+        docfiles = get_docfiles lang
+    unless indexes
+        indexes  = sort_indexes docfiles
+
+    doc = docfiles[name]
+    if doc
+        title  = doc.name
         params =
-            doc :doc
-            lang:lang, title:title, index:index
+            doc: lang_process marked fs.readFileSync(doc.path, 'utf-8')
+            lang:lang, title:doc.name, index:[], indexes:indexes
+            categories: [
+                { key:'tut', caption:'Tutorial'   }
+                { key:'obj', caption:'Objects'    }
+                { key:'ext', caption:'Extentions' }
+                { key:'uti', caption:'Utilities'  }
+                { key:'dev', caption:'Developers' }
+            ]
         template params
     else 'NOT FOUND'
 
@@ -103,12 +120,12 @@ if not module.parent
     if fs.existsSync dstpath
         for lang in ['en', 'ja']
             fs.mkdir "#{dstpath}/#{lang}"
-            list  = get_filelist lang
-            index = list.map (x)-> x.replace /^(\d)+\./, ''
-            for name in list
-                name = name.replace /^(\d)+\./, ''
-                html = make_doc lang, name, index
-                htmlfilepath = "#{dstpath}/#{lang}/#{name}.html"
+            docfiles = get_docfiles lang
+            indexes  = sort_indexes docfiles
+            for name in Object.keys(docfiles)
+                doc = docfiles[name]
+                html = make_doc doc.lang, doc.name, docfiles
+                htmlfilepath = "#{dstpath}/#{doc.lang}/#{doc.name}.html"
                 fs.writeFileSync htmlfilepath, html, 'utf-8'
 else
     isDev = true

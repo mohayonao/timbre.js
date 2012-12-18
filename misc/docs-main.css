@@ -7,13 +7,22 @@ body {
     padding: 10px;
 }
 
-#index h4 {
-    font-family: 'Arial'
-    text-shadow: 0 2px 2px #999;
+#index h1 {
+    font-family: 'Arial';
+    font-size: 20px;
+    text-shadow: 0 0 2px #999;
+}
+
+#index h2 {
+    font-size: 16px;
 }
 
 #index ul {
-    margin-top: 10px;
+    list-style-type: circle;
+}
+
+#index li {
+    line-height: 14px;
 }
 
 #doc h1 {
