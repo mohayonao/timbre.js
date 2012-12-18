@@ -475,6 +475,20 @@
                 get: function() {
                     return this._.add;
                 }
+            },
+            dac: {
+                set: function(value) {
+                    var _ = this._;
+                    if (value instanceof Dac && _.dac !== value) {
+                        if (_.dac) {
+                            _.dac.remove(this);
+                        }
+                        value.append(this);
+                    }
+                },
+                get: function() {
+                    return this._.dac;
+                }
             }
         });
         
@@ -589,7 +603,7 @@
             var dac = this._.dac;
             var emit = false;
             if (dac === null) {
-                dac = this._.dac = timbre("dac", this);
+                dac = this._.dac = new Dac(this);
                 emit = true;
             } else if (dac.inputs.indexOf(this) === -1) {
                 dac.append(this);
@@ -757,56 +771,6 @@
         return TimbreStereoObject;
     })();
     timbre.StereoObject = TimbreStereoObject;
-    
-    var TimbreDacObject = (function() {
-        function TimbreDacObject(_args) {
-            TimbreStereoObject.call(this, _args);
-            this.on("append", function(list) {
-                for (var i = list.length; i--; ) {
-                    list[i]._.dac = this;
-                }
-            });
-        }
-        __extend(TimbreDacObject, TimbreStereoObject);
-        
-        var $ = TimbreDacObject.prototype;
-        
-        Object.defineProperties($, {
-            dac: {
-                set: function() {
-                },
-                get: function() {
-                    return this;
-                }
-            }
-        });
-        
-        $.play = function() {
-            var self = this;
-            _sys.nextTick(function() {
-                if (_sys.dacs.indexOf(self) === -1) {
-                    _sys.dacs.push(self);
-                    _sys.emit("addObject");
-                    self.emit("play");
-                }
-            });
-            return this;
-        };
-        
-        $.pause = function() {
-            if (_sys.dacs.indexOf(this) !== -1) {
-                this._.remove_check = true;
-                _sys.nextTick(function() {
-                    _sys.emit("removeObject");
-                });
-                this.emit("pause");
-            }
-            return this;
-        };
-        
-        return TimbreDacObject;
-    })();
-    timbre.DacObject = TimbreDacObject;
     
     var TimbreTimerObject = (function() {
         function TimbreTimerObject(_args) {
@@ -1039,14 +1003,52 @@
         return ObjectWrapper;
     })();
     
-    // defalut T("dac")
-    (function() {
-        function Dac(_args) {
-            TimbreDacObject.call(this, _args);
+    var Dac = (function() {
+        function Dac(object) {
+            TimbreStereoObject.call(this, []);
+            this.inputs.push(object);
+            this.on("append", function(list) {
+                for (var i = list.length; i--; ) {
+                    list[i]._.dac = this;
+                }
+            });
         }
-        __extend(Dac , TimbreDacObject);
+        __extend(Dac , TimbreStereoObject);
         
         var $ = Dac.prototype;
+        
+        Object.defineProperties($, {
+            dac: {
+                set: function() {
+                },
+                get: function() {
+                    return this;
+                }
+            }
+        });
+        
+        $.play = function() {
+            var self = this;
+            _sys.nextTick(function() {
+                if (_sys.dacs.indexOf(self) === -1) {
+                    _sys.dacs.push(self);
+                    _sys.emit("addObject");
+                    self.emit("play");
+                }
+            });
+            return this;
+        };
+        
+        $.pause = function() {
+            if (_sys.dacs.indexOf(this) !== -1) {
+                this._.remove_check = true;
+                _sys.nextTick(function() {
+                    _sys.emit("removeObject");
+                });
+                this.emit("pause");
+            }
+            return this;
+        };
         
         $.seq = function(seq_id) {
             var _ = this._;
@@ -1090,7 +1092,7 @@
             return cell;
         };
         
-        __register("dac", Dac);
+        return Dac;
     })();
     
     var SoundSystem = (function() {
