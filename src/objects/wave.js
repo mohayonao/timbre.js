@@ -3,8 +3,7 @@
 
     function WaveListener(_args) {
         timbre.ListenerObject.call(this, _args);
-        
-        this._.buffer = new Float32Array(1024);
+
         this._.samples    = 0;
         this._.writeIndex = 0;
         
@@ -17,6 +16,9 @@
     timbre.fn.extend(WaveListener, timbre.ListenerObject);
     
     var oninit = function() {
+        if (!this._.buffer) {
+            this.size = 1024;
+        }
         if (!this._.interval) {
             this.interval = 1000;
         }
@@ -25,14 +27,36 @@
     var $ = WaveListener.prototype;
     
     Object.defineProperties($, {
+        size: {
+            set: function(value) {
+                var _ = this._;
+                if (!_.buffer) {
+                    if (typeof value === "number") {
+                        var n = (value < 64) ? 64 : (value > 2048) ? 2048 : value;
+                        _.buffer = new Float32Array(n);
+                        if (_.reservedinterval) {
+                            this.interval = _.reservedinterval;
+                            _.reservedinterval = null;
+                        }
+                    }
+                }
+            },
+            get: function() {
+                return this._.buffer.length;
+            }
+        },
         interval: {
             set: function(value) {
                 var _ = this._;
                 if (typeof value === "number" && value > 0) {
-                    _.interval    = value;
-                    _.samplesIncr = value * 0.001 * timbre.samplerate / 1024;
-                    if (_.samplesIncr < 1) {
-                        _.samplesIncr = 1;
+                    if (!_.buffer) {
+                        _.reservedinterval = value;
+                    } else {
+                        _.interval    = value;
+                        _.samplesIncr = value * 0.001 * timbre.samplerate / _.buffer.length;
+                        if (_.samplesIncr < 1) {
+                            _.samplesIncr = 1;
+                        }
                     }
                 }
             },
@@ -46,7 +70,7 @@
         var _ = this._;
         var buffer = _.buffer;
         
-        for (var i = 1024; i--; ) {
+        for (var i = buffer.length; i--; ) {
             buffer[i] = 0;
         }
         _.samples    = 0;
@@ -84,11 +108,12 @@
             var writeIndex  = _.writeIndex;
             var emit = false;
             var mul = _.mul, add = _.add;
+            var mask = buffer.length - 1;
             
             for (j = 0; j < jmax; ++j) {
                 if (samples <= 0) {
                     buffer[writeIndex++] = cell[j];
-                    writeIndex &= 1023;
+                    writeIndex &= mask;
                     emit = _.plotFlush = true;
                     samples += samplesIncr;
                 }
@@ -109,10 +134,12 @@
     $.plot = function(opts) {
         var _ = this._;
         if (_.plotFlush) {
-            var data   = new Float32Array(1024);
             var buffer = _.buffer;
-            for (var i = 0, j = _.writeIndex; i < 1024; i++) {
-                data[i] = buffer[++j & 1023];
+            var mask   = buffer.length - 1;
+            var data   = new Float32Array(buffer.length);
+            var j = _.writeIndex;
+            for (var i = 0, imax = buffer.length; i < imax; i++) {
+                data[i] = buffer[++j & mask];
             }
             _.plotData  = data;
             _.plotFlush = null;
