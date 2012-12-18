@@ -2,11 +2,9 @@
     "use strict";
 
     function Interval(_args) {
-        var pending =  (_args[0] && _args[0].pending);
         timbre.TimerObject.call(this, _args);
         
         this._.interval = 1000;
-        this._.delay    =    0;
         this._.count    =    0;
         this._.limit    = Infinity;
         this._.currentTime = 0;
@@ -15,15 +13,15 @@
         this._.delaySamples = 0;
         this._.countSamples = 0;
         
+        this.once("init", function() {
+            if (this._.delay === undefined) {
+                this.delay = this.interval;
+            }
+        });
+        
         this.on("start", function() {
             this._.currentTime  = timbre.currentTime;
         });
-        
-        if (!pending && this.inputs.length) {
-            this.once("init", function() {
-                this.start();
-            });
-        }
         
         this.on("ar", function() { this._.ar = false; });
     }
