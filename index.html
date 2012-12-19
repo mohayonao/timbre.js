@@ -30,20 +30,24 @@
       var audio  = T("audio", {isLooped:true});
       var filter = T("biquad", {type:"LPF", freq:mouseX, Q:mouseY}, audio);
       var wave   = T("wave", {size:512,interval:2500}).listen(filter);
-      var fft    = T("fft", {interval:80}).listen(filter);
+      var fft    = T("fft").listen(filter);
       
       audio.on("loadeddata", function() {
           filter.play();
       });
+
+      var filter_plot_opts = {target:viewer,x:  0,width:160,height:80};
+      var wave_plot_opts   = {target:viewer,x:160,width:160,height:80};
+      var fft_plot_opts    = {target:viewer,x:320,width:160,height:80};
       
       var lastTime    = 0;
       var animationId = 0;
       function animate(time) {
-          if (time - lastTime > 60) {
+          if (time - lastTime > 120) {
               lastTime = time;
-              filter.plot({target:viewer,x:  0,width:160,height:80});
-              wave.plot  ({target:viewer,x:160,width:160,height:80});
-              fft.plot   ({target:viewer,x:320,width:160,height:80});
+              filter.plot(filter_plot_opts);
+              wave.plot  (wave_plot_opts);
+              fft.plot   (fft_plot_opts);
           }
           animationId = requestAnimationFrame(animate);
 
