@@ -47,9 +47,7 @@
                 var imag = _.imagBuffer;
                 var _real = _.real.seq(seq_id);
                 var _imag = _.imag.seq(seq_id);
-                var i = cell.length, imax = real.length;
                 var j, jmax = cell.length;
-                var k = cell.length - 1;
                 var mul = _.mul, add = _.add;
                 
                 real.set(_real);

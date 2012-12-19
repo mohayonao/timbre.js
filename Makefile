@@ -1,7 +1,7 @@
 all: hint timbre minify html
 
 timbre:
-	coffee build/build-timbre.coffee
+	coffee build/timbre-builder.coffee
 
 minify: timbre
 	uglifyjs --unsafe -nc -o ./timbre.js ./timbre.dev.js
