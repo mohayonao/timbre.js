@@ -67,10 +67,6 @@
         }
     });
     
-    $.createInnerInstance = function(type) {
-        return new BiquadFilter(type);
-    };
-    
     $.seq = function(seq_id) {
         var _ = this._;
         var cell = this.cell;
@@ -127,7 +123,7 @@
     };
     
     $.plot = (function() {
-        var fft = timbre("fft").createInnerInstance(256);
+        var fft = new timbre.utils.FFT(256);
         return function(opts) {
             if (this._.plotFlush) {
                 var biquad = new BiquadFilter({type:this.type,samplerate:timbre.samplerate});
@@ -469,4 +465,6 @@
     timbre.fn.alias("BEF", "notch");
     timbre.fn.alias("BRF", "notch");
     timbre.fn.alias("APF", "allpass");
+    
+    timbre.utils.BiquadFilter = BiquadFilter;
 })(timbre);

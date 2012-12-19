@@ -83,7 +83,7 @@
                 }
             },
             DelayNode: {
-                value: timbre("efx.delay").createInnerInstance().constructor
+                value: timbre.utils.EfxDelay
             }
         });
         

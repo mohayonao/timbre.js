@@ -57,10 +57,6 @@
         }
     });
     
-    $.createInnerInstance = function(opts) {
-        return new EfxDelay(opts);
-    };
-    
     $.seq = function(seq_id) {
         var _ = this._;
         var cell = this.cell;
@@ -176,6 +172,8 @@
         
         return cell;
     };
+    
+    timbre.utils.EfxDelay = EfxDelay;
     
     timbre.fn.register("efx.delay", EfxDelayNode);
 })(timbre);

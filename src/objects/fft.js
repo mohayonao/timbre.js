@@ -103,10 +103,6 @@
         }
     });
     
-    $.createInnerInstance = function(n) {
-        return new FFT(n);
-    };
-    
     $.bang = function() {
         this._.samples    = 0;
         this._.writeIndex = 0;
@@ -440,4 +436,6 @@
     }());
     
     timbre.fn.register("fft", FFTListener);
+    
+    timbre.utils.FFT = FFT;
 })(timbre);
