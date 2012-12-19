@@ -1236,8 +1236,9 @@
             }
             return this;
         };
-
+        
         $.reset = function() {
+            this._.events = null;
             this.currentTime = 0;
             this.nextTicks = [];
             this.inlets    = [];
