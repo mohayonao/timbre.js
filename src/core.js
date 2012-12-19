@@ -1240,7 +1240,7 @@
         };
         
         $.reset = function() {
-            this._.events = null;
+            // this._.events = null; // TODO: !!!!
             this.currentTime = 0;
             this.nextTicks = [];
             this.inlets    = [];
