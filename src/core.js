@@ -964,7 +964,7 @@
             TimbreObject.call(this, []);
             __fixKR(this);
             
-            this.value = _args[0];
+            this.value  = _args[0];
             this._.args = _args.slice(1);
             this._.ar = false;
         }
@@ -997,8 +997,16 @@
             }
         });
         
-        $.bang = function() {
-            this._.value.apply(null, this._.args);
+        $.bang = function(arg) {
+            var _ = this._;
+            var x = _.value.call(this, arg);
+            if (typeof x === "number") {
+                var i, cell = this.cell;
+                x = x * _.mul + _.add;
+                for (i = cell.length; i--; ) {
+                    cell[i] = x;
+                }
+            }
             this.emit("bang");
             return this;
         };

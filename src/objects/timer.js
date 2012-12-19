@@ -1,11 +1,10 @@
 (function(timbre) {
     "use strict";
 
-    function Interval(_args) {
+    function Timer(_args) {
         timbre.TimerObject.call(this, _args);
         timbre.fn.fixKR(this);
         
-        this._.interval = 1000;
         this._.count    =    0;
         this._.limit    = Infinity;
         this._.currentTime = 0;
@@ -17,9 +16,12 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
-    timbre.fn.extend(Interval, timbre.TimerObject);
+    timbre.fn.extend(Timer, timbre.TimerObject);
     
     var oninit = function() {
+        if (!this._.interval) {
+            this.interval = 1000;
+        }
         if (this._.delay === undefined) {
             this.delay = this.interval;
         }
@@ -32,14 +34,12 @@
         value:true, writable:false
     });
     
-    var $ = Interval.prototype;
+    var $ = Timer.prototype;
     
     Object.defineProperties($, {
         interval: {
             set: function(value) {
-                if (typeof value === "number" && value >= 0) {
-                    this._.interval = value;
-                }
+                this._.interval = timbre(value);
             },
             get: function() {
                 return this._.interval;
@@ -103,14 +103,20 @@
             if (_.delaySamples > 0) {
                 _.delaySamples -= cell.length;
             }
+            _.interval.seq(seq_id);
             
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;
                 if (_.countSamples <= 0) {
-                    _.countSamples += (timbre.samplerate * _.interval * 0.001)|0;
+                    _.countSamples += (timbre.samplerate * _.interval.valueOf() * 0.001)|0;
                     var inputs = this.inputs;
+                    var count = _.count;
+                    var x = count * _.mul + _.add;
+                    for (var j = cell.length; j--; ) {
+                        cell[j] = x;
+                    }
                     for (var i = 0, imax = inputs.length; i < imax; ++i) {
-                        inputs[i].bang();
+                        inputs[i].bang(count);
                     }
                     ++_.count;
                     if (_.count >= _.limit) {
@@ -127,10 +133,12 @@
         return cell;
     };
     
-    timbre.fn.register("interval", Interval);
+    timbre.fn.register("timer", Timer);
+    
+    timbre.fn.alias("interval", "timer");
     
     timbre.fn.register("timeout", function(_args) {
-        return new Interval(_args).once("init", function() {
+        return new Timer(_args).once("init", function() {
             if (this.delay === 0) {
                 this.delay = this.interval;
             }
