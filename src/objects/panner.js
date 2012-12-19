@@ -2,7 +2,8 @@
     "use strict";
     
     function Panner(_args) {
-        timbre.StereoObject.call(this, _args);
+        timbre.Object.call(this, _args);
+        timbre.fn.stereo(this);
         
         this._.panL = 0.5;
         this._.panR = 0.5;
@@ -11,7 +12,7 @@
         
         timbre.fn.fixAR(this);
     }
-    timbre.fn.extend(Panner, timbre.StereoObject);
+    timbre.fn.extend(Panner, timbre.Object);
     
     var oninit = function() {
         if (!this._.value) {

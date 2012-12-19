@@ -2,9 +2,10 @@
     "use strict";
     
     function PicoBinder(_args) {
-        timbre.StereoObject.call(this, _args);
+        timbre.Object.call(this, _args);
+        timbre.fn.stereo(this);
     }
-    timbre.fn.extend(PicoBinder, timbre.StereoObject);
+    timbre.fn.extend(PicoBinder, timbre.Object);
     
     var $ = PicoBinder.prototype;
     

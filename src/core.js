@@ -252,6 +252,17 @@
         object._.kronly = true;
     };
     timbre.fn.fixKR = __fixKR;
+
+    var __stereo = function(object) {
+        object.L = new TimbreObject([]);
+        object.R = new TimbreObject([]);
+        object.cellL = object.L.cell;
+        object.cellR = object.R.cell;
+        Object.defineProperty(object, "isStereo", {
+            value:true, writable:false
+        });
+    };
+    timbre.fn.stereo = __stereo;
     
     // borrowed from node.js
     var EventEmitter = (function() {
@@ -774,25 +785,6 @@
     })();
     timbre.Object = TimbreObject;
     
-    var TimbreStereoObject = (function() {
-        function TimbreStereoObject(_args) {
-            TimbreObject.call(this, _args);
-            
-            this.L = new TimbreObject([]);
-            this.R = new TimbreObject([]);
-            this.cellL = this.L.cell;
-            this.cellR = this.R.cell;
-            
-            Object.defineProperty(this, "isStereo", {
-                value:true, writable:false
-            });
-        }
-        __extend(TimbreStereoObject, TimbreObject);
-        
-        return TimbreStereoObject;
-    })();
-    timbre.StereoObject = TimbreStereoObject;
-    
     var TimbreTimerObject = (function() {
         function TimbreTimerObject(_args) {
             TimbreObject.call(this, _args);
@@ -1031,11 +1023,12 @@
     
     var SystemInlet = (function() {
         function SystemInlet(object) {
-            TimbreStereoObject.call(this, []);
+            TimbreObject.call(this, []);
             this.inputs.push(object);
             this.on("append", onappend);
+            __stereo(this);
         }
-        __extend(SystemInlet , TimbreStereoObject);
+        __extend(SystemInlet , TimbreObject);
         
         var onappend = function(list) {
             for (var i = list.length; i--; ) {

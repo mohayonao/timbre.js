@@ -9,12 +9,15 @@
         }
         instance = this;
         
-        timbre.StereoObject.call(this, _args);
+        timbre.Object.call(this, _args);
+        timbre.fn.stereo(this);
+        
         this.X = this.L;
         this.Y = this.R;
+        
         timbre.fn.fixKR(this);
     }
-    timbre.fn.extend(MouseListener, timbre.StereoObject);
+    timbre.fn.extend(MouseListener, timbre.Object);
     
     
     var mouseX = 0;

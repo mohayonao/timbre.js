@@ -2,12 +2,13 @@
     "use strict";
     
     function ScissorNode(_args) {
-        timbre.StereoObject.call(this, _args);
+        timbre.Object.call(this, _args);
+        timbre.fn.stereo(this);
         this._.isLooped = false;
         this._.isEnded  = false;
         timbre.fn.fixAR(this);
     }
-    timbre.fn.extend(ScissorNode, timbre.StereoObject);
+    timbre.fn.extend(ScissorNode, timbre.Object);
     
     var $ = ScissorNode.prototype;
     
