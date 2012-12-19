@@ -4,112 +4,39 @@
     function FFTListener(_args) {
         timbre.Object.call(this, _args);
         timbre.fn.listener(this);
+        timbre.fn.stereo(this);
         timbre.fn.fixAR(this);
         
-        this._.status  = 0;
-        this._.samples = 0;
-        this._.samplesIncr = 0;
-        this._.writeIndex  = 0;
+        this.real = this.L;
+        this.imag = this.R;
+        
+        this._.fft = new FFT(timbre.cellsize * 2);
+        this._.fftCell  = new Float32Array(this._.fft.length);
+        this._.prevCell = new Float32Array(timbre.cellsize);
         
         this._.plotFlush = true;
         this._.plotRange = [0, 0.5];
         this._.plotBarStyle = true;
-        
-        this.once("init", oninit);
     }
     timbre.fn.extend(FFTListener, timbre.Object);
-    
-    var oninit = function() {
-        var _ = this._;
-        if (!_.fft) {
-            this.size = 512;
-        }
-        if (!_.interval) {
-            this.interval = 500;
-        }
-    };
     
     var $ = FFTListener.prototype;
     
     Object.defineProperties($, {
-        size: {
-            set: function(value) {
-                var _ = this._;
-                if (!_.fft) {
-                    if (typeof value === "number") {
-                        var n = (value < 256) ? 256 : (value > 2048) ? 2048 : value;
-                        _.fft    = new FFT(n);
-                        _.buffer = new Float32Array(_.fft.length);
-                        if (_.reservedwindow) {
-                            _.fft.setWindow(_.reservedwindow);
-                            _.reservedwindow = null;
-                        }
-                        if (_.reservedinterval) {
-                            this.interval = _.reservedinterval;
-                            _.reservedinterval = null;
-                        }
-                    }
-                }
-            },
-            get: function() {
-                return this._.buffer.length;
-            }
-        },
         window: {
             set: function(value) {
-                if (!this._.fft) {
-                    this._.reservedwindow = value;
-                } else {
-                   this._.fft.setWindow(value);
-                }
+                this._.fft.setWindow(value);
             },
             get: function() {
                 return this._.fft.windowName;
-            }
-        },
-        interval: {
-            set: function(value) {
-                var _ = this._;
-                if (typeof value === "number" && value > 0) {
-                    if (!_.buffer) {
-                        _.reservedinterval = value;
-                    } else {
-                        _.interval = value;
-                        _.samplesIncr = (value * 0.001 * timbre.samplerate);
-                        if (_.samplesIncr < _.buffer.length) {
-                            _.samplesIncr = _.buffer.length;
-                            _.interval = _.samplesIncr * 1000 / timbre.samplerate;
-                        }
-                    }
-                }
-            },
-            get: function() {
-                return this._.interval;
             }
         },
         spectrum: {
             get: function() {
                 return this._.fft.spectrum;
             }
-        },
-        real: {
-            get: function() {
-                return this._.fft.real;
-            }
-        },
-        imag: {
-            get: function() {
-                return this._.fft.imag;
-            }
         }
     });
-    
-    $.bang = function() {
-        this._.samples    = 0;
-        this._.writeIndex = 0;
-        this.emit("bang");
-        return this;
-    };
     
     $.seq = function(seq_id) {
         var _ = this._;
@@ -134,42 +61,24 @@
                 }
             }
             
-            var status  = _.status;
-            var samples = _.samples;
-            var samplesIncr = _.samplesIncr;
-            var writeIndex  = _.writeIndex;
-            var buffer = _.buffer;
-            var bufferLength = buffer.length;
+            _.fftCell.set(_.prevCell);
+            _.fftCell.set(cell, jmax);
+            _.fft.forward(_.fftCell);
+            _.prevCell.set(cell);
+            
+            var real = this.cellL;
+            var imag = this.cellR;
+            var _real = _.fft.real;
+            var _imag = _.fft.imag;
             var mul = _.mul, add = _.add;
-            var emit;
             
-            for (j = 0; j < jmax; ++j) {
-                if (samples <= 0) {
-                    if (status === 0) {
-                        status = 1;
-                        writeIndex  = 0;
-                        samples += samplesIncr;
-                    }
-                }
-                if (status === 1) {
-                    buffer[writeIndex++] = cell[j];
-                    if (bufferLength <= writeIndex) {
-                        _.fft.forward(buffer);
-                        emit = _.plotFlush = true;
-                        status = 0;
-                    }
-                }
+            for (j = jmax; j--; ) {
+                real[j] = _real[j];
+                imag[j] = _imag[j];
                 cell[j] = cell[j] * mul + add;
-                --samples;
             }
             
-            _.samples = samples;
-            _.status  = status;
-            _.writeIndex = writeIndex;
-            
-            if (emit) {
-                this.emit("fft");
-            }
+            this._.plotFlush = true;
         }
         return cell;
     };
