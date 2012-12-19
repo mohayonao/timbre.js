@@ -2,7 +2,8 @@
     "use strict";
 
     function FFTListener(_args) {
-        timbre.ListenerObject.call(this, _args);
+        timbre.Object.call(this, _args);
+        timbre.fn.listener(this);
         timbre.fn.fixAR(this);
         
         this._.status  = 0;
@@ -16,7 +17,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(FFTListener, timbre.ListenerObject);
+    timbre.fn.extend(FFTListener, timbre.Object);
     
     var oninit = function() {
         var _ = this._;

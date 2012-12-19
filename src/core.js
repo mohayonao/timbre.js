@@ -264,6 +264,89 @@
     };
     timbre.fn.stereo = __stereo;
     
+    var __timer = (function() {
+        var start = function() {
+            var self = this;
+            _sys.nextTick(function() {
+                if (self._.remove_check) {
+                    return self._.remove_check = null;
+                }
+                
+                if (_sys.timers.indexOf(self) === -1) {
+                    _sys.timers.push(self);
+                    _sys.emit("addObject");
+                    self.emit("start");
+                }
+            });
+            return this;
+        };
+        
+        var stop = function() {
+            var self = this;
+            this._.remove_check = true;
+            if (_sys.timers.indexOf(this) !== -1) {
+                _sys.nextTick(function() {
+                    _sys.emit("removeObject");
+                    self.emit("stop");
+                });
+            }
+            return this;
+        };
+        
+        return function(object) {
+            object.start = start;
+            object.stop  = stop;
+            return object;
+        };
+    })();
+    timbre.fn.timer = __timer;
+
+    var __listener = (function() {
+        var listen = function() {
+            var self = this;
+            if (arguments.length) {
+                this.append.apply(this, arguments);
+            }
+            if (this.inputs.length) {
+                _sys.nextTick(function() {
+                    if (self._.remove_check) {
+                        return self._.remove_check = null;
+                    }
+                    if (_sys.listeners.indexOf(self) === -1) {
+                        _sys.listeners.push(self);
+                        _sys.emit("addObject");
+                        self.emit("listen");
+                    }
+                });
+            }
+            return this;
+        };
+        
+        var unlisten = function() {
+            var self = this;
+            if (arguments.length) {
+                this.remove.apply(this, arguments);
+            }
+            if (!this.inputs.length) {
+                this._.remove_check = true;
+                if (_sys.listeners.indexOf(this) !== -1) {
+                    _sys.nextTick(function() {
+                        _sys.emit("removeObject");
+                        self.emit("unlisten");
+                    });
+                }
+            }
+            return this;
+        };
+        
+        return function(object) {
+            object.listen   = listen;
+            object.unlisten = unlisten;
+            return object;
+        };
+    })();
+    timbre.fn.listener = __listener;
+    
     // borrowed from node.js
     var EventEmitter = (function() {
         function EventEmitter() {
@@ -533,7 +616,7 @@
         
         $.append = function() {
             if (arguments.length > 0) {
-                var list = slice.call(arguments);
+                var list = slice.call(arguments).map(timbre);
                 this.inputs = this.inputs.concat(list);
                 this.emit("append", list);
             }
@@ -784,92 +867,6 @@
         return TimbreObject;
     })();
     timbre.Object = TimbreObject;
-    
-    var TimbreTimerObject = (function() {
-        function TimbreTimerObject(_args) {
-            TimbreObject.call(this, _args);
-        }
-        __extend(TimbreTimerObject, TimbreObject);
-        
-        var $ = TimbreTimerObject.prototype;
-        
-        $.start = function() {
-            var self = this;
-            _sys.nextTick(function() {
-                if (self._.remove_check) {
-                    return self._.remove_check = null;
-                }
-                
-                if (_sys.timers.indexOf(self) === -1) {
-                    _sys.timers.push(self);
-                    _sys.emit("addObject");
-                    self.emit("start");
-                }
-            });
-            return this;
-        };
-        
-        $.stop = function() {
-            this._.remove_check = true;
-            if (_sys.timers.indexOf(this) !== -1) {
-                _sys.nextTick(function() {
-                    _sys.emit("removeObject");
-                });
-                this.emit("stop");
-            }
-            return this;
-        };
-        
-        $.play = $.pause = function() {
-            return this;
-        };
-        
-        return TimbreTimerObject;
-    })();
-    timbre.TimerObject = TimbreTimerObject;
-    
-    var TimbreListenerObject = (function() {
-        function TimbreListenerObject(_args) {
-            TimbreObject.call(this, _args);
-        }
-        __extend(TimbreListenerObject, TimbreObject);
-        
-        var $ = TimbreListenerObject.prototype;
-        
-        $.listen = function(target) {
-            var self = this;
-            if (target === null) {
-                this._.remove_check = true;
-                if (_sys.listeners.indexOf(this) !== -1) {
-                    _sys.nextTick(function() {
-                        _sys.emit("removeObject");
-                    });
-                }
-            } else if (target instanceof TimbreObject) {
-                _sys.nextTick(function() {
-                    if (self._.remove_check) {
-                        return self._.remove_check = null;
-                    }
-                    if (_sys.listeners.indexOf(self) === -1) {
-                        self._.inputs = self.inputs;
-                        self.inputs = [target];
-                        _sys.listeners.push(self);
-                        _sys.emit("addObject");
-                    }
-                });
-            }
-            this.emit("listen", target);
-            
-            return this;
-        };
-        
-        $.play = $.pause = function() {
-            return this;
-        };
-        
-        return TimbreListenerObject;
-    })();
-    timbre.ListenerObject = TimbreListenerObject;
     
     var NumberWrapper = (function() {
         function NumberWrapper(_args) {

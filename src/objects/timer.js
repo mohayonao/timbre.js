@@ -2,7 +2,8 @@
     "use strict";
 
     function Timer(_args) {
-        timbre.TimerObject.call(this, _args);
+        timbre.Object.call(this, _args);
+        timbre.fn.timer(this);
         timbre.fn.fixKR(this);
         
         this._.count    =    0;
@@ -16,7 +17,7 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
-    timbre.fn.extend(Timer, timbre.TimerObject);
+    timbre.fn.extend(Timer, timbre.Object);
     
     var oninit = function() {
         if (!this._.interval) {

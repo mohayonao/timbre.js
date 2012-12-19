@@ -2,7 +2,8 @@
     "use strict";
 
     function WaveListener(_args) {
-        timbre.ListenerObject.call(this, _args);
+        timbre.Object.call(this, _args);
+        timbre.fn.listener(this);
         timbre.fn.fixAR(this);
         
         this._.samples    = 0;
@@ -12,7 +13,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(WaveListener, timbre.ListenerObject);
+    timbre.fn.extend(WaveListener, timbre.Object);
     
     var oninit = function() {
         if (!this._.buffer) {
