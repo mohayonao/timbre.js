@@ -4,13 +4,12 @@
     function Panner(_args) {
         timbre.Object.call(this, _args);
         timbre.fn.stereo(this);
+        timbre.fn.fixAR(this);
         
         this._.panL = 0.5;
         this._.panR = 0.5;
         
         this.once("init", oninit);
-        
-        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(Panner, timbre.Object);
     

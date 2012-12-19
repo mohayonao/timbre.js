@@ -14,6 +14,7 @@
     
     function Param(_args) {
         timbre.Object.call(this, _args);
+        timbre.fn.fixKR(this);
         
         this._.value = 0;
         this._.minvalue = -Infinity;
@@ -26,7 +27,6 @@
         
         this.on("setAdd", changeTheValue);
         this.on("setMul", changeTheValue);
-        timbre.fn.fixKR(this);
     }
     timbre.fn.extend(Param, timbre.Object);
     

@@ -3,6 +3,7 @@
 
     function Interval(_args) {
         timbre.TimerObject.call(this, _args);
+        timbre.fn.fixKR(this);
         
         this._.interval = 1000;
         this._.count    =    0;
@@ -15,8 +16,6 @@
         
         this.once("init", oninit);
         this.on("start", onstart);
-        
-        timbre.fn.fixKR(this);
     }
     timbre.fn.extend(Interval, timbre.TimerObject);
     

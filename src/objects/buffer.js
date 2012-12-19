@@ -3,6 +3,7 @@
     
     function SoundBuffer(_args) {
         timbre.Object.call(this, _args);
+        timbre.fn.fixAR(this);
         
         this._.isLooped   = false;
         this._.isReversed = false;
@@ -12,8 +13,6 @@
         this._.samplerate  = 0;
         this._.phase = 0;
         this._.phaseIncr = 0;
-        
-        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(SoundBuffer, timbre.Object);
     

@@ -874,12 +874,13 @@
     var NumberWrapper = (function() {
         function NumberWrapper(_args) {
             TimbreObject.call(this, []);
+            __fixKR(this);
+            
             this.value = _args[0];
             this._.ar = false;
             
             this.on("setAdd", changeTheValue);
             this.on("setMul", changeTheValue);
-            __fixKR(this);
         }
         __extend(NumberWrapper, TimbreObject);
         
@@ -917,12 +918,13 @@
     var BooleanWrapper = (function() {
         function BooleanWrapper(_args) {
             TimbreObject.call(this, []);
+            __fixKR(this);
+            
             this.value = _args[0];
             this._.ar = false;
             
             this.on("setAdd", changeTheValue);
             this.on("setMul", changeTheValue);
-            __fixKR(this);
         }
         __extend(BooleanWrapper, TimbreObject);
         
@@ -960,10 +962,11 @@
     var FunctionWrapper = (function() {
         function FunctionWrapper(_args) {
             TimbreObject.call(this, []);
+            __fixKR(this);
+            
             this.value = _args[0];
             this._.args = _args.slice(1);
             this._.ar = false;
-            __fixKR(this);
         }
         __extend(FunctionWrapper, TimbreObject);
         

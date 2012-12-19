@@ -3,12 +3,11 @@
     
     function EfxDelayNode(_args) {
         timbre.Object.call(this, _args);
+        timbre.fn.fixAR(this);
         
         this._.delay = new EfxDelay();
         
         this.once("init", oninit);
-        
-        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(EfxDelayNode, timbre.Object);
     

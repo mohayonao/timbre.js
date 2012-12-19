@@ -3,6 +3,7 @@
     
     function Biquad(_args) {
         timbre.Object.call(this, _args);
+        timbre.fn.fixAR(this);
         
         this._.biquad = new BiquadFilter({samplerate:timbre.samplerate});
         
@@ -10,8 +11,6 @@
         this._.plotFlush = true;
         
         this.once("init", oninit);
-        
-        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(Biquad, timbre.Object);
     

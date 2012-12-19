@@ -3,15 +3,14 @@
 
     function WaveListener(_args) {
         timbre.ListenerObject.call(this, _args);
-
+        timbre.fn.fixAR(this);
+        
         this._.samples    = 0;
         this._.writeIndex = 0;
         
         this._.plotFlush = true;
         
         this.once("init", oninit);
-        
-        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(WaveListener, timbre.ListenerObject);
     

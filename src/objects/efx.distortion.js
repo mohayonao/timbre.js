@@ -3,10 +3,9 @@
     
     function EfxDistortion(_args) {
         timbre.Object.call(this, _args);
+        timbre.fn.fixAR(this);
         
         this.once("init", oninit);
-        
-        timbre.fn.fixAR(this);
     }
     timbre.fn.extend(EfxDistortion, timbre.Object);
     

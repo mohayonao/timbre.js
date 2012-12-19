@@ -3,6 +3,7 @@
     
     function Map(_args) {
         timbre.Object.call(this, _args);
+        timbre.fn.fixKR(this);
         
         this._.inMin  = 0;
         this._.inMax  = 1;
@@ -10,8 +11,6 @@
         this._.outMax = 1;
         
         this.once("init", oninit);
-        
-        timbre.fn.fixKR(this);
     }
     timbre.fn.extend(Map, timbre.Object);
     
