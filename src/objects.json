@@ -1,6 +1,7 @@
 {
     "dependencies": {
         "audio" : ["buffer"],
-        "biquad": ["fft"]
+        "biquad": ["fft"],
+        "_ifft" : ["fft"]
     }
 }
