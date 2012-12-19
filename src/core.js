@@ -75,6 +75,8 @@
             });
         }
         
+        instance._.originkey = key;
+        
         instance.emit("init");
         
         return instance;

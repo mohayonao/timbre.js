@@ -15,6 +15,11 @@
     var $ = AudioFile.prototype;
     
     Object.defineProperties($, {
+        buffer: {
+            get: function() {
+                return this._.buffer;
+            }
+        },
         src: {
             set: function(value) {
                 var _ = this._;
@@ -43,37 +48,6 @@
             }
         }
     });
-    
-    $.slice = function(begin, end) {
-        var _ = this._;
-        var instance = timbre("audio");
-        
-        var isReversed = _.isReversed;
-        if (typeof begin === "number" ){
-            begin = (begin * 0.001 * _.samplerate)|0;
-        } else {
-            begin = 0;
-        }
-        if (typeof end === "number") {
-            end   = (end   * 0.001 * _.samplerate)|0;
-        } else {
-            end = _.buffer.length;
-        }
-        if (begin > end) {
-            var tmp = begin;
-            begin = end;
-            end   = tmp;
-            isReversed = !isReversed;
-        }
-        
-        instance._.samplerate = _.samplerate;
-        instance._.buffer = _.buffer.subarray(begin, end);
-        instance._.duration = (end - begin / _.samplerate) * 1000;
-        instance.isLooped   = this.isLooped;
-        instance.isReversed = this.isReversed;
-        
-        return instance;
-    };
     
     var deinterleave = function(list) {
         var result = new list.constructor(list.length>>1);

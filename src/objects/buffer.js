@@ -10,28 +10,40 @@
         this._.duration    = 0;
         this._.currentTime = 0;
         this._.currentTimeIncr = this.cell.length * 1000 / timbre.samplerate;
-        this._.samplerate  = 0;
+        this._.samplerate  = 44100;
         this._.phase = 0;
         this._.phaseIncr = 0;
     }
     timbre.fn.extend(SoundBuffer, timbre.Object);
     
     var $ = SoundBuffer.prototype;
+
+    var setBuffer = function(value) {
+        var _ = this._;
+        if (typeof value === "object") {
+            var buffer, samplerate;
+            if (value instanceof Float32Array) {
+                buffer = value;
+            } else if (value.buffer instanceof Float32Array) {
+                buffer = value.buffer;
+                if (typeof value.samplerate === "number") {
+                    samplerate = value.samplerate;
+                }
+            }
+            if (buffer) {
+                if (samplerate > 0) {
+                    _.samplerate = value.samplerate;
+                }
+                _.buffer = buffer;
+                _.phaseIncr = _.samplerate / timbre.samplerate;
+                _.duration  = _.buffer.length * 1000 / _.samplerate;
+            }
+        }
+    };
     
     Object.defineProperties($, {
         buffer: {
-            set: function(value) {
-                var _ = this._;
-                if (!_.buffer && typeof value === "object") {
-                    if (typeof value.samplerate === "number" &&
-                        value.buffer instanceof Float32Array) {
-                        _.samplerate = value.samplerate;
-                        _.buffer    = new Float32Array(value.buffer);
-                        _.phaseIncr = _.samplerate / timbre.samplerate;
-                        _.duration  = _.buffer.length * 1000 / _.samplerate;
-                    }
-                }
-            },
+            set: setBuffer,
             get: function() {
                 return this._.buffer;
             }
@@ -95,6 +107,38 @@
             }
         }
     });
+    
+    $.slice = function(begin, end) {
+        var _ = this._;
+        var instance = timbre(_.originkey);
+        
+        var isReversed = _.isReversed;
+        if (typeof begin === "number" ){
+            begin = (begin * 0.001 * _.samplerate)|0;
+        } else {
+            begin = 0;
+        }
+        if (typeof end === "number") {
+            end   = (end   * 0.001 * _.samplerate)|0;
+        } else {
+            end = _.buffer.length;
+        }
+        if (begin > end) {
+            var tmp = begin;
+            begin = end;
+            end   = tmp;
+            isReversed = !isReversed;
+        }
+        
+        instance._.samplerate = _.samplerate;
+        if (_.buffer) {
+            setBuffer.call(instance, _.buffer.subarray(begin, end));
+        }
+        instance.isLooped   = this.isLooped;
+        instance.isReversed = this.isReversed;
+        
+        return instance;
+    };
     
     $.bang = function() {
         this._.phase   = 0;
