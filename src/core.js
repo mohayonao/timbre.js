@@ -242,16 +242,14 @@
     timbre.fn.getClass = __getClass;
     
     var __fixAR = function(object) {
-        Object.defineProperty(object._ , "ar", {
-            value:true, writable:false
-        });
+        object._.ar = true;
+        object._.aronly = true;
     };
     timbre.fn.fixAR = __fixAR;
     
     var __fixKR = function(object) {
-        Object.defineProperty(object._ , "ar", {
-            value:false, writable:false
-        });
+        object._.ar = false;
+        object._.kronly = true;
     };
     timbre.fn.fixKR = __fixKR;
     
@@ -650,7 +648,7 @@
         };
         
         $.ar = function() {
-            if (Object.getOwnPropertyDescriptor(this._, "ar").writable) {
+            if (!this._.kronly) {
                 this._.ar = true;
                 this.emit("ar", true);
             }
@@ -658,7 +656,7 @@
         };
         
         $.kr = function() {
-            if (Object.getOwnPropertyDescriptor(this._, "ar").writable) {
+            if (!this._.aronly) {
                 this._.ar = false;
                 this.emit("ar", false);
             }
