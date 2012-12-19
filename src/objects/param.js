@@ -39,7 +39,7 @@
         }
     };
     Object.defineProperty(changeTheValue, "unremovable", {
-        value:true, configurable:false
+        value:true, writable:false
     });
     
     var $ = Param.prototype;

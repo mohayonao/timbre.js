@@ -71,7 +71,7 @@
         
         if (instance.isStereo === undefined) {
             Object.defineProperty(instance, "isStereo", {
-                value:false, configurable:false
+                value:false, writable:false
             });
         }
         
@@ -784,7 +784,7 @@
             this.cellR = this.R.cell;
             
             Object.defineProperty(this, "isStereo", {
-                value:true, configurate:false
+                value:true, writable:false
             });
         }
         __extend(TimbreStereoObject, TimbreObject);
@@ -900,7 +900,7 @@
             }
         };
         Object.defineProperty(changeTheValue, "unremovable", {
-            value:true, configurable:false
+            value:true, writable:false
         });
         
         var $ = NumberWrapper.prototype;
@@ -943,7 +943,7 @@
             }
         };
         Object.defineProperty(changeTheValue, "unremovable", {
-            value:true, configurable:false
+            value:true, writable:false
         });
         
         var $ = BooleanWrapper.prototype;
@@ -1043,7 +1043,7 @@
             }
         };
         Object.defineProperty(onappend, "unremovable", {
-            value:true, configurable:false
+            value:true, writable:false
         });
         
         var $ = SystemInlet.prototype;

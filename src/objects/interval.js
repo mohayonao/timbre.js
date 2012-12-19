@@ -30,7 +30,7 @@
         this._.currentTime  = timbre.currentTime;
     };
     Object.defineProperty(onstart, "unremovable", {
-        value:true, configurable:false
+        value:true, writable:false
     });
     
     var $ = Interval.prototype;

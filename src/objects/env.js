@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     // TODO: loopNode, releaseNode
@@ -243,4 +243,4 @@
     };
     
     timbre.fn.register("env", Envelope);
-})();
+})(timbre);

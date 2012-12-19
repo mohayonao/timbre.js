@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     function EfxDelayNode(_args) {
@@ -179,4 +179,4 @@
     };
     
     timbre.fn.register("efx.delay", EfxDelayNode);
-})();
+})(timbre);

@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     function Panner(_args) {
@@ -83,4 +83,4 @@
     };
     
     timbre.fn.register("pan", Panner);
-})();
+})(timbre);

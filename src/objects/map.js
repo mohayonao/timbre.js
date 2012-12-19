@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
     
     function Map(_args) {
@@ -162,4 +162,4 @@
     };
     
     timbre.fn.register("map", Map);
-})();
+})(timbre);
