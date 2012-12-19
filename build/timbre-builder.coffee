@@ -41,4 +41,5 @@ if not module.parent
     fs.writeFileSync "#{DST_DIR}/timbre.dev.js", source, 'utf-8'
 else
     isDev = true
-    module.exports = build_timbre
+    module.exports =
+        build: build_timbre

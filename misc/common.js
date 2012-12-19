@@ -17,7 +17,7 @@ $(function() {
         }
     }
     
-    $(".timbre").on("click", function(e) {
+    $(".click-to-play").on("click", function(e) {
         playCode($(this).text());
     });
     
@@ -25,15 +25,17 @@ $(function() {
         var textarea = $("<textarea>").val($(e).attr("source")).appendTo(e);
         
         var editor = CodeMirror.fromTextArea(textarea.get(0), {
-            theme:"blackboard", lineNumbers:true
+            lineNumbers:true
         });
         $("<button>").on("click", function() {
             timbre.pause();
-        }).text("Pause").addClass("btn pull-right").appendTo(e);
+        }).addClass("btn pull-right").appendTo(e)
+            .append($("<i>").addClass("icon-pause")).append(" Pause");
+        
         $("<button>").on("click", function() {
-            var code = editor.getValue().trim();
-            playCode(code);
-        }).text("Play").addClass("btn pull-right").appendTo(e);
+            playCode(editor.getValue().trim());
+        }).addClass("btn pull-right").appendTo(e)
+            .append($("<i>").addClass("icon-play")).append(" Play");
     });
     
     prettyPrint();    

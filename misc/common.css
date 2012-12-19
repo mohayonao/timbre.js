@@ -3,7 +3,8 @@ body {
 }
 
 #index {
-    border: solid 1px #ccc;
+    border: solid 1px #E1E1E8;
+    border-radius: 4px;
     padding: 10px;
 }
 
@@ -30,13 +31,17 @@ body {
     font-family: 'Arial';
 }
 
+.codemirror {
+    border: solid 1px #E1E1E8;
+}
+
 .codemirror button {
     margin-top: 10px;
     margin-left: 5px;
     width: 120px;
 }
 
-.timbre {
+.click-to-play {
     background-image: url("../../misc/img/click-to-play.png");
     background-repeat: no-repeat;
     background-position: top right;
