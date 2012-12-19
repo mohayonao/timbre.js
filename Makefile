@@ -1,4 +1,4 @@
-all: hint timbre minify docs
+all: hint timbre minify html
 
 timbre:
 	coffee build/build-timbre.coffee
