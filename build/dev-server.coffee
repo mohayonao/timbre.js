@@ -2,14 +2,22 @@ fs       = require 'fs'
 path     = require 'path'
 express  = require 'express'
 build_timbre = require './build-timbre'
-make_doc     = require './make-docs'
+build_html   = require './build-html'
 
 app = express()
+
+app.get '/examples/:name\.html', (req, res)->
+    name = req.params.name
+    res.send build_html.example name
 
 app.get '/docs/:lang/:name\.html', (req, res)->
     lang = req.params.lang
     name = req.params.name
-    res.send make_doc lang, name
+    res.send build_html.doc lang, name
+
+app.get '/misc/doc-index-:lang\.html', (req, res)->
+    lang = req.params.lang
+    res.send build_html.doc_index lang
 
 app.get /^\/timbre(\.dev)?.js$/, (req, res)->
     res.type '.js'

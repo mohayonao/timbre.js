@@ -5,23 +5,19 @@ html(lang=lang)
     title #{title}
     link(rel="stylesheet", href="../../misc/bootstrap.min.css", type="text/css")
     link(rel="stylesheet", href="../../misc/prettify.css" , type="text/css")
-    link(rel="stylesheet", href="../../misc/docs-main.css", type="text/css")
+    link(rel="stylesheet", href="../../misc/codemirror.css", type="text/css")
+    link(rel="stylesheet", href="../../misc/common.css", type="text/css")
     link(rel="shortcut icon", href="/favicon.ico")
     script(src="../../timbre.dev.js")    
   body
     .container
       .row
         #index.span2
-          h1 timbre.js
-          for items in categories
-            if indexes[items.key].length
-              h2 #{items.caption}
-              ul
-                each name in indexes[items.key]
-                  li
-                    a(href=name + ".html") #{name}
-        #doc.span9
-          !{doc}
+        #main.span9 !{main}
     script(src="../../misc/jquery.min.js")
     script(src="../../misc/prettify.js")
-    script(src="../../misc/docs-main.js")
+    script(src="../../misc/codemirror.js")
+    script(src="../../misc/javascript.js")
+    script(src="../../misc/common.js")
+    if script
+      script !{script}

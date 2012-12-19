@@ -1,0 +1,8 @@
+h1 timbre.js
+  for items in categories
+    if indexes[items.key].length
+      h2 #{items.caption}
+      ul
+        each name in indexes[items.key]
+          li
+            a(href=name + ".html") #{name}

@@ -6,8 +6,8 @@ timbre:
 minify: timbre
 	uglifyjs --unsafe -nc -o ./timbre.js ./timbre.dev.js
 
-docs: clear-docs
-	coffee build/make-docs.coffee
+html: clear-html
+	coffee build/build-html.coffee
 
 hint:
 	jshint src/core.js src/objects/*.js src/extras/*.js
@@ -16,5 +16,5 @@ clear:
 	rm -f timbre.dev.js
 	rm -f timbre.js
 
-clear-docs:
+clear-html:
 	rm -rf docs/*

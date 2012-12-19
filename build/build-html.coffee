@@ -36,6 +36,8 @@ lang_process = (doc)->
                 "<pre class=\"timbre lang-js prettyprint linenums\">#{m[2]}</pre>"
             when 'table'
                 table m[2]
+            when 'codemirror'
+                """<div class=\"codemirror\" source=\"#{m[2]}\"></div>"""
         if rep
             head = doc.substr 0, m.index
             tail = doc.substr m.index + m[0].length
@@ -80,6 +82,7 @@ table = (src)->
     items.push "</table>"
     items.join ''
 
+
 sort_indexes = (docfiles)->
     map = tut:[], obj:[], ext:[], uti:[], dev:[]
     for name in Object.keys(docfiles)
@@ -91,31 +94,37 @@ sort_indexes = (docfiles)->
         map[name] = map[name].map (x)-> x.name
     map
 
-make_doc = (lang, name, docfiles=null, indexes=null)->
-    template = jade.compile fs.readFileSync("#{__dirname}/make-docs.jade")
+make_doc = (lang, name)->
+    template = jade.compile fs.readFileSync("#{__dirname}/common.jade")
 
-    unless docfiles
-        docfiles = get_docfiles lang
-    unless indexes
-        indexes  = sort_indexes docfiles
+    docfiles = get_docfiles lang
 
     doc = docfiles[name]
     if doc
-        title  = doc.name
         params =
-            doc: lang_process marked fs.readFileSync(doc.path, 'utf-8')
-            lang:lang, title:doc.name, index:[], indexes:indexes
-            categories: [
-                { key:'tut', caption:'Tutorial'   }
-                { key:'obj', caption:'Objects'    }
-                { key:'ext', caption:'Extentions' }
-                { key:'uti', caption:'Utilities'  }
-                { key:'dev', caption:'Developers' }
-            ]
+            lang:lang, title:doc.name
+            main:lang_process marked fs.readFileSync(doc.path, 'utf-8')
+            script: '''$(function() {
+    $("#index").load("../../misc/doc-index-" + navigator.language + ".html");
+});'''
         template params
     else 'NOT FOUND'
 
-if not module.parent
+make_doc_index = (lang)->
+    template = jade.compile fs.readFileSync("#{__dirname}/doc-index.jade")
+
+    docfiles = get_docfiles lang
+    indexes  = sort_indexes docfiles
+
+    template indexes:indexes, categories: [
+        { key:'tut', caption:'Tutorial'   }
+        { key:'obj', caption:'Objects'    }
+        { key:'ext', caption:'Extentions' }
+        { key:'uti', caption:'Utilities'  }
+        { key:'dev', caption:'Developers' }
+    ]
+
+make_static_documents = ->
     dstpath = path.normalize "#{__dirname}/../docs/"
     if fs.existsSync dstpath
         for lang in ['en', 'ja']
@@ -124,9 +133,34 @@ if not module.parent
             indexes  = sort_indexes docfiles
             for name in Object.keys(docfiles)
                 doc = docfiles[name]
-                html = make_doc doc.lang, doc.name, docfiles
+                html = make_doc doc.lang, doc.name
                 htmlfilepath = "#{dstpath}/#{doc.lang}/#{doc.name}.html"
                 fs.writeFileSync htmlfilepath, html, 'utf-8'
+        dstpath = path.normalize "#{__dirname}/../misc/"
+        for lang in ['en', 'ja']
+            html = make_doc_index lang
+            htmlfilepath = "#{dstpath}/doc-index-#{lang}.html"
+            fs.writeFileSync htmlfilepath, html, 'utf-8'
+
+make_example = (name)->
+    template = jade.compile fs.readFileSync("#{__dirname}/common.jade")
+
+    filepath = "#{__dirname}/../examples.md/01.md"
+    params =
+        lang:'en', title:'example(test)'
+        main:lang_process marked fs.readFileSync(filepath, 'utf-8')
+        script: null
+    template params
+
+make_static_examples = ->
+    null
+
+if not module.parent
+    make_static_documents()
+    make_static_examples()
 else
     isDev = true
-    module.exports = make_doc
+    module.exports =
+        doc: make_doc
+        doc_index: make_doc_index
+        example: make_example

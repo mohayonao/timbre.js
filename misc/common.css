@@ -10,7 +10,7 @@ body {
 #index h1 {
     font-family: 'Arial';
     font-size: 20px;
-    text-shadow: 0 0 2px #999;
+    text-shadow: 0 0 1px #ccc;
 }
 
 #index h2 {
@@ -25,24 +25,15 @@ body {
     line-height: 14px;
 }
 
-#doc h1 {
+#main h1 {
     margin-bottom: 10px;
     font-family: 'Arial';
 }
 
-#doc h2 {
-    border: solid 0 #333;
-    border-width: 0 0 1px 5px;
-    margin: 40px 0 10px; padding-left: 10px;
-    font-size: 22px; line-height: 24px;
-}
-
-#doc h3 {
-    margin: 15px 0 5px;
-}
-
-#doc h3:before {
-    content: "- "
+.codemirror button {
+    margin-top: 10px;
+    margin-left: 5px;
+    width: 120px;
 }
 
 .timbre {
