@@ -12,14 +12,14 @@ class DocFile
         if (m = re.exec @path)
             @lang     =   m[1] or 'en'
             @dev      = !!m[2]
-            @category =   m[3] or 'def'
+            @category =   m[3] or '*'
             @sort     =  +m[4] or 50
             @name     =   m[5]
         else @error = true
 
 
 class HTMLBuilder
-    constructor: (dirpath)->
+    constructor: (dirpath, urlpath)->
         @files = do =>
             unless fs.existsSync dirpath then return {}
 
@@ -27,9 +27,9 @@ class HTMLBuilder
             for filename in fs.readdirSync dirpath
                 doc = new DocFile("#{dirpath}/#{filename}")
                 if doc.error or (doc.dev and not isDev) then continue
+                doc.url = "/timbre.js/#{urlpath}/#{doc.name}.html"
                 map[doc.name] = doc
             map
-        @index_url = null
 
     build: (name)->
         doc = @files[name]
@@ -37,29 +37,20 @@ class HTMLBuilder
 
         html = marked fs.readFileSync(doc.path, 'utf-8')
         html = lang_process html
-        if @index_url
-            script = "$(function() { $(\"#index\").load(\"../../misc/#{@index_url}.html\"); });"
         jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
             lang: doc.lang, title: doc.name
-            main: html, script: script
+            main: html
 
     get  : (name)-> @files[name]
     names: -> Object.keys(@files)
 
-    build_indexes: (categories=[])->
-        indexes = {}
-        for kv in categories then indexes[kv.key] = []
-        for name in Object.keys(@files)
-            doc = @files[name]
-            indexes[doc.category]?.push doc
-        for name in Object.keys(indexes)
-            indexes[name].sort (a, b)->
-                if a.sort is b.sort
-                    if a.name < b.name then -1 else +1
-                else a.sort - b.sort
-            indexes[name] = indexes[name].map (x)-> x.name
-        jade.compile(fs.readFileSync("#{__dirname}/index.jade"))
-            indexes:indexes, categories: categories
+    get_indexes: (indexes, def='def')->
+        for name in @names()
+            doc = @get(name)
+            if doc.category is '*' then doc.category = def
+            unless indexes[doc.category]
+                indexes[doc.category] = []
+            indexes[doc.category].push doc
 
     lang_process = (doc)->
         re = /<pre><code class="lang-(.+)">([\w\W]+?)<\/code><\/pre>/g
@@ -110,18 +101,13 @@ class HTMLBuilder
 
 class DocFileBuilder extends HTMLBuilder
     constructor: (@lang)->
-        super path.normalize "#{__dirname}/../docs.md/#{@lang}"
-        @index_url = 'index-doc-" + navigator.language + "'
+        super path.normalize("#{__dirname}/../docs.md/#{@lang}"), "docs/#{lang}"
 
     build: (name)->
         super name
 
-    build_indexes: ->
-        super [ { key:'tut', caption:'Tutorial'   }
-                { key:'def', caption:'Objects'    }
-                { key:'ext', caption:'Extentions' }
-                { key:'uti', caption:'Utilities'  }
-                { key:'dev', caption:'Developers' } ]
+    get_indexes: (indexes)->
+        super indexes, 'ref'
 
     @build_statics = (langlist=['en', 'ja'])->
         dstpath = path.normalize "#{__dirname}/../docs/"
@@ -136,21 +122,17 @@ class DocFileBuilder extends HTMLBuilder
                 html = builder.build name
                 htmlfilepath = "#{dstpath}/#{lang}/#{name}.html"
                 fs.writeFileSync htmlfilepath, html, 'utf-8'
-            html = builder.build_indexes()
-            htmlfilepath = "#{miscpath}/index-doc-#{lang}.html"
-            fs.writeFileSync htmlfilepath, html, 'utf-8'
 
 
 class ExampleFileBuilder extends HTMLBuilder
     constructor: ->
-        super path.normalize "#{__dirname}/../examples.md"
-        @index_url = 'index-example'
+        super path.normalize("#{__dirname}/../examples.md"), "examples"
 
     build: (name)->
         super name
 
-    build_indexes: ->
-        super [ { key:'def', caption:'Examples' } ]
+    get_indexes: (indexes)->
+        super indexes, 'exa'
 
     @build_statics = ->
         dstpath = path.normalize "#{__dirname}/../examples/"
@@ -163,16 +145,41 @@ class ExampleFileBuilder extends HTMLBuilder
             html = builder.build name
             htmlfilepath = "#{dstpath}/#{name}.html"
             fs.writeFileSync htmlfilepath, html, 'utf-8'
-        html = builder.build_indexes()
-        htmlfilepath = "#{miscpath}/index-example.html"
-        fs.writeFileSync htmlfilepath, html, 'utf-8'
 
+
+class IndexFileBuilder extends HTMLBuilder
+    constructor: (@lang)->
+        @doc      = new DocFileBuilder(@lang)
+        @examples = new ExampleFileBuilder()
+
+    build: (categories=[])->
+        indexes = {}
+        @doc     .get_indexes(indexes)
+        @examples.get_indexes(indexes)
+
+        for name in Object.keys(indexes)
+            indexes[name].sort (a, b)->
+                if a.sort is b.sort
+                    if a.name < b.name then -1 else +1
+                else a.sort - b.sort
+            indexes[name] = indexes[name].map (x)-> {name:x.name, url:x.url, dev:x.dev}
+        jade.compile(fs.readFileSync("#{__dirname}/index.jade"))
+            indexes:indexes, categories: [
+                { key:'tut', caption:'Tutorials'     }
+                { key:'exa', caption:'Examples'      }
+                { key:'ref', caption:'References'    }
+            ]
+
+    @build_statics = ->
+        null # TODO: implements
 
 if not module.parent
     DocFileBuilder.build_statics()
     ExampleFileBuilder.build_statics()
+    IndexFileBuilder.build_statics()
 else
     isDev = true
     module.exports =
-        DocFileBuilder    : DocFileBuilder
+        DocFileBuilder: DocFileBuilder
         ExampleFileBuilder: ExampleFileBuilder
+        IndexFileBuilder: IndexFileBuilder

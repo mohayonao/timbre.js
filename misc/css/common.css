@@ -6,16 +6,18 @@ body {
     border: solid 1px #E1E1E8;
     border-radius: 4px;
     padding: 10px;
+    background: #EAF4FC;
 }
 
 #index h1 {
     font-family: 'Arial';
-    font-size: 20px;
+    font-size: 18px;
     text-shadow: 0 0 1px #ccc;
 }
 
 #index h2 {
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: normal;
 }
 
 #index ul {
@@ -23,12 +25,29 @@ body {
 }
 
 #index li {
-    line-height: 14px;
+    line-height: 16px;
+}
+
+#index span {
+    margin-left: 5px;
+    font-weight: normal;
 }
 
 #main h1 {
-    margin-bottom: 10px;
+    padding-bottom: 5px;
+    margin-bottom: 0;
     font-family: 'Arial';
+    border: solid 0 #E1E1E8;
+    border-width: 0 0 1px 0;
+    letter-spacing: 2px;
+}
+
+#main h2 {
+    line-height: 20px;
+    font-size: 12px;
+    font-weight: normal;
+    font-style: italic;
+    margin-bottom: 15px;
 }
 
 .codemirror {
@@ -42,7 +61,7 @@ body {
 }
 
 .click-to-play {
-    background-image: url("../../misc/img/click-to-play.png");
+    background-image: url("/timbre.js/misc/img/click-to-play.png");
     background-repeat: no-repeat;
     background-position: top right;
     cursor: pointer

@@ -2,11 +2,9 @@ T("tape")
 =========
 
 ```timbre
-T("audio").load("../../misc/amen.wav", function() {
+T("audio").load("/timbre.js/misc/audio/amen.wav", function() {
 
-    var tape = T("tape").getInnerInstance({
-        buffer:this.buffer, samplerate:this.samplerate
-    });
+    var tape = T("tape", {tape:this}).tape;
     
     var num = 400;
     var pitch = ((tape.duration() * (num - 1)) / (tape.duration() * num)) * 100;
@@ -16,8 +14,3 @@ T("audio").load("../../misc/amen.wav", function() {
 
 })
 ```
-    T("tape", {tape:tape}).on("ended", function() {
-        console.log("end");
-        this.pause();
-    }).play();
-

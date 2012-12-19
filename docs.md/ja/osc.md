@@ -1,6 +1,6 @@
 T("osc")
 ========
-** オシレータ **
+## オシレータ ##
 
 ```timbre
 T("osc", {wave:"sin", freq:880}).play();

@@ -1,8 +1,9 @@
 $(function() {
     "use strict";
     
-    var nowPlaying;
+    $("#list").load("/timbre.js/misc/index-"+(navigator.language==='ja'?'ja':'en')+".html");
     
+    var nowPlaying;
     timbre.on("pause", function() {
         nowPlaying = null;
     });

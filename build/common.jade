@@ -3,22 +3,29 @@ html(lang=lang)
   head
     meta(charset="utf-8")
     title #{title}
-    link(rel="stylesheet", href="../../misc/bootstrap.css", type="text/css")
-    link(rel="stylesheet", href="../../misc/prettify.css" , type="text/css")
-    link(rel="stylesheet", href="../../misc/codemirror.css", type="text/css")
-    link(rel="stylesheet", href="../../misc/common.css", type="text/css")
-    link(rel="shortcut icon", href="/favicon.ico")
-    script(src="../../timbre.dev.js")    
+    link(rel="stylesheet", href="/timbre.js/misc/css/bootstrap.css", type="text/css")
+    link(rel="stylesheet", href="/timbre.js/misc/css/prettify.css" , type="text/css")
+    link(rel="stylesheet", href="/timbre.js/misc/css/codemirror.css", type="text/css")
+    link(rel="stylesheet", href="/timbre.js/misc/css/common.css", type="text/css")
+    link(rel="shortcut icon", href="/timbre.js/favicon.ico")
+    script(src="/timbre.js/timbre.dev.js")    
   body
     .container
       .row
         #index.span2
+          h1 timbre.js
+          ul
+            li
+              a(href="/timbre.js/timbre.js") timbre.js
+            li
+              a(href="/timbre.js/timbre.dev.js") timbre.dev.js
+            li
+              a(href="https://github.com/mohayonao/timbre.js") repository
+          #list
         #main.span9 !{main}
-    script(src="../../misc/jquery.js")
-    script(src="../../misc/underscore.js")
-    script(src="../../misc/prettify.js")
-    script(src="../../misc/codemirror.js")
-    script(src="../../misc/javascript.js")
-    script(src="../../misc/common.js")
-    if script
-      script !{script}
+    script(src="/timbre.js/misc/js/jquery.js")
+    script(src="/timbre.js/misc/js/underscore.js")
+    script(src="/timbre.js/misc/js/prettify.js")
+    script(src="/timbre.js/misc/js/codemirror.js")
+    script(src="/timbre.js/misc/js/javascript.js")
+    script(src="/timbre.js/misc/js/common.js")
