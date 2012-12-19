@@ -18,6 +18,12 @@
                     this._.tape = tape;
                     this._.tapeStream = new TapeStream(tape, timbre.samplerate);
                     this._.isEnded = false;
+                } else if (typeof tape === "object") {
+                    if (tape.buffer instanceof Float32Array) {
+                        this._.tape = new Scissor(tape);
+                        this._.tapeStream = new TapeStream(tape, timbre.samplerate);
+                        this._.isEnded = false;
+                    }
                 }
             },
             get: function() {
@@ -27,6 +33,9 @@
         isLooped: {
             set: function(value) {
                 this._.isLooped = !!value;
+                if (this._.tapeStream) {
+                    this._.tapeStream.isLooped = this._.isLooped;
+                }
             },
             get: function() {
                 return this._.isLooped;
@@ -38,14 +47,6 @@
             }
         }
     });
-    
-    $.getInnerClass = function() {
-        return Scissor;
-    };
-    
-    $.getInnerInstance = function(soundbuffer) {
-        return new Scissor(soundbuffer);
-    };
     
     $.bang = function() {
         if (this._.tapeStream) {
@@ -80,13 +81,8 @@
             }
             
             if (!_.isEnded && tapeStream.isEnded) {
-                if (_.isLooped) {
-                    this._.tapeStream.reset();
-                    this.emit("looped");
-                } else {
-                    this.emit("ended");
-                    _.isEnded = true;
-                }
+                this.emit("ended");
+                _.isEnded = true;
             }
         }
         
@@ -113,7 +109,8 @@
     function Tape(soundbuffer) {
         this.fragments = [];
         if (soundbuffer) {
-            var duration = soundbuffer.buffer.length / soundbuffer.samplerate;
+            var samplerate = soundbuffer.samplerate || 44100;
+            var duration   = soundbuffer.buffer.length / samplerate;
             this.fragments.push(
                 new Fragment(soundbuffer, 0, duration)
             );
@@ -377,6 +374,7 @@
         this.fragmentIndex = 0;
         this.panL = 0.7071067811865475;
         this.panR = 0.7071067811865475;
+        this.isLooped = false;
         return this;
     };
     
@@ -399,13 +397,11 @@
         var fragmentIndex = this.fragmentIndex;
         var panL = this.panL;
         var panR = this.panR;
-        var savedBufferIndex;
         
         for (var i = 0; i < n; i++) {
             while (!buffer ||
                    bufferIndex < bufferBeginIndex || bufferIndex >= bufferEndIndex) {
                 if (!fragment || fragmentIndex < fragments.length) {
-                    savedBufferIndex = bufferIndex - bufferEndIndex;
                     fragment = fragments[fragmentIndex++];
                     buffer   = fragment.buffer;
                     bufferIndexIncr = fragment.samplerate / samplerate * fragment.pitch;
@@ -422,11 +418,21 @@
                         bufferIndex = bufferBeginIndex;
                     }
                 } else {
-                    this.isEnded = true;
-                    buffer   = DummyBuffer;
-                    bufferIndexIncr = 0;
-                    bufferIndex = 0;
-                    break;
+                    if (this.isLooped) {
+                        buffer  = null;
+                        bufferIndex = 0;
+                        bufferIndexIncr  = 0;
+                        bufferBeginIndex = 0;
+                        bufferEndIndex   = 0;
+                        fragment      = null;
+                        fragmentIndex = 0;
+                    } else {
+                        this.isEnded = true;
+                        buffer   = DummyBuffer;
+                        bufferIndexIncr = 0;
+                        bufferIndex = 0;
+                        break;
+                    }
                 }
             }
             cellL[i] = buffer[bufferIndex|0] * panL;
@@ -445,4 +451,9 @@
         
         return [cellL, cellR];
     };
+    
+    timbre.utils.scissor = {
+        Scissor: Scissor, Tape: Tape, Fragment: Fragment
+    };
+    
 })(timbre);
