@@ -188,8 +188,6 @@
                 
                 if (typeof args[i] === "string") {
                     _.src = args[i++];
-                } else if (args[i] instanceof Buffer) {
-                    _.src = args[i++];
                 }
                 if (typeof args[i] === "function") {
                     callback = args[i++];
@@ -233,20 +231,15 @@
                         }
                     });
                     this.emit("loadstart");
-                } else if (src instanceof Buffer) {
-                    // TODO:
-                    then.call(this, null,
-                              new Uint8Array(src), callback);
-                    this.emit("loadstart");
                 }
                 return this;
             };
             
-            var node_ogg_decoder = function(filepath, done) {
-                done(false);
+            var node_ogg_decoder = function(filepath, onloadedmetadata) {
+                onloadedmetadata(false);
             };
             
-            var node_mp3_decoder = function(filepath, done) {
+            var node_mp3_decoder = function(filepath, onloadedmetadata, onloadeddata) {
                 var lame = require("lame");
                 var self = this;
                 var decoder = new lame.Decoder();
@@ -290,7 +283,7 @@
                         buffer[i] = data[i] * k;
                     }
                     
-                    done({
+                    onloadedmetadata({
                         samplerate: samplerate,
                         buffer    : buffer,
                         duration  : duration
@@ -298,7 +291,8 @@
 
                     self._.isLoaded  = true;
                     self._.plotFlush = true;
-                    self.emit("loadeddata");
+                    
+                    onloadeddata();
                 });
                 fs.createReadStream(filepath).pipe(decoder);
             };
@@ -313,7 +307,7 @@
             return callback.call(self, false);
         }
         
-        var done = function(result) {
+        var onloadedmetadata = function(result) {
             var _ = self._;
             if (result) {
                 _.samplerate = result.samplerate;
@@ -328,18 +322,22 @@
                     _.phaseIncr *= -1;
                     _.phase = result.buffer.length + _.phaseIncr;
                 }
-                callback.call(self, true);
                 self.emit("loadedmetadata");
             } else {
                 iter();
             }
         };
         
+        var onloadeddata = function() {
+            self.emit("loadeddata");
+            callback.call(self, true);
+        };
+        
         var iter = function() {
             if (decoderList.length > 0) {
                 var decoder = decoderList.shift();
                 if (decoder) {
-                    decoder.call(self, data, done);
+                    decoder.call(self, data, onloadedmetadata, onloadeddata);
                 } else {
                     iter();
                 }
@@ -354,19 +352,19 @@
     var webkit_decoder = (function() {
         if (typeof webkitAudioContext !== "undefined") {
             var ctx = new webkitAudioContext();
-            return function(data, done) {
+            return function(data, onloadedmetadata, onloadeddata) {
                 var samplerate, duration, buffer;
                 try {
                     buffer = ctx.createBuffer(data.buffer, true);
                 } catch (e) {
-                    return done(false);
+                    return onloadedmetadata(false);
                 }
                 
                 samplerate = ctx.sampleRate;
                 buffer     = buffer.getChannelData(0);
                 duration   = buffer.length / samplerate;
                 
-                done({
+                onloadedmetadata({
                     samplerate: samplerate,
                     buffer    : buffer,
                     duration  : duration
@@ -374,14 +372,15 @@
                 
                 this._.isLoaded  = true;
                 this._.plotFlush = true;
-                this.emit("loadeddata");
+                
+                onloadeddata();
             };
         }
     })();
     
     var moz_decoder = (function() {
         if (typeof Audio === "function" && typeof new Audio().mozSetup === "function") {
-            return function(data, done) {
+            return function(data, onloadedmetadata, onloadeddata) {
                 var self = this;
                 var samplerate, duration, buffer;
                 var writeIndex = 0;
@@ -412,7 +411,7 @@
                     }
                     audio.play();
                     setTimeout(function() {
-                        done({
+                        onloadedmetadata({
                             samplerate: samplerate,
                             buffer    : buffer,
                             duration  : duration
@@ -422,7 +421,7 @@
                 audio.addEventListener("ended", function() {
                     self._.isLoaded  = true;
                     self._.plotFlush = true;
-                    self.emit("loadeddata");
+                    onloadeddata();
                 }, false);
                 audio.addEventListener("error", function() {
                     self.emit("error");
@@ -432,29 +431,29 @@
         }
     })();
     
-    var wav_decoder = function(data, done) {
+    var wav_decoder = function(data, onloadedmetadata, onloadeddata) {
         if (data[0] !== 0x52 || data[1] !== 0x49 ||
             data[2] !== 0x46 || data[3] !== 0x46) { // 'RIFF'
             // "HeaderError: not exists 'RIFF'"
-            return done(false);
+            return onloadedmetadata(false);
         }
         
         var l1 = data[4] + (data[5]<<8) + (data[6]<<16) + (data[7]<<24);
         if (l1 + 8 !== data.length) {
             // "HeaderError: invalid data size"
-            return done(false);
+            return onloadedmetadata(false);
         }
         
         if (data[ 8] !== 0x57 || data[ 9] !== 0x41 ||
             data[10] !== 0x56 || data[11] !== 0x45) { // 'WAVE'
             // "HeaderError: not exists 'WAVE'"
-            return done(false);
+            return onloadedmetadata(false);
         }
         
         if (data[12] !== 0x66 || data[13] !== 0x6D ||
             data[14] !== 0x74 || data[15] !== 0x20) { // 'fmt '
             // "HeaderError: not exists 'fmt '"
-            return done(false);
+            return onloadedmetadata(false);
         }
         
         // var byteLength = data[16] + (data[17]<<8) + (data[18]<<16) + (data[19]<<24);
@@ -468,7 +467,7 @@
         if (data[36] !== 0x64 || data[37] !== 0x61 ||
             data[38] !== 0x74 || data[39] !== 0x61) { // 'data'
             // "HeaderError: not exists 'data'"
-            return done(false);
+            return onloadedmetadata(false);
         }
         
         var l2 = data[40] + (data[41]<<8) + (data[42]<<16) + (data[43]<<24);
@@ -476,12 +475,12 @@
 
         if (l2 > data.length - 44) {
             // "HeaderError: not exists data"
-            return done(false);
+            return onloadedmetadata(false);
         }
         
         var buffer = new Float32Array((duration * samplerate)|0);
         
-        done({
+        onloadedmetadata({
             samplerate: samplerate,
             buffer    : buffer,
             duration  : duration
@@ -508,7 +507,8 @@
         
         this._.isLoaded  = true;
         this._.plotFlush = true;
-        this.emit("loadeddata");
+        
+        onloadeddata();
     };
     
     timbre.fn.register("audio", AudioFile);
