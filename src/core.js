@@ -539,6 +539,7 @@
         
         return EventEmitter;
     })();
+    timbre.utils.EventEmitter = EventEmitter;
     
     // root object
     var TimbreObject = (function() {
