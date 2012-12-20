@@ -25,22 +25,12 @@
         
         this._.schedules = [];
         
-        this.on("setAdd", changeTheValue);
-        this.on("setMul", changeTheValue);
+        this.on("setAdd", __changeWithValue);
+        this.on("setMul", __changeWithValue);
     }
     timbre.fn.extend(Param, timbre.Object);
-    
-    var changeTheValue = function() {
-        var _ = this._;
-        var x = _.value * _.mul + _.add;
-        var cell = this.cell;
-        for (var i = cell.length; i--; ) {
-            cell[i] = x;
-        }
-    };
-    Object.defineProperty(changeTheValue, "unremovable", {
-        value:true, writable:false
-    });
+
+    var __changeWithValue = timbre.fn.changeWithValue;
     
     var $ = Param.prototype;
     
@@ -53,7 +43,7 @@
                         _.minvalue : (value > _.maxValue) ? _.maxValue : value;
                     _.value = isNaN(value) ? 0 : value;
                     _.eventtype = ParamEvent.None;
-                    changeTheValue.call(this);
+                    __changeWithValue.call(this);
                 }
             },
             get: function() {

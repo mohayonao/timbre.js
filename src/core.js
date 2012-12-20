@@ -237,7 +237,7 @@
     };
     timbre.fn.getClass = __getClass;
     
-    var __nextTick = = function(func) {
+    var __nextTick = function(func) {
         _sys.nextTick(func);
         return timbre;
     };
@@ -254,7 +254,20 @@
         object._.kronly = true;
     };
     timbre.fn.fixKR = __fixKR;
-
+    
+    var __changeWithValue = function() {
+        var _ = this._;
+        var x = _.value * _.mul + _.add;
+        var cell = this.cell;
+        for (var i = cell.length; i--; ) {
+            cell[i] = x;
+        }
+    };
+    Object.defineProperty(__changeWithValue, "unremovable", {
+        value:true, writable:false
+    });
+    timbre.fn.changeWithValue = __changeWithValue;
+    
     var __stereo = function(object) {
         object.L = new TimbreObject([]);
         object.R = new TimbreObject([]);
@@ -878,22 +891,10 @@
             this.value = _args[0];
             this._.ar = false;
             
-            this.on("setAdd", changeTheValue);
-            this.on("setMul", changeTheValue);
+            this.on("setAdd", __changeWithValue);
+            this.on("setMul", __changeWithValue);
         }
         __extend(NumberWrapper, TimbreObject);
-        
-        var changeTheValue = function() {
-            var _ = this._;
-            var x = _.value * _.mul + _.add;
-            var cell = this.cell;
-            for (var i = cell.length; i--; ) {
-                cell[i] = x;
-            }
-        };
-        Object.defineProperty(changeTheValue, "unremovable", {
-            value:true, writable:false
-        });
         
         var $ = NumberWrapper.prototype;
         
@@ -902,7 +903,7 @@
                 set: function(value) {
                     if (typeof value === "number") {
                         this._.value = isNaN(value) ? 0 : value;
-                        changeTheValue.call(this);
+                        __changeWithValue.call(this);
                     }
                 },
                 get: function() {
@@ -922,22 +923,10 @@
             this.value = _args[0];
             this._.ar = false;
             
-            this.on("setAdd", changeTheValue);
-            this.on("setMul", changeTheValue);
+            this.on("setAdd", __changeWithValue);
+            this.on("setMul", __changeWithValue);
         }
         __extend(BooleanWrapper, TimbreObject);
-        
-        var changeTheValue = function() {
-            var _ = this._;
-            var x = _.value * _.mul + _.add;
-            var cell = this.cell;
-            for (var i = cell.length; i--; ) {
-                cell[i] = x;
-            }
-        };
-        Object.defineProperty(changeTheValue, "unremovable", {
-            value:true, writable:false
-        });
         
         var $ = BooleanWrapper.prototype;
         
@@ -946,7 +935,7 @@
                 set: function(value) {
                     if (typeof value === "number") {
                         this._.value = value ? 1 : 0;
-                        changeTheValue.call(this);
+                        __changeWithValue.call(this);
                     }
                 },
                 get: function() {
@@ -963,23 +952,27 @@
             TimbreObject.call(this, []);
             __fixKR(this);
             
-            this.value  = _args[0];
-            this._.args = _args.slice(1);
+            this.func    = _args[0];
+            this._.args  = _args.slice(1);
+            this._.value = 0;
             this._.ar = false;
+            
+            this.on("setAdd", __changeWithValue);
+            this.on("setMul", __changeWithValue);
         }
         __extend(FunctionWrapper, TimbreObject);
         
         var $ = FunctionWrapper.prototype;
         
         Object.defineProperties($, {
-            value: {
+            func: {
                 set: function(value) {
                     if (typeof value === "function") {
-                        this._.value = value;
+                        this._.func = value;
                     }
                 },
                 get: function() {
-                    return this._.value;
+                    return this._.func;
                 }
             },
             args: {
@@ -998,13 +991,10 @@
         
         $.bang = function(arg) {
             var _ = this._;
-            var x = _.value.call(this, arg);
+            var x = _.func.call(this, arg);
             if (typeof x === "number") {
-                var i, cell = this.cell;
-                x = x * _.mul + _.add;
-                for (i = cell.length; i--; ) {
-                    cell[i] = x;
-                }
+                _.value = x;
+                __changeWithValue.call(this);
             }
             this.emit("bang");
             return this;
