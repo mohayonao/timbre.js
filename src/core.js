@@ -184,6 +184,12 @@
         return _sys.listeners(type);
     };
     
+    
+    var __nop = function() {
+        return this;
+    };
+    timbre.fn.nop = __nop;
+    
     // borrowed from coffee-script
     var __extend = function(child, parent) {
         for (var key in parent) {
@@ -1031,7 +1037,7 @@
                 return this;
             };
         } else {
-            $.plot = function() {};
+            $.plot = __nop;
         }
         
         return TimbreObject;
@@ -1195,11 +1201,7 @@
         
         Object.defineProperties($, {
             dac: {
-                set: function() {
-                },
-                get: function() {
-                    return this;
-                }
+                get: __nop
             }
         });
         
@@ -1592,8 +1594,8 @@
             this.maxSamplerate     = 48000;
             this.defaultSamplerate =  8000;
             this.env = "nop";
-            this.play  = function() {};
-            this.pause = function() {};
+            this.play  = __nop;
+            this.pause = __nop;
         };
     }
     

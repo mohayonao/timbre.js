@@ -74,11 +74,7 @@
             this._.deferred.resolve();
             this.pause();
         }
-        this.start = this.pause = nop;
-    };
-    
-    var nop = function() {
-        return this;
+        this.start = this.pause = timbre.fn.nop;
     };
     
     timbre.fn.register("wait", Wait);
