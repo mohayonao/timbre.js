@@ -91,7 +91,7 @@
     };
     
     var onended = function() {
-        var cell = this.cell;
+        var cell  = this.cell;
         var cellL = this.cellL;
         var cellR = this.cellR;
         for (var i = cell.length; i--; ) {
@@ -229,18 +229,18 @@
         var new_instance = new Tape();
         var offset = start + length;
 
-        new_instance = new_instance.plus(this.slice(0, length));
+        new_instance = new_instance.plus(this.slice(0, start));
 
         var new_instance_duration = new_instance.duration();
         if (new_instance_duration < start) {
             new_instance = new_instance.plus(Scissor.silence(start-new_instance_duration));
         }
-            
+        
         new_instance = new_instance.plus(replaced);
         
         var duration = this.duration();
         if (duration > offset) {
-            new_instance = new_instance.plus(offset, duration - offset);
+            new_instance = new_instance.plus(this.slice(offset, duration - offset));
         }
         
         return new_instance;
