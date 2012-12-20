@@ -889,7 +889,6 @@
             __fixKR(this);
             
             this.value = _args[0];
-            this._.ar = false;
             
             this.on("setAdd", __changeWithValue);
             this.on("setMul", __changeWithValue);
@@ -921,7 +920,6 @@
             __fixKR(this);
             
             this.value = _args[0];
-            this._.ar = false;
             
             this.on("setAdd", __changeWithValue);
             this.on("setMul", __changeWithValue);
@@ -955,7 +953,6 @@
             this.func    = _args[0];
             this._.args  = _args.slice(1);
             this._.value = 0;
-            this._.ar = false;
             
             this.on("setAdd", __changeWithValue);
             this.on("setMul", __changeWithValue);
