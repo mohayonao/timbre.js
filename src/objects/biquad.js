@@ -124,6 +124,7 @@
     
     $.plot = (function() {
         var fft = new timbre.utils.FFT(256);
+        var super_plot = timbre.Object.prototype.plot;
         return function(opts) {
             if (this._.plotFlush) {
                 var biquad = new BiquadFilter({type:this.type,samplerate:timbre.samplerate});
@@ -138,7 +139,7 @@
                 this._.plotData  = fft.spectrum;
                 this._.plotFlush = null;
             }
-            return Biquad.__super__.plot.call(this, opts);
+            return super_plot.call(this, opts);
         };
     })();
     

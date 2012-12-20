@@ -83,6 +83,8 @@
         return cell;
     };
     
+    var super_plot = timbre.Object.prototype.plot;
+    
     $.plot = function(opts) {
         if (this._.plotFlush) {
             var fft = this._.fft;
@@ -106,7 +108,7 @@
             this._.plotData  = data;
             this._.plotFlush = null;
         }
-        return FFTListener.__super__.plot.call(this, opts);
+        return super_plot.call(this, opts);
     };
     
     

@@ -131,6 +131,8 @@
         return cell;
     };
     
+    var super_plot = timbre.Object.prototype.plot;
+    
     $.plot = function(opts) {
         var _ = this._;
         if (_.plotFlush) {
@@ -144,7 +146,7 @@
             _.plotData  = data;
             _.plotFlush = null;
         }
-        return WaveListener.__super__.plot.call(this, opts);
+        return super_plot.call(this, opts);
     };
     
     timbre.fn.register("wave", WaveListener);
