@@ -83,15 +83,26 @@
             }
             
             if (!_.isEnded && tapeStream.isEnded) {
-                this.emit("ended");
-                _.isEnded = true;
+                timbre.fn.nextTick(onended.bind(this));
             }
         }
         
         return cell;
     };
     
+    var onended = function() {
+        var cell = this.cell;
+        var cellL = this.cellL;
+        var cellR = this.cellR;
+        for (var i = cell.length; i--; ) {
+            cell[i] = cellL[i] = cellR[i] = 0;
+        }
+        this._.isEnded = true;
+        this.emit("ended");
+    };
+    
     timbre.fn.register("tape", ScissorNode);
+    
     
     var DummyBuffer = new Float32Array(60);
     
