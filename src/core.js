@@ -362,6 +362,43 @@
     })();
     timbre.fn.listener = __listener;
     
+    var __deferred = (function() {
+        var then = function() {
+            var dfd = this._.deferred;
+            dfd.then.apply(dfd, arguments);
+            return this;
+        };
+        var done = function() {
+            var dfd = this._.deferred;
+            dfd.done.apply(dfd, arguments);
+            return this;
+        };
+        var fail = function() {
+            var dfd = this._.deferred;
+            dfd.fail.apply(dfd, arguments);
+            return this;
+        };
+        var always = function() {
+            var dfd = this._.deferred;
+            dfd.always.apply(dfd, arguments);
+            return this;
+        };
+        var isResolved = function() {
+            return this._.deferred.isResolved;
+        };
+        return function(object) {
+            object._.deferred = new timbre.utils.Deferred(object);
+            object.then = then.bind(object);
+            object.done = done.bind(object);
+            object.fail = fail.bind(object);
+            object.always = always.bind(object);
+            Object.defineProperty(object, "isResolved", {
+                get: isResolved.bind(object)
+            });
+        };
+    })();
+    timbre.fn.deferred = __deferred;
+    
     // borrowed from node.js
     var EventEmitter = (function() {
         function EventEmitter() {
@@ -540,6 +577,123 @@
         return EventEmitter;
     })();
     timbre.utils.EventEmitter = EventEmitter;
+    
+    var Deferred = (function() {
+        var YET = 0, DONE = 1, FAIL = 2;
+        var Status = { 0:"yet", 1:"done", 2:"faile" };
+        
+        function Deferred(context) {
+            this.context = context;
+            this.before  = null;
+            
+            this._ = { resolveStatus:YET, doneList:[], failList:[] };
+        }
+        
+        var $ = Deferred.prototype;
+        
+        Object.defineProperties($, {
+            isResolved: {
+                get: function() {
+                    return this._.resolveStatus !== YET;
+                }
+            },
+            status: {
+                get: function() {
+                    return Status[this._.resolveStatus];
+                }
+            }
+        });
+        
+        var done = function(status, list, args) {
+            if (this._.resolveStatus === YET) {
+                this._.resolveStatus = status;
+                var i, c = this.context;
+                for (i = list.length; i--; ) {
+                    list[i].apply(c, args);
+                }
+                this._.doneList = this._.failList = null;
+            }
+        };
+        
+        $.resolve = function() {
+            done.call(this, DONE, this._.doneList, arguments);
+            return this;
+        };
+        
+        $.reject = function() {
+            done.call(this, FAIL, this._.failList, arguments);
+            return this;
+        };
+        
+        var _then = function(done, fail) {
+            return this.then(done, fail);
+        };
+        var _done = function() {
+            return this.done.apply(this, arguments);
+        };
+        var _fail = function() {
+            return this.fail.apply(this, arguments);
+        };
+        var _always = function() {
+            return this.always.apply(this, arguments);
+        };
+        
+        $.promise = function() {
+            return {
+                then  : _then.bind(this),
+                done  : _done.bind(this),
+                fail  : _fail.bind(this),
+                always: _always.bind(this)
+            };
+        };
+        
+        $.then = function(done, fail) {
+            return this.done(done).fail(fail);
+        };
+        
+        $.done = function() {
+            var args = slice.call(arguments);
+            var resolveStatus = this._.resolveStatus;
+            var doneList = this._.doneList;
+            for (var i = 0, imax = args.length; i < imax; ++i) {
+                if (typeof args[i] === "function") {
+                    if (resolveStatus === DONE) {
+                        args[i]();
+                    } else if (resolveStatus === YET) {
+                        doneList.push(args[i]);
+                    }
+                }
+            }
+            return this;
+        };
+        
+        $.fail = function() {
+            var args = slice.call(arguments);
+            var resolveStatus = this._.resolveStatus;
+            var failList = this._.failList;
+            for (var i = 0, imax = args.length; i < imax; ++i) {
+                if (typeof args[i] === "function") {
+                    if (resolveStatus === FAIL) {
+                        args[i]();
+                    } else if (resolveStatus === YET) {
+                        failList.push(args[i]);
+                    }
+                }
+            }
+            return this;
+        };
+        
+        $.always = function() {
+            this.done.apply(this, arguments);
+            this.fail.apply(this, arguments);
+            return this;
+        };
+        
+        // TODO: Deferred.when
+        
+        return Deferred;
+    })();
+    timbre.utils.Deferred = Deferred;
     
     // root object
     var TimbreObject = (function() {
