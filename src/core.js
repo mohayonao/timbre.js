@@ -275,8 +275,8 @@
     timbre.fn.changeWithValue = __changeWithValue;
     
     var __stereo = function(object) {
-        object.L = new TimbreObject([]);
-        object.R = new TimbreObject([]);
+        object.L = new ChannelObject(object);
+        object.R = new ChannelObject(object);
         object.cellL = object.L.cell;
         object.cellR = object.R.cell;
         Object.defineProperty(object, "isStereo", {
@@ -1043,6 +1043,26 @@
         return TimbreObject;
     })();
     timbre.Object = TimbreObject;
+    
+    var ChannelObject = (function() {
+        function ChannelObject(parent) {
+            timbre.Object.call(this, []);
+            __fixAR(this);
+            
+            this._.parent = parent;
+        }
+        __extend(ChannelObject, TimbreObject);
+        
+        ChannelObject.prototype.seq = function(seq_id) {
+            if (this.seq_id !== seq_id) {
+                this.seq_id = seq_id;
+                this._.parent.seq(seq_id);
+            }
+            return this.cell;
+        };
+        
+        return ChannelObject;
+    })();
     
     var NumberWrapper = (function() {
         function NumberWrapper(_args) {
