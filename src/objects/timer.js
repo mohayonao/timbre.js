@@ -1,6 +1,6 @@
 (function(timbre) {
     "use strict";
-
+    
     function Timer(_args) {
         timbre.Object.call(this, _args);
         timbre.fn.timer(this);
@@ -15,7 +15,6 @@
         this._.countSamples = 0;
         
         this.once("init", oninit);
-        this.on("start", onstart);
     }
     timbre.fn.extend(Timer, timbre.Object);
     
@@ -27,13 +26,6 @@
             this.delay = this.interval;
         }
     };
-    
-    var onstart = function() {
-        this._.currentTime  = timbre.currentTime;
-    };
-    Object.defineProperty(onstart, "unremovable", {
-        value:true, writable:false
-    });
     
     var $ = Timer.prototype;
     
@@ -87,8 +79,7 @@
     $.bang = function() {
         var _ = this._;
         _.delaySamples = (timbre.samplerate * (_.delay * 0.001))|0;
-        _.countSamples = _.count = 0;
-        _.currentTime  = timbre.currentTime;
+        _.countSamples = _.count = _.currentTime = 0;
         this.emit("bang");
         return this;
     };
@@ -111,7 +102,7 @@
                 if (_.countSamples <= 0) {
                     _.countSamples += (timbre.samplerate * _.interval.valueOf() * 0.001)|0;
                     var inputs = this.inputs;
-                    var count = _.count;
+                    var count  = _.count;
                     var x = count * _.mul + _.add;
                     for (var j = cell.length; j--; ) {
                         cell[j] = x;
@@ -119,13 +110,8 @@
                     for (var i = 0, imax = inputs.length; i < imax; ++i) {
                         inputs[i].bang(count);
                     }
-                    ++_.count;
-                    if (_.count >= _.limit) {
-                        var self = this;
-                        timbre.fn.nextTick(function() {
-                            self.emit("limit");
-                            self.pause();
-                        });
+                    if (++_.count >= _.limit) {
+                        timbre.fn.nextTick(onlimit.bind(this));
                     }
                 }
             }
@@ -134,16 +120,12 @@
         return cell;
     };
     
+    var onlimit = function() {
+        var _ = this._;
+        this.emit("limit", _.count);
+        this.stop();
+    };
+    
     timbre.fn.register("timer", Timer);
-    
     timbre.fn.alias("interval", "timer");
-    
-    timbre.fn.register("timeout", function(_args) {
-        return new Timer(_args).once("init", function() {
-            if (this.delay === 0) {
-                this.delay = this.interval;
-            }
-            this.limit = 1;
-        });
-    });
 })(timbre);
