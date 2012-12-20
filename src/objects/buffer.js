@@ -13,6 +13,7 @@
         this._.samplerate  = 44100;
         this._.phase = 0;
         this._.phaseIncr = 0;
+        this._.pitch = 1;
     }
     timbre.fn.extend(SoundBuffer, timbre.Object);
     
@@ -46,6 +47,16 @@
             set: setBuffer,
             get: function() {
                 return this._.buffer;
+            }
+        },
+        pitch: {
+            set: function(value) {
+                if (typeof value === "number" && value > 0) {
+                    this._.pitch = value;
+                }
+            },
+            get: function() {
+                return this._.pitch;
             }
         },
         isLooped: {
@@ -157,7 +168,7 @@
             if (!_.isEnded && _.buffer) {
                 var buffer = _.buffer;
                 var phase  = _.phase;
-                var phaseIncr = _.phaseIncr;
+                var phaseIncr = _.phaseIncr * _.pitch;
                 var mul = _.mul, add = _.add;
                 
                 for (var i = 0, imax = cell.length; i < imax; ++i) {
