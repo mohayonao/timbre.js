@@ -55,6 +55,10 @@
             }
             
             if (_.waitSamples <= 0) {
+                var inputs = this.inputs;
+                for (var i = 0, imax = inputs.length; i < imax; ++i) {
+                    inputs[i].bang();
+                }
                 timbre.fn.nextTick(ondone.bind(this));
             }
             
