@@ -5,6 +5,7 @@
     
     function AudioFile(_args) {
         SoundBuffer.call(this, _args);
+        timbre.fn.deferred(this);
         
         this._.isLoaded = false;
         this._.isEnded  = true;
@@ -80,22 +81,31 @@
             $.load = function() {
                 var self = this, _ = this._;
                 
-                var args = arguments, i = 0;
-                var callback = function() {};
+                if (_.deferred.isResolve) {
+                    // throw error ??
+                    return this;
+                }
                 
+                var args = arguments, i = 0;
                 if (typeof args[i] === "string") {
                     _.src = args[i++];
                 } else if (args[i] instanceof File) {
                     _.src = args[i++];
                 }
-                if (typeof args[i] === "function") {
-                    callback = args[i++];
-                }
-                
                 if (!_.src) {
-                    callback.call(this, false);
+                    // throw error ??
                     return this;
                 }
+                
+                var dfd = _.deferred;
+                
+                if (typeof args[i] === "function") {
+                    dfd.done(args[i++]);
+                    if (typeof args[i] === "function") {
+                        dfd.fail(args[i++]);
+                    }
+                }
+                
                 _.loadedTime = 0;
                 
                 var src = _.src;
@@ -116,7 +126,7 @@
                         }
                         
                         if (noUseByteData) {
-                            then.call(this, decoderList, src, callback);
+                            then.call(this, decoderList, src, dfd);
                             this.emit("loadstart");
                         } else {
                             var xhr = new XMLHttpRequest();
@@ -125,25 +135,25 @@
                             xhr.onload = function() {
                                 if (xhr.status === 200) {
                                     then.call(self, decoderList,
-                                              new Uint8Array(xhr.response), callback);
+                                              new Uint8Array(xhr.response), dfd);
                                 } else {
                                     var msg = xhr.status + " " + xhr.statusText;
                                     self.emit("error", msg);
-                                    callback.call(self, false);
+                                    dfd.reject();
                                 }
                             };
                             xhr.send();
                             this.emit("loadstart");
                         }
                     } else {
-                        callback.call(this, false);
+                        dfd.reject();
                     }
                 } else if (src instanceof File) {
                     // TODO:
                     var reader = new FileReader();
                     reader.onload = function() {
                         then.call(this, null,
-                                  new Uint8Array(xhr.response), callback);
+                                  new Uint8Array(xhr.response), dfd);
                     };
                     reader.readAsArrayBuffer(src);
                     this.emit("loadstart");
@@ -157,19 +167,30 @@
             var fs = require("fs");
             $.load = function() {
                 var self = this, _ = this._;
-                var args = arguments, i = 0;
-                var callback = function() {};
                 
+                if (_.deferred.isResolve) {
+                    // throw error ??
+                    return this;
+                }
+                
+                var args = arguments, i = 0;
                 if (typeof args[i] === "string") {
                     _.src = args[i++];
                 }
-                if (typeof args[i] === "function") {
-                    callback = args[i++];
-                }
-                
                 if (!_.src) {
+                    // throw error ??
                     return this;
                 }
+                
+                var dfd = _.deferred;
+                
+                if (typeof args[i] === "function") {
+                    dfd.done(args[i++]);
+                    if (typeof args[i] === "function") {
+                        dfd.fail(args[i++]);
+                    }
+                }
+                
                 _.loadedTime = 0;
                 
                 var src = _.src;
@@ -179,19 +200,19 @@
                         if (!exists) {
                             var msg = "file does not exists";
                             self.emit("error", msg);
-                            return callback.call(self, false);
+                            dfd.reject();
                         }
                         
                         if (/.*\.ogg/.test(src)) {
-                            then.call(self, [node_ogg_decoder], src, callback);
+                            then.call(self, [node_ogg_decoder], src, dfd);
                         } else if (/.*\.mp3/.test(src)) {
-                            then.call(self, [node_mp3_decoder], src, callback);
+                            then.call(self, [node_mp3_decoder], src, dfd);
                         } else {
                             fs.readFile(src, function(err, data) {
                                 if (err) {
                                     var msg = "can't read file";
                                     self.emit("error", msg);
-                                    return callback.call(self, false);
+                                    return dfd.reject();
                                 }
                                 var decoderList;
                                 if (typeof src === "string") {
@@ -200,7 +221,7 @@
                                     }
                                 }
                                 then.call(self, decoderList,
-                                          new Uint8Array(data), callback);
+                                          new Uint8Array(data), dfd);
                             });
                         }
                     });
@@ -273,12 +294,12 @@
         })();
     }
     
-    var then = function(decoderList, data, callback) {
+    var then = function(decoderList, data, dfd) {
         var self = this;
         
         // TODO:
         if (!decoderList) {
-            return callback.call(self, false);
+            return dfd.reject();
         }
         
         var onloadedmetadata = function(result) {
@@ -304,7 +325,7 @@
         
         var onloadeddata = function() {
             self.emit("loadeddata");
-            callback.call(self, true);
+            dfd.resolve();
         };
         
         var iter = function() {
@@ -317,7 +338,7 @@
                 }
             } else {
                 self.emit("error", "can't decode");
-                callback.call(self, false);
+                dfd.reject();
             }
         };
         iter();

@@ -167,21 +167,15 @@
                 
                 if (phase >= buffer.length) {
                     if (_.isLooped) {
-                        phase = 0;
-                        this.emit("looped");
+                        timbre.fn.nextTick(onlooped.bind(this));
                     } else {
-                        _.isEnded = true;
-                        this.emit("ended");
-                        timbre.fn.nextTick(clearCell.bind(this));
+                        timbre.fn.nextTick(onended.bind(this));
                     }
                 } else if (phase < 0) {
                     if (_.isLooped) {
-                        phase = buffer.length + phaseIncr;
-                        this.emit("looped");
+                        timbre.fn.nextTick(onlooped.bind(this));
                     } else {
-                        _.isEnded = true;
-                        this.emit("ended");
-                        timbre.fn.nextTick(clearCell.bind(this));
+                        timbre.fn.nextTick(onended.bind(this));
                     }
                 }
                 _.phase = phase;
@@ -192,11 +186,23 @@
         return cell;
     };
     
-    var clearCell = function() {
+    var onlooped = function() {
+        var _ = this._;
+        if (_.phase >= _.buffer.length) {
+            _.phase = 0;
+        } else if (_.phase < 0) {
+            _.phase = _.buffer.length + _.phaseIncr;
+        }
+        this.emit("looped");
+    };
+    
+    var onended = function() {
         var cell = this.cell;
         for (var i = cell.length; i--; ) {
             cell[i] = 0;
         }
+        this._.isEnded = true;
+        this.emit("ended");
     };
     
     var super_plot = timbre.Object.prototype.plot;

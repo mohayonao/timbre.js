@@ -168,7 +168,6 @@
             }
             
             var changed = false;
-            var emit    = false;
             var i, x;
             
             switch (_.eventtype) {
@@ -189,8 +188,8 @@
             
             if (_.eventtype !== ParamEvent.None && _.currentTime >= _.goalTime) {
                 _.value = _.goalValue;
-                _.eventtype = ParamEvent.None;
-                changed = emit = true;
+                timbre.fn.nextTick(ondone.bind(this));
+                changed = true;
             }
             
             if (changed) {
@@ -198,13 +197,16 @@
                 for (i = cell.length; i--; ) {
                     cell[i] = x;
                 }
-                if (emit) {
-                    this.emit("done", _.value);
-                }
             }
         }
         
         return cell;
+    };
+    
+    var ondone = function() {
+        var _ = this._;
+        _.eventtype = ParamEvent.None;
+        this.emit("done", _.value);
     };
     
     timbre.fn.register("param", Param);
