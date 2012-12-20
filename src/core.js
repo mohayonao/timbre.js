@@ -1147,21 +1147,7 @@
             this.inlets    = [];
             this.timers    = [];
             this.listeners = [];
-            
-            this.on("addObject", function() {
-                if (!this.isPlaying) {
-                    if (this.inlets.length > 0 || this.timers.length > 0) {
-                        this.play();
-                    }
-                }
-            });
-            this.on("removeObject", function() {
-                if (this.isPlaying) {
-                    if (this.inlets.length === 0 && this.timers.length === 0) {
-                        this.pause();
-                    }
-                }
-            });
+            this.reset();
         }
         __extend(SoundSystem, EventEmitter);
         
@@ -1240,12 +1226,26 @@
         };
         
         $.reset = function() {
-            // this._.events = null; // TODO: !!!!
+            this._.events = null;
             this.currentTime = 0;
             this.nextTicks = [];
             this.inlets    = [];
             this.timers    = [];
             this.listeners = [];
+            this.on("addObject", function() {
+                if (!this.isPlaying) {
+                    if (this.inlets.length > 0 || this.timers.length > 0) {
+                        this.play();
+                    }
+                }
+            });
+            this.on("removeObject", function() {
+                if (this.isPlaying) {
+                    if (this.inlets.length === 0 && this.timers.length === 0) {
+                        this.pause();
+                    }
+                }
+            });
             return this;
         };
         
