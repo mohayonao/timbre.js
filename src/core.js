@@ -184,12 +184,6 @@
         return _sys.listeners(type);
     };
     
-    timbre.nextTick = function(func) {
-        _sys.nextTick(func);
-        return timbre;
-    };
-
-    
     // borrowed from coffee-script
     var __extend = function(child, parent) {
         for (var key in parent) {
@@ -242,6 +236,12 @@
         return _constructors[key];
     };
     timbre.fn.getClass = __getClass;
+    
+    var __nextTick = = function(func) {
+        _sys.nextTick(func);
+        return timbre;
+    };
+    timbre.fn.nextTick = __nextTick;
     
     var __fixAR = function(object) {
         object._.ar = true;

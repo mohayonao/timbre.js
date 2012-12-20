@@ -172,7 +172,7 @@
                     } else {
                         _.isEnded = true;
                         this.emit("ended");
-                        timbre.nextTick(clearCell.bind(this));
+                        timbre.fn.nextTick(clearCell.bind(this));
                     }
                 } else if (phase < 0) {
                     if (_.isLooped) {
@@ -181,7 +181,7 @@
                     } else {
                         _.isEnded = true;
                         this.emit("ended");
-                        timbre.nextTick(clearCell.bind(this));
+                        timbre.fn.nextTick(clearCell.bind(this));
                     }
                 }
                 _.phase = phase;

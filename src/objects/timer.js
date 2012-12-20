@@ -122,7 +122,7 @@
                     ++_.count;
                     if (_.count >= _.limit) {
                         var self = this;
-                        timbre.nextTick(function() {
+                        timbre.fn.nextTick(function() {
                             self.emit("limit");
                             self.pause();
                         });
