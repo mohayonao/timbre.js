@@ -81,7 +81,7 @@
         
         instance._.originkey = key;
         
-        instance.emit("init");
+        instance._.emit("init");
         
         return instance;
     };
@@ -337,7 +337,7 @@
                 if (_sys.timers.indexOf(self) === -1) {
                     _sys.timers.push(self);
                     _sys.emit("addObject");
-                    self.emit("start");
+                    self._.emit("start");
                 }
             });
             return this;
@@ -349,7 +349,7 @@
             if (_sys.timers.indexOf(this) !== -1) {
                 _sys.nextTick(function() {
                     _sys.emit("removeObject");
-                    self.emit("stop");
+                    self._.emit("stop");
                 });
             }
             return this;
@@ -377,7 +377,7 @@
                     if (_sys.listeners.indexOf(self) === -1) {
                         _sys.listeners.push(self);
                         _sys.emit("addObject");
-                        self.emit("listen");
+                        self._.emit("listen");
                     }
                 });
             }
@@ -394,7 +394,7 @@
                 if (_sys.listeners.indexOf(this) !== -1) {
                     _sys.nextTick(function() {
                         _sys.emit("removeObject");
-                        self.emit("unlisten");
+                        self._.emit("unlisten");
                     });
                 }
             }
@@ -452,7 +452,8 @@
     
     // borrowed from node.js
     var EventEmitter = (function() {
-        function EventEmitter() {
+        function EventEmitter(context) {
+            this.context = context;
             if (!this._) {
                 this._ = {};
             }
@@ -477,24 +478,24 @@
             if (typeof handler === "function") {
                 switch (arguments.length) {
                 case 1:
-                    handler.call(this);
+                    handler.call(this.context);
                     break;
                 case 2:
-                    handler.call(this, arguments[1]);
+                    handler.call(this.context, arguments[1]);
                     break;
                 case 3:
-                    handler.call(this, arguments[1], arguments[2]);
+                    handler.call(this.context, arguments[1], arguments[2]);
                     break;
                 default:
                     args = slice.call(arguments, 1);
-                    handler.apply(this, args);
+                    handler.apply(this.context, args);
                 }
                 return true;
             } else if (isArray(handler)) {
                 args = slice.call(arguments, 1);
                 var listeners = handler.slice();
                 for (var i = 0, imax = listeners.length; i < imax; ++i) {
-                    listeners[i].apply(this, args);
+                    listeners[i].apply(this.context, args);
                 }
                 return true;
             } else {
@@ -535,7 +536,7 @@
             var self = this;
             function g() {
                 self.removeListener(type, g);
-                listener.apply(self, arguments);
+                listener.apply(self.context, arguments);
             }
             g.listener = listener;
             
@@ -619,10 +620,18 @@
             if (!_.events || !_.events[type]) {
                 return [];
             }
-            if (!isArray(_.events[type])) {
-                return [_.events[type]];
+            var a, e = _.events[type];
+            if (!isArray(e)) {
+                return e.unremovable ? [] : [e];
             }
-            return _.events[type].slice();
+            e = e.slice();
+            a = [];
+            for (var i = 0, imax = e.length; i < imax; ++i) {
+                if (!e[i].unremovable) {
+                    a.push(e[i]);
+                }
+            }
+            return a;
         };
         
         return EventEmitter;
@@ -800,6 +809,8 @@
     var TimbreObject = (function() {
         function TimbreObject(_args) {
             this._ = {}; // private members
+            this._.events = new EventEmitter(this);
+            this._.emit   = this._.events.emit.bind(this._.events);
             
             if (isDictionary(_args[0])) {
                 var params = _args.shift();
@@ -811,12 +822,12 @@
             this.seq_id = -1;
             this.cell   = new Float32Array(_sys.cellsize);
             this.inputs = _args.map(timbre);
+            
             this._.ar  = true;
             this._.mul = 1;
             this._.add = 0;
             this._.dac = null;
         }
-        __extend(TimbreObject, EventEmitter);
         
         var $ = TimbreObject.prototype;
         
@@ -840,7 +851,7 @@
                 set: function(value) {
                     if (typeof value === "number") {
                         this._.mul = value;
-                        this.emit("setMul", value);
+                        this._.emit("setMul", value);
                     }
                 },
                 get: function() {
@@ -851,7 +862,7 @@
                 set: function(value) {
                     if (typeof value === "number") {
                         this._.add = value;
-                        this.emit("setAdd", value);
+                        this._.emit("setAdd", value);
                     }
                 },
                 get: function() {
@@ -889,7 +900,7 @@
             if (arguments.length > 0) {
                 var list = slice.call(arguments).map(timbre);
                 this.inputs = this.inputs.concat(list);
-                this.emit("append", list);
+                this._.emit("append", list);
             }
             return this;
         };
@@ -909,7 +920,7 @@
                     }
                 }
                 if (list.length > 0) {
-                    this.emit("remove", list);
+                    this._.emit("remove", list);
                 }
             }
             return this;
@@ -924,7 +935,7 @@
             var list = this.inputs.slice();
             this.inputs = [];
             if (list.length > 0) {
-                this.emit("remove", list);
+                this._.emit("remove", list);
             }
             return this;
         };
@@ -933,11 +944,37 @@
             var item = this.inputs[index];
             if (item) {
                 this.inputs.splice(index, 1);
-                this.emit("remove", [item]);
+                this._.emit("remove", [item]);
             }
             return this;
         };
+
+        // EventEmitter
+        $.on = $.addListener = function(type, listener) {
+            this._.events.on(type, listener);
+            return this;
+        };
         
+        $.once = function(type, listener) {
+            this._.events.once(type, listener);
+            return this;
+        };
+        
+        $.removeListener = function(type, listener) {
+            this._.events.removeListener(type, listener);
+            return this;
+        };
+
+        $.removeAllListeners = function(type) {
+            this._.events.removeAllListeners(type);
+            return this;
+        };
+        
+        $.listeners = function(type) {
+            return this._.events.listeners(type);
+        };
+        
+        //
         $.set = function(key, value) {
             var x, desc;
             switch (typeof key) {
@@ -973,7 +1010,7 @@
         };
         
         $.bang = function() {
-            this.emit("bang");
+            this._.emit("bang");
             return this;
         };
         
@@ -993,7 +1030,7 @@
             }
             dac.play();
             if (emit) {
-                this.emit("play");
+                this._.emit("play");
             }
             return this;
         };
@@ -1003,7 +1040,7 @@
             if (dac) {
                 if (dac.inputs.indexOf(this) !== -1) {
                     dac.remove(this);
-                    this.emit("pause");
+                    this._.emit("pause");
                 }
                 if (dac.inputs.length === 0) {
                     dac.pause();
@@ -1015,7 +1052,7 @@
         $.ar = function() {
             if (!this._.kronly) {
                 this._.ar = true;
-                this.emit("ar", true);
+                this._.emit("ar", true);
             }
             return this;
         };
@@ -1023,7 +1060,7 @@
         $.kr = function() {
             if (!this._.aronly) {
                 this._.ar = false;
-                this.emit("ar", false);
+                this._.emit("ar", false);
             }
             return this;
         };
@@ -1269,7 +1306,7 @@
                 _.value = x;
                 __changeWithValue.call(this);
             }
-            this.emit("bang");
+            this._.emit("bang");
             return this;
         };
         
@@ -1328,7 +1365,7 @@
                 if (_sys.inlets.indexOf(self) === -1) {
                     _sys.inlets.push(self);
                     _sys.emit("addObject");
-                    self.emit("play");
+                    self._.emit("play");
                 }
             });
             return this;
@@ -1340,7 +1377,7 @@
                 _sys.nextTick(function() {
                     _sys.emit("removeObject");
                 });
-                this.emit("pause");
+                this._.emit("pause");
             }
             return this;
         };
@@ -1394,6 +1431,7 @@
         
         function SoundSystem() {
             this._ = {};
+            this.context = this;
             this.seq_id = 0;
             this.impl = null;
             this.amp  = 0.8;

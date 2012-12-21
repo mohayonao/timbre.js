@@ -70,7 +70,7 @@
     var ondone = function() {
         if (!this.isResolved) {
             this._.waitSamples = Infinity;
-            this.emit("done");
+            this._.emit("done");
             this._.deferred.resolve();
             this.pause();
         }

@@ -80,7 +80,7 @@
         var _ = this._;
         _.delaySamples = (timbre.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
-        this.emit("bang");
+        this._.emit("bang");
         return this;
     };
     
@@ -122,7 +122,7 @@
     
     var onlimit = function() {
         var _ = this._;
-        this.emit("limit", _.count);
+        this._.emit("limit", _.count);
         this.stop();
     };
     

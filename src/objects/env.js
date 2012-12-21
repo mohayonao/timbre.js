@@ -100,7 +100,7 @@
             _.status  = StatusEnd;
             _.samples = Infinity;
             _.curve   = CurveTypeNone;
-            this.emit("release-done");
+            this._.emit("release-done");
             return this;
         }
         
@@ -129,7 +129,7 @@
         var _ = this._;
         this.reset();
         _.status = StatusGate;
-        this.emit("bang");
+        this._.emit("bang");
         return this;
     };
     
@@ -235,7 +235,7 @@
             _.samples -= cell.length;
             
             if (emit) {
-                this.emit(emit);
+                this._.emit(emit);
             }
         }
         

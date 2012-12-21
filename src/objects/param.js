@@ -206,7 +206,7 @@
     var ondone = function() {
         var _ = this._;
         _.eventtype = ParamEvent.None;
-        this.emit("done", _.value);
+        this._.emit("done", _.value);
     };
     
     timbre.fn.register("param", Param);

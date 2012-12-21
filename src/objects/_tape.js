@@ -55,7 +55,7 @@
             this._.tapeStream.reset();
         }
         this._.isEnded = false;
-        this.emit("bang");
+        this._.emit("bang");
         return this;
     };
     
@@ -98,7 +98,7 @@
             cell[i] = cellL[i] = cellR[i] = 0;
         }
         this._.isEnded = true;
-        this.emit("ended");
+        this._.events.emit("ended");
     };
     
     timbre.fn.register("tape", ScissorNode);

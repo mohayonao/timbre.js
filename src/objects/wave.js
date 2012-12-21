@@ -75,7 +75,7 @@
         }
         _.samples    = 0;
         _.writeIndex = 0;
-        this.emit("bang");
+        this._.emit("bang");
         return this;
     };
     
@@ -124,7 +124,7 @@
             _.writeIndex = writeIndex;
             
             if (emit) {
-                this.emit("wave");
+                this._.emit("wave");
             }
         }
         

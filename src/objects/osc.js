@@ -88,7 +88,7 @@
     
     $.bang = function() {
         this._.x = 1024 * this._.phase;
-        this.emit("bang");
+        this._.emit("bang");
         return this;
     };
 

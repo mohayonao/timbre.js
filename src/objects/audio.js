@@ -107,7 +107,7 @@
                     
                     if (noUseByteData) {
                         then.call(this, decoderList, src, dfd);
-                        this.emit("loadstart");
+                        this._.emit("loadstart");
                     } else {
                         var xhr = new XMLHttpRequest();
                         xhr.open("GET", src, true);
@@ -118,12 +118,12 @@
                                           new Uint8Array(xhr.response), dfd);
                             } else {
                                 var msg = xhr.status + " " + xhr.statusText;
-                                self.emit("error", msg);
+                                self._.emit("error", msg);
                                 dfd.reject();
                             }
                         };
                         xhr.send();
-                        this.emit("loadstart");
+                        this._.emit("loadstart");
                     }
                 } else {
                     dfd.reject();
@@ -136,7 +136,7 @@
                               new Uint8Array(xhr.response), dfd);
                 };
                 reader.readAsArrayBuffer(src);
-                this.emit("loadstart");
+                this._.emit("loadstart");
             }
             return this;
         };
@@ -179,7 +179,7 @@
                 fs.exists(src, function(exists) {
                     if (!exists) {
                         var msg = "file does not exists";
-                        self.emit("error", msg);
+                        self._.emit("error", msg);
                         dfd.reject();
                     }
                     
@@ -191,7 +191,7 @@
                         fs.readFile(src, function(err, data) {
                             if (err) {
                                 var msg = "can't read file";
-                                self.emit("error", msg);
+                                self._.emit("error", msg);
                                 return dfd.reject();
                             }
                             var decoderList;
@@ -205,7 +205,7 @@
                         });
                     }
                 });
-                this.emit("loadstart");
+                this._.emit("loadstart");
             }
             return this;
         };
@@ -262,14 +262,14 @@
                     _.phaseIncr *= -1;
                     _.phase = result.buffer.length + _.phaseIncr;
                 }
-                self.emit("loadedmetadata");
+                self._.emit("loadedmetadata");
             } else {
                 iter();
             }
         };
         
         var onloadeddata = function() {
-            self.emit("loadeddata");
+            self._.emit("loadeddata");
             dfd.resolve();
         };
         
@@ -282,7 +282,7 @@
                     iter();
                 }
             } else {
-                self.emit("error", "can't decode");
+                self._.emit("error", "can't decode");
                 dfd.reject();
             }
         };
@@ -364,7 +364,7 @@
                     onloadeddata();
                 }, false);
                 audio.addEventListener("error", function() {
-                    self.emit("error");
+                    self._.emit("error");
                 }, false);
                 audio.load();
             };

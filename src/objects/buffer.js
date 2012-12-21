@@ -157,7 +157,7 @@
     $.bang = function() {
         this._.phase   = 0;
         this._.isEnded = false;
-        this.emit("bang");
+        this._.emit("bang");
         return this;
     };
     
@@ -208,7 +208,7 @@
         } else if (_.phase < 0) {
             _.phase = _.buffer.length + _.phaseIncr;
         }
-        this.emit("looped");
+        this._.emit("looped");
     };
     
     var onended = function() {
@@ -217,7 +217,7 @@
             cell[i] = 0;
         }
         this._.isEnded = true;
-        this.emit("ended");
+        this._.emit("ended");
     };
     
     var super_plot = timbre.Object.prototype.plot;
