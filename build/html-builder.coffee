@@ -111,7 +111,8 @@ class DocFileBuilder extends HTMLBuilder
 
     @build_statics = (langlist=['en', 'ja'])->
         dstpath = path.normalize "#{__dirname}/../docs/"
-        unless fs.existsSync dstpath then return
+        unless fs.existsSync dstpath
+            fs.mkdir dstpath
         miscpath = path.normalize "#{__dirname}/../misc/"
 
         for lang in langlist
@@ -136,7 +137,8 @@ class ExampleFileBuilder extends HTMLBuilder
 
     @build_statics = ->
         dstpath = path.normalize "#{__dirname}/../examples/"
-        unless fs.existsSync dstpath then return
+        unless fs.existsSync dstpath
+            fs.mkdir dstpath
         miscpath = path.normalize "#{__dirname}/../misc/"
 
         builder = new ExampleFileBuilder()
