@@ -50,8 +50,14 @@ body {
     margin-bottom: 15px;
 }
 
-.codemirror {
+.CodeMirror {
     border: solid 1px #E1E1E8;
+}
+
+.CodeMirror-scroll {
+    height: auto;
+    overflow-y: hidden;
+    overflow-x: auto;
 }
 
 .codemirror button {
