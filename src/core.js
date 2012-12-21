@@ -222,7 +222,7 @@
         return _sys.promise.apply(_sys, arguments);
     };
     
-    timbre.ready = function() {
+    timbre.ready = timbre.when = function() {
         return _sys.ready.apply(_sys, arguments);
     };
     
@@ -630,14 +630,13 @@
     timbre.utils.EventEmitter = EventEmitter;
     
     var Deferred = (function() {
-        var YET = 0, DONE = 1, FAIL = 2;
-        var Status = { 0:"yet", 1:"done", 2:"faile" };
+        var STATUS_PENDING  = 0;
+        var STATUS_RESOLVED = 1;
+        var STATUS_REJECTED = 2;
         
         function Deferred(context) {
             this.context = context;
-            this.before  = null;
-            
-            this._ = { resolveStatus:YET, doneList:[], failList:[] };
+            this._ = { status:STATUS_PENDING, doneList:[], failList:[] };
         }
         
         var $ = Deferred.prototype;
@@ -645,19 +644,19 @@
         Object.defineProperties($, {
             isResolved: {
                 get: function() {
-                    return this._.resolveStatus !== YET;
+                    return this._.status === STATUS_RESOLVED;
                 }
             },
-            status: {
+            isRejected: {
                 get: function() {
-                    return Status[this._.resolveStatus];
+                    return this._.status === STATUS_REJECTED;
                 }
             }
         });
         
         var done = function(status, list, args) {
-            if (this._.resolveStatus === YET) {
-                this._.resolveStatus = status;
+            if (this._.status === STATUS_PENDING) {
+                this._.status = status;
                 var i, c = this.context;
                 for (i = list.length; i--; ) {
                     list[i].apply(c, args);
@@ -667,12 +666,12 @@
         };
         
         $.resolve = function() {
-            done.call(this, DONE, this._.doneList, arguments);
+            done.call(this, STATUS_RESOLVED, this._.doneList, arguments);
             return this;
         };
         
         $.reject = function() {
-            done.call(this, FAIL, this._.failList, arguments);
+            done.call(this, STATUS_REJECTED, this._.failList, arguments);
             return this;
         };
         
@@ -686,13 +685,13 @@
         
         $.done = function() {
             var args = slice.call(arguments);
-            var resolveStatus = this._.resolveStatus;
+            var status = this._.status;
             var doneList = this._.doneList;
             for (var i = 0, imax = args.length; i < imax; ++i) {
                 if (typeof args[i] === "function") {
-                    if (resolveStatus === DONE) {
+                    if (status === STATUS_RESOLVED) {
                         args[i]();
-                    } else if (resolveStatus === YET) {
+                    } else if (status === STATUS_PENDING) {
                         doneList.push(args[i]);
                     }
                 }
@@ -702,13 +701,13 @@
         
         $.fail = function() {
             var args = slice.call(arguments);
-            var resolveStatus = this._.resolveStatus;
+            var status = this._.status;
             var failList = this._.failList;
             for (var i = 0, imax = args.length; i < imax; ++i) {
                 if (typeof args[i] === "function") {
-                    if (resolveStatus === FAIL) {
+                    if (status === STATUS_REJECTED) {
                         args[i]();
-                    } else if (resolveStatus === YET) {
+                    } else if (status === STATUS_PENDING) {
                         failList.push(args[i]);
                     }
                 }
