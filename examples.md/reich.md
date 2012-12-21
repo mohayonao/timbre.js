@@ -2,7 +2,7 @@ Reich
 =====
 
 ```codemirror
-timbre.rec(function(inlet) {
+timbre.rec(function(output) {
 
     var freqs = _.shuffle([440, 494, 523, 659, 440, 494, 523, 659]);
 
@@ -15,10 +15,10 @@ timbre.rec(function(inlet) {
     osc.freq = func;
 
     T("timer", {delay:0, interval:240, limit:32}, func, env).on("limit", function() {
-        inlet.done();
+        output.done();
     }).start();
     
-    inlet.append(env);
+    output.append(env);
     
 }).then(function(res) {
 
