@@ -1,4 +1,4 @@
-(function() {
+(function(timbre) {
     "use strict";
 
     function Wait(_args) {
@@ -79,4 +79,4 @@
     
     timbre.fn.register("wait", Wait);
     timbre.fn.alias("timeout", "wait");
-})();
+})(timbre);
