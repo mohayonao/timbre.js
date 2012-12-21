@@ -1,54 +1,217 @@
 (function(timbre) {
     "use strict";
     
-    var SoundBuffer = timbre.fn.getClass("buffer");
-    
-    function AudioFile(_args) {
-        SoundBuffer.call(this, _args);
-        timbre.fn.deferred(this);
+    timbre.fn.register("audio", function() {
+        var instance = timbre("buffer");
         
-        this._.isLoaded = false;
-        this._.isEnded  = true;
-        this._.loadedTime  = 0;
-    }
-    timbre.fn.extend(AudioFile, SoundBuffer);
-    
-    var $ = AudioFile.prototype;
-    
-    Object.defineProperties($, {
-        buffer: {
-            get: function() {
-                return this._.buffer;
-            }
-        },
-        src: {
-            set: function(value) {
-                var _ = this._;
-                if (_.value !== value) {
-                    if (typeof value === "string") {
-                        this._.src = value;
-                        this._.isLoaded = false;
-                    } else if (timbre.envtype === "browser" && value instanceof File) {
-                        this._.src = value;
-                        this._.isLoaded = false;
+        timbre.fn.deferred(instance);
+        
+        instance._.isLoaded = false;
+        instance._.isEnded  = true;
+        instance._.loadedTime  = 0;
+        
+        Object.defineProperties(instance, {
+            src: {
+                set: function(value) {
+                    var _ = this._;
+                    if (_.value !== value) {
+                        if (typeof value === "string") {
+                            this._.src = value;
+                            this._.isLoaded = false;
+                        } else if (timbre.envtype === "browser" && value instanceof File) {
+                            this._.src = value;
+                            this._.isLoaded = false;
+                        }
                     }
+                },
+                get: function() {
+                    return this._.src;
                 }
             },
-            get: function() {
-                return this._.src;
+            isLoaded: {
+                get: function() {
+                    return this._.isLoaded;
+                }
+            },
+            loadedTime: {
+                get: function() {
+                    return this._.loadedTime;
+                }
             }
-        },
-        isLoaded: {
-            get: function() {
-                return this._.isLoaded;
-            }
-        },
-        loadedTime: {
-            get: function() {
-                return this._.loadedTime;
-            }
-        }
+        });
+        
+        instance.load = load;
+        
+        return instance;
     });
+    
+    
+    var load = (function() {
+        if (timbre.envtype === "browser") {
+            return getLoadFunctionForBrowser();
+        } else if (timbre.envtype === "node") {
+            return getLoadFunctionForNodeJS();
+        } else {
+            return timbre.fn.nop;
+        }
+    })();
+    
+    
+    function getLoadFunctionForBrowser() {
+        return function() {
+            var self = this, _ = this._;
+            
+            if (_.deferred.isResolve) {
+                // throw error ??
+                return this;
+            }
+            
+            var args = arguments, i = 0;
+            if (typeof args[i] === "string") {
+                _.src = args[i++];
+            } else if (args[i] instanceof File) {
+                _.src = args[i++];
+            }
+            if (!_.src) {
+                // throw error ??
+                return this;
+            }
+            
+            var dfd = _.deferred;
+            
+            if (typeof args[i] === "function") {
+                dfd.done(args[i++]);
+                if (typeof args[i] === "function") {
+                    dfd.fail(args[i++]);
+                }
+            }
+            
+            _.loadedTime = 0;
+            
+            var src = _.src;
+            var decoderList;
+            
+            if (typeof src === "string") {
+                if (src !== "") {
+                    var noUseByteData = false;
+                    if (/.*\.wav/.test(src)) {
+                        decoderList = [wav_decoder];
+                    } else {
+                        if (webkit_decoder) {
+                            decoderList = [webkit_decoder];
+                        } else if (moz_decoder) {
+                            decoderList = [moz_decoder];
+                            noUseByteData = true;
+                        }
+                    }
+                    
+                    if (noUseByteData) {
+                        then.call(this, decoderList, src, dfd);
+                        this.emit("loadstart");
+                    } else {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open("GET", src, true);
+                        xhr.responseType = "arraybuffer";
+                        xhr.onload = function() {
+                            if (xhr.status === 200) {
+                                then.call(self, decoderList,
+                                          new Uint8Array(xhr.response), dfd);
+                            } else {
+                                var msg = xhr.status + " " + xhr.statusText;
+                                self.emit("error", msg);
+                                dfd.reject();
+                            }
+                        };
+                        xhr.send();
+                        this.emit("loadstart");
+                    }
+                } else {
+                    dfd.reject();
+                }
+            } else if (src instanceof File) {
+                // TODO:
+                var reader = new FileReader();
+                reader.onload = function() {
+                    then.call(this, null,
+                              new Uint8Array(xhr.response), dfd);
+                };
+                reader.readAsArrayBuffer(src);
+                this.emit("loadstart");
+            }
+            return this;
+        };
+    }
+    
+    
+    function getLoadFunctionForNodeJS() {
+        return function() {
+            var fs = require("fs");
+            var self = this, _ = this._;
+            
+            if (_.deferred.isResolve) {
+                // throw error ??
+                return this;
+            }
+            
+            var args = arguments, i = 0;
+            if (typeof args[i] === "string") {
+                _.src = args[i++];
+            }
+            if (!_.src) {
+                // throw error ??
+                return this;
+            }
+            
+            var dfd = _.deferred;
+            
+            if (typeof args[i] === "function") {
+                dfd.done(args[i++]);
+                if (typeof args[i] === "function") {
+                    dfd.fail(args[i++]);
+                }
+            }
+            
+            _.loadedTime = 0;
+            
+            var src = _.src;
+            
+            if (typeof src === "string") {
+                fs.exists(src, function(exists) {
+                    if (!exists) {
+                        var msg = "file does not exists";
+                        self.emit("error", msg);
+                        dfd.reject();
+                    }
+                    
+                    if (/.*\.ogg/.test(src)) {
+                        then.call(self, [node_ogg_decoder], src, dfd);
+                    } else if (/.*\.mp3/.test(src)) {
+                        then.call(self, [node_mp3_decoder], src, dfd);
+                    } else {
+                        fs.readFile(src, function(err, data) {
+                            if (err) {
+                                var msg = "can't read file";
+                                self.emit("error", msg);
+                                return dfd.reject();
+                            }
+                            var decoderList;
+                            if (typeof src === "string") {
+                                if (/.*\.wav/.test(src)) {
+                                    decoderList = [wav_decoder];
+                                }
+                            }
+                            then.call(self, decoderList,
+                                      new Uint8Array(data), dfd);
+                        });
+                    }
+                });
+                this.emit("loadstart");
+            }
+            return this;
+        };
+    }
+    
+    
     
     var deinterleave = function(list) {
         var result = new list.constructor(list.length>>1);
@@ -75,224 +238,6 @@
         return int32;
     };
     
-    if (timbre.envtype === "browser") {
-        // bowser
-        (function() {
-            $.load = function() {
-                var self = this, _ = this._;
-                
-                if (_.deferred.isResolve) {
-                    // throw error ??
-                    return this;
-                }
-                
-                var args = arguments, i = 0;
-                if (typeof args[i] === "string") {
-                    _.src = args[i++];
-                } else if (args[i] instanceof File) {
-                    _.src = args[i++];
-                }
-                if (!_.src) {
-                    // throw error ??
-                    return this;
-                }
-                
-                var dfd = _.deferred;
-                
-                if (typeof args[i] === "function") {
-                    dfd.done(args[i++]);
-                    if (typeof args[i] === "function") {
-                        dfd.fail(args[i++]);
-                    }
-                }
-                
-                _.loadedTime = 0;
-                
-                var src = _.src;
-                var decoderList;
-                
-                if (typeof src === "string") {
-                    if (src !== "") {
-                        var noUseByteData = false;
-                        if (/.*\.wav/.test(src)) {
-                            decoderList = [wav_decoder];
-                        } else {
-                            if (webkit_decoder) {
-                                decoderList = [webkit_decoder];
-                            } else if (moz_decoder) {
-                                decoderList = [moz_decoder];
-                                noUseByteData = true;
-                            }
-                        }
-                        
-                        if (noUseByteData) {
-                            then.call(this, decoderList, src, dfd);
-                            this.emit("loadstart");
-                        } else {
-                            var xhr = new XMLHttpRequest();
-                            xhr.open("GET", src, true);
-                            xhr.responseType = "arraybuffer";
-                            xhr.onload = function() {
-                                if (xhr.status === 200) {
-                                    then.call(self, decoderList,
-                                              new Uint8Array(xhr.response), dfd);
-                                } else {
-                                    var msg = xhr.status + " " + xhr.statusText;
-                                    self.emit("error", msg);
-                                    dfd.reject();
-                                }
-                            };
-                            xhr.send();
-                            this.emit("loadstart");
-                        }
-                    } else {
-                        dfd.reject();
-                    }
-                } else if (src instanceof File) {
-                    // TODO:
-                    var reader = new FileReader();
-                    reader.onload = function() {
-                        then.call(this, null,
-                                  new Uint8Array(xhr.response), dfd);
-                    };
-                    reader.readAsArrayBuffer(src);
-                    this.emit("loadstart");
-                }
-                return this;
-            };
-        })();
-    } else if (timbre.envtype === "node") {
-        // node.js
-        (function() {
-            var fs = require("fs");
-            $.load = function() {
-                var self = this, _ = this._;
-                
-                if (_.deferred.isResolve) {
-                    // throw error ??
-                    return this;
-                }
-                
-                var args = arguments, i = 0;
-                if (typeof args[i] === "string") {
-                    _.src = args[i++];
-                }
-                if (!_.src) {
-                    // throw error ??
-                    return this;
-                }
-                
-                var dfd = _.deferred;
-                
-                if (typeof args[i] === "function") {
-                    dfd.done(args[i++]);
-                    if (typeof args[i] === "function") {
-                        dfd.fail(args[i++]);
-                    }
-                }
-                
-                _.loadedTime = 0;
-                
-                var src = _.src;
-                
-                if (typeof src === "string") {
-                    fs.exists(src, function(exists) {
-                        if (!exists) {
-                            var msg = "file does not exists";
-                            self.emit("error", msg);
-                            dfd.reject();
-                        }
-                        
-                        if (/.*\.ogg/.test(src)) {
-                            then.call(self, [node_ogg_decoder], src, dfd);
-                        } else if (/.*\.mp3/.test(src)) {
-                            then.call(self, [node_mp3_decoder], src, dfd);
-                        } else {
-                            fs.readFile(src, function(err, data) {
-                                if (err) {
-                                    var msg = "can't read file";
-                                    self.emit("error", msg);
-                                    return dfd.reject();
-                                }
-                                var decoderList;
-                                if (typeof src === "string") {
-                                    if (/.*\.wav/.test(src)) {
-                                        decoderList = [wav_decoder];
-                                    }
-                                }
-                                then.call(self, decoderList,
-                                          new Uint8Array(data), dfd);
-                            });
-                        }
-                    });
-                    this.emit("loadstart");
-                }
-                return this;
-            };
-            
-            var node_ogg_decoder = function(filepath, onloadedmetadata) {
-                onloadedmetadata(false);
-            };
-            
-            var node_mp3_decoder = function(filepath, onloadedmetadata, onloadeddata) {
-                var lame = require("lame");
-                var self = this;
-                var decoder = new lame.Decoder();
-                var bytes = [];
-                var samplerate, duration, buffer;
-                var channels, bitDepth;
-                
-                decoder.on("format", function(format) {
-                    // console.log("format", format);
-                    samplerate = format.sampleRate;
-                    channels   = format.channels;
-                    bitDepth   = format.bitDepth;
-                });
-                decoder.on("data", function(data) {
-                    for (var i = 0, imax = data.length; i < imax; ++i) {
-                        bytes.push(data[i]);
-                    }
-                });
-                decoder.on("end", function() {
-                    var length = bytes.length / channels / (bitDepth / 8);
-                    
-                    duration = length / samplerate;
-                    buffer = new Float32Array(length);
-                    
-                    var uint8 = new Uint8Array(bytes);
-                    var data;
-                    if (bitDepth === 16) {
-                        data = new Int16Array(uint8.buffer);
-                    } else if (bitDepth === 8) {
-                        data = new Int8Array(uint8.buffer);
-                    } else if (bitDepth === 24) {
-                        data = _24bit_to_32bit(uint8.buffer);
-                    }
-                    
-                    if (channels === 2) {
-                        data = deinterleave(data);
-                    }
-                    
-                    var k = 1 / ((1 << (bitDepth-1)) - 1);
-                    for (var i = buffer.length; i--; ) {
-                        buffer[i] = data[i] * k;
-                    }
-                    
-                    onloadedmetadata({
-                        samplerate: samplerate,
-                        buffer    : buffer,
-                        duration  : duration
-                    });
-
-                    self._.isLoaded  = true;
-                    self._.plotFlush = true;
-                    
-                    onloadeddata();
-                });
-                fs.createReadStream(filepath).pipe(decoder);
-            };
-        })();
-    }
     
     var then = function(decoderList, data, dfd) {
         var self = this;
@@ -506,5 +451,66 @@
         onloadeddata();
     };
     
-    timbre.fn.register("audio", AudioFile);
+    var node_ogg_decoder = function(filepath, onloadedmetadata) {
+        onloadedmetadata(false);
+    };
+    
+    var node_mp3_decoder = function(filepath, onloadedmetadata, onloadeddata) {
+        var fs   = require("fs");
+        var lame = require("lame");
+        var self = this;
+        var decoder = new lame.Decoder();
+        var bytes = [];
+        var samplerate, duration, buffer;
+        var channels, bitDepth;
+        
+        decoder.on("format", function(format) {
+            // console.log("format", format);
+            samplerate = format.sampleRate;
+            channels   = format.channels;
+            bitDepth   = format.bitDepth;
+        });
+        decoder.on("data", function(data) {
+            for (var i = 0, imax = data.length; i < imax; ++i) {
+                bytes.push(data[i]);
+            }
+        });
+        decoder.on("end", function() {
+            var length = bytes.length / channels / (bitDepth / 8);
+            
+            duration = length / samplerate;
+            buffer = new Float32Array(length);
+            
+            var uint8 = new Uint8Array(bytes);
+            var data;
+            if (bitDepth === 16) {
+                data = new Int16Array(uint8.buffer);
+            } else if (bitDepth === 8) {
+                data = new Int8Array(uint8.buffer);
+            } else if (bitDepth === 24) {
+                data = _24bit_to_32bit(uint8.buffer);
+            }
+            
+            if (channels === 2) {
+                data = deinterleave(data);
+            }
+            
+            var k = 1 / ((1 << (bitDepth-1)) - 1);
+            for (var i = buffer.length; i--; ) {
+                buffer[i] = data[i] * k;
+            }
+            
+            onloadedmetadata({
+                samplerate: samplerate,
+                buffer    : buffer,
+                duration  : duration
+            });
+
+            self._.isLoaded  = true;
+            self._.plotFlush = true;
+            
+            onloadeddata();
+        });
+        fs.createReadStream(filepath).pipe(decoder);
+    };
 })(timbre);

@@ -13,15 +13,15 @@
         this._.samplerate  = 44100;
         this._.phase = 0;
         this._.phaseIncr = 0;
-        this._.pitch = 1;
+        this._.pitch = timbre(1);
     }
     timbre.fn.extend(SoundBuffer, timbre.Object);
     
     var $ = SoundBuffer.prototype;
-
+    
     var setBuffer = function(value) {
         var _ = this._;
-        if (typeof value === "object") {
+        if (!_.buffer && typeof value === "object") {
             var buffer, samplerate;
             if (value instanceof Float32Array) {
                 buffer = value;
@@ -51,9 +51,7 @@
         },
         pitch: {
             set: function(value) {
-                if (typeof value === "number" && value > 0) {
-                    this._.pitch = value;
-                }
+                this._.pitch = timbre(value);
             },
             get: function() {
                 return this._.pitch;
@@ -151,6 +149,11 @@
         return instance;
     };
     
+    $.reversed = function() {
+        this.isReversed = !this._.isReversed;
+        return this;
+    };
+    
     $.bang = function() {
         this._.phase   = 0;
         this._.isEnded = false;
@@ -166,9 +169,10 @@
             this.seq_id = seq_id;
             
             if (!_.isEnded && _.buffer) {
+                var pitch  = _.pitch.seq(seq_id)[0];
                 var buffer = _.buffer;
                 var phase  = _.phase;
-                var phaseIncr = _.phaseIncr * _.pitch;
+                var phaseIncr = _.phaseIncr * pitch;
                 var mul = _.mul, add = _.add;
                 
                 for (var i = 0, imax = cell.length; i < imax; ++i) {
