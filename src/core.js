@@ -167,7 +167,7 @@
         _sys.reset();
         return timbre;
     };
-
+    
     timbre.on = function(type, listener) {
         _sys.on(type, listener);
         return timbre;
@@ -178,7 +178,7 @@
         _sys.once(type, listener);
         return timbre;
     };
-
+    
     timbre.removeListener = function(type, listener) {
         _sys.removeListener(type, listener);
         return timbre;
@@ -198,9 +198,32 @@
         return timbre;
     };
     
-    timbre.then = function(fn) {
-        _sys.then(fn);
+    timbre.then = function() {
+        _sys.then.apply(_sys, arguments);
         return timbre;
+    };
+    
+    timbre.done = function() {
+        _sys.done.apply(_sys, arguments);
+        return timbre;
+    };
+    
+    timbre.fail = function() {
+        _sys.fail.apply(_sys, arguments);
+        return timbre;
+    };
+    
+    timbre.always = function() {
+        _sys.always.apply(_sys, arguments);
+        return timbre;
+    };
+    
+    timbre.promise = function() {
+        return _sys.promise.apply(_sys, arguments);
+    };
+    
+    timbre.ready = function() {
+        return _sys.ready.apply(_sys, arguments);
     };
     
     var __nop = function() {
@@ -410,12 +433,16 @@
         var isResolved = function() {
             return this._.deferred.isResolved;
         };
+        var promise = function() {
+            return this._.deferred.promise();
+        };
         return function(object) {
             object._.deferred = new timbre.utils.Deferred(object);
             object.then = then.bind(object);
             object.done = done.bind(object);
             object.fail = fail.bind(object);
             object.always = always.bind(object);
+            object.promise = promise.bind(object);
             Object.defineProperty(object, "isResolved", {
                 get: isResolved.bind(object)
             });
@@ -649,26 +676,8 @@
             return this;
         };
         
-        var _then = function(done, fail) {
-            return this.then(done, fail);
-        };
-        var _done = function() {
-            return this.done.apply(this, arguments);
-        };
-        var _fail = function() {
-            return this.fail.apply(this, arguments);
-        };
-        var _always = function() {
-            return this.always.apply(this, arguments);
-        };
-        
         $.promise = function() {
-            return {
-                then  : _then.bind(this),
-                done  : _done.bind(this),
-                fail  : _fail.bind(this),
-                always: _always.bind(this)
-            };
+            return new Promise(this);
         };
         
         $.then = function(done, fail) {
@@ -712,12 +721,81 @@
             this.fail.apply(this, arguments);
             return this;
         };
+
+        var isDeferred = function(x) {
+            return x && typeof x.promise === "function";
+        };
         
-        // TODO: Deferred.when
+        Deferred.when = function(subordinate) {
+            var i = 0;
+            var resolveValues = slice.call(arguments);
+            var length    = resolveValues.length;
+            var remaining = length;
+            
+            if (length === 1 && !isDeferred(subordinate)) {
+                remaining = 0;
+            }
+            var deferred = (remaining === 1) ? subordinate : new Deferred();
+            
+            var updateFunc = function(i, results) {
+                return function(value) {
+                    results[i] = arguments.length > 1 ? slice.call(arguments) : value;
+                    if (!(--remaining)) {
+                        deferred.resolve.apply(deferred, results);
+                    }
+                };
+            };
+            
+            if (length > 1) {
+                var resolveResults = new Array(length);
+                for (; i < length; ++i) {
+                    if (resolveValues[i] && isDeferred(resolveValues[i])) {
+                        resolveValues[i].promise().done(
+                            updateFunc(i, resolveResults)
+                        ).fail(deferred.reject.bind(deferred));
+                    } else {
+                        resolveResults[i] = resolveValues[i];
+                        --remaining;
+                    }
+                }
+            }
+            
+            if (!remaining) {
+                deferred.resolve.apply(deferred, resolveValues);
+            }
+            
+            return deferred.promise();
+        };
         
         return Deferred;
     })();
     timbre.utils.Deferred = Deferred;
+    
+    var Promise = (function() {
+        function Promise(dfd) {
+            this.then = then.bind(dfd);
+            this.done = done.bind(dfd);
+            this.fail = fail.bind(dfd);
+            this.always  = always.bind(dfd);
+            this.promise = promise.bind(this);
+        }
+        var then = function(done, fail) {
+            return this.then(done, fail);
+        };
+        var done = function() {
+            return this.done.apply(this, arguments);
+        };
+        var fail = function() {
+            return this.fail.apply(this, arguments);
+        };
+        var always = function() {
+            return this.always.apply(this, arguments);
+        };
+        var promise = function() {
+            return this;
+        };
+        return Promise;
+    })();
     
     // root object
     var TimbreObject = (function() {
@@ -1333,8 +1411,7 @@
             this.timers    = [];
             this.listeners = [];
             
-            this.dfd1 = null;
-            this.dfd2 = null;
+            this._.deferred = null;
             this.recStart   = 0;
             this.recBuffers = null;
             
@@ -1438,14 +1515,10 @@
                 }
             });
             if (this.status === STATUS_REC) {
-                if (this.dfd1) {
-                    this.dfd1.reject();
+                if (this._.deferred) {
+                    this._.deferred.reject();
                 }
-                this.dfd1 = null;
-                if (this.dfd2) {
-                    this.dfd2.reject();
-                }
-                this.dfd2 = null;
+                this._.deferred = null;
             }
             return this;
         };
@@ -1562,7 +1635,7 @@
                 // throw error??
                 return;
             }
-            if (this.dfd1 || this.dfd2) {
+            if (this._.deferred) {
                 console.warn("rec??");
                 // throw error??
                 return;
@@ -1570,14 +1643,14 @@
             this.status = STATUS_REC;
             this.reset();
             
-            var dfd1 = this.dfd1 = new Deferred(this); // from user resolve
-            var dfd2 = this.dfd2 = new Deferred(this); // to user done
+            this._.deferred = new Deferred(this);
             
             var inlet = new SystemInlet();
+            var inlet_dfd = new Deferred(this);
             inlet.done = function() {
-                dfd1.resolve.apply(dfd1, slice.call(arguments));
+                inlet_dfd.resolve.apply(inlet_dfd, slice.call(arguments));
             };
-            dfd1.then(recdone);
+            inlet_dfd.then(recdone);
             
             this.recBuffers = [];
             
@@ -1598,7 +1671,6 @@
         var recdone = function() {
             this.status = STATUS_NONE;
             this.reset();
-            this.dfd1 = null;
             
             var recBuffers = this.recBuffers;
             
@@ -1626,14 +1698,37 @@
             };
             var args = [].concat.apply([result], arguments);
             
-            this.dfd2.resolve.apply(this.dfd2, args);
-            this.dfd2 = null;
+            this._.deferred.resolve.apply(this._.deferred, args);
+            this._.deferred = null;
         };
         
-        $.then = function(fn) {
-            if (this.dfd2) {
-                this.dfd2.then(fn);
-            }
+        $.then = function() {
+            var dfd = this._.deferred || new Deferred().resolve().promise();
+            dfd.then.apply(dfd, arguments);
+        };
+
+        $.done = function() {
+            var dfd = this._.deferred || new Deferred().resolve().promise();
+            dfd.done.apply(dfd, arguments);
+        };
+        
+        $.fail = function() {
+            var dfd = this._.deferred || new Deferred().resolve().promise();
+            dfd.fail.apply(dfd, arguments);
+        };
+        
+        $.always = function() {
+            var dfd = this._.deferred || new Deferred().resolve().promise();
+            dfd.alywas.apply(dfd, arguments);
+        };
+        
+        $.promise = function() {
+            var dfd = this._.deferred || new Deferred().resolve();
+            return dfd.promise();
+        };
+        
+        $.ready = function() {
+            return Deferred.when.apply(null, arguments);
         };
         
         return SoundSystem;
