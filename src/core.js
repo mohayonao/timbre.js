@@ -10,6 +10,10 @@
         return typeof object === "object" && object.constructor === Object;
     };
     
+    var STATUS_NONE = 0;
+    var STATUS_PLAY = 1;
+    var STATUS_REC  = 2;
+    
     var _ver = "${VERSION}";
     var _sys = null;
     var _constructors = {};
@@ -124,7 +128,12 @@
         },
         isPlaying: {
             get: function() {
-                return _sys.isPlaying;
+                return _sys.status === STATUS_PLAY;
+            }
+        },
+        isRecording: {
+            get: function() {
+                return _sys.status === STATUS_REC;
             }
         },
         amp: {
@@ -184,6 +193,15 @@
         return _sys.listeners(type);
     };
     
+    timbre.rec = function(fn) {
+        _sys.rec(fn);
+        return timbre;
+    };
+    
+    timbre.then = function(fn) {
+        _sys.then(fn);
+        return timbre;
+    };
     
     var __nop = function() {
         return this;
@@ -1202,7 +1220,9 @@
     var SystemInlet = (function() {
         function SystemInlet(object) {
             TimbreObject.call(this, []);
-            this.inputs.push(object);
+            if (object instanceof TimbreObject) {
+                this.inputs.push(object);
+            }
             this.on("append", onappend);
             __stereo(this);
         }
@@ -1294,12 +1314,13 @@
     })();
     
     var SoundSystem = (function() {
+        
         function SoundSystem() {
             this._ = {};
             this.seq_id = 0;
             this.impl = null;
             this.amp  = 0.8;
-            this.isPlaying  = false;
+            this.status = STATUS_NONE;
             this.samplerate = 44100;
             this.channels   = 2;
             this.cellsize   = 128;
@@ -1311,6 +1332,12 @@
             this.inlets    = [];
             this.timers    = [];
             this.listeners = [];
+            
+            this.dfd1 = null;
+            this.dfd2 = null;
+            this.recStart   = 0;
+            this.recBuffers = null;
+            
             this.reset();
         }
         __extend(SoundSystem, EventEmitter);
@@ -1366,8 +1393,8 @@
         };
         
         $.play = function() {
-            if (!this.isPlaying) {
-                this.isPlaying  = true;
+            if (this.status === STATUS_NONE) {
+                this.status = STATUS_PLAY;
                 this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
                 
                 this.streamsize = this.getAdjustSamples();
@@ -1381,8 +1408,8 @@
         };
         
         $.pause = function() {
-            if (this.isPlaying) {
-                this.isPlaying = false;
+            if (this.status === STATUS_PLAY) {
+                this.status = STATUS_NONE;
                 this.impl.pause();
                 this.emit("pause");
             }
@@ -1397,19 +1424,29 @@
             this.timers    = [];
             this.listeners = [];
             this.on("addObject", function() {
-                if (!this.isPlaying) {
+                if (this.status === STATUS_NONE) {
                     if (this.inlets.length > 0 || this.timers.length > 0) {
                         this.play();
                     }
                 }
             });
             this.on("removeObject", function() {
-                if (this.isPlaying) {
+                if (this.status === STATUS_PLAY) {
                     if (this.inlets.length === 0 && this.timers.length === 0) {
                         this.pause();
                     }
                 }
             });
+            if (this.status === STATUS_REC) {
+                if (this.dfd1) {
+                    this.dfd1.reject();
+                }
+                this.dfd1 = null;
+                if (this.dfd2) {
+                    this.dfd2.reject();
+                }
+                this.dfd2 = null;
+            }
             return this;
         };
         
@@ -1492,13 +1529,110 @@
             }
             
             this.seq_id = seq_id;
+            
+            if (this.status === STATUS_REC) {
+                this.recBuffers.push(new Float32Array(strmL));
+                this.recBuffers.push(new Float32Array(strmR));
+                var now = +new Date();
+                if ((now - this.recStart) > 20) {
+                    setTimeout(function() {
+                        this.recStart = +new Date();
+                        this.process();
+                    }.bind(this), 10);
+                } else {
+                    this.process();
+                }
+            }
         };
         
         $.nextTick = function(func) {
-            if (!this.isPlaying) {
+            if (this.status === STATUS_NONE) {
                 func();
             } else {
                 this.nextTicks.push(func);
+            }
+        };
+        
+        $.rec = function(fn) {
+            if (this.status !== STATUS_NONE) {
+                // throw error??
+                return;
+            }
+            if (typeof fn !== "function") {
+                // throw error??
+                return;
+            }
+            if (this.dfd1 || this.dfd2) {
+                console.warn("rec??");
+                // throw error??
+                return;
+            }
+            this.status = STATUS_REC;
+            this.reset();
+            
+            var dfd1 = this.dfd1 = new Deferred(this); // from user resolve
+            var dfd2 = this.dfd2 = new Deferred(this); // to user done
+            
+            var inlet = new SystemInlet();
+            inlet.done = function() {
+                dfd1.resolve.apply(dfd1, slice.call(arguments));
+            };
+            dfd1.then(recdone);
+            
+            this.recBuffers = [];
+            
+            this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
+            
+            this.streamsize = this.getAdjustSamples();
+            this.strmL = new Float32Array(this.streamsize);
+            this.strmR = new Float32Array(this.streamsize);
+            
+            this.inlets.push(inlet);
+            
+            fn(inlet);
+            
+            this.recStart = +new Date();
+            this.process();
+        };
+        
+        var recdone = function() {
+            this.status = STATUS_NONE;
+            this.reset();
+            this.dfd1 = null;
+            
+            var recBuffers = this.recBuffers;
+            
+            var streamsize   = this.streamsize;
+            var bufferLength = (recBuffers.length >> 1) * streamsize;
+            
+            // TODO: limit length???
+            
+            var L = new Float32Array(bufferLength);
+            var R = new Float32Array(bufferLength);
+            var i, imax = bufferLength / streamsize;
+            var j = 0, k = 0;
+            
+            for (i = 0; i < imax; ++i) {
+                L.set(recBuffers[j++], k);
+                R.set(recBuffers[j++], k);
+                k += streamsize;
+
+            }
+            
+            var result = {
+                L: { buffer:L, samplerate:this.samplerate },
+                R: { buffer:R, samplerate:this.samplerate },
+                samplerate:this.samplerate
+            };
+            var args = [].concat.apply([result], arguments);
+            
+            this.dfd2.resolve.apply(this.dfd2, args);
+            this.dfd2 = null;
+        };
+        
+        $.then = function(fn) {
+            if (this.dfd2) {
+                this.dfd2.then(fn);
             }
         };
         
