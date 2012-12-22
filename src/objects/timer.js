@@ -6,15 +6,17 @@
         timbre.fn.timer(this);
         timbre.fn.fixKR(this);
         
-        this._.count    =    0;
-        this._.limit    = Infinity;
+        this._.count = 0;
+        this._.duration = Infinity;
         this._.currentTime = 0;
         this._.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
         
         this._.delaySamples = 0;
         this._.countSamples = 0;
+        this._.isEnded = false;
         
         this.once("init", oninit);
+        this.on("start", onstart);
     }
     timbre.fn.extend(Timer, timbre.Object);
     
@@ -23,9 +25,20 @@
             this.interval = 1000;
         }
         if (this._.delay === undefined) {
-            this.delay = this.interval;
+            if (this._.originkey === "interval") {
+                this.delay = this.interval.valueOf();
+            } else {
+                this.delay = 0;
+            }
         }
     };
+    
+    var onstart = function() {
+        this._.isEnded = false;
+    };
+    Object.defineProperty(onstart, "unremovable", {
+        value:true, writable:false
+    })
     
     var $ = Timer.prototype;
     
@@ -59,14 +72,14 @@
                 return this._.count;
             }
         },
-        limit: {
+        duration: {
             set: function(value) {
                 if (typeof value === "number" && value >= 0) {
-                    this._.limit = value;
+                    this._.duration = value;
                 }
             },
             get: function() {
-                return this._.limit;
+                return this._.duration;
             }
         },
         currentTime: {
@@ -89,6 +102,10 @@
         
         var _ = this._;
         
+        if (_.isEnded) {
+            return cell;
+        }
+        
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
             
@@ -110,20 +127,20 @@
                     for (var i = 0, imax = inputs.length; i < imax; ++i) {
                         inputs[i].bang(count);
                     }
-                    if (++_.count >= _.limit) {
-                        timbre.fn.nextTick(onlimit.bind(this));
-                    }
+                    _.count += 1;
                 }
             }
             _.currentTime += _.currentTimeIncr;
+
+            if (_.currentTime >= _.duration) {
+                timbre.fn.nextTick(onended.bind(this));
+            }
         }
         return cell;
     };
     
-    var onlimit = function() {
-        var _ = this._;
-        this._.emit("limit", _.count);
-        this.stop();
+    var onended = function() {
+        timbre.fn.onended(this);
     };
     
     timbre.fn.register("timer", Timer);
