@@ -107,7 +107,7 @@
                     
                     if (noUseByteData) {
                         then.call(this, decoderList, src, dfd);
-                        this._.emit("loadstart");
+                        this._.emit("load");
                     } else {
                         var xhr = new XMLHttpRequest();
                         xhr.open("GET", src, true);
@@ -123,7 +123,7 @@
                             }
                         };
                         xhr.send();
-                        this._.emit("loadstart");
+                        this._.emit("load");
                     }
                 } else {
                     dfd.reject();
@@ -136,7 +136,7 @@
                               new Uint8Array(xhr.response), dfd);
                 };
                 reader.readAsArrayBuffer(src);
-                this._.emit("loadstart");
+                this._.emit("load");
             }
             return this;
         };
@@ -205,7 +205,7 @@
                         });
                     }
                 });
-                this._.emit("loadstart");
+                this._.emit("load");
             }
             return this;
         };
