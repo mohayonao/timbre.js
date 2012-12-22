@@ -38,7 +38,7 @@
     };
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
-    })
+    });
     
     var $ = Timer.prototype;
     
