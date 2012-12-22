@@ -79,6 +79,10 @@
             
             var dfd = _.deferred;
             
+            dfd.done(function() {
+                this._.emit("done");
+            }.bind(this));
+            
             if (typeof args[i] === "function") {
                 dfd.done(args[i++]);
                 if (typeof args[i] === "function") {
