@@ -5,18 +5,19 @@ Reich
 timbre.rec(function(output) {
 
     var freqs = _.shuffle([440, 494, 523, 659, 440, 494, 523, 659]);
+    var ms = 240;
 
     var osc = T("osc", {wave:"sin(40)", mul:0.25});
-    var env = T("env", {table:[1, [0, 250]]}, osc);
+    var env = T("env", {table:[0, [1, ms*0.5], [0, ms*0.5]]}, osc);
 
     var func = T(function(count) {
         return freqs[count % freqs.length];
     });
     osc.freq = func;
 
-    T("timer", {delay:0, interval:240, limit:32}, func, env).on("limit", function() {
+    T("timer", {interval:ms, duration:ms*freqs.length}).on("ended", function() {
         output.done();
-    }).start();
+    }).append(func, env).start();
     
     output.append(env);
     
@@ -28,10 +29,9 @@ timbre.rec(function(output) {
     var num = 400;
     var duration = L.duration;
     
-    var pitch = (duration * (num - 1)) / (duration * num);
-
-    R.pitch = pitch;
+    R.pitch = (duration * (num - 1)) / (duration * num);
     
-    T("+", L, R).play();
+    T("pan", {value:-1}, L).play();
+    T("pan", {value:+1}, R).play();
 });
 ```
