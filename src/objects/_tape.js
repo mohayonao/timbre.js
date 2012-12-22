@@ -91,14 +91,7 @@
     };
     
     var onended = function() {
-        var cell  = this.cell;
-        var cellL = this.cellL;
-        var cellR = this.cellR;
-        for (var i = cell.length; i--; ) {
-            cell[i] = cellL[i] = cellR[i] = 0;
-        }
-        this._.isEnded = true;
-        this._.events.emit("ended");
+        timbre.fn.onended(this, 0);
     };
     
     timbre.fn.register("tape", ScissorNode);

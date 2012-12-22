@@ -450,6 +450,29 @@
     })();
     timbre.fn.deferred = __deferred;
     
+    var __onended = function(object, lastValue) {
+        var cell = object.cell;
+        var cellL, cellR;
+        if (object.isStereo) {
+            cellL = object.cellL;
+            cellR = object.cellR;
+        } else {
+            cellL = cellR = cell;
+        }
+        if (typeof lastValue === "number") {
+            for (var i = cell.length; i--; ) {
+                cellL[i] = cellR[i] = cell[i] = lastValue;
+            }
+        }
+        var dac = object.dac;
+        if (dac && dac.isPlaying) {
+            object.pause();
+        }
+        object._.isEnded = true;
+        object._.emit("ended");
+    };
+    timbre.fn.onended = __onended;
+    
     // borrowed from node.js
     var EventEmitter = (function() {
         function EventEmitter(context) {
@@ -1039,6 +1062,7 @@
             var dac = this._.dac;
             if (dac) {
                 if (dac.inputs.indexOf(this) !== -1) {
+                    this._.dac = null;
                     dac.remove(this);
                     this._.emit("pause");
                 }
@@ -1337,8 +1361,11 @@
             if (object instanceof TimbreObject) {
                 this.inputs.push(object);
             }
-            this.on("append", onappend);
             __stereo(this);
+            
+            this._.isPlaying = false;
+            
+            this.on("append", onappend);
         }
         __extend(SystemInlet , TimbreObject);
         
@@ -1356,6 +1383,11 @@
         Object.defineProperties($, {
             dac: {
                 get: __nop
+            },
+            isPlaying: {
+                get: function() {
+                    return this._.isPlaying;
+                }
             }
         });
         
@@ -1365,6 +1397,7 @@
                 if (_sys.inlets.indexOf(self) === -1) {
                     _sys.inlets.push(self);
                     _sys.emit("addObject");
+                    self._.isPlaying = true;
                     self._.emit("play");
                 }
             });
@@ -1377,6 +1410,7 @@
                 _sys.nextTick(function() {
                     _sys.emit("removeObject");
                 });
+                this._.isPlaying = false;
                 this._.emit("pause");
             }
             return this;
@@ -1530,8 +1564,10 @@
             return this;
         };
         
-        $.reset = function() {
-            this._.events = null;
+        $.reset = function(deep) {
+            if (deep) {
+                this._.events = null;
+            }
             this.currentTime = 0;
             this.nextTicks = [];
             this.inlets    = [];

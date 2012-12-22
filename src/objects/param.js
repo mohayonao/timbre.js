@@ -145,6 +145,7 @@
                     _.eventtype = ParamEvent.SetValue;
                     _.goalValue = e.value;
                     _.goalTime  = e.time + _.currentTime;
+                    _.isEnded = false;
                     break;
                 case ParamEvent.LinearRampToValue:
                     samples = e.time * 0.001 * timbre.samplerate;
@@ -153,6 +154,7 @@
                         _.goalValue = e.value;
                         _.goalTime  = e.time + _.currentTime;
                         _.variation = (e.value - _.value) / (samples / cell.length);
+                        _.isEnded = false;
                     }
                     break;
                 case ParamEvent.ExponentialRampToValue:
@@ -162,6 +164,7 @@
                         _.goalValue = e.value;
                         _.goalTime  = e.time + _.currentTime;
                         _.variation = Math.pow(e.value/_.value, 1/(samples/cell.length));
+                        _.isEnded = false;
                     }
                     break;
                 }
@@ -169,33 +172,39 @@
             
             var changed = false;
             var i, x;
-            
-            switch (_.eventtype) {
-            case ParamEvent.LinearRampToValue:
-                if (_.currentTime < _.goalTime) {
-                    _.value += _.variation;
+
+            if (!_.isEnded) {
+                switch (_.eventtype) {
+                case ParamEvent.LinearRampToValue:
+                    if (_.currentTime < _.goalTime) {
+                        _.value += _.variation;
+                        changed = true;
+                    }
+                    break;
+                case ParamEvent.ExponentialRampToValue:
+                    if (_.currentTime < _.goalTime) {
+                        _.value *= _.variation;
+                        changed = true;
+                    }
+                    break;
+                }
+                _.currentTime += _.currentTimeIncr;
+                
+                if (_.eventtype !== ParamEvent.None && _.currentTime >= _.goalTime) {
+                    _.value = _.goalValue;
+                    if (schedules.length === 0) {
+                        timbre.fn.nextTick(onended.bind(this));
+                    } else {
+                        timbre.fn.nextTick(onnext.bind(this));
+                    }
                     changed = true;
                 }
-                break;
-            case ParamEvent.ExponentialRampToValue:
-                if (_.currentTime < _.goalTime) {
-                    _.value *= _.variation;
-                    changed = true;
-                }
-                break;
-            }
-            _.currentTime += _.currentTimeIncr;
-            
-            if (_.eventtype !== ParamEvent.None && _.currentTime >= _.goalTime) {
-                _.value = _.goalValue;
-                timbre.fn.nextTick(ondone.bind(this));
-                changed = true;
-            }
-            
-            if (changed) {
-                x = _.value * _.mul + _.add;
-                for (i = cell.length; i--; ) {
-                    cell[i] = x;
+                
+                if (changed) {
+                    x = _.value * _.mul + _.add;
+                    for (i = cell.length; i--; ) {
+                        cell[i] = x;
+                    }
                 }
             }
         }
@@ -203,10 +212,15 @@
         return cell;
     };
     
-    var ondone = function() {
+    var onended = function() {
+        this._.eventtype = ParamEvent.None;
+        timbre.fn.onended(this);
+    };
+    
+    var onnext = function() {
         var _ = this._;
         _.eventtype = ParamEvent.None;
-        this._.emit("done", _.value);
+        this._.emit("next", _.value);
     };
     
     timbre.fn.register("param", Param);

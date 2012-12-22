@@ -212,12 +212,7 @@
     };
     
     var onended = function() {
-        var cell = this.cell;
-        for (var i = cell.length; i--; ) {
-            cell[i] = 0;
-        }
-        this._.isEnded = true;
-        this._.emit("ended");
+        timbre.fn.onended(this, 0);
     };
     
     var super_plot = timbre.Object.prototype.plot;
