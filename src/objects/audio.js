@@ -1,8 +1,8 @@
 (function(timbre) {
     "use strict";
     
-    timbre.fn.register("audio", function() {
-        var instance = timbre("buffer");
+    timbre.fn.register("audio", function(_args) {
+        var instance = timbre.apply(null, ["buffer"].concat(_args));
         
         timbre.fn.deferred(instance);
         
