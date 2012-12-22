@@ -3,12 +3,12 @@ Reich
 
 ```codemirror
 timbre.rec(function(output) {
-
+    
     var freqs = _.shuffle([440, 494, 523, 659, 440, 494, 523, 659]);
     var ms = 240;
 
-    var osc = T("osc", {wave:"sin(40)", mul:0.25});
-    var env = T("env", {table:[0, [1, ms*0.5], [0, ms*0.5]]}, osc);
+    var osc = T("osc", {wave:"tri(25)", mul:0.25});
+    var env = T("env", {table:[0, [1, 10], [0, ms*0.95]]}, osc);
 
     var func = T(function(count) {
         return freqs[count % freqs.length];
@@ -19,12 +19,12 @@ timbre.rec(function(output) {
         output.done();
     }).append(func, env).start();
     
-    output.append(env);
+    output.send(env);
     
 }).then(function(res) {
 
-    var L = T("buffer", {buffer:res.L, isLooped:true});
-    var R = T("buffer", {buffer:res.R, isLooped:true});
+    var L = T("buffer", {buffer:res, isLooped:true});
+    var R = T("buffer", {buffer:res, isLooped:true});
     
     var num = 400;
     var duration = L.duration;
@@ -33,5 +33,6 @@ timbre.rec(function(output) {
     
     T("pan", {value:-1}, L).play();
     T("pan", {value:+1}, R).play();
+
 });
 ```
