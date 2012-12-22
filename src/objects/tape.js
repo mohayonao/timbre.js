@@ -111,6 +111,17 @@
         return new Scissor(silencebuffer).slice(0, 1).fill(duration);
     };
     
+    Scissor.join = function(tapes) {
+        var new_instance = new Tape();
+        
+        for (var i = 0; i < tapes.length; i++) {
+            if (tapes[i] instanceof Tape) {
+                new_instance.add_fragments(tapes[i].fragments);
+            }
+        }
+        
+        return new_instance;
+    };
     
     function Tape(soundbuffer) {
         this.fragments = [];
@@ -143,7 +154,7 @@
         }
         return result;
     };
-
+    
     Tape.prototype.slice = function(start, length) {
         var duration = this.duration();
         if (start + length > duration) {
@@ -170,19 +181,15 @@
         
         return new_instance;
     };
-
-    Tape.prototype.concat = function(other) {
-        this.add_fragments(other.fragments);
-        return this;
-    };
+    Tape.prototype.cut = Tape.prototype.slice;
     
-    Tape.prototype.plus = function(other) {
+    Tape.prototype.concat = function(other) {
         var new_instance = new Tape();
         new_instance.add_fragments(this.fragments);
         new_instance.add_fragments(other.fragments);
         return new_instance;
     };
-
+    
     Tape.prototype.loop = function(count) {
         var i;
         var orig_fragments = [];
@@ -244,7 +251,7 @@
 
         for (var i = this.fragments.length; i--; ) {
             var fragment = this.fragments[i].clone();
-            fragment.reverse = !fragment.isReversed;
+            fragment.reverse = !fragment.isReversed();
             new_instance.add_fragment(fragment);
         }
         
@@ -284,6 +291,18 @@
     
     Tape.prototype.silence = function() {
         return Scissor.silence(this.duration());
+    };
+    
+    Tape.prototype.join = function(tapes) {
+        var new_instance = new Tape();
+        
+        for (var i = 0; i < tapes.length; i++) {
+            if (tapes[i] instanceof Tape) {
+                new_instance.add_fragments(tapes[i].fragments);
+            }
+        }
+        
+        return new_instance;
     };
     
     function Fragment(soundbuffer, start, duration, reverse, pitch, stretch, pan) {
@@ -412,7 +431,7 @@
                     buffer   = fragment.buffer;
                     bufferIndexIncr = fragment.samplerate / samplerate * fragment.pitch;
                     bufferBeginIndex = fragment.start * fragment.samplerate;
-                    bufferEndIndex   = bufferBeginIndex + fragment.duration() * fragment.samplerate;
+                    bufferEndIndex   = bufferBeginIndex + fragment.original_duration() * fragment.samplerate;
                     
                     panL = Math.cos(0.005 * Math.PI * fragment.pan);
                     panR = Math.sin(0.005 * Math.PI * fragment.pan);
@@ -459,7 +478,9 @@
     };
     
     timbre.utils.scissor = {
-        Scissor: Scissor, Tape: Tape, Fragment: Fragment
+        Scissor: Scissor,
+        join   : Scissor.join,
+        silence: Scissor.silence
     };
     
 })(timbre);
