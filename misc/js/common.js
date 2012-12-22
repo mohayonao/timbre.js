@@ -3,8 +3,14 @@ $(function() {
     
     $("#list").load("/timbre.js/misc/index-"+(navigator.language==='ja'?'ja':'en')+".html");
     
+    var $title = $("#title");
+    var defaultColor = $title.css("color");
+    
     var nowPlaying;
-    timbre.on("pause", function() {
+    timbre.on("play", function() {
+        $title.css({color:"#25AA6E"});
+    }).on("pause", function() {
+        $title.css("color", defaultColor);
         nowPlaying = null;
     });
     
@@ -39,7 +45,7 @@ $(function() {
             .append($("<i>").addClass("icon-play")).append(" Play");
     });
     
-    prettyPrint();    
+    prettyPrint();
     
     timbre.amp = 0.4;
 });

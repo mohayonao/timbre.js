@@ -6,13 +6,14 @@ body {
     border: solid 1px #E1E1E8;
     border-radius: 4px;
     padding: 10px;
-    background: #EAF4FC;
+    background: #DBF0F6;
 }
 
 #index h1 {
     font-family: 'Arial';
     font-size: 18px;
-    text-shadow: 0 0 1px #ccc;
+    color: #333;
+    text-shadow: 0 0 1px #999;
 }
 
 #index h2 {
