@@ -1,6 +1,6 @@
 T("env")
 ========
-## エンベロープ ##
+## Envelope ##
 
 ```timbre
 T("env", {table:[1,[0, 1500]]}, T("sin")).on("done", function() {

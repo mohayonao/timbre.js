@@ -1,6 +1,6 @@
 T("param")
 ==========
-## パラメーター ##
+## Parameter ##
 
 ```timbre
 var freq  = T("param", {value:440});

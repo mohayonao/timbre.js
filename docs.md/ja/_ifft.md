@@ -1,5 +1,6 @@
 T("ifft")
 =========
+## Inverse fast Fourier transform ##
 
 ```timbre
 var osc = T("saw");

@@ -1,6 +1,6 @@
 T("timer")
 ==========
-## タイマー ##
+## Timer ##
 
 ```timbre
 var freqs = _.shuffle([220, 440, 660, 880]);
