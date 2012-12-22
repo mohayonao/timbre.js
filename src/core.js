@@ -689,8 +689,8 @@
         var done = function(status, list, args) {
             if (this._.status === STATUS_PENDING) {
                 this._.status = status;
-                var i, c = this.context;
-                for (i = list.length; i--; ) {
+                var c = this.context;
+                for (var i = 0, imax = list.length; i < imax; ++i) {
                     list[i].apply(c, args);
                 }
                 this._.doneList = this._.failList = null;
