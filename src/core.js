@@ -1748,12 +1748,18 @@
             
             this._.deferred = new Deferred(this);
             
-            var inlet = new SystemInlet();
+            var rec_inlet = new SystemInlet();
             var inlet_dfd = new Deferred(this);
             
-            inlet.done = function() {
-                inlet_dfd.resolve.apply(inlet_dfd, slice.call(arguments));
+            var outlet = {
+                done: function() {
+                    inlet_dfd.resolve.apply(inlet_dfd, slice.call(arguments));
+                },
+                send: function() {
+                    rec_inlet.append.apply(rec_inlet, arguments);
+                }
             };
+            
             inlet_dfd.then(recdone, function() {
                 recdone.call(this, true);
             }.bind(this));
@@ -1763,7 +1769,7 @@
             this.savedSamplerate = this.samplerate;
             this.samplerate  = opts.samplerate  || this.samplerate;
             this.recDuration = opts.recDuration || Infinity;
-            this.maxDuration = opts.maxDuration || 60 * 1000;
+            this.maxDuration = opts.maxDuration || 10 * 60 * 1000;
             this.recCh = opts.ch || 1;
             if (this.recCh !== 2) {
                 this.recCh = 1;
@@ -1776,9 +1782,9 @@
             this.strmL = new Float32Array(this.streamsize);
             this.strmR = new Float32Array(this.streamsize);
             
-            this.inlets.push(inlet);
+            this.inlets.push(rec_inlet);
             
-            func(inlet);
+            func(outlet);
             
             setTimeout(delayProcess.bind(this), 10);
         };
