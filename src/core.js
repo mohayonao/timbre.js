@@ -193,8 +193,8 @@
         return _sys.listeners(type);
     };
     
-    timbre.rec = function(fn) {
-        _sys.rec(fn);
+    timbre.rec = function() {
+        _sys.rec.apply(_sys, arguments);
         return timbre;
     };
     
@@ -1679,19 +1679,38 @@
             
             this.seq_id = seq_id;
             
+            var currentTime = this.currentTime;
+            
             if (this.status === STATUS_REC) {
-                this.recBuffers.push(new Float32Array(strmL));
-                this.recBuffers.push(new Float32Array(strmR));
-                var now = +new Date();
-                if ((now - this.recStart) > 20) {
-                    setTimeout(function() {
-                        this.recStart = +new Date();
-                        this.process();
-                    }.bind(this), 10);
+                if (this.recCh === 2) {
+                    this.recBuffers.push(new Float32Array(strmL));
+                    this.recBuffers.push(new Float32Array(strmR));
                 } else {
-                    this.process();
+                    var strm = new Float32Array(strmL.length);
+                    for (i = strm.length; i--; ) {
+                        strm[i] = (strmL[i] + strmR[i]) * 0.5;
+                    }
+                    this.recBuffers.push(strm);
+                }
+                
+                if (currentTime >= this.maxDuration) {
+                    this._.deferred.sub.reject();
+                } else if (currentTime >= this.recDuration) {
+                    this._.deferred.sub.resolve();
+                } else {
+                    var now = +new Date();
+                    if ((now - this.recStart) > 20) {
+                        setTimeout(delayProcess.bind(this), 10);
+                    } else {
+                        this.process();
+                    }
                 }
             }
+        };
+        
+        var delayProcess = function() {
+            this.recStart = +new Date();
+            this.process();
         };
         
         $.nextTick = function(func) {
@@ -1702,20 +1721,28 @@
             }
         };
         
-        $.rec = function(fn) {
+        $.rec = function() {
             if (this.status !== STATUS_NONE) {
                 // throw error??
-                return;
-            }
-            if (typeof fn !== "function") {
-                // throw error??
+                console.log("status is not none", this.status);
                 return;
             }
             if (this._.deferred) {
-                console.warn("rec??");
+                console.warn("rec deferred is exists??");
                 // throw error??
                 return;
             }
+            
+            var i = 0, args = arguments;
+            var opts = isDictionary(args[i]) ? args[i++] : {};
+            var func = args[i];
+            
+            if (typeof func !== "function") {
+                // throw error??
+                console.warn("no function");
+                return;
+            }
+            
             this.status = STATUS_REC;
             this.reset();
             
@@ -1723,11 +1750,24 @@
             
             var inlet = new SystemInlet();
             var inlet_dfd = new Deferred(this);
+            
             inlet.done = function() {
                 inlet_dfd.resolve.apply(inlet_dfd, slice.call(arguments));
             };
-            inlet_dfd.then(recdone);
+            inlet_dfd.then(recdone, function() {
+                recdone.call(this, true);
+            }.bind(this));
             
+            this._.deferred.sub = inlet_dfd;
+            
+            this.savedSamplerate = this.samplerate;
+            this.samplerate  = opts.samplerate  || this.samplerate;
+            this.recDuration = opts.recDuration || Infinity;
+            this.maxDuration = opts.maxDuration || 60 * 1000;
+            this.recCh = opts.ch || 1;
+            if (this.recCh !== 2) {
+                this.recCh = 1;
+            }
             this.recBuffers = [];
             
             this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
@@ -1738,10 +1778,9 @@
             
             this.inlets.push(inlet);
             
-            fn(inlet);
+            func(inlet);
             
-            this.recStart = +new Date();
-            this.process();
+            setTimeout(delayProcess.bind(this), 10);
         };
         
         var recdone = function() {
@@ -1749,31 +1788,59 @@
             this.reset();
             
             var recBuffers = this.recBuffers;
+            var samplerate = this.samplerate;
+            var streamsize = this.streamsize;
+            var bufferLength;
             
-            var streamsize   = this.streamsize;
-            var bufferLength = (recBuffers.length >> 1) * streamsize;
+            this.samplerate = this.savedSamplerate;
             
-            // TODO: limit length???
-            
-            var L = new Float32Array(bufferLength);
-            var R = new Float32Array(bufferLength);
-            var i, imax = bufferLength / streamsize;
-            var j = 0, k = 0;
-            
-            for (i = 0; i < imax; ++i) {
-                L.set(recBuffers[j++], k);
-                R.set(recBuffers[j++], k);
-                k += streamsize;
-
+            if (this.recDuration !== Infinity) {
+                bufferLength = (this.recDuration * samplerate * 0.001)|0;
+            } else {
+                bufferLength = (recBuffers.length >> (this.recCh-1)) * streamsize;
             }
             
-            var result = {
-                L: { buffer:L, samplerate:this.samplerate },
-                R: { buffer:R, samplerate:this.samplerate },
-                samplerate:this.samplerate
-            };
-            var args = [].concat.apply([result], arguments);
+            var result;
+            var i, imax = (bufferLength / streamsize)|0;
+            var j = 0, k = 0;
+            var remaining = bufferLength;
             
+            if (this.recCh === 2) {
+                var L = new Float32Array(bufferLength);
+                var R = new Float32Array(bufferLength);
+                
+                for (i = 0; i < imax; ++i) {
+                    L.set(recBuffers[j++], k);
+                    R.set(recBuffers[j++], k);
+                    k += streamsize;
+                    remaining -= streamsize;
+                    if (remaining > 0 && remaining < streamsize) {
+                        L.set(recBuffers[j++].subarray(0, remaining), k);
+                        R.set(recBuffers[j++].subarray(0, remaining), k);
+                        break;
+                    }
+                }
+                result = {
+                    L: { buffer:L, samplerate:samplerate },
+                    R: { buffer:R, samplerate:samplerate },
+                    samplerate:samplerate
+                };
+                
+            } else {
+                var buffer = new Float32Array(bufferLength);
+                for (i = 0; i < imax; ++i) {
+                    buffer.set(recBuffers[j++], k);
+                    k += streamsize;
+                    remaining -= streamsize;
+                    if (remaining > 0 && remaining < streamsize) {
+                        buffer.set(recBuffers[j++].subarray(0, remaining), k);
+                        break;
+                    }
+                }
+                result = { buffer: buffer, samplerate:samplerate };
+            }
+            
+            var args = [].concat.apply([result], arguments);
             this._.deferred.resolve.apply(this._.deferred, args);
             this._.deferred = null;
         };
