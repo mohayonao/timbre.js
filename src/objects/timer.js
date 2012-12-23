@@ -148,7 +148,7 @@
     
     
     function timevalue(str) {
-        var m;
+        var m, bpm, ticks;
         m = /^(\d+(?:\.\d+)?)Hz$/i.exec(str);
         if (m) {
             var hz = +m[1];
@@ -159,12 +159,33 @@
         }
         m = /^bpm(\d+(?:\.\d+)?)\s*(?:l(\d+))?$/i.exec(str);
         if (m) {
-            var bpm = +m[1];
+            bpm = +m[1];
             var len = m[2] ? m[2]|0 : 4;
             if (bpm === 0 || len === 0) {
                 return 0;
             }
             return 60 / bpm * (4 / len) * 1000;
+        }
+        m = /^bpm(\d+(?:\.\d+)?)\s*(?:(\d+)ticks)?$/i.exec(str);
+        if (m) {
+            bpm = +m[1];
+            ticks = m[2] ? m[2]|0 : 480;
+            if (bpm === 0) {
+                return 0;
+            }
+            return 60 / bpm * (ticks / 480) * 1000;
+        }
+        m = /^bpm(\d+(?:\.\d+)?)\s*(\d+)\.(\d+)\.(\d+)$/i.exec(str);
+        if (m) {
+            bpm = +m[1];
+            if (bpm === 0) {
+                return 0;
+            }
+            var bars  = m[2]|0;
+            var beats = m[3]|0;
+            var units = m[4]|0;
+            ticks = (bars * 4 * 480) + (beats * 480) + units;
+            return 60 / bpm * (ticks / 480) * 1000;
         }
         m = /^(\d+)(?:ms)?$/i.exec(str);
         if (m) {
