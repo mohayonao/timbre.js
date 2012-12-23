@@ -1,6 +1,8 @@
 (function(timbre) {
     "use strict";
     
+    var timevalue = timbre.utils.timevalue;
+    
     function EfxDelayNode(_args) {
         timbre.Object.call(this, _args);
         timbre.fn.fixAR(this);
@@ -28,8 +30,11 @@
     Object.defineProperties($, {
         time: {
             set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                }
                 if (typeof value === "number") {
-                    if (value > 0 && value < 1500) {
+                    if (0 < value && value < 15000) {
                         this._.time = value;
                         this._.delay.setParams({time:value});
                     }

@@ -1,6 +1,8 @@
 (function(timbre) {
     "use strict";
-
+    
+    var timevalue = timbre.utils.timevalue;
+    
     function ParamEvent(type, value, time) {
         this.type  = type;
         this.value = value;
@@ -21,6 +23,7 @@
         this._.maxValue = +Infinity;
         
         this._.eventtype = ParamEvent.None;
+        this._.currentTime = 0;
         this._.currentTimeIncr = this.cell.length * 1000 / timbre.samplerate;
         
         this._.schedules = [];
@@ -78,18 +81,23 @@
     
     $.setValueAtTime = function(value, time) {
         var _ = this._;
+        if (typeof time === "string") {
+            time = timevalue(time);
+        }
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            _.currentTime = timbre.currentTime;
             insertEvent(_.schedules, ParamEvent.SetValue, value, time);
         }
         return this;
     };
+    $.setAt = $.setValueAtTime;
     
     $.linearRampToValueAtTime = function(value, time) {
         var _ = this._;
-        _.currentTime = timbre.currentTime;
+        if (typeof time === "string") {
+            time = timevalue(time);
+        }
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
@@ -97,11 +105,13 @@
         }
         return this;
     };
-    $.lin = $.linearRampToValueAtTime;
+    $.lineTo = $.linearRampToValueAtTime;
     
     $.exponentialRampToValueAtTime = function(value, time) {
         var _ = this._;
-        _.currentTime = timbre.currentTime;
+        if (typeof time === "string") {
+            time = timevalue(time);
+        }
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
@@ -109,9 +119,12 @@
         }
         return this;
     };
-    $.exp = $.exponentialRampToValueAtTime;
+    $.expTo = $.exponentialRampToValueAtTime;
     
     $.cancelScheduledValues = function(time) {
+        if (typeof time === "string") {
+            time = timevalue(time);
+        }
         if (typeof time === "number") {
             var s = this._.schedules;
             for (var i = 0, imax = s.length; i < imax; ++i) {

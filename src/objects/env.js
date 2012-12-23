@@ -2,6 +2,7 @@
     "use strict";
     
     var ZERO = 1e-6;
+    var timevalue = timbre.utils.timevalue;
     
     function Envelope(_args) {
         timbre.Object.call(this, _args);
@@ -95,8 +96,6 @@
             }
         }
     });
-    
-    var timevalue = timbre.utils.timevalue;
     
     var buildTable = function(list) {
         var _ = this._;

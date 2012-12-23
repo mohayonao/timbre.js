@@ -1,6 +1,8 @@
 (function(timbre) {
     "use strict";
-
+    
+    var timevalue = timbre.utils.timevalue;
+    
     function Wait(_args) {
         timbre.Object.call(this, _args);
         timbre.fn.timer(this);
@@ -27,6 +29,9 @@
     Object.defineProperties($, {
         time: {
             set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                }
                 if (typeof value === "number" && value >= 0) {
                     this._.time = value;
                     this._.waitSamples = (timbre.samplerate * (value * 0.001))|0;

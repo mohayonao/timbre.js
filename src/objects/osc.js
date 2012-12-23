@@ -1,6 +1,8 @@
 (function(timbre) {
     "use strict";
     
+    var timevalue = timbre.utils.timevalue;
+    
     function Oscillator(_args) {
         timbre.Object.call(this, _args);
         
@@ -61,6 +63,13 @@
         },
         freq: {
             set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                    if (value <= 0) {
+                        return;
+                    }
+                    value = 1000 / value;
+                }
                 this._.freq = timbre(value);
             },
             get: function() {

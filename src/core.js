@@ -16,6 +16,7 @@
     
     var _ver = "${VERSION}";
     var _sys = null;
+    var _bpm = 120;
     var _constructors = {};
     var _factories    = {};
     var _envtype = (function() {
@@ -134,6 +135,18 @@
         isRecording: {
             get: function() {
                 return _sys.status === STATUS_REC;
+            }
+        },
+        bpm: {
+            set: function(value) {
+                if (typeof value === "number" ) {
+                    if (5 <= value && value <= 300) {
+                        _bpm = value;
+                    }
+                }
+            },
+            get: function() {
+                return _bpm;
             }
         },
         amp: {
@@ -1531,6 +1544,100 @@
         
         return ObjectWrapper;
     })();
+    
+    
+    var timevalue = function(str) {
+        var m, bpm, ticks, x;
+        m = /^(\d+(?:\.\d+)?)Hz$/i.exec(str);
+        if (m) {
+            var hz = +m[1];
+            if (hz === 0) {
+                return 0;
+            }
+            return 1000 / +m[1];
+        }
+        m = /^bpm(\d+(?:\.\d+)?)?\s*(?:l(\d+))?(\.*)$/i.exec(str);
+        if (m) {
+            bpm = m[1];
+            if (bpm === undefined) {
+                bpm = timbre.bpm;
+            } else {
+                bpm = +m[1];
+                if (bpm < 5 || 300 < bpm) {
+                    bpm = timbre.bpm;
+                }
+            }
+            var len = m[2] ? m[2]|0 : 4;
+            if (bpm === 0 || len === 0) {
+                return 0;
+            }
+            var ms = 60 / bpm * (4 / len) * 1000;
+            ms *= [1, 1.5, 1.75, 1.875][(m[3]||"").length] || 1;
+            return ms;
+        }
+        m = /^bpm(\d+(?:\.\d+)?)?\s*(\d+)\.(\d+)\.(\d+)$/i.exec(str);
+        if (m) {
+            bpm = m[1];
+            if (bpm === undefined) {
+                bpm = timbre.bpm;
+            } else {
+                bpm = +m[1];
+                if (bpm < 5 || 300 < bpm) {
+                    bpm = timbre.bpm;
+                }
+            }
+            var bars  = m[2]|0;
+            var beats = m[3]|0;
+            var units = m[4]|0;
+            ticks = (bars * 4 * 480) + (beats * 480) + units;
+            return 60 / bpm * (ticks / 480) * 1000;
+        }
+        m = /^(\d+(?:\.\d+)?)secs?$/i.exec(str);
+        if (m) {
+            return +m[1] * 1000;
+        }
+        m = /^(\d+(?:\.\d+)?)mins?$/i.exec(str);
+        if (m) {
+            return +m[1] * (60 * 1000);
+        }
+        m = /^(?:([0-5]?[0-9]):)?(?:([0-5]?[0-9]):)(?:([0-5]?[0-9]))(?:\.([0-9]{1,3}))?$/.exec(str);
+        if (m) {
+            x = (m[1]|0) * 3600 + (m[2]|0) * 60 + (m[3]|0);
+            x = x * 1000 + ((((m[4]||"")+"00").substr(0, 3))|0);
+            return x;
+        }
+        m = /^bpm(\d+(?:\.\d+)?)?\s*(?:(\d+)ticks)?$/i.exec(str);
+        if (m) {
+            bpm = m[1];
+            if (bpm === undefined) {
+                bpm = timbre.bpm;
+            } else {
+                bpm = +m[1];
+                if (bpm < 5 || 300 < bpm) {
+                    bpm = timbre.bpm;
+                }
+            }
+            ticks = m[2] ? m[2]|0 : 480;
+            if (bpm === 0) {
+                return 0;
+            }
+            return 60 / bpm * (ticks / 480) * 1000;
+        }
+        m = /^(\d+)samples(?:\/(\d+)Hz)?$/i.exec(str);
+        if (m) {
+            var sr = m[2] ? m[2]|0 : timbre.samplerate;
+            if (sr === 0) {
+                return 0;
+            }
+            return (m[1]|0) / sr * 1000;
+        }
+        m = /^(\d+)(?:ms)?$/i.exec(str);
+        if (m) {
+            return m[1]|0;
+        }
+        return 0;
+    };
+    timbre.utils.timevalue = timevalue;
     
     var SystemInlet = (function() {
         function SystemInlet(object) {

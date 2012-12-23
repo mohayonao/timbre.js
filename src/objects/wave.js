@@ -1,6 +1,8 @@
 (function(timbre) {
     "use strict";
-
+    
+    var timevalue = timbre.utils.timevalue;
+    
     function WaveListener(_args) {
         timbre.Object.call(this, _args);
         timbre.fn.listener(this);
@@ -48,6 +50,9 @@
         interval: {
             set: function(value) {
                 var _ = this._;
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                }
                 if (typeof value === "number" && value > 0) {
                     if (!_.buffer) {
                         _.reservedinterval = value;
