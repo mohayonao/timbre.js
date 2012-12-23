@@ -36,7 +36,8 @@ class HTMLBuilder
         unless doc then return 'NOT FOUND'
 
         html = marked fs.readFileSync(doc.path, 'utf-8')
-        html = lang_process html
+        html = lang_process  html
+        html = insert_canvas html
         jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
             lang: doc.lang, title: doc.name
             main: html
@@ -65,10 +66,13 @@ class HTMLBuilder
                 when 'table'
                     marked_table m[2]
             if rep
-                head = doc.substr 0, m.index
-                tail = doc.substr m.index + m[0].length
-                doc  = head + rep + tail
+                doc = replace doc, m.index, m[0].length, rep
         doc
+
+    replace = (src, start, length, dst)->
+        head = src.substr 0, start
+        tail = src.substr start + length
+        head + dst + tail
 
     marked_table = (src)->
         [theads, tbodies]  = [[],[]]
@@ -98,13 +102,17 @@ class HTMLBuilder
         m = /^md:\s*([\w\W]+)$/.exec x
         if m then marked m[1] else x
 
+    insert_canvas = (src)->
+        re = /<p>\s*\$\(([\-\w]+) w:(\d+) h:(\d+)\)\s*<\/p>/g
+        while (m = re.exec(src))
+            rep = "<canvas id=\"#{m[1]}\" style=\"width:#{m[2]}px;height:#{m[3]}px\" class=\"pull-right\"></canvas>"
+            src = replace src, m.index, m[0].length, rep
+        src
+
 
 class DocFileBuilder extends HTMLBuilder
     constructor: (@lang)->
         super path.normalize("#{__dirname}/../docs.md/#{@lang}"), "docs/#{lang}"
-
-    build: (name)->
-        super name
 
     get_indexes: (indexes)->
         super indexes, 'ref'
@@ -128,9 +136,6 @@ class DocFileBuilder extends HTMLBuilder
 class ExampleFileBuilder extends HTMLBuilder
     constructor: ->
         super path.normalize("#{__dirname}/../examples.md"), "examples"
-
-    build: (name)->
-        super name
 
     get_indexes: (indexes)->
         super indexes, 'exa'

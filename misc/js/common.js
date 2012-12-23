@@ -24,6 +24,11 @@ $(function() {
         }
     }
     
+    $("canvas + p").each(function(i, e) {
+        var h = $(e).prev().height();
+        $(e).height(h);
+    });
+    
     $(".click-to-play").on("click", function(e) {
         playCode($(this).text());
     });
@@ -48,4 +53,11 @@ $(function() {
     prettyPrint();
     
     timbre.amp = 0.4;
+
+    window.getCanvasWithSize = function(name, width, height) {
+        var canvas = document.getElementById(name);
+        canvas.width  = width;
+        canvas.height = height;
+        return canvas;
+    }
 });

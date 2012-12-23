@@ -51,6 +51,10 @@ body {
     margin-bottom: 15px;
 }
 
+#main canvas {
+    border: solid 1px #E1E1E8;
+}
+
 .CodeMirror {
     border: solid 1px #E1E1E8;
 }
