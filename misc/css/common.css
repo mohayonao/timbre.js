@@ -43,7 +43,7 @@ body {
     letter-spacing: 2px;
 }
 
-#main h2 {
+#main h1 + p {
     line-height: 20px;
     font-size: 12px;
     font-weight: normal;
@@ -51,8 +51,26 @@ body {
     margin-bottom: 15px;
 }
 
+#main h2 {
+    font-size: 18px;
+}
+
+#main h3 {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+#main h4 {
+
+}
+
+#main h5 {
+    
+}
+
 #main canvas {
     border: solid 1px #E1E1E8;
+    margin-left: 25px;
 }
 
 .CodeMirror {

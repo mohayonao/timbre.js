@@ -6,12 +6,16 @@ $(function() {
     var $title = $("#title");
     var defaultColor = $title.css("color");
     
-    var nowPlaying;
+    var nowPlaying, animationId;
     timbre.on("play", function() {
         $title.css({color:"#25AA6E"});
     }).on("pause", function() {
         $title.css("color", defaultColor);
         nowPlaying = null;
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+        }
+        animationId = null;
     });
     
     function playCode(code) {
@@ -23,11 +27,6 @@ $(function() {
             nowPlaying = code;
         }
     }
-    
-    $("canvas + p").each(function(i, e) {
-        var h = $(e).prev().height();
-        $(e).height(h);
-    });
     
     $(".click-to-play").on("click", function(e) {
         playCode($(this).text());
@@ -54,10 +53,26 @@ $(function() {
     
     timbre.amp = 0.4;
 
-    window.getCanvasWithSize = function(name, width, height) {
+    window.getCanvasById = function(name) {
         var canvas = document.getElementById(name);
-        canvas.width  = width;
-        canvas.height = height;
+        canvas.width  = $(canvas).width();
+        canvas.height = $(canvas).height();
         return canvas;
     }
+    
+    
+    
+    window.animate = function(fn, fps) {
+        var lastTime = 0;
+        var limit = 1 / (fps || 10) * 1000;
+        var _animate = function(time) {
+            if (time - lastTime > limit) {
+                lastTime = time;
+                fn();
+            }
+            animationId = requestAnimationFrame(_animate);
+        };
+        animationId = requestAnimationFrame(_animate);
+    };
+    
 });

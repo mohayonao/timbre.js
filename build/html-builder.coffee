@@ -38,6 +38,7 @@ class HTMLBuilder
         html = marked fs.readFileSync(doc.path, 'utf-8')
         html = lang_process  html
         html = insert_canvas html
+        html = insert_height html
         jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
             lang: doc.lang, title: doc.name
             main: html
@@ -58,7 +59,7 @@ class HTMLBuilder
         while m = re.exec doc
             rep = switch m[1]
                 when 'js', 'javascript'
-                    "<pre class=\"lang-js prettyprint linenums\">#{m[2]}</pre>"
+                    "<pre class=\"lang-js prettyprint\">#{m[2]}</pre>"
                 when 'timbre'
                     "<pre class=\"click-to-play lang-js prettyprint linenums\">#{m[2]}</pre>"
                 when 'codemirror'
@@ -103,9 +104,16 @@ class HTMLBuilder
         if m then marked m[1] else x
 
     insert_canvas = (src)->
-        re = /<p>\s*\$\(([\-\w]+) w:(\d+) h:(\d+)\)\s*<\/p>/g
+        re = /<p>\s*\(canvas\s+([\-\w]+) w:(\d+) h:(\d+)\)\s*<\/p>/g
         while (m = re.exec(src))
             rep = "<canvas id=\"#{m[1]}\" style=\"width:#{m[2]}px;height:#{m[3]}px\" class=\"pull-right\"></canvas>"
+            src = replace src, m.index, m[0].length, rep
+        src
+
+    insert_height = (src)->
+        re = /<p>\s*\(height\s+(\d+)\)\s*<\/p>/g
+        while (m = re.exec(src))
+            rep = "<div style=\"height:#{m[1]}px\"></div>"
             src = replace src, m.index, m[0].length, rep
         src
 
