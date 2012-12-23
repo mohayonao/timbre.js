@@ -5,10 +5,10 @@ Reich
 timbre.rec(function(output) {
     
     var freqs = _.shuffle([440, 494, 523, 659, 440, 494, 523, 659]);
-    var ms = 240;
+    var ms = timbre.utils.timevalue("bpm120 l8");
 
-    var osc = T("osc", {wave:"tri(25)", mul:0.25});
-    var env = T("env", {table:[0, [1, 10], [0, ms*0.95]]}, osc);
+    var osc = T("osc", {wave:"tri(25)"});
+    var env = T("perc", {r:ms}, osc);
 
     var func = T(function(count) {
         return freqs[count % freqs.length];
