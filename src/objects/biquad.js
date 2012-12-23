@@ -122,26 +122,25 @@
         return cell;
     };
     
-    $.plot = (function() {
-        var fft = new timbre.utils.FFT(256);
-        var super_plot = timbre.Object.prototype.plot;
-        return function(opts) {
-            if (this._.plotFlush) {
-                var biquad = new BiquadFilter({type:this.type,samplerate:timbre.samplerate});
-                biquad.setParams(this.freq.valueOf(), this.Q.valueOf(), this.gain.valueOf());
-                
-                var impluse = new Float32Array(256);
-                impluse[0] = 1;
-                
-                biquad.process(impluse);
-                fft.forward(impluse);
-                
-                this._.plotData  = fft.spectrum;
-                this._.plotFlush = null;
-            }
-            return super_plot.call(this, opts);
-        };
-    })();
+    var fft = new timbre.utils.FFT(256);
+    var super_plot = timbre.Object.prototype.plot;
+    
+    $.plot = function(opts) {
+        if (this._.plotFlush) {
+            var biquad = new BiquadFilter({type:this.type,samplerate:timbre.samplerate});
+            biquad.setParams(this.freq.valueOf(), this.Q.valueOf(), this.gain.valueOf());
+            
+            var impluse = new Float32Array(256);
+            impluse[0] = 1;
+            
+            biquad.process(impluse);
+            fft.forward(impluse);
+            
+            this._.plotData  = fft.spectrum;
+            this._.plotFlush = null;
+        }
+        return super_plot.call(this, opts);
+    };
     
     
     function BiquadFilter(opts) {
