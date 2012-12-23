@@ -5,7 +5,6 @@
     // http://www.firstpr.com.au/dsp/pink-noise/
     
     var MAX_KEY = 31;
-    var RANGE  = 128;
     
     function PinkNoise(_args) {
         timbre.Object.call(this, _args);
@@ -32,7 +31,7 @@
             var i, imax, j;
             var key = _.key, whites = _.whites;
             var mul = _.mul, add = _.add;
-            var last_key, sum, diff;            
+            var last_key, sum, diff;
             
             for (i = 0, imax = cell.length; i < imax; ++i) {
                 last_key = key++;
