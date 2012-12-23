@@ -1,7 +1,6 @@
 {
     "dependencies": {
         "env"   : ["timer"],
-        "biquad": ["fft"],
-        "_ifft" : ["fft"]
+        "biquad": ["fft"]
     }
 }
