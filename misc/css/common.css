@@ -1,24 +1,48 @@
-body {
-    margin: 25px 0 50px;
+* {
+    margin: 0;
+    padding: 0;
 }
 
-#index {
-    border: solid 1px #E1E1E8;
-    border-radius: 4px;
-    padding: 10px;
+ul {
+    margin: 5px 0 30px 25px;
+}
+
+a {
+    color: #007AB7;
+}
+
+#sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    
+    padding: 15px 0 30px 30px;
+    border-right: 1px solid #BBB;
+    box-shadow: 0 0 20px #CCC;
+    -webkit-box-shadow: 0 0 20px #CCC;
+
+    font-size: 14px;
+
     background: #DBF0F6;
 }
 
-#index h1 {
+#title {
     font-family: 'Arial';
     font-size: 18px;
     color: #333;
     text-shadow: 0 0 1px #999;
+    margin-bottom: 25px;
+}
+
+#index {
+    height: 100%;
+
 }
 
 #index h2 {
     font-size: 14px;
-    font-weight: normal;
 }
 
 #index ul {
@@ -35,6 +59,9 @@ body {
 }
 
 #main {
+    width: 600px;
+    margin: 40px 0 50px 260px;
+    font-size: 14px;
     line-height: 24px;
 }
 
@@ -57,6 +84,7 @@ body {
 
 #main h2 {
     font-size: 18px;
+    margin: 15px 0 5px;
 }
 
 #main h3 {
@@ -72,6 +100,10 @@ body {
     
 }
 
+#main h2 ~ p {
+    margin-left: 15px;
+}
+
 #main canvas {
     border: solid 1px #E1E1E8;
     margin-left: 25px;
@@ -80,6 +112,11 @@ body {
 #main ul ul {
     margin: 0 0 10px 5px;
     list-style-type: none;
+}
+
+#main code {
+    color: #BF1E56;
+    font-family: 'Courier', monospace;
 }
 
 .label {
@@ -105,6 +142,12 @@ body {
     width: 120px;
 }
 
+.prettyprint {
+    font-family: 'Courier', monospace;
+    font-size: 12px;
+    margin: 15px 0 25px;
+}
+
 .click-to-play {
     background-image: url("/timbre.js/misc/img/click-to-play.png");
     background-repeat: no-repeat;
@@ -112,7 +155,14 @@ body {
     cursor: pointer
 }
 
-#main code {
-    border-width: 0;
-    background: transparent;
+.pull-right {
+    float: right;
+}
+
+.label {
+    color: white;
+    padding: 0 5px;
+    font-size: 8px;
+    font-weight: bold;
+    border-radius: 3px;
 }

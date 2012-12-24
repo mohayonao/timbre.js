@@ -3,7 +3,6 @@ html(lang=lang)
   head
     meta(charset="utf-8")
     title #{title}
-    link(rel="stylesheet", href="/timbre.js/misc/css/bootstrap.css", type="text/css")
     link(rel="stylesheet", href="/timbre.js/misc/css/prettify.css" , type="text/css")
     link(rel="stylesheet", href="/timbre.js/misc/css/codemirror.css", type="text/css")
     link(rel="stylesheet", href="/timbre.js/misc/css/common.css", type="text/css")
@@ -12,17 +11,19 @@ html(lang=lang)
   body
     .container
       .row
-        #index.span2
+        #sidebar
           h1#title timbre.js
-          ul
-            li
-              a(href="/timbre.js/timbre.js") timbre.js
-            li
-              a(href="/timbre.js/timbre.dev.js") timbre.dev.js
-            li
-              a(href="https://github.com/mohayonao/timbre.js") repository
-          #list
-        #main.span9 !{main}
+          #index
+            ul
+              li
+                a(href="/timbre.js/timbre.js") timbre.js
+              li
+                a(href="/timbre.js/timbre.dev.js") timbre.dev.js
+              li
+                a(href="https://github.com/mohayonao/timbre.js") repository
+            #list
+        #main
+          !{main}
     script(src="/timbre.js/misc/js/jquery.js")
     script(src="/timbre.js/misc/js/underscore.js")
     script(src="/timbre.js/misc/js/prettify.js")
