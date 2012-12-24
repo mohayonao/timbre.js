@@ -1,5 +1,5 @@
 body {
-    margin-top: 25px;
+    margin: 25px 0 50px;
 }
 
 #index {
@@ -34,6 +34,10 @@ body {
     font-weight: normal;
 }
 
+#main {
+    line-height: 24px;
+}
+
 #main h1 {
     padding-bottom: 5px;
     margin-bottom: 0;
@@ -57,7 +61,7 @@ body {
 
 #main h3 {
     margin: 10px 0;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 #main h4 {
@@ -71,6 +75,18 @@ body {
 #main canvas {
     border: solid 1px #E1E1E8;
     margin-left: 25px;
+}
+
+#main ul ul {
+    margin: 0 0 10px 5px;
+    list-style-type: none;
+}
+
+.label {
+    margin: 5px 0 0 5px;
+    font-style: normal;
+    font-size: 12px;
+    background: #6EB7DB;
 }
 
 .CodeMirror {
@@ -94,4 +110,9 @@ body {
     background-repeat: no-repeat;
     background-position: top right;
     cursor: pointer
+}
+
+#main code {
+    border-width: 0;
+    background: transparent;
 }

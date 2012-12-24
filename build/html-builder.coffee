@@ -39,6 +39,7 @@ class HTMLBuilder
         html = lang_process  html
         html = insert_canvas html
         html = insert_height html
+        html = insert_label  html
         jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
             lang: doc.lang, title: doc.name
             main: html
@@ -55,19 +56,19 @@ class HTMLBuilder
             indexes[doc.category].push doc
 
     lang_process = (doc)->
-        re = /<pre><code class="lang-(.+)">([\w\W]+?)<\/code><\/pre>/g
+        re  = /<pre><code class="lang-(?:js|javascript)">([\w\W]+?)<\/code><\/pre>/g
+        doc = doc.replace re, '<pre class="lang-js prettyprint">$1</pre>'
+
+        re  = /<pre><code class="lang-timbre">([\w\W]+?)<\/code><\/pre>/g
+        doc = doc.replace re, '<pre class="click-to-play lang-js prettyprint linenums">$1</pre>'
+
+        re  = /<pre><code class="lang-codemirror">([\w\W]+?)<\/code><\/pre>/g
+        doc = doc.replace re, '<div class="codemirror" source="$1"></div>'
+
+        re = /<pre><code class="lang-table">([\w\W]+?)<\/code><\/pre>/g
         while m = re.exec doc
-            rep = switch m[1]
-                when 'js', 'javascript'
-                    "<pre class=\"lang-js prettyprint\">#{m[2]}</pre>"
-                when 'timbre'
-                    "<pre class=\"click-to-play lang-js prettyprint linenums\">#{m[2]}</pre>"
-                when 'codemirror'
-                    """<div class=\"codemirror\" source=\"#{m[2]}\"></div>"""
-                when 'table'
-                    marked_table m[2]
-            if rep
-                doc = replace doc, m.index, m[0].length, rep
+            rep = marked_table m[1]
+            doc = replace doc, m.index, m[0].length, rep
         doc
 
     replace = (src, start, length, dst)->
@@ -105,18 +106,16 @@ class HTMLBuilder
 
     insert_canvas = (src)->
         re = /<p>\s*\(canvas\s+([\-\w]+) w:(\d+) h:(\d+)\)\s*<\/p>/g
-        while (m = re.exec(src))
-            rep = "<canvas id=\"#{m[1]}\" style=\"width:#{m[2]}px;height:#{m[3]}px\" class=\"pull-right\"></canvas>"
-            src = replace src, m.index, m[0].length, rep
-        src
+        src.replace re, '<canvas id="$1" style="width:$2px;height:$3px" class="pull-right"></canvas>'
 
     insert_height = (src)->
         re = /<p>\s*\(height\s+(\d+)\)\s*<\/p>/g
-        while (m = re.exec(src))
-            rep = "<div style=\"height:#{m[1]}px\"></div>"
-            src = replace src, m.index, m[0].length, rep
-        src
+        src.replace re, '<div style="height:$1px"></div>'
 
+    insert_label = (src)->
+        src = src.replace /{deferred}/ig, '<span class="label deferred pull-right">D</span>'
+        src = src.replace /{listener}/ig, '<span class="label listener pull-right">L</span>'
+        src = src.replace /{timer}/ig   , '<span class="label timer pull-right">T</span>'
 
 class DocFileBuilder extends HTMLBuilder
     constructor: (@lang)->
