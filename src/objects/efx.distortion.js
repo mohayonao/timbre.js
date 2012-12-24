@@ -7,7 +7,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(EfxDistortion, timbre.Object);
+    timbre.fn.extend(EfxDistortion);
     
     var oninit = function() {
         if (!this._.preGain) {

@@ -4,7 +4,7 @@
     function Noise(_args) {
         timbre.Object.call(this, _args);
     }
-    timbre.fn.extend(Noise, timbre.Object);
+    timbre.fn.extend(Noise);
     
     var $ = Noise.prototype;
 

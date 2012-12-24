@@ -25,7 +25,7 @@
         
         this._.plotFlush = true;
     }
-    timbre.fn.extend(Envelope, timbre.Object);
+    timbre.fn.extend(Envelope);
     
     var CurveTypeNone = 0;
     var CurveTypeLin  = 1;

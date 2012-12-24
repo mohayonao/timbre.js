@@ -12,7 +12,7 @@
         this._.realBuffer = new Float32Array(this._.fft.length);
         this._.imagBuffer = new Float32Array(this._.fft.length);
     }
-    timbre.fn.extend(IFFT, timbre.Object);
+    timbre.fn.extend(IFFT);
     
     var $ = IFFT.prototype;
     

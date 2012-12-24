@@ -15,7 +15,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(WaveListener, timbre.Object);
+    timbre.fn.extend(WaveListener);
     
     var oninit = function() {
         if (!this._.buffer) {

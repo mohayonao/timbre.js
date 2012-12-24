@@ -18,7 +18,7 @@
         this._.plotRange = [0, 0.5];
         this._.plotBarStyle = true;
     }
-    timbre.fn.extend(FFTListener, timbre.Object);
+    timbre.fn.extend(FFTListener);
     
     var $ = FFTListener.prototype;
     

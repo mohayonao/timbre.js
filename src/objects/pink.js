@@ -17,7 +17,7 @@
         this._.whites = whites;
         this._.key = 0;
     }
-    timbre.fn.extend(PinkNoise, timbre.Object);
+    timbre.fn.extend(PinkNoise);
     
     var $ = PinkNoise.prototype;
     

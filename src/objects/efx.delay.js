@@ -11,7 +11,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(EfxDelayNode, timbre.Object);
+    timbre.fn.extend(EfxDelayNode);
     
     var oninit = function() {
         if (!this._.time) {

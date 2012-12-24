@@ -12,7 +12,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(Map, timbre.Object);
+    timbre.fn.extend(Map);
     
     var oninit = function() {
         if (!this._.warp) {

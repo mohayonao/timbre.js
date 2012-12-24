@@ -21,7 +21,7 @@
         _.currentTime     = 0;
         _.currentTimeIncr = 1000 / timbre.samplerate;
     }
-    timbre.fn.extend(Recorder, timbre.Object);
+    timbre.fn.extend(Recorder);
     
     var $ = Recorder.prototype;
     
@@ -80,10 +80,10 @@
             _.status = STATUS_WAIT;
             _.emit("stop");
             timbre.fn.nextTick(onended.bind(this));
-        }        
+        }
         return this;
     };
-
+    
     $.bang = function() {
         if (this._.status === STATUS_WAIT) {
             this.srart();

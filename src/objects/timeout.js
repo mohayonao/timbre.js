@@ -21,7 +21,7 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
-    timbre.fn.extend(Timeout, timbre.Object);
+    timbre.fn.extend(Timeout);
     
     var oninit = function() {
         if (this._.originkey === "wait") {

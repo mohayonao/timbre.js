@@ -31,7 +31,7 @@
         this.on("setAdd", __changeWithValue);
         this.on("setMul", __changeWithValue);
     }
-    timbre.fn.extend(Param, timbre.Object);
+    timbre.fn.extend(Param);
 
     var __changeWithValue = timbre.fn.changeWithValue;
     

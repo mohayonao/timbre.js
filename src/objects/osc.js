@@ -12,7 +12,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(Oscillator, timbre.Object);
+    timbre.fn.extend(Oscillator);
     
     var oninit = function() {
         var _ = this._;

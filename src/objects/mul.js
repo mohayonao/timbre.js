@@ -4,7 +4,7 @@
     function Mul(_args) {
         timbre.Object.call(this, _args);
     }
-    timbre.fn.extend(Mul, timbre.Object);
+    timbre.fn.extend(Mul);
     
     var $ = Mul.prototype;
     

@@ -9,7 +9,7 @@
         this._.isLooped = false;
         this._.isEnded  = false;
     }
-    timbre.fn.extend(ScissorNode, timbre.Object);
+    timbre.fn.extend(ScissorNode);
     
     var $ = ScissorNode.prototype;
     

@@ -12,7 +12,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(Biquad, timbre.Object);
+    timbre.fn.extend(Biquad);
     
     var oninit = function() {
         if (!this._.freq) {

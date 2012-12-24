@@ -6,7 +6,7 @@
         
         this._.lv = 0.8;
     }
-    timbre.fn.extend(Clip, timbre.Object);
+    timbre.fn.extend(Clip);
     
     var $ = Clip.prototype;
     

@@ -11,7 +11,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(Panner, timbre.Object);
+    timbre.fn.extend(Panner);
     
     var oninit = function() {
         if (!this._.value) {

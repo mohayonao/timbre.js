@@ -23,7 +23,7 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
-    timbre.fn.extend(Interval, timbre.Object);
+    timbre.fn.extend(Interval);
     
     var oninit = function() {
         if (this._.originkey === "timer") {

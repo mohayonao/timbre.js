@@ -4,7 +4,7 @@
     function Add(_args) {
         timbre.Object.call(this, _args);
     }
-    timbre.fn.extend(Add, timbre.Object);
+    timbre.fn.extend(Add);
     
     var $ = Add.prototype;
     

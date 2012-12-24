@@ -20,7 +20,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(FFTSpectrum, timbre.Object);
+    timbre.fn.extend(FFTSpectrum);
     
     var oninit = function() {
         var _ = this._;

@@ -246,6 +246,8 @@
     
     // borrowed from coffee-script
     var __extend = function(child, parent) {
+        parent = parent || TimbreObject;
+        
         for (var key in parent) {
             if (parent.hasOwnProperty(key)) {
                 child[key] = parent[key];
@@ -1253,7 +1255,7 @@
             
             this._.parent = parent;
         }
-        __extend(ChannelObject, TimbreObject);
+        __extend(ChannelObject);
         
         ChannelObject.prototype.seq = function(seq_id) {
             if (this.seq_id !== seq_id) {
@@ -1276,7 +1278,7 @@
             this.on("setAdd", __changeWithValue);
             this.on("setMul", __changeWithValue);
         }
-        __extend(NumberWrapper, TimbreObject);
+        __extend(NumberWrapper);
         
         var $ = NumberWrapper.prototype;
         
@@ -1296,7 +1298,7 @@
         
         return NumberWrapper;
     })();
-
+    
     var BooleanWrapper = (function() {
         function BooleanWrapper(_args) {
             TimbreObject.call(this, _args.slice(1));
@@ -1307,7 +1309,7 @@
             this.on("setAdd", __changeWithValue);
             this.on("setMul", __changeWithValue);
         }
-        __extend(BooleanWrapper, TimbreObject);
+        __extend(BooleanWrapper);
         
         var $ = BooleanWrapper.prototype;
         
@@ -1338,7 +1340,7 @@
             this.on("setAdd", __changeWithValue);
             this.on("setMul", __changeWithValue);
         }
-        __extend(FunctionWrapper, TimbreObject);
+        __extend(FunctionWrapper);
         
         var $ = FunctionWrapper.prototype;
         
@@ -1400,7 +1402,7 @@
             this._.ignoreFirstBang      = false;
             this._.savedIgnoreFirstBang = false;
         }
-        __extend(ArrayWrapper, TimbreObject);
+        __extend(ArrayWrapper);
         
         var $ = ArrayWrapper.prototype;
         
@@ -1565,7 +1567,7 @@
         function ObjectWrapper() {
             TimbreObject.call(this, []);
         }
-        __extend(ObjectWrapper, TimbreObject);
+        __extend(ObjectWrapper);
         
         return ObjectWrapper;
     })();
@@ -1676,7 +1678,7 @@
             
             this.on("append", onappend);
         }
-        __extend(SystemInlet , TimbreObject);
+        __extend(SystemInlet);
         
         var onappend = function(list) {
             for (var i = list.length; i--; ) {

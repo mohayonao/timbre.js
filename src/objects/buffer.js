@@ -15,7 +15,7 @@
         this._.phaseIncr = 0;
         this._.pitch = timbre(1);
     }
-    timbre.fn.extend(SoundBuffer, timbre.Object);
+    timbre.fn.extend(SoundBuffer);
     
     var $ = SoundBuffer.prototype;
     
