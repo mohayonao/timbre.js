@@ -2,14 +2,17 @@
     "use strict";
 
     var timevalue = timbre.utils.timevalue;
+
+    var TYPE_TIMER    = 0;
+    var TYPE_INTERVAL = 1;
     
-    function Timer(_args) {
+    function Interval(_args) {
         timbre.Object.call(this, _args);
         timbre.fn.timer(this);
         timbre.fn.fixKR(this);
         
         this._.count = 0;
-        this._.duration = Infinity;
+        this._.timeout = Infinity;
         this._.currentTime = 0;
         this._.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
         
@@ -20,9 +23,15 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
-    timbre.fn.extend(Timer, timbre.Object);
+    timbre.fn.extend(Interval, timbre.Object);
     
     var oninit = function() {
+        if (this._.originkey === "timer") {
+            this._.type = TYPE_TIMER;
+            timbre.fn.deferred(this);
+        } else {
+            this._.type = TYPE_INTERVAL;
+        }
         if (!this._.interval) {
             this.interval = 1000;
         }
@@ -36,13 +45,14 @@
     };
     
     var onstart = function() {
+        this._.currentTime = 0;
         this._.isEnded = false;
     };
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
     });
     
-    var $ = Timer.prototype;
+    var $ = Interval.prototype;
     
     Object.defineProperties($, {
         interval: {
@@ -80,14 +90,17 @@
                 return this._.count;
             }
         },
-        duration: {
+        timeout: {
             set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                }
                 if (typeof value === "number" && value >= 0) {
-                    this._.duration = value;
+                    this._.timeout = value;
                 }
             },
             get: function() {
-                return this._.duration;
+                return this._.timeout;
             }
         },
         currentTime: {
@@ -99,9 +112,10 @@
     
     $.bang = function() {
         var _ = this._;
+        _.currentTime = 0;
         _.delaySamples = (timbre.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
-        this._.emit("bang");
+        _.emit("bang");
         return this;
     };
     
@@ -140,7 +154,7 @@
             }
             _.currentTime += _.currentTimeIncr;
 
-            if (_.currentTime >= _.duration) {
+            if (_.currentTime >= _.timeout) {
                 timbre.fn.nextTick(onended.bind(this));
             }
         }
@@ -148,10 +162,22 @@
     };
     
     var onended = function() {
-        timbre.fn.onended(this);
+        var _ = this._;
+        _.isEnded = true;
+        if (_.type === TYPE_TIMER && !this.isResolved) {
+            var stop = this.stop;
+            this.start = this.stop = timbre.fn.nop;
+            _.emit("ended");
+            _.deferred.resolve();
+            stop.call(this);
+        } else {
+            this.stop();
+            _.emit("ended");
+        }
     };
     
-    timbre.fn.register("timer", Timer);
-    timbre.fn.alias("interval", "timer");
+    timbre.fn.register("interval", Interval);
+    timbre.fn.alias("interval0", "interval");
+    timbre.fn.alias("timer", "interval");
     
 })(timbre);
