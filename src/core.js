@@ -1268,7 +1268,7 @@
     
     var NumberWrapper = (function() {
         function NumberWrapper(_args) {
-            TimbreObject.call(this, []);
+            TimbreObject.call(this, _args.slice(1));
             __fixKR(this);
             
             this.value = _args[0];
@@ -1299,7 +1299,7 @@
 
     var BooleanWrapper = (function() {
         function BooleanWrapper(_args) {
-            TimbreObject.call(this, []);
+            TimbreObject.call(this, _args.slice(1));
             __fixKR(this);
             
             this.value = _args[0];
@@ -1314,10 +1314,8 @@
         Object.defineProperties($, {
             value: {
                 set: function(value) {
-                    if (typeof value === "number") {
-                        this._.value = value ? 1 : 0;
-                        __changeWithValue.call(this);
-                    }
+                    this._.value = value ? 1 : 0;
+                    __changeWithValue.call(this);
                 },
                 get: function() {
                     return !!this._.value;
@@ -1529,9 +1527,6 @@
             
             return cell;
         };
-        
-        
-        
         
         
         var ClipFunctions = [
