@@ -477,13 +477,6 @@
                 cellL[i] = cellR[i] = cell[i] = lastValue;
             }
         }
-        var dac = object.dac;
-        if (dac && dac.isPlaying) {
-            object.pause();
-        }
-        if (typeof object.stop === "function") {
-            object.stop();
-        }
         object._.isEnded = true;
         object._.emit("ended");
     };
