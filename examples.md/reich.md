@@ -15,7 +15,7 @@ timbre.rec(function(output) {
     });
     osc.freq = func;
 
-    T("timer", {interval:ms, duration:ms*freqs.length}).on("ended", function() {
+    T("timer", {interval:ms, timeout:ms*freqs.length}).on("ended", function() {
         output.done();
     }).append(func, env).start();
     
