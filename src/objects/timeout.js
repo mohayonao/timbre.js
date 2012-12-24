@@ -30,8 +30,8 @@
         } else {
             this._.type = TYPE_TIMEOUT;
         }
-        if (!this._.time) {
-            this.time = 1000;
+        if (!this._.timeout) {
+            this.timeout = 1000;
         }
     };
     
@@ -45,21 +45,21 @@
     var $ = Timeout.prototype;
     
     Object.defineProperties($, {
-        time: {
+        timeout: {
             set: function(value) {
                 var _ = this._;
                 if (typeof value === "string") {
                     value = timevalue(value);
                 }
                 if (typeof value === "number" && value >= 0) {
-                    _.time = value;
+                    _.timeout = value;
                     _.waitSamples = (timbre.samplerate * (value * 0.001))|0;
                     _.samples = _.waitSamples;
                     _.isEnded = false;
                 }
             },
             get: function() {
-                return this._.time;
+                return this._.timeout;
             }
         },
         currentTime: {
