@@ -438,6 +438,10 @@
             dfd.fail.apply(dfd, arguments);
             return this;
         };
+        var pipe = function() {
+            var dfd = this._.deferred;
+            return dfd.pipe.apply(dfd, arguments);
+        };
         var always = function() {
             var dfd = this._.deferred;
             dfd.always.apply(dfd, arguments);
@@ -454,6 +458,7 @@
             object.then = then.bind(object);
             object.done = done.bind(object);
             object.fail = fail.bind(object);
+            object.pipe = pipe.bind(object);
             object.always = always.bind(object);
             object.promise = promise.bind(object);
             Object.defineProperty(object, "isResolved", {
@@ -702,7 +707,7 @@
                 for (var i = 0, imax = list.length; i < imax; ++i) {
                     list[i].apply(c, args);
                 }
-                this._.doneList = this._.failList = null;
+                // this._.doneList = this._.failList = null;
             }
         };
         
@@ -761,7 +766,35 @@
             this.fail.apply(this, arguments);
             return this;
         };
-
+        
+        $.pipe = function(done, fail) {
+            var dfd = new Deferred();
+            
+            this.then(function() {
+                var res = done.apply(this.context || this, arguments);
+                if (isDeferred(res)) {
+                    dfd.context = res;
+                    res.then(function() {
+                        dfd.resolve.apply(dfd, arguments);
+                    });
+                }
+            }.bind(this), function() {
+                if (typeof fail === "function") {
+                    var res = fail.apply(this.contex || this, arguments);
+                    if (isDeferred(res)) {
+                        dfd.context = res;
+                        res.fail(function() {
+                            dfd.reject.apply(dfd, arguments);
+                        });
+                    }
+                } else {
+                    dfd.reject.apply(dfd, arguments);
+                }
+            }.bind(this));
+            
+            return dfd.promise();
+        };
+        
         var isDeferred = function(x) {
             return x && typeof x.promise === "function";
         };
@@ -816,6 +849,7 @@
             this.then = then.bind(dfd);
             this.done = done.bind(dfd);
             this.fail = fail.bind(dfd);
+            this.pipe = pipe.bind(dfd);
             this.always  = always.bind(dfd);
             this.promise = promise.bind(this);
         }
@@ -827,6 +861,9 @@
         };
         var fail = function() {
             return this.fail.apply(this, arguments);
+        };
+        var pipe = function() {
+            return this.pipe.apply(this, arguments);
         };
         var always = function() {
             return this.always.apply(this, arguments);
