@@ -1,6 +1,7 @@
 T("fft") / T("ifft") / T("spectrum")
 ====================================
 Fast Fourier transform
+{listener}
 
 ## Description ##
 
@@ -45,7 +46,7 @@ T("ifft", {real:real, imag:imag}).play();
 (height 30)
 
 ```timbre
-var saw = T("noise", {mul:0.15});
+var saw = T("pink", {mul:0.15});
 
 var canvas = window.getCanvasById("spectrum");
 var fft = T("spectrum", {size:512, interval:100}, saw).on("fft", function() {

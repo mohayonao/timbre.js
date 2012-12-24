@@ -1,17 +1,37 @@
 T("timer")
 ==========
-## Timer ##
+Timer
+{timer}
+
+指定した間隔で入力オブジェクトに対して `bang()` する Deferred オブジェクトです。
 
 ```timbre
-var freqs = _.shuffle([220, 440, 660, 880]);
+var freqs = T([220, 440, 660, 880]);
 
-var func = T(function(count) {
-    console.log(count);
-    return freqs[count % freqs.length];
-});
-var osc = T("sin", {freq:func}).play();
+var osc = T("sin", {freq:freqs}).play();
 
-var interval = T("param", {value:500}).lin(50, 20000);
+var i = T("param", {value:500}).linearRampToValueAtTime(50, 20000);
 
-T("timer", {delay:0,interval:interval}, func).start();
+T("timer", {interval:i, timeout:"10sec"}, freqs).start();
 ```
+
+## Attributes ##
+- `interval`
+  - 入力オブジェクトに対して `bang()` を呼び出す間隔を設定します
+- `delay`
+  - 待機時間を設定します
+- `count`  
+  - `bang` を送出した回数
+- `timeout`
+  - タイムアウトの時間を設定します
+- `currentTime`  
+  - 経過時間
+
+## Events ##
+- `ended` タイムアウト時に発生します。
+
+## Note ##
+同じような動作をするオブジェクトに [T("interval")](/timbre.js/docs/ja/interval.html) があります。
+
+- `T("timer")` は Deferred オブジェクトで タイムアウト後に再起動しません。
+- `T("interval")` は タイムアウト後も `start()` で再起動が出来ます。

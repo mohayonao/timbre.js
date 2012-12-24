@@ -8,7 +8,9 @@ Envelope
 
 ```timbre
 var table = [0.8, [0, 1500]];
-T("env", {table:table}, T("sin")).bang().play();
+T("env", {table:table}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
 ```
 
 エンベロープの形状は `table` プロパティで指定します。`table` は `初期値` に続いて `[次の値, 時間(ms), カーブの種類]` の子配列を要素に持つ配列です。以下の例では 440Hzから 0.5秒かけて 880Hzに上昇し、0.25秒で 660Hzに遷移するエンベロープをオシレーターの周波数の入力として 3回動作させています。
@@ -34,7 +36,9 @@ setInterval(function() {
 ```timbre
 var table = [0, [1, 100], [0.6, 100], [0, 1000]];
 var synth = T("saw", {mul:0.25});
-var env   = T("env", {table:table, releaseNode:3}, synth).bang().play();
+var env   = T("env", {table:table, releaseNode:3}, synth).on("ended", function() {
+    this.pause();
+}).bang().play();
 
 var canvas = window.getCanvasById("env-release");
 env.plot({target:canvas});
@@ -88,7 +92,9 @@ var env = T("env", {table:table, loopNode:3, releaseNode:5, curve:"exp"});
 var canvas = window.getCanvasById("env-plot");
 env.plot({target:canvas});
 
-env.append(T("pulse", {mul:0.25})).bang().play();
+env.append(T("pulse", {mul:0.25})).on("ended", function() {
+    this.pause();
+}).bang().play();
 
 setTimeout(function() {
     env.release();
@@ -109,7 +115,9 @@ setTimeout(function() {
 - lv, level: 0
 
 ```timbre
-var env = T("perc", {d:500}, T("sin")).bang().play();
+var env = T("perc", {d:500}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
 
 var canvas = window.getCanvasById("env-perc");
 env.plot({target:canvas});
@@ -127,7 +135,9 @@ env.plot({target:canvas});
 - lv, totalLevel : 1
 
 ```timbre
-var env = T("adsr", {a:100,d:250,s:0.6,r:500}, T("sin")).bang().play();
+var env = T("adsr", {a:100,d:250,s:0.6,r:500}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
 
 var canvas = window.getCanvasById("env-adsr");
 env.plot({target:canvas, width:240, height:80});
@@ -148,7 +158,9 @@ setTimeout(function() {
 - lv, totalLevel : 1
 
 ```timbre
-var env = T("asr", {a:100,s:0.8,r:500}, T("sin")).bang().play();
+var env = T("asr", {a:100,s:0.8,r:500}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
 
 var canvas = window.getCanvasById("env-asr");
 env.plot({target:canvas, width:240, height:80});
@@ -170,7 +182,9 @@ setTimeout(function() {
 - lv, totalLevel : 1
 
 ```timbre
-var env = T("dadsr", {dl:500,r:500}, T("sin")).bang().play();
+var env = T("dadsr", {dl:500,r:500}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
 
 var canvas = window.getCanvasById("env-dadsr");
 env.plot({target:canvas, width:240, height:80});
@@ -191,7 +205,9 @@ setTimeout(function() {
 - lv, totalLevel : 1
 
 ```timbre
-var env = T("linen", {a:200, lv:0.8}, T("sin")).bang().play();
+var env = T("linen", {a:200, lv:0.8}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
 
 var canvas = window.getCanvasById("env-linen");
 env.plot({target:canvas, width:240, height:80});
@@ -208,7 +224,9 @@ env.plot({target:canvas, width:240, height:80});
 - lv, totalLevel : 1
 
 ```timbre
-var env = T("env.tri", {dur:1500}, T("sin")).bang().play();
+var env = T("env.tri", {dur:1500}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
 
 var canvas = window.getCanvasById("env-tri");
 env.plot({target:canvas, width:240, height:80});
@@ -225,7 +243,9 @@ env.plot({target:canvas, width:240, height:80});
 - lv, totalLevel : 1
 
 ```timbre
-var env = T("env.cutoff", {r:"BPM120 4.0.0"}, T("sin")).bang().play();
+var env = T("env.cutoff", {r:"BPM120 4.0.0"}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
 
 var canvas = window.getCanvasById("env-cutoff");
 env.plot({target:canvas, width:240, height:80});

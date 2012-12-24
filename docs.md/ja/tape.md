@@ -16,7 +16,9 @@ T("audio").load("/timbre.js/misc/audio/amen.wav").then(function() {
     tape = timbre.utils.scissor.join(tapes);
     tape = tape.pitch(90).loop(2);
         
-    T("+", T("tape", {tape:tape})).play();
+    T("tape", {tape:tape}).on("ended", function() {
+        this.pause();
+    }).play();
 
 });
 ```
