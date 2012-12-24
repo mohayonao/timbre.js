@@ -6,7 +6,7 @@
     var TYPE_WAIT    = 0;
     var TYPE_TIMEOUT = 1;
     
-    function Wait(_args) {
+    function Timeout(_args) {
         timbre.Object.call(this, _args);
         timbre.fn.timer(this);
         timbre.fn.fixKR(this);
@@ -19,22 +19,30 @@
         this._.isEnded = true;
         
         this.once("init", oninit);
+        this.on("start", onstart);
     }
-    timbre.fn.extend(Wait, timbre.Object);
+    timbre.fn.extend(Timeout, timbre.Object);
     
     var oninit = function() {
-        if (!this._.time) {
-            this.time = 1000;
-        }
         if (this._.originkey === "wait") {
             this._.type = TYPE_WAIT;
             timbre.fn.deferred(this);
         } else {
             this._.type = TYPE_TIMEOUT;
         }
+        if (!this._.time) {
+            this.time = 1000;
+        }
     };
     
-    var $ = Wait.prototype;
+    var onstart = function() {
+        this._.isEnded = false;
+    };
+    Object.defineProperty(onstart, "unremovable", {
+        value:true, writable:false
+    });
+    
+    var $ = Timeout.prototype;
     
     Object.defineProperties($, {
         time: {
@@ -75,24 +83,26 @@
     $.seq = function(seq_id) {
         var cell = this.cell;
         var _ = this._;
+
+        if (_.isEnded) {
+            return cell;
+        }
         
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
             
-            if (!_.isEnded) {
-                if (_.samples > 0) {
-                    _.samples -= cell.length;
-                }
-                
-                if (_.samples <= 0) {
-                    var inputs = this.inputs;
-                    for (var i = 0, imax = inputs.length; i < imax; ++i) {
-                        inputs[i].bang();
-                    }
-                    timbre.fn.nextTick(onended.bind(this));
-                }
-                _.currentTime += _.currentTimeIncr;
+            if (_.samples > 0) {
+                _.samples -= cell.length;
             }
+            
+            if (_.samples <= 0) {
+                var inputs = this.inputs;
+                for (var i = 0, imax = inputs.length; i < imax; ++i) {
+                    inputs[i].bang();
+                }
+                timbre.fn.nextTick(onended.bind(this));
+            }
+            _.currentTime += _.currentTimeIncr;
         }
         return cell;
     };
@@ -112,7 +122,7 @@
         }
     };
     
-    timbre.fn.register("wait", Wait);
-    timbre.fn.alias("timeout", "wait");
+    timbre.fn.register("timeout", Timeout);
+    timbre.fn.alias("wait", "timeout");
     
 })(timbre);
