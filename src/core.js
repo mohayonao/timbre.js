@@ -1179,8 +1179,8 @@
                 
                 context.save();
                 
-                context.rect(offset_x, offset_y, width + 1, height);
-                context.clip();
+                context.rect(offset_x, offset_y, width, height);
+                // context.clip();
                 
                 if (background !== null) {
                     context.fillStyle = background;
