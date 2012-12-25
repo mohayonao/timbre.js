@@ -174,7 +174,7 @@ class IndexFileBuilder extends HTMLBuilder
         for name in Object.keys(indexes)
             indexes[name].sort (a, b)->
                 if a.sort is b.sort
-                    if a.name < b.name then -1 else +1
+                    if a.name.toLowerCase() < b.name.toLowerCase() then -1 else +1
                 else a.sort - b.sort
             indexes[name] = indexes[name].map (x)->
                 name:formatName(x.name), url:x.url, dev:x.dev
