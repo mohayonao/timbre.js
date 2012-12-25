@@ -53,7 +53,7 @@
                     }
                 } else if (typeof value === "string") {
                     if ((dx = this.getWavetable(value)) !== undefined) {
-                        this._.wave = dx;
+                        this._.wave.set(dx);
                     }
                 }
             },
