@@ -1270,10 +1270,17 @@
     
     var NumberWrapper = (function() {
         function NumberWrapper(_args) {
-            TimbreObject.call(this, _args.slice(1));
+            TimbreObject.call(this, []);
             __fixKR(this);
             
             this.value = _args[0];
+            
+            if (isDictionary(_args[1])) {
+                var params = _args[1];
+                this.once("init", function() {
+                    this.set(params);
+                });
+            }
             
             this.on("setAdd", __changeWithValue);
             this.on("setMul", __changeWithValue);
@@ -1301,10 +1308,17 @@
     
     var BooleanWrapper = (function() {
         function BooleanWrapper(_args) {
-            TimbreObject.call(this, _args.slice(1));
+            TimbreObject.call(this, []);
             __fixKR(this);
             
             this.value = _args[0];
+            
+            if (isDictionary(_args[1])) {
+                var params = _args[1];
+                this.once("init", function() {
+                    this.set(params);
+                });
+            }
             
             this.on("setAdd", __changeWithValue);
             this.on("setMul", __changeWithValue);
@@ -1389,7 +1403,7 @@
         var MODE_FOLD = 2;
         
         function ArrayWrapper(_args) {
-            TimbreObject.call(this, _args.slice(1));
+            TimbreObject.call(this, []);
             __fixKR(this);
             
             this._.index = 0;
@@ -1401,6 +1415,13 @@
             
             this._.ignoreFirstBang      = false;
             this._.savedIgnoreFirstBang = false;
+            
+            if (isDictionary(_args[1])) {
+                var params = _args[1];
+                this.once("init", function() {
+                    this.set(params);
+                });
+            }
         }
         __extend(ArrayWrapper);
         
