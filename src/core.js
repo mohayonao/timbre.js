@@ -1925,6 +1925,7 @@
                 }
                 this._.deferred = null;
             }
+            this.emit("reset");
             return this;
         };
         
