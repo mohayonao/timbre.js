@@ -3,6 +3,14 @@
     padding: 0;
 }
 
+body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    color: #333;
+    background: white;
+}
+
 ul {
     margin: 5px 0 30px 25px;
 }
@@ -14,7 +22,7 @@ a {
 #sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
-    width: 200px;
+    width: 160px;
     overflow-y: auto;
     overflow-x: hidden;
     
@@ -29,16 +37,20 @@ a {
 }
 
 #title {
+    position: fixed;
+    top: 0; left: 0px;
+    width: 120px;
+    height: 20px;
+    padding: 10px 25px;
     font-family: 'Arial';
     font-size: 18px;
     color: #333;
+    background: #DBF0F6;
     text-shadow: 0 0 1px #999;
-    margin-bottom: 25px;
 }
 
 #index {
-    height: 100%;
-
+    margin-top: 30px;
 }
 
 #index h2 {
@@ -59,8 +71,8 @@ a {
 }
 
 #main {
-    width: 600px;
-    margin: 40px 0 50px 260px;
+    width: 700px;
+    margin: 40px 0 50px 220px;
     font-size: 14px;
     line-height: 24px;
 }
@@ -80,6 +92,10 @@ a {
     font-weight: normal;
     font-style: italic;
     margin-bottom: 15px;
+}
+
+#main h1 + p .label {
+    float: right;
 }
 
 #main h2 {
@@ -107,6 +123,11 @@ a {
 #main canvas {
     border: solid 1px #E1E1E8;
     margin-left: 25px;
+    float: right;
+}
+
+#main ul {
+    line-height: 20px;
 }
 
 #main ul ul {
@@ -117,6 +138,15 @@ a {
 #main code {
     color: #BF1E56;
     font-family: 'Courier', monospace;
+}
+
+#main a code {
+    color: #007AB7;
+}
+
+#main em {
+    color: #666;
+    font-size: 12px;
 }
 
 .label {
@@ -144,8 +174,8 @@ a {
 
 .prettyprint {
     font-family: 'Courier', monospace;
-    font-size: 12px;
-    margin: 15px 0 25px;
+    font-size: 12.025px;
+    margin: 5px 0 25px;
 }
 
 .click-to-play {
@@ -155,13 +185,9 @@ a {
     cursor: pointer
 }
 
-.pull-right {
-    float: right;
-}
-
 .label {
     color: white;
-    padding: 0 5px;
+    padding: 0 4px;
     font-size: 8px;
     font-weight: bold;
     border-radius: 3px;

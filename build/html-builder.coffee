@@ -13,7 +13,7 @@ class DocFile
             @lang     =   m[1] or 'en'
             @dev      = !!m[2]
             @category =   m[3] or '*'
-            @sort     =  +m[4] or 50
+            @sort     = +(m[4] ? 50)
             @name     =   m[5]
         else @error = true
 
@@ -41,7 +41,7 @@ class HTMLBuilder
         html = insert_height html
         html = insert_label  html
         jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
-            lang: doc.lang, title: doc.name
+            lang: doc.lang, title: formatName(doc.name)
             main: html
 
     get  : (name)-> @files[name]
@@ -106,16 +106,16 @@ class HTMLBuilder
 
     insert_canvas = (src)->
         re = /<p>\s*\(canvas\s+([\-\w]+) w:(\d+) h:(\d+)\)\s*<\/p>/g
-        src.replace re, '<canvas id="$1" style="width:$2px;height:$3px" class="pull-right"></canvas>'
+        src.replace re, '<canvas id="$1" style="width:$2px;height:$3px"></canvas>'
 
     insert_height = (src)->
         re = /<p>\s*\(height\s+(\d+)\)\s*<\/p>/g
         src.replace re, '<div style="height:$1px"></div>'
 
     insert_label = (src)->
-        src = src.replace /{deferred}/ig, '<span class="label deferred pull-right">D</span>'
-        src = src.replace /{listener}/ig, '<span class="label listener pull-right">L</span>'
-        src = src.replace /{timer}/ig   , '<span class="label timer pull-right">T</span>'
+        src = src.replace /{deferred}/ig, '<span class="label deferred">D</span>'
+        src = src.replace /{listener}/ig, '<span class="label listener">L</span>'
+        src = src.replace /{timer}/ig   , '<span class="label timer">T</span>'
 
 class DocFileBuilder extends HTMLBuilder
     constructor: (@lang)->
@@ -176,7 +176,9 @@ class IndexFileBuilder extends HTMLBuilder
                 if a.sort is b.sort
                     if a.name < b.name then -1 else +1
                 else a.sort - b.sort
-            indexes[name] = indexes[name].map (x)-> {name:x.name, url:x.url, dev:x.dev}
+            indexes[name] = indexes[name].map (x)->
+                name:formatName(x.name), url:x.url, dev:x.dev
+
         jade.compile(fs.readFileSync("#{__dirname}/index.jade"))
             indexes:indexes, categories: [
                 { key:'tut', caption:'Tutorials'     }
@@ -186,6 +188,14 @@ class IndexFileBuilder extends HTMLBuilder
 
     @build_statics = ->
         null # TODO: implements
+
+capitalize = (x)->
+    x.charAt(0).toUpperCase() + x.slice(1)
+
+formatName = (name)->
+    if name.indexOf('_') != -1
+        name = name.split('_').map(capitalize).join ' '
+    name
 
 if not module.parent
     DocFileBuilder.build_statics()
