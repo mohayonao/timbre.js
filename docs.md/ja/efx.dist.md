@@ -11,3 +11,7 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 
 });
 ```
+
+## Properties ##
+- `preGain` _(T Object)_
+- `postGain` _(T Object)_

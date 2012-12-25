@@ -12,3 +12,8 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
     
 });
 ```
+
+## Properties ##
+- `time` _(Number or timevalue)_
+- `feedback` _(T Object)_
+- `wet` _(T Object)_

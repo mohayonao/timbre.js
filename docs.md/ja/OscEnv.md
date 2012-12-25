@@ -16,7 +16,7 @@ T("interval", {delay:0, interval:500}, function(count) {
 }).start();
 ```
 
-## Attributes ##
+## Properties ##
 - `wave`
   - 波形の種類
 - `env`  
@@ -33,8 +33,8 @@ T("interval", {delay:0, interval:500}, function(count) {
 - `noteOnWithFreq(freq, velocity)`
 - `noteOffWithFreq(freq)`
 
-```js
-var oscenv = T("OscEnv").play();
-
-T("mml", {mml:"cdefg"}).on("mml", oscenv.noteOn.bind(oscenv)).start();
-```
+## See Also ##
+- [`T("osc")`](/timbre.js/docs/ja/osc.html)
+  - Oscillator
+- [`T("env")`](/timbre.js/docs/ja/env.html)
+  - Envelope

@@ -65,6 +65,18 @@ setTimeout(function() {
 }, 2000);
 ```
 
+## Properties ##
+- `table` _(Array)_
+- `curve` _(String "lin" or "exp")_
+- `releaseNode` _(Number)_
+- `loopNode` _(Number)_
+
+## Methods ##
+- `bang()`
+  - エンベロープを起動します
+- `release()`
+  - リリースフェーズに移行します
+
 ## Events ##
 - `sustained`
   - エンベロープが持続フェーズに入ったときに発生します

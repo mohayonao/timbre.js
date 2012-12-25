@@ -1,7 +1,8 @@
 T("interval")
 =============
-Interval
-{timer}
+Interval {timer}
+
+## Description ##
 
 指定した間隔で入力オブジェクトに対して `bang()` する。
 
@@ -22,24 +23,25 @@ T("interval", {interval:i}, freqs, env).start();
 env.play();
 ```
 
-## Attributes ##
-- `interval`
+## Properties ##
+- `interval` _(T Object or timevalue)_
   - 入力オブジェクトに対して `bang()` を呼び出す間隔を設定します
-- `delay`
+- `delay` _(Number or timevalue)_
   - 待機時間を設定します
-- `count`  
+- `count` _(Number)_
   - `bang` を送出した回数
-- `timeout`
+- `timeout` _(Number or timevalue)_
   - タイムアウトの時間を設定します
-- `currentTime`  
+- `currentTime` _(Number)_
   - 経過時間
 
-## Method ##
+## Methods ##
 - `bang()`
   - 動作を再開します。
 
 ## Events ##
-- `ended` タイムアウト時に発生します。
+- `ended`
+  - タイムアウト時に発生します。
 
 ## Alias ##
 - `T("interval0")`
@@ -50,3 +52,8 @@ env.play();
 
 - `T("timer")` は Deferred オブジェクトで タイムアウト後に再起動しません。
 - `T("interval")` は タイムアウト後も `start()` で再起動が出来ます。
+
+## See Also ##
+- [T("timer")](/timbre.js/docs.md/ja/timer.html)
+- [T("timeout")](/timbre.js/docs.md/ja/timeout.html)
+- [T("wait)](/timbre.js/docs.md/ja/wait.html)
