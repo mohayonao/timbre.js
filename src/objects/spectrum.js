@@ -207,4 +207,3 @@
     timbre.fn.register("spectrum", FFTSpectrum);
 
 })(timbre);
-
