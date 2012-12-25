@@ -12,11 +12,17 @@ body {
 }
 
 ul {
-    margin: 5px 0 30px 25px;
+    margin: 5px 0 5px 25px;
 }
 
 a {
     color: #007AB7;
+}
+
+hr {
+    border: dashed 0 #dcdcdc;
+    border-width: 1px 0 0;
+    margin: 20px 0;
 }
 
 #sidebar {
@@ -54,6 +60,7 @@ a {
 }
 
 #index h2 {
+    margin-top: 20px;
     font-size: 14px;
 }
 
@@ -78,9 +85,11 @@ a {
 }
 
 #main h1 {
-    padding-bottom: 5px;
+    padding-bottom: 8px;
     margin-bottom: 0;
     font-family: 'Arial';
+    font-size: 32px;
+    text-shadow: 0 0 1px #ccc;
     border: solid 0 #E1E1E8;
     border-width: 0 0 1px 0;
     letter-spacing: 2px;
@@ -99,17 +108,17 @@ a {
 }
 
 #main h2 {
-    font-size: 18px;
+    font-size: 20px;
     margin: 15px 0 5px;
 }
 
 #main h3 {
-    margin: 10px 0;
+    margin: 10px 0 0px;
     font-size: 14px;
 }
 
 #main h4 {
-
+    font-size: 12px;
 }
 
 #main h5 {
@@ -117,7 +126,11 @@ a {
 }
 
 #main h2 ~ p {
-    margin-left: 15px;
+    margin-left: 5px;
+}
+
+#main pre + p {
+    margin-top: 15px;
 }
 
 #main canvas {
@@ -175,7 +188,7 @@ a {
 .prettyprint {
     font-family: 'Courier', monospace;
     font-size: 12.025px;
-    margin: 5px 0 25px;
+    margin: 5px 0;
 }
 
 .click-to-play {

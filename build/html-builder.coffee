@@ -56,8 +56,8 @@ class HTMLBuilder
             indexes[doc.category].push doc
 
     lang_process = (doc)->
-        re  = /<pre><code class="lang-(?:js|javascript)">([\w\W]+?)<\/code><\/pre>/g
-        doc = doc.replace re, '<pre class="lang-js prettyprint">$1</pre>'
+        re  = /<pre><code class="lang-(js|html|sh)">([\w\W]+?)<\/code><\/pre>/g
+        doc = doc.replace re, '<pre class="lang-$1 prettyprint">$2</pre>'
 
         re  = /<pre><code class="lang-timbre">([\w\W]+?)<\/code><\/pre>/g
         doc = doc.replace re, '<pre class="click-to-play lang-js prettyprint linenums">$1</pre>'

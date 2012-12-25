@@ -16,6 +16,7 @@ $(function() {
             cancelAnimationFrame(animationId);
         }
         animationId = null;
+        $(window).off("keydown").off("keyup");
     });
     
     function playCode(code) {
