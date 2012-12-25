@@ -169,8 +169,17 @@ hr {
     background: #6EB7DB;
 }
 
+.editor {
+    clear: both;    
+     margin: 15px 0 50px;
+}
+
 .CodeMirror {
-    border: solid 1px #E1E1E8;
+    border: solid 1px #c0c0c0;
+    font-family: 'Courier', monospace;
+    font-size: 12.025px;
+    background: #ededed;
+    line-height: 18px;
 }
 
 .CodeMirror-scroll {
@@ -180,22 +189,10 @@ hr {
 }
 
 .codemirror button {
-    margin-top: 10px;
+    margin-top: 2px;
     margin-left: 5px;
-    width: 120px;
-}
-
-.prettyprint {
-    font-family: 'Courier', monospace;
-    font-size: 12.025px;
-    margin: 5px 0;
-}
-
-.click-to-play {
-    background-image: url("/timbre.js/misc/img/click-to-play.png");
-    background-repeat: no-repeat;
-    background-position: top right;
-    cursor: pointer
+    width: 40px;
+    float: right;
 }
 
 .label {

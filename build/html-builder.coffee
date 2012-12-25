@@ -60,7 +60,7 @@ class HTMLBuilder
         doc = doc.replace re, '<pre class="lang-$1 prettyprint">$2</pre>'
 
         re  = /<pre><code class="lang-timbre">([\w\W]+?)<\/code><\/pre>/g
-        doc = doc.replace re, '<pre class="click-to-play lang-js prettyprint linenums">$1</pre>'
+        doc = doc.replace re, '<div class="codemirror" source="$1"></div>'
 
         re  = /<pre><code class="lang-codemirror">([\w\W]+?)<\/code><\/pre>/g
         doc = doc.replace re, '<div class="codemirror" source="$1"></div>'
@@ -189,13 +189,8 @@ class IndexFileBuilder extends HTMLBuilder
     @build_statics = ->
         null # TODO: implements
 
-capitalize = (x)->
-    x.charAt(0).toUpperCase() + x.slice(1)
-
 formatName = (name)->
-    if name.indexOf('_') != -1
-        name = name.split('_').map(capitalize).join ' '
-    name
+    name.replace /_/g, ' '
 
 if not module.parent
     DocFileBuilder.build_statics()

@@ -3,24 +3,24 @@ $(function() {
     
     $("#list").load("/timbre.js/misc/index-"+(navigator.language==='ja'?'ja':'en')+".html");
     
-    var $title = $("#title");
-    var defaultColor = $title.css("color");
-    
     var nowPlaying, animationId;
-    timbre.on("play", function() {
-        $title.css({color:"#25AA6E"});
-    }).on("pause", function() {
-        $title.css("color", defaultColor);
+    
+    var onreset = function() {
         nowPlaying = null;
         if (animationId) {
             cancelAnimationFrame(animationId);
         }
         animationId = null;
         $(window).off("keydown").off("keyup");
-    });
+        $(".play-button").text("Play");
+        $(".CodeMirror").css("border-color", "silver");
+    };
+    
+    timbre.on("pause", onreset).on("reset", onreset).amp = 0.6;
     
     function playCode(code) {
         if (timbre.isPlaying && nowPlaying === code) {
+            timbre.reset();
             timbre.pause();
         } else {
             timbre.reset();
@@ -29,39 +29,29 @@ $(function() {
         }
     }
     
-    $(".click-to-play").on("click", function(e) {
-        playCode($(this).text());
-    });
-    
     $(".codemirror").each(function(i, e) {
-        var textarea = $("<textarea>").val($(e).attr("source")).appendTo(e);
+        var container = $("<div>").addClass("editor").appendTo(e);
+        var textarea = $("<textarea>").val($(e).attr("source")).appendTo(container);
         
         var editor = CodeMirror.fromTextArea(textarea.get(0), {
             lineNumbers:true
         });
-        $("<button>").on("click", function() {
-            timbre.pause();
-        }).addClass("btn pull-right").appendTo(e)
-            .append($("<i>").addClass("icon-pause")).append(" Pause");
-        
-        $("<button>").on("click", function() {
+        $("<button>").addClass("play-button").on("click", function() {
             playCode(editor.getValue().trim());
-        }).addClass("btn pull-right").appendTo(e)
-            .append($("<i>").addClass("icon-play")).append(" Play");
+            
+            if (nowPlaying) {
+                $(this).text("Pause");
+                $(".CodeMirror", container).css("border-color", "#DF81A2");
+            }
+        }).append("Play").appendTo(container);
     });
     
-    prettyPrint();
-    
-    timbre.amp = 0.4;
-
     window.getCanvasById = function(name) {
         var canvas = document.getElementById(name);
         canvas.width  = $(canvas).width();
         canvas.height = $(canvas).height();
         return canvas;
     }
-    
-    
     
     window.animate = function(fn, fps) {
         var lastTime = 0;
