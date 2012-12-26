@@ -2,144 +2,121 @@
     "use strict";
     
     var fn = timbre.fn;
-    var timevalue = timbre.utils.timevalue;
+    var Envelope = timbre.modules.Envelope;
     
     function ParamNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixKR(this);
         
-        this._.value = 0;
-        this._.minvalue = -Infinity;
-        this._.maxValue = +Infinity;
-        
-        this._.eventtype = ParamEvent_None;
-        this._.currentTime = 0;
-        this._.currentTimeIncr = this.cell.length * 1000 / timbre.samplerate;
-        
-        this._.schedules = [];
-        
-        this.on("setAdd", __changeWithValue);
-        this.on("setMul", __changeWithValue);
+        var _ = this._;
+        _.env = new Envelope(timbre.samplerate);
+        _.env.step = this.cell.length;
+        _.curve = "lin";
     }
     fn.extend(ParamNode);
-
-    function ParamEvent(type, value, time) {
-        this.type  = type;
-        this.value = value;
-        this.time  = time;
-    }
-    var ParamEvent_None                   = 0;
-    var ParamEvent_SetValue               = 1;
-    var ParamEvent_LinearRampToValue      = 2;
-    var ParamEvent_ExponentialRampToValue = 3;
-    
-    var __changeWithValue = fn.changeWithValue;
     
     var $ = ParamNode.prototype;
-    
+
     Object.defineProperties($, {
         value: {
             set: function(value) {
                 if (typeof value === "number") {
-                    var _ = this._;
-                    value = (value < _.minvalue) ?
-                        _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-                    _.value = isNaN(value) ? 0 : value;
-                    _.eventtype = ParamEvent_None;
-                    __changeWithValue.call(this);
+                    var env = this._.env;
+                    env.setTable([value]);
+                    env.reset();
+                    env.status = Envelope.StatusGate;
                 }
             },
             get: function() {
-                return this._.value;
-            }
-        },
-        minValue: {
-            set: function(value) {
-                if (typeof value === "number") {
-                    this._.minValue = value;
-                }
-            },
-            get: function() {
-                return this._.minValue;
-            }
-        },
-        maxValue: {
-            set: function(value) {
-                if (typeof value === "number") {
-                    this._.maxValue = value;
-                }
-            },
-            get: function() {
-                return this._.maxValue;
+                return this._.env.level;
             }
         }
     });
     
-    var insertEvent = function(schedules, type, value, time) {
-        schedules.push(new ParamEvent(type, value, time));
-    };
-    
-    $.setValueAtTime = function(value, time) {
-        var _ = this._;
-        if (typeof time === "string") {
-            time = timevalue(time);
-        }
-        if (typeof value === "number" && typeof time === "number") {
-            value = (value < _.minvalue) ?
-                _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(_.schedules, ParamEvent_SetValue, value, time);
-        }
+    $.to = function(nextLevel, time, curve) {
+        var env = this._.env;
+        env.setTable([env.level, [nextLevel, time, curve]]);
+        env.reset();
+        env.status = Envelope.StatusGate;
+        this._.curve = curve;
+        this._.plotFlush = true;
         return this;
     };
-    $.setAt = $.setValueAtTime;
     
-    $.linearRampToValueAtTime = function(value, time) {
-        var _ = this._;
-        if (typeof time === "string") {
-            time = timevalue(time);
-        }
-        if (typeof value === "number" && typeof time === "number") {
-            value = (value < _.minvalue) ?
-                _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(_.schedules, ParamEvent_LinearRampToValue, value, time);
-        }
+    $.setAt = function(nextLevel, time) {
+        var env = this._.env;
+        env.setTable([env.level, [env.level, time], [nextLevel, 0]]);
+        env.reset();
+        env.status = Envelope.StatusGate;
+        this._.curve = "set";
+        this._.plotFlush = true;
         return this;
     };
-    $.lineTo = $.linearRampToValueAtTime;
     
-    $.exponentialRampToValueAtTime = function(value, time) {
-        var _ = this._;
-        if (typeof time === "string") {
-            time = timevalue(time);
-        }
-        if (typeof value === "number" && typeof time === "number") {
-            value = (value < _.minvalue) ?
-                _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(_.schedules, ParamEvent_ExponentialRampToValue, value, time);
-        }
+    $.linTo = function(nextLevel, time) {
+        var env = this._.env;
+        env.setTable([env.level, [nextLevel, time, "lin"]]);
+        env.reset();
+        env.status = Envelope.StatusGate;
+        this._.curve = "lin";
+        this._.plotFlush = true;
         return this;
     };
-    $.expTo = $.exponentialRampToValueAtTime;
     
-    $.cancelScheduledValues = function(time) {
-        if (typeof time === "string") {
-            time = timevalue(time);
-        }
-        if (typeof time === "number") {
-            var s = this._.schedules;
-            for (var i = 0, imax = s.length; i < imax; ++i) {
-                if (time <= s[i].time) {
-                    s.splice(i);
-                    if (i === 0) {
-                        this._.eventtype = ParamEvent_None;
-                    }
-                    break;
-                }
-            }
-        }
+    $.expTo = function(nextLevel, time) {
+        var env = this._.env;
+        env.setTable([env.level, [nextLevel, time, "exp"]]);
+        env.reset();
+        env.status = Envelope.StatusGate;
+        this._.curve = "exp";
+        this._.plotFlush = true;
         return this;
     };
-    $.cancel = $.cancelScheduledValues;
+    
+    $.sinTo = function(nextLevel, time) {
+        var env = this._.env;
+        env.setTable([env.level, [nextLevel, time, "sin"]]);
+        env.reset();
+        env.status = Envelope.StatusGate;
+        this._.curve = "sin";
+        this._.plotFlush = true;
+        return this;
+    };
+    
+    $.welTo = function(nextLevel, time) {
+        var env = this._.env;
+        env.setTable([env.level, [nextLevel, time, "wel"]]);
+        env.reset();
+        env.status = Envelope.StatusGate;
+        this._.curve = "wel";
+        this._.plotFlush = true;
+        return this;
+    };
+    
+    $.sqrTo = function(nextLevel, time) {
+        var env = this._.env;
+        env.setTable([env.level, [nextLevel, time, "sqr"]]);
+        env.reset();
+        env.status = Envelope.StatusGate;
+        this._.curve = "sqr";
+        this._.plotFlush = true;
+        return this;
+    };
+    
+    $.cubTo = function(nextLevel, time) {
+        var env = this._.env;
+        env.setTable([env.level, [nextLevel, time, "cub"]]);
+        env.reset();
+        env.status = Envelope.StatusGate;
+        this._.curve = "cub";
+        this._.plotFlush = true;
+        return this;
+    };
+    
+    $.cancel = function() {
+        this._.env.status = Envelope.StatusWait;
+        return this;
+    };
     
     $.process = function(tickID) {
         var _ = this._;
@@ -148,76 +125,30 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var schedules = _.schedules;
-            var e, samples;
+            var inputs  = this.inputs;
+            var i, imax = cell.length;
+            var mul = _.mul, add = _.add;
             
-            while (_.eventtype === ParamEvent_None && schedules.length > 0) {
-                e = schedules.shift();
-                switch (e.type) {
-                case ParamEvent_SetValue:
-                    _.eventtype = ParamEvent_SetValue;
-                    _.goalValue = e.value;
-                    _.goalTime  = e.time + _.currentTime;
-                    _.isEnded = false;
-                    break;
-                case ParamEvent_LinearRampToValue:
-                    samples = e.time * 0.001 * timbre.samplerate;
-                    if (samples > 0) {
-                        _.eventtype = ParamEvent_LinearRampToValue;
-                        _.goalValue = e.value;
-                        _.goalTime  = e.time + _.currentTime;
-                        _.variation = (e.value - _.value) / (samples / cell.length);
-                        _.isEnded = false;
-                    }
-                    break;
-                case ParamEvent_ExponentialRampToValue:
-                    samples = e.time * 0.001 * timbre.samplerate;
-                    if (_.value !== 0 && samples > 0) {
-                        _.eventtype = ParamEvent_ExponentialRampToValue;
-                        _.goalValue = e.value;
-                        _.goalTime  = e.time + _.currentTime;
-                        _.variation = Math.pow(e.value/_.value, 1/(samples/cell.length));
-                        _.isEnded = false;
-                    }
-                    break;
+            if (inputs.length) {
+                fn.inputSignalAR(this);
+            } else {
+                for (i = imax; i--; ) {
+                    cell[i] = 1;
                 }
             }
             
-            var changed = false;
-            var i, x;
-
-            if (!_.isEnded) {
-                switch (_.eventtype) {
-                case ParamEvent_LinearRampToValue:
-                    if (_.currentTime < _.goalTime) {
-                        _.value += _.variation;
-                        changed = true;
-                    }
-                    break;
-                case ParamEvent_ExponentialRampToValue:
-                    if (_.currentTime < _.goalTime) {
-                        _.value *= _.variation;
-                        changed = true;
-                    }
-                    break;
-                }
-                _.currentTime += _.currentTimeIncr;
-                
-                if (_.eventtype !== ParamEvent_None && _.currentTime >= _.goalTime) {
-                    _.value = _.goalValue;
-                    if (schedules.length === 0) {
-                        fn.nextTick(onended.bind(this));
-                    } else {
-                        fn.nextTick(onnext.bind(this));
-                    }
-                    changed = true;
-                }
-                
-                if (changed) {
-                    x = _.value * _.mul + _.add;
-                    for (i = cell.length; i--; ) {
-                        cell[i] = x;
-                    }
+            var value = _.env.next();
+            
+            for (i = imax; i--; ) {
+                cell[i] = (cell[i] * value) * mul + add;
+            }
+            
+            var emit = _.env.emit;
+            if (emit) {
+                if (emit === "ended") {
+                    fn.nextTick(onended.bind(this));
+                } else {
+                    this._.emit(emit, _.value);
                 }
             }
         }
@@ -226,16 +157,39 @@
     };
     
     var onended = function() {
-        this._.eventtype = ParamEvent_None;
         fn.onended(this);
     };
     
-    var onnext = function() {
-        var _ = this._;
-        _.eventtype = ParamEvent_None;
-        this._.emit("next", _.value);
-    };
+    var super_plot = timbre.Object.prototype.plot;
     
+    $.plot = function(opts) {
+        if (this._.plotFlush) {
+            var env = new Envelope(128);
+            
+            var table;
+            if (this._.curve === "set") {
+                table = [0, [0, 900], [1, 0]];
+            } else {
+                table = [0, [1, 1000, this._.curve]];
+            }
+            
+            env.setTable(table);
+            env.status = Envelope.StatusGate;
+            
+            var data = new Float32Array(128);
+            var i, imax;
+
+            for (i = 0, imax = data.length; i < imax; ++i) {
+                data[i] = env.next();
+            }
+            
+            this._.plotData  = data;
+            this._.plotRange = [0, 1];
+            this._.plotFlush = null;
+        }
+        return super_plot.call(this, opts);
+    };
+
     fn.register("param", ParamNode);
     
 })(timbre);
