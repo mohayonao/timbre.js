@@ -167,4 +167,5 @@
     timbre.utils.EfxDelay = EfxDelay;
     
     fn.register("efx.delay", EfxDelayNode);
+    
 })(timbre);

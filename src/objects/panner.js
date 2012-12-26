@@ -3,7 +3,7 @@
     
     var fn = timbre.fn;
     
-    function Panner(_args) {
+    function PannerNode(_args) {
         timbre.Object.call(this, _args);
         fn.stereo(this);
         fn.fixAR(this);
@@ -13,7 +13,7 @@
         
         this.once("init", oninit);
     }
-    fn.extend(Panner);
+    fn.extend(PannerNode);
     
     var oninit = function() {
         if (!this._.value) {
@@ -21,7 +21,7 @@
         }
     };
     
-    var $ = Panner.prototype;
+    var $ = PannerNode.prototype;
     
     Object.defineProperties($, {
         value: {
@@ -84,5 +84,6 @@
         return cell;
     };
     
-    fn.register("pan", Panner);
+    fn.register("pan", PannerNode);
+    
 })(timbre);

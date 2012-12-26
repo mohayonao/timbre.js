@@ -7,7 +7,7 @@
     var TYPE_WAIT    = 0;
     var TYPE_TIMEOUT = 1;
     
-    function Timeout(_args) {
+    function TimeoutNode(_args) {
         timbre.Object.call(this, _args);
         fn.timer(this);
         fn.fixKR(this);
@@ -22,7 +22,7 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
-    fn.extend(Timeout);
+    fn.extend(TimeoutNode);
     
     var oninit = function() {
         if (this._.originkey === "wait") {
@@ -43,7 +43,7 @@
         value:true, writable:false
     });
     
-    var $ = Timeout.prototype;
+    var $ = TimeoutNode.prototype;
     
     Object.defineProperties($, {
         timeout: {
@@ -123,7 +123,7 @@
         }
     };
     
-    fn.register("timeout", Timeout);
+    fn.register("timeout", TimeoutNode);
     fn.alias("wait", "timeout");
     
 })(timbre);

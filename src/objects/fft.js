@@ -4,7 +4,7 @@
     var fn  = timbre.fn;
     var FFT = timbre.modules.FFT;
     
-    function FFTListener(_args) {
+    function FFTNode(_args) {
         timbre.Object.call(this, _args);
         fn.listener(this);
         fn.stereo(this);
@@ -21,9 +21,9 @@
         this._.plotRange = [0, 0.5];
         this._.plotBarStyle = true;
     }
-    fn.extend(FFTListener);
+    fn.extend(FFTNode);
     
-    var $ = FFTListener.prototype;
+    var $ = FFTNode.prototype;
     
     Object.defineProperties($, {
         window: {
@@ -98,6 +98,6 @@
         return super_plot.call(this, opts);
     };
     
-    fn.register("fft", FFTListener);
+    fn.register("fft", FFTNode);
     
 })(timbre);

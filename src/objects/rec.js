@@ -7,7 +7,7 @@
     var STATUS_WAIT = 0;
     var STATUS_REC  = 1;
     
-    function Recorder(_args) {
+    function RecNode(_args) {
         timbre.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
@@ -22,9 +22,9 @@
         _.currentTime     = 0;
         _.currentTimeIncr = 1000 / timbre.samplerate;
     }
-    fn.extend(Recorder);
+    fn.extend(RecNode);
     
-    var $ = Recorder.prototype;
+    var $ = RecNode.prototype;
     
     Object.defineProperties($, {
         timeout: {
@@ -145,6 +145,6 @@
         });
     };
     
-    fn.register("rec", Recorder);
+    fn.register("rec", RecNode);
     
 })(timbre);

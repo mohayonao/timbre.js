@@ -3,14 +3,14 @@
     
     var fn = timbre.fn;
     
-    function Clip(_args) {
+    function ClipNode(_args) {
         timbre.Object.call(this, _args);
         
         this._.lv = 0.8;
     }
-    fn.extend(Clip);
+    fn.extend(ClipNode);
     
-    var $ = Clip.prototype;
+    var $ = ClipNode.prototype;
     
     Object.defineProperties($, {
         lv: {
@@ -76,6 +76,6 @@
         return cell;
     };
     
-    fn.register("clip", Clip);
+    fn.register("clip", ClipNode);
     
 })(timbre);

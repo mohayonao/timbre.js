@@ -3,7 +3,7 @@
     
     var fn = timbre.fn;
     
-    function SoundBuffer(_args) {
+    function BufferNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
@@ -17,9 +17,9 @@
         this._.phaseIncr = 0;
         this._.pitch = timbre(1);
     }
-    fn.extend(SoundBuffer);
+    fn.extend(BufferNode);
     
-    var $ = SoundBuffer.prototype;
+    var $ = BufferNode.prototype;
     
     var setBuffer = function(value) {
         var _ = this._;
@@ -235,5 +235,6 @@
         return super_plot.call(this, opts);
     };
     
-    fn.register("buffer", SoundBuffer);
+    fn.register("buffer", BufferNode);
+    
 })(timbre);

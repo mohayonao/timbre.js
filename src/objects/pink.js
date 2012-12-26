@@ -7,7 +7,7 @@
     var MAX_KEY = 31;
     var fn = timbre.fn;
     
-    function PinkNoise(_args) {
+    function PinkNoiseNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
@@ -18,9 +18,9 @@
         this._.whites = whites;
         this._.key = 0;
     }
-    fn.extend(PinkNoise);
+    fn.extend(PinkNoiseNode);
     
-    var $ = PinkNoise.prototype;
+    var $ = PinkNoiseNode.prototype;
     
     $.process = function(tickID) {
         var cell = this.cell;
@@ -53,5 +53,6 @@
         return cell;
     };
     
-    fn.register("pink", PinkNoise);
+    fn.register("pink", PinkNoiseNode);
+    
 })(timbre);

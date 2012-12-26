@@ -5,7 +5,7 @@
     var timevalue = timbre.utils.timevalue;
     var FFT = timbre.modules.FFT;
     
-    function FFTSpectrum(_args) {
+    function SpectrumNode(_args) {
         timbre.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
@@ -21,7 +21,7 @@
         
         this.once("init", oninit);
     }
-    fn.extend(FFTSpectrum);
+    fn.extend(SpectrumNode);
     
     var oninit = function() {
         var _ = this._;
@@ -33,7 +33,7 @@
         }
     };
     
-    var $ = FFTSpectrum.prototype;
+    var $ = SpectrumNode.prototype;
     
     Object.defineProperties($, {
         size: {
@@ -192,6 +192,6 @@
         return super_plot.call(this, opts);
     };
     
-    fn.register("spectrum", FFTSpectrum);
+    fn.register("spectrum", SpectrumNode);
 
 })(timbre);

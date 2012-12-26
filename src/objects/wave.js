@@ -4,7 +4,7 @@
     var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
-    function WaveListener(_args) {
+    function WaveNode(_args) {
         timbre.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
@@ -16,7 +16,7 @@
         
         this.once("init", oninit);
     }
-    fn.extend(WaveListener);
+    fn.extend(WaveNode);
     
     var oninit = function() {
         if (!this._.buffer) {
@@ -27,7 +27,7 @@
         }
     };
     
-    var $ = WaveListener.prototype;
+    var $ = WaveNode.prototype;
     
     Object.defineProperties($, {
         size: {
@@ -142,5 +142,6 @@
         return super_plot.call(this, opts);
     };
     
-    fn.register("wave", WaveListener);
+    fn.register("wave", WaveNode);
+    
 })(timbre);

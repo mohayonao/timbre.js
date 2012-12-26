@@ -161,4 +161,5 @@
     });
     
     fn.alias("square", "pulse");
+    
 })(timbre);

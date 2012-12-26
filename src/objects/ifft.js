@@ -4,7 +4,7 @@
     var fn  = timbre.fn;
     var FFT = timbre.modules.FFT;
     
-    function IFFT(_args) {
+    function IFFTNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
@@ -13,9 +13,9 @@
         this._.realBuffer = new Float32Array(this._.fft.length);
         this._.imagBuffer = new Float32Array(this._.fft.length);
     }
-    fn.extend(IFFT);
+    fn.extend(IFFTNode);
     
-    var $ = IFFT.prototype;
+    var $ = IFFTNode.prototype;
     
     Object.defineProperties($, {
         real: {
@@ -61,6 +61,6 @@
         return cell;
     };
     
-    fn.register("ifft", IFFT);
+    fn.register("ifft", IFFTNode);
 
 })(timbre);

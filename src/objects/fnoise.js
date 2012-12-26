@@ -4,7 +4,7 @@
     var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
-    function FNoise(_args) {
+    function FNoiseNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
@@ -17,7 +17,7 @@
         
         this.once("init", oninit);
     }
-    fn.extend(FNoise);
+    fn.extend(FNoiseNode);
     
     var oninit = function() {
         var _ = this._;
@@ -26,7 +26,7 @@
         }
     };
     
-    var $ = FNoise.prototype;
+    var $ = FNoiseNode.prototype;
     
     Object.defineProperties($, {
         freq: {
@@ -99,5 +99,6 @@
         return cell;
     };
     
-    fn.register("fnoise", FNoise);
+    fn.register("fnoise", FNoiseNode);
+    
 })();

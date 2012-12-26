@@ -15,7 +15,7 @@
     ParamEvent.ExponentialRampToValue = 3;
     ParamEvent.SetValueCurve          = 4;
     
-    function Param(_args) {
+    function ParamNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixKR(this);
         
@@ -32,11 +32,11 @@
         this.on("setAdd", __changeWithValue);
         this.on("setMul", __changeWithValue);
     }
-    fn.extend(Param);
+    fn.extend(ParamNode);
 
     var __changeWithValue = fn.changeWithValue;
     
-    var $ = Param.prototype;
+    var $ = ParamNode.prototype;
     
     Object.defineProperties($, {
         value: {
@@ -237,5 +237,6 @@
         this._.emit("next", _.value);
     };
     
-    fn.register("param", Param);
+    fn.register("param", ParamNode);
+    
 })(timbre);

@@ -3,12 +3,12 @@
     
     var fn = timbre.fn;
     
-    function Noise(_args) {
+    function NoiseNode(_args) {
         timbre.Object.call(this, _args);
     }
-    fn.extend(Noise);
+    fn.extend(NoiseNode);
     
-    var $ = Noise.prototype;
+    var $ = NoiseNode.prototype;
 
     $.process = function(tickID) {
         var cell = this.cell;
@@ -34,5 +34,6 @@
         return cell;
     };
     
-    fn.register("noise", Noise);
+    fn.register("noise", NoiseNode);
+    
 })(timbre);

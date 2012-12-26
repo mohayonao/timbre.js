@@ -3,12 +3,12 @@
     
     var fn = timbre.fn;
     
-    function Mul(_args) {
+    function PlusNode(_args) {
         timbre.Object.call(this, _args);
     }
-    fn.extend(Mul);
+    fn.extend(PlusNode);
     
-    var $ = Mul.prototype;
+    var $ = PlusNode.prototype;
     
     $.process = function(tickID) {
         var cell = this.cell;
@@ -24,14 +24,14 @@
             var tmp;
             
             for (j = jmax; j--; ) {
-                cell[j] = 1;
+                cell[j] = 0;
             }
             
             if (_.ar) { // audio-rate
                 for (i = 0; i < imax; ++i) {
                     tmp = inputs[i].process(tickID);
                     for (j = jmax; j--; ) {
-                        cell[j] *= tmp[j];
+                        cell[j] += tmp[j];
                     }
                 }
                 if (mul !== 1 || add !== 0) {
@@ -40,9 +40,9 @@
                     }
                 }
             } else {    // control-rate
-                tmp = 1;
+                tmp = 0;
                 for (i = 0; i < imax; ++i) {
-                    tmp *= inputs[i].process(tickID)[0];
+                    tmp += inputs[i].process(tickID)[0];
                 }
                 tmp = tmp * mul + add;
                 for (j = jmax; j--; ) {
@@ -50,9 +50,9 @@
                 }
             }
         }
-        
         return cell;
     };
     
-    fn.register("*", Mul);
+    fn.register("+", PlusNode);
+    
 })(timbre);

@@ -7,7 +7,7 @@
     var TYPE_TIMER    = 0;
     var TYPE_INTERVAL = 1;
     
-    function Interval(_args) {
+    function IntervalNode(_args) {
         timbre.Object.call(this, _args);
         fn.timer(this);
         fn.fixKR(this);
@@ -24,7 +24,7 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
-    fn.extend(Interval);
+    fn.extend(IntervalNode);
     
     var oninit = function() {
         if (this._.originkey === "timer") {
@@ -53,7 +53,7 @@
         value:true, writable:false
     });
     
-    var $ = Interval.prototype;
+    var $ = IntervalNode.prototype;
     
     Object.defineProperties($, {
         interval: {
@@ -177,7 +177,7 @@
         }
     };
     
-    fn.register("interval", Interval);
+    fn.register("interval", IntervalNode);
     fn.alias("interval0", "interval");
     fn.alias("timer", "interval");
     

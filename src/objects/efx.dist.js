@@ -3,13 +3,13 @@
     
     var fn = timbre.fn;
     
-    function EfxDistortion(_args) {
+    function EfxDistNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
         this.once("init", oninit);
     }
-    fn.extend(EfxDistortion);
+    fn.extend(EfxDistNode);
     
     var oninit = function() {
         if (!this._.preGain) {
@@ -20,7 +20,7 @@
         }
     };
     
-    var $ = EfxDistortion.prototype;
+    var $ = EfxDistNode.prototype;
     
     Object.defineProperties($, {
         preGain: {
@@ -83,5 +83,6 @@
         return cell;
     };
     
-    fn.register("efx.dist", EfxDistortion);
+    fn.register("efx.dist", EfxDistNode);
+    
 })(timbre);

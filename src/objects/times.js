@@ -3,12 +3,12 @@
     
     var fn = timbre.fn;
     
-    function Add(_args) {
+    function TimesNode(_args) {
         timbre.Object.call(this, _args);
     }
-    fn.extend(Add);
+    fn.extend(TimesNode);
     
-    var $ = Add.prototype;
+    var $ = TimesNode.prototype;
     
     $.process = function(tickID) {
         var cell = this.cell;
@@ -24,14 +24,14 @@
             var tmp;
             
             for (j = jmax; j--; ) {
-                cell[j] = 0;
+                cell[j] = 1;
             }
             
             if (_.ar) { // audio-rate
                 for (i = 0; i < imax; ++i) {
                     tmp = inputs[i].process(tickID);
                     for (j = jmax; j--; ) {
-                        cell[j] += tmp[j];
+                        cell[j] *= tmp[j];
                     }
                 }
                 if (mul !== 1 || add !== 0) {
@@ -40,9 +40,9 @@
                     }
                 }
             } else {    // control-rate
-                tmp = 0;
+                tmp = 1;
                 for (i = 0; i < imax; ++i) {
-                    tmp += inputs[i].process(tickID)[0];
+                    tmp *= inputs[i].process(tickID)[0];
                 }
                 tmp = tmp * mul + add;
                 for (j = jmax; j--; ) {
@@ -50,8 +50,10 @@
                 }
             }
         }
+        
         return cell;
     };
     
-    fn.register("+", Add);
+    fn.register("*", TimesNode);
+    
 })(timbre);
