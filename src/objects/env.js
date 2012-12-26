@@ -5,7 +5,7 @@
     var timevalue = timbre.utils.timevalue;
     var Envelope  = timbre.modules.Envelope;
     
-    function Env(_args) {
+    function EnvNode(_args) {
         timbre.Object.call(this, _args);
         var _ = this._;
         _.env = new Envelope(timbre.samplerate);
@@ -13,9 +13,9 @@
         _.kr = true;
         _.plotFlush = true;
     }
-    fn.extend(Env);
+    fn.extend(EnvNode);
     
-    var $ = Env.prototype;
+    var $ = EnvNode.prototype;
     
     Object.defineProperties($, {
         table: {
@@ -26,7 +26,7 @@
                 }
             },
             get: function() {
-                return this._.env.originaltable;
+                return this._.env.table;
             }
         },
         curve: {
@@ -34,7 +34,7 @@
                 this._.env.setCurve(value);
             },
             get: function() {
-                return this._.env.curveName;
+                return this._.env.curve;
             }
         },
         releaseNode: {
@@ -110,7 +110,6 @@
                     this._.emit(emit, _.value);
                 }
             }
-            _.env.emit = null;
         }
         
         return cell;
@@ -125,11 +124,11 @@
     $.plot = function(opts) {
         if (this._.plotFlush) {
             var env = this._.env.clone();
-            env.calcTotalDuration(1000);
+            var info = env.getInfo(1000);
             
-            var totalDuration    = env.totalDuration;
-            var loopBeginTime    = env.loopBeginTime;
-            var releaseBeginTime = env.releaseBeginTime;
+            var totalDuration    = info.totalDuration;
+            var loopBeginTime    = info.loopBeginTime;
+            var releaseBeginTime = info.releaseBeginTime;
             var data = new Float32Array(256);
             var duration = 0;
             var durationIncr = totalDuration / data.length;
@@ -186,7 +185,7 @@
         }
         return super_plot.call(this, opts);
     };
-    fn.register("env", Env);
+    fn.register("env", EnvNode);
     
     
     var isDictionary = function(x) {

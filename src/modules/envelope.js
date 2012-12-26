@@ -1,36 +1,34 @@
 (function(timbre) {
     "use strict";
-
+    
     var timevalue = timbre.utils.timevalue;
     
     function Envelope(samplerate) {
-        this.samplerate = samplerate || timbre.samplerate;
-        this.table     = [];
-        this.level     = ZERO;
-        this.endLevel  = ZERO;
-        this.initLevel = ZERO;
-        this.status    = StatusWait;
-        this.step      = 1;
-        this.index     = 0;
-        this.counter   = 0;
-        this.counterMax = 0;
-        this.defaultCurveType = CurveTypeLin;
-        this.curveName  = "linear";
-        this.curveType  = CurveTypeLin;
-        this.curveValue = 0;
-        this.grow   = 0;
+        this.samplerate = samplerate || 44100;
+        this.table  = [];
+        this.level  = ZERO;
+        this.status = StatusWait;
+        this.curve  = "linear";        
+        this.step   = 1;
         this.releaseNode = null;
         this.loopNode    = null;
-        this.emit  = null;
-        this.totalDuration = 0;
-        this.loopBeginTime = Infinity;
-        this.releaseBeginTime = Infinity;
-        this.isEndlessLoop    = null;
+        this.emit = null;
         
-        this.m_a2 = 0;
-        this.m_b1 = 0;
-        this.m_y1 = 0;
-        this.m_y2 = 0;
+        this._endLevel   = ZERO;
+        this._initLevel  = ZERO;
+        this._curveType  = CurveTypeLin;
+        this._curveValue = 0;
+        this._defaultCurveType = CurveTypeLin;
+        this._table      = [];
+        this._index      = 0;
+        this._counter    = 0;
+        this._counterMax = 0;
+        this._grow   = 0;
+        
+        this._a2 = 0;
+        this._b1 = 0;
+        this._y1 = 0;
+        this._y2 = 0;
     }
     
     var ZERO           = Envelope.ZERO = 1e-6;
@@ -62,8 +60,8 @@
     
     $.clone = function() {
         var new_instance = new Envelope(this.samplerate);
-        new_instance.setTable(this.originaltable);
-        new_instance.setCurve(this.curveName);
+        new_instance.setTable(this.table);
+        new_instance.setCurve(this.curve);
         if (this.releaseNode !== null) {
             new_instance.setReleaseNode(this.releaseNode + 1);
         }
@@ -74,19 +72,19 @@
     };
     $.setTable = function(value) {
         if (Array.isArray(value)) {
-            this.originaltable = value;
+            this.table = value;
             this._buildTable(value);
-            this.level = this.initLevel;
+            this.level = this._initLevel;
         }
     };
     $.setCurve = function(value) {
         if (typeof value === "number")  {
-            this.defaultCurveType = CurveTypeCurve;
-            this.curveValue = value;
-            this.curveName  = value;
+            this._defaultCurveType = CurveTypeCurve;
+            this._curveValue = value;
+            this.curve = value;
         } else {
-            this.defaultCurveType = CurveTypeDict[value] || null;
-            this.curveName = value;
+            this._defaultCurveType = CurveTypeDict[value] || null;
+            this.curve = value;
         }
     };
     $.setReleaseNode = function(value) {
@@ -100,28 +98,31 @@
         }
     };
     $.reset = function() {
-        this.level = this.endLevel = this.initLevel;
-        this.index   = 0;
-        this.counter = this.counterMax = 0;
-        this.curveType  = CurveTypeStep;
-        this.grow   = 0;
+        this.level = this._endLevel = this._initLevel;
+        this._index   = 0;
+        this._counter = this._counterMax = 0;
+        this._curveType  = CurveTypeStep;
+        this._grow   = 0;
         this.status = StatusWait;
     };
     $.release = function() {
-        this.counter = this.counterMax = 0;
+        this._counter = this._counterMax = 0;
         this.status = StatusRelease;
     };
-    $.calcTotalDuration = function(sustainTime) {
-        var table = this.table;
+    $.getInfo = function(sustainTime) {
+        var table = this._table;
         var i, imax;
-        var totalDuration = 0;
+        var totalDuration    = 0;
+        var loopBeginTime    = Infinity;
+        var releaseBeginTime = Infinity;
+        var isEndlessLoop    = false;
         for (i = 0, imax = table.length; i < imax; ++i) {
             if (this.loopNode === i) {
-                this.loopBeginTime = totalDuration;
+                loopBeginTime = totalDuration;
             }
             if (this.releaseNode === i) {
                 totalDuration += sustainTime;
-                this.releaseBeginTime = totalDuration;
+                releaseBeginTime = totalDuration;
             }
             
             var items = table[i];
@@ -129,38 +130,42 @@
                 totalDuration += items[1];
             }
         }
-        if (this.loopBeginTime !== Infinity && this.releaseBeginTime === Infinity) {
+        if (loopBeginTime !== Infinity && releaseBeginTime === Infinity) {
             totalDuration += sustainTime;
-            this.isEndlessLoop = true;
+            isEndlessLoop = true;
         }
         
-        this.totalDuration = totalDuration;
-        
-        return this;
+        return {
+            totalDuration   : totalDuration,
+            loopBeginTime   : loopBeginTime,
+            releaseBeginTime: releaseBeginTime,
+            isEndlessLoop   : isEndlessLoop
+        };
     };
     $.next = function() {
         var n = this.step;
         var samplerate = this.samplerate;
         var status  = this.status;
-        var index   = this.index;
-        var table   = this.table;
-        var endLevel = this.endLevel;
-        var curveType   = this.curveType;
-        var curveValue = this.curveValue;
-        var defaultCurveType = this.defaultCurveType;
+        var index   = this._index;
+        var table   = this._table;
+        var endLevel = this._endLevel;
+        var curveType   = this._curveType;
+        var curveValue = this._curveValue;
+        var defaultCurveType = this._defaultCurveType;
         var level   = this.level;
-        var grow    = this.grow;
+        var grow    = this._grow;
         var loopNode    = this.loopNode;
         var releaseNode = this.releaseNode;
-        var counter = this.counter;
-        var counterMax = this.counterMax;
+        var counter = this._counter;
+        var counterMax = this._counterMax;
         var _counter;
         var w, items, time;
-        var a1, y0;
-        var m_a2 = this.m_a2;
-        var m_b1 = this.m_b1;
-        var m_y1 = this.m_y1;
-        var m_y2 = this.m_y2;
+        var a1;
+        var a2 = this._a2;
+        var b1 = this._b1;
+        var y0;
+        var y1 = this._y1;
+        var y2 = this._y2;
         var emit = null;
         
         switch (status) {
@@ -229,41 +234,41 @@
                     break;
                 case CurveTypeSin:
                     w = Math.PI / _counter;
-                    m_a2 = (endLevel + level) * 0.5;
-                    m_b1 = 2 * Math.cos(w);
-                    m_y1 = (endLevel - level) * 0.5;
-                    m_y2 = m_y1 * Math.sin(Math.PI * 0.5 - w);
-                    level = m_a2 - m_y1;
+                    a2 = (endLevel + level) * 0.5;
+                    b1 = 2 * Math.cos(w);
+                    y1 = (endLevel - level) * 0.5;
+                    y2 = y1 * Math.sin(Math.PI * 0.5 - w);
+                    level = a2 - y1;
                     break;
                 case CurveTypeWel:
                     w = (Math.PI * 0.5) / _counter;
-                    m_b1 = 2 * Math.cos(w);
+                    b1 = 2 * Math.cos(w);
                     if (endLevel >= level) {
-                        m_a2 = level;
-                        m_y1 = 0;
-                        m_y2 = -Math.sin(w) * (endLevel - level);
+                        a2 = level;
+                        y1 = 0;
+                        y2 = -Math.sin(w) * (endLevel - level);
                     } else {
-                        m_a2 = endLevel;
-                        m_y1 = level - endLevel;
-                        m_y2 = Math.cos(w) * (level - endLevel);
+                        a2 = endLevel;
+                        y1 = level - endLevel;
+                        y2 = Math.cos(w) * (level - endLevel);
                     }
-                    level = m_a2 + m_y1;
+                    level = a2 + y1;
                     break;
                 case CurveTypeCurve:
                     a1 = (endLevel - level) / (1.0 - Math.exp(curveValue));
-                    m_a2 = level + a1;
-                    m_b1 = a1;
+                    a2 = level + a1;
+                    b1 = a1;
                     grow = Math.exp(curveValue / _counter);
                     break;
                 case CurveTypeSqr:
-                    m_y1 = Math.sqrt(level);
-                    m_y2 = Math.sqrt(endLevel);
-                    grow = (m_y2 - m_y1) / _counter;
+                    y1 = Math.sqrt(level);
+                    y2 = Math.sqrt(endLevel);
+                    grow = (y2 - y1) / _counter;
                     break;
                 case CurveTypeCub:
-                    m_y1 = Math.pow(level   , 0.33333333);
-                    m_y2 = Math.pow(endLevel, 0.33333333);
-                    grow = (m_y2 - m_y1) / _counter;
+                    y1 = Math.pow(level   , 0.33333333);
+                    y2 = Math.pow(endLevel, 0.33333333);
+                    grow = (y2 - y1) / _counter;
                     break;
                 }
                 counter = 0;
@@ -282,60 +287,60 @@
             level *= grow;
             break;
         case CurveTypeSin:
-            y0 = m_b1 * m_y1 - m_y2;
-            level = m_a2 - y0;
-            m_y2  = m_y1;
-            m_y1  = y0;
+            y0 = b1 * y1 - y2;
+            level = a2 - y0;
+            y2  = y1;
+            y1  = y0;
             break;
         case CurveTypeWel:
-            y0 = m_b1 * m_y1 - m_y2;
-            level = m_a2 + y0;
-            m_y2  = m_y1;
-            m_y1  = y0;
+            y0 = b1 * y1 - y2;
+            level = a2 + y0;
+            y2  = y1;
+            y1  = y0;
             break;
         case CurveTypeCurve:
-            m_b1 *= grow;
-            level = m_a2 - m_b1;
+            b1 *= grow;
+            level = a2 - b1;
             break;
         case CurveTypeSqr:
-            m_y1 += grow;
-            level = m_y1 * m_y1;
+            y1 += grow;
+            level = y1 * y1;
             break;
         case CurveTypeCub:
-            m_y1 += grow;
-            level = m_y1 * m_y1 * m_y1;
+            y1 += grow;
+            level = y1 * y1 * y1;
             break;
         }
         this.level = level || ZERO;
         
-        this.status  = status;
-        this.index   = index;
-        this.grow    = grow;
-        this.endLevel = endLevel;
-        this.curveType   = curveType;
-        this.emit    = emit;
+        this.status = status;
+        this._index = index;
+        this._grow  = grow;
+        this._endLevel  = endLevel;
+        this._curveType = curveType;
+        this.emit      = emit;
         
-        this.counter    = counter + n;
-        this.counterMax = counterMax;
-
-        this.m_a2 = m_a2;
-        this.m_b1 = m_b1;
-        this.m_y1 = m_y1;
-        this.m_y2 = m_y2;
+        this._counter    = counter + n;
+        this._counterMax = counterMax;
+        
+        this._a2 = a2;
+        this._b1 = b1;
+        this._y1 = y1;
+        this._y2 = y2;
         
         return this.level;
     };
     $._buildTable = function(list) {
         if (list.length === 0) {
-            this.initLevel = ZERO;
-            this.table     = [];
+            this._initLevel = ZERO;
+            this._table     = [];
             return;
         }
         
-        this.initLevel = list[0] || ZERO;
-        this.table     = [];
+        this._initLevel = list[0] || ZERO;
+        this._table     = [];
         
-        var table = this.table;
+        var table = this._table;
         var level, time, curveType, curveValue;
         for (var i = 1, imax = list.length; i < imax; ++i) {
             level = list[i][0] || ZERO;
