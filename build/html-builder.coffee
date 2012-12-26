@@ -158,12 +158,14 @@ class IndexFileBuilder extends HTMLBuilder
             indexes[name] = indexes[name].map (x)->
                 title:formatTitle(x.title), url:x.url, dev:x.dev
 
+        unless indexes.T then indexes.T = []
         indexes.T.unshift
             title:'Introduction', url:'./'
 
         jade.compile(fs.readFileSync("#{__dirname}/index.jade"))
             indexes:indexes, categories:[
                 {key:'T', caption:'Tutorials' }
+                {key:'E', caption:'Examples'  }
                 {key:'R', caption:'References'}
             ]
 
