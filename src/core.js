@@ -88,7 +88,8 @@
     };
     
     var fn    = timbre.fn    = {};
-    var utils = timbre.utils = {};
+    var utils = timbre.utils = {}; // TODO: remove
+    timbre.modules = {};
     
     // properties
     Object.defineProperties(timbre, {

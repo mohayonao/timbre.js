@@ -3,7 +3,7 @@
     
     var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
-    var FFT = timbre.utils.FFT;
+    var FFT = timbre.modules.FFT;
     
     function FFTSpectrum(_args) {
         timbre.Object.call(this, _args);

@@ -1,8 +1,8 @@
 (function(timbre) {
     "use strict";
     
-    var fn = timbre.fn;
-    var FFT = timbre.utils.FFT;
+    var fn  = timbre.fn;
+    var FFT = timbre.modules.FFT;
     
     function IFFT(_args) {
         timbre.Object.call(this, _args);
