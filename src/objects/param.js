@@ -12,7 +12,7 @@
         this._.minvalue = -Infinity;
         this._.maxValue = +Infinity;
         
-        this._.eventtype = ParamEvent.None;
+        this._.eventtype = ParamEvent_None;
         this._.currentTime = 0;
         this._.currentTimeIncr = this.cell.length * 1000 / timbre.samplerate;
         

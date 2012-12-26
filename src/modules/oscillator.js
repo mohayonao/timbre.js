@@ -4,7 +4,7 @@
     function Oscillator(samplerate) {
         this.samplerate = samplerate || 44100;
         
-        this.wave = new Float32Array(TABLE_SIZE);
+        this.wave = null;
         this.step = 1;
         this.frequency = 0;
         
@@ -19,6 +19,9 @@
     
     $.setWave = function(value) {
         var i, dx, wave = this.wave;
+        if (!this.wave) {
+            this.wave = new Float32Array(TABLE_SIZE);    
+        }
         if (typeof value === "function") {
             for (i = 0; i < TABLE_SIZE; ++i) {
                 wave[i] = value(i / TABLE_SIZE);
