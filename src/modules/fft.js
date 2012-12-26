@@ -1,4 +1,5 @@
 (function(timbre) {
+    "use strict";
     
     function FFT(n) {
         n = (typeof n === "number") ? n : 512;

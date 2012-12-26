@@ -83,8 +83,8 @@
         var coeff = this._coeff;
         var index, delta, x0, x1;
         for (var i = 0, imax = this.step; i < imax; ++i) {
-            index = x|0;
-            delta = x - index;
+            index = phase|0;
+            delta = phase - index;
             x0 = wave[index & TABLE_MASK];
             x1 = wave[(index+1) & TABLE_MASK];
             cell[i] = ((1.0 - delta) * x0 + delta * x1);

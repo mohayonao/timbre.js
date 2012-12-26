@@ -8,7 +8,7 @@
         this.table  = [];
         this.level  = ZERO;
         this.status = StatusWait;
-        this.curve  = "linear";        
+        this.curve  = "linear";
         this.step   = 1;
         this.releaseNode = null;
         this.loopNode    = null;

@@ -12,7 +12,7 @@ html: clear-html
 	coffee build/html-builder.coffee
 
 hint:
-	jshint src/core.js src/objects/*.js src/extras/*.js
+	jshint src/core.js src/objects/*.js src/modules/*.js src/extras/*.js
 
 clear:
 	rm -f timbre.dev.js
