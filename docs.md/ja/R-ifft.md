@@ -25,3 +25,6 @@ T("ifft", {real:real, imag:imag}).play();
 ## See Also ##
 - [T("fft")](./fft.html)
   - Fast Fourier Transform
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/ifft.js

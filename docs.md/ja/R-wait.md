@@ -1,7 +1,6 @@
 T("wait")
 =========
-Wait
-{timer}{deferred}
+{timer}{deferred} Wait
 
 ## Description ##
 指定時間後に入力オブジェクトに対して `bang()` する Deferredオブジェクトです。
@@ -29,3 +28,6 @@ T("wait", {timeout:80}).then(function() {
 
 - `T("wait")` は Deferred オブジェクトで 1回しか作動しません。
 - `T("timeout")` は `bang()` を呼ぶ度に動作を再開します。
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/wait.js

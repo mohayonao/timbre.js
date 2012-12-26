@@ -94,8 +94,6 @@ setTimeout(function() {
 - `plot()` メソッドでエンベロープの形状を描画します。
 - 時間は **timevalue形式**の文字列でも指定できます。
 
-(height 60)
-
 ```timbre
 var table = [0, [0.8, "BPM120 L8"], [0.4, "BPM120 L16"],
                 [0.5, 80], [0.4, 80], [0, "BPM120 L4", "lin"]];
@@ -230,8 +228,6 @@ env.plot({target:canvas, width:240, height:80});
 
 `T("env.tri")` は三角エンベロープを作ります。
 
-(height 20)
-
 - dur, duration : 1000
 - lv, totalLevel : 1
 
@@ -249,8 +245,6 @@ env.plot({target:canvas, width:240, height:80});
 
 `T("env.cutoff")` はカットオフエンベロープを作ります。
 
-(height 20)
-
 - r, releaseTime : 100
 - lv, totalLevel : 1
 
@@ -262,3 +256,6 @@ var env = T("env.cutoff", {r:"BPM120 4.0.0"}, T("sin")).on("ended", function() {
 var canvas = window.getCanvasById("env-cutoff");
 env.plot({target:canvas, width:240, height:80});
 ```
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/env.js

@@ -1,6 +1,6 @@
 T("spectrum")
 =============
-Spectrum Viewer {listener}
+{listener} Spectrum Viewer
 
 (canvas spectrum w:240 h:80)
 
@@ -35,3 +35,6 @@ var fft = T("spectrum", {size:512, interval:100}).on("fft", function() {
   - Fast Fourier Transform
 - [T("ifft")](./ifft.html)
   - Inverse Fast Fourier Transform
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/spectrum.js

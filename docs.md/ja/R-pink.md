@@ -8,8 +8,6 @@ Pink Noise Generator
 
 ピンクノイズを出力します。
 
-(height 70)
-
 ```timbre
 var noise = T("pink", {mul:0.15}).play();
 
@@ -28,3 +26,6 @@ var fft = T("spectrum", {size:512, interval:100}, noise).on("fft", function() {
   - White Noise Generator
 - [T("fnoise")](./fnoise.html) 
   - Frequency Noise Generator
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/pink.js

@@ -1,7 +1,6 @@
 T("timer")
 ==========
-Timer
-{timer}
+{timer} Timer
 
 指定した間隔で入力オブジェクトに対して `bang()` する Deferred オブジェクトです。
 
@@ -35,3 +34,6 @@ T("timer", {interval:i, timeout:"10sec"}, freqs).start();
 
 - `T("timer")` は Deferred オブジェクトで タイムアウト後に再起動しません。
 - `T("interval")` は タイムアウト後も `start()` で再起動が出来ます。
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/timer.js

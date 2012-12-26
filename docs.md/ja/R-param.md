@@ -134,3 +134,6 @@ freq.plot({target:canvas});
 ## See Also ##
 - [`T("env")`](./R-env.html)
   - Envelope
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/param.js

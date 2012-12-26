@@ -8,7 +8,7 @@ var BD = function() {
 };
 BD.impl = function() {
 
-    var freq = T("param", {value:200}).lineTo(10, 50);
+    var freq = T("param", {value:200}).linTo(10, 50);
     var synth = T("pulse", {freq:freq, mul:2.5});
     synth = T("LPF", {freq:100, Q:15}, synth);
     synth = T("clip", synth, T("pink", {mul:0.15}));
@@ -32,3 +32,6 @@ BD.impl = function() {
 
 T("interval0", {interval:500}, BD).start();
 ```
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/rec.js

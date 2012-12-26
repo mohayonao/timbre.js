@@ -17,3 +17,6 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 - `time` _(Number or timevalue)_
 - `feedback` _(T Object)_
 - `wet` _(T Object)_
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/efx.delay.js

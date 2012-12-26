@@ -14,7 +14,7 @@ timbre.js は Chrome, Safari, Firefox, node.js, オプションとして Opera �
 ## Installation ##
 ミニファイされた [timbre.js](/timbre.js/timbre.js) と開発用の [timbre.dev.js](/timbre.dev.js) があります。
 
-```
+```html
 <script src="./timbre.js"></script>
 ```
 

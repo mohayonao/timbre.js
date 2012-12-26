@@ -1,6 +1,6 @@
 T("interval")
 =============
-Interval {timer}
+{timer} Interval
 
 ## Description ##
 
@@ -16,7 +16,7 @@ var freqs = T([220, 440, 660, 880]);
 var osc = T("sin", {freq:freqs, mul:0.5});
 var env = T("perc", {a:50, r:500}, osc).bang();
 
-var i = T("param", {value:500}).lineTo(50, "30sec");
+var i = T("param", {value:500}).linTo(50, "30sec");
 
 T("interval", {interval:i}, freqs, env).start();
 
@@ -57,3 +57,6 @@ env.play();
 - [T("timer")](./timer.html)
 - [T("timeout")](./timeout.html)
 - [T("wait)](./wait.html)
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/interval.js

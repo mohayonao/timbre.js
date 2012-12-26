@@ -9,7 +9,7 @@ The Root Object of Timbre Objects
 再生を開始します。 `play()` を実行すると、その T オブジェクトがシステムに登録されて関連する他の T オブジェクトの実行を促して動作を開始します。以下の例では `freq` 自体は `play()` されていませんが `synth` に関連付いているため動作します。一方 `volume` は `play()` されておらず関連付いてもいないので動作しません。
 
 ```timbre
-var freq   = T("param", {value:440}).lineTo(880, "1sec");
+var freq   = T("param", {value:440}).linTo(880, "1sec");
 var volume = T("perc" , {r:"5sec"});
 var synth  = T("saw"  , {freq:freq, mul:0.20}).play();
 

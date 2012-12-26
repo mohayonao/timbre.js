@@ -1,6 +1,8 @@
 T("tape")
 =========
-## Tape edit ##
+Tape edit
+
+## Description ##
 
 磁気テープを切り貼りする要領で音声データを編集します。
 
@@ -37,3 +39,5 @@ T("audio").load("/timbre.js/misc/audio/amen.wav").then(function() {
 - **timbre.utils.scissor.join(tapes)**
 - **timbre.utils.scissor.scilence(duration)**
 
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/tape.js

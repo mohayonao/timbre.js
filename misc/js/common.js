@@ -33,18 +33,24 @@ $(function() {
     $(".codemirror").each(function(i, e) {
         var container = $("<div>").addClass("editor").appendTo(e);
         var textarea = $("<textarea>").val($(e).attr("source")).appendTo(container);
+
+        var lang = $(e).attr("lang");
+        var mode = (lang === "timbre" || lang === "js") ? "javascript" : lang;
         
         var editor = CodeMirror.fromTextArea(textarea.get(0), {
-            lineNumbers:true
+            lineNumbers:true, readOnly:(lang !== "timbre"), mode:mode
         });
-        $("<button>").addClass("play-button").on("click", function() {
-            playCode(editor.getValue().trim());
-            
-            if (nowPlaying) {
-                $(this).text("Pause");
-                $(".CodeMirror", container).css("border-color", "#DF81A2");
-            }
-        }).append("Play").appendTo(container);
+        
+        if (lang === "timbre") {
+            $("<button>").addClass("play-button").on("click", function() {
+                playCode(editor.getValue().trim());
+                
+                if (nowPlaying) {
+                    $(this).text("Pause");
+                    $(".CodeMirror", container).css("border-color", "#DF81A2");
+                }
+            }).append("Play").appendTo(container);
+        }
     });
     
     window.getCanvasById = function(name) {

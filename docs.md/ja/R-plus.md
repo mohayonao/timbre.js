@@ -47,3 +47,6 @@ var cutoff = T("sin", {freq:"250ms", mul:800, add:1600}).kr();
 
 T("LPF", {freq:cutoff}, chord).play();
 ```
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/plus.js

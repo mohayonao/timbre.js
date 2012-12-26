@@ -15,3 +15,6 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 ## Properties ##
 - `preGain` _(T Object)_
 - `postGain` _(T Object)_
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/efx.dist.js

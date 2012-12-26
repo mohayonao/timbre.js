@@ -41,7 +41,6 @@ class HTMLBuilder
         html = marked fs.readFileSync(doc.path, 'utf-8')
         html = lang_process  html
         html = insert_canvas html
-        html = insert_height html
         html = insert_label  html
         jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
             lang: doc.lang, title: doc.title
@@ -58,14 +57,8 @@ class HTMLBuilder
             indexes[doc.category].push doc
 
     lang_process = (doc)->
-        re  = /<pre><code class="lang-(js|html|sh)">([\w\W]+?)<\/code><\/pre>/g
-        doc = doc.replace re, '<pre class="lang-$1 prettyprint">$2</pre>'
-
-        re  = /<pre><code class="lang-timbre">([\w\W]+?)<\/code><\/pre>/g
-        doc = doc.replace re, '<div class="codemirror" source="$1"></div>'
-
-        re  = /<pre><code class="lang-codemirror">([\w\W]+?)<\/code><\/pre>/g
-        doc = doc.replace re, '<div class="codemirror" source="$1"></div>'
+        re  = /<pre><code class="lang-(timbre|js|html|sh)">([\w\W]+?)<\/code><\/pre>/g
+        doc = doc.replace re, '<div class="codemirror" lang="$1" source="$2"></div>'
 
         re = /<pre><code class="lang-table">([\w\W]+?)<\/code><\/pre>/g
         while m = re.exec doc
@@ -109,10 +102,6 @@ class HTMLBuilder
     insert_canvas = (src)->
         re = /<p>\s*\(canvas\s+([\-\w]+) w:(\d+) h:(\d+)\)\s*<\/p>/g
         src.replace re, '<canvas id="$1" style="width:$2px;height:$3px"></canvas>'
-
-    insert_height = (src)->
-        re = /<p>\s*\(height\s+(\d+)\)\s*<\/p>/g
-        src.replace re, '<div style="height:$1px"></div>'
 
     insert_label = (src)->
         src = src.replace /{deferred}/ig, '<span class="label deferred">D</span>'

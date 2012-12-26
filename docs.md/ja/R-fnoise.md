@@ -8,8 +8,6 @@ Frequency Noise Generator
 
 周期的ノイズを出力します。
 
-(height 70)
-
 ```timbre
 var freqs = T([220, 440, 880, 1760, 3520, 7040, 14080]);
 
@@ -33,3 +31,6 @@ T("interval", {interval:1000}, freqs).start();
   - White Noise Generator
 - [T("pink")](./pink.html)
   - Pink Noise Generator
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/fnoise.js

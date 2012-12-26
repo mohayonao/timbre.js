@@ -1,7 +1,6 @@
 T("fft")
 ========
-Fast Fourier transform
-{listener}
+{listener} Fast Fourier transform
 
 ## Description ##
 
@@ -37,3 +36,6 @@ window.animate(function() {
   - Inverse Fast Fourier Transform
 - [T("spectrum")](./spectrum.html)
   - Spectrum Viewer
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/fft.js

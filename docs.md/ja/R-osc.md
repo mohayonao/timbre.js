@@ -86,3 +86,6 @@ T("osc", {wave:src, mul:0.15}).plot({target:canvas}).play();
 
 ## See Also ##
 - [`T("OscEnv")`](./OscEnv.html)
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/osc.js

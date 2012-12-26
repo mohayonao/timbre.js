@@ -38,3 +38,6 @@ T("interval", {delay:0, interval:500}, function(count) {
   - Oscillator
 - [`T("env")`](./env.html)
   - Envelope
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/OscEnv.js
