@@ -1,18 +1,9 @@
 (function(timbre) {
     "use strict";
-    
-    
-    var CurveTypeDict = {
-        lin:CurveTypeLin, linear     :CurveTypeLin,
-        exp:CurveTypeExp, exponential:CurveTypeExp,
-        sin:CurveTypeSin, sine       :CurveTypeSin,
-        wel:CurveTypeWel, welch      :CurveTypeWel,
-        sqr:CurveTypeSqr, squared    :CurveTypeSqr,
-        cub:CurveTypeCub, cubed      :CurveTypeCub
-    };
+
+    var timevalue = timbre.utils.timevalue;
     
     function Envelope(samplerate) {
-        
         this.samplerate = samplerate || timbre.samplerate;
         this.table     = [];
         this.level     = ZERO;
@@ -57,11 +48,20 @@
     var StatusSustain = Envelope.StatusSustain = 2;
     var StatusRelease = Envelope.StatusRelease = 3;
     var StatusEnd     = Envelope.StatusEnd     = 4;
+
+    var CurveTypeDict = {
+        lin:CurveTypeLin, linear     :CurveTypeLin,
+        exp:CurveTypeExp, exponential:CurveTypeExp,
+        sin:CurveTypeSin, sine       :CurveTypeSin,
+        wel:CurveTypeWel, welch      :CurveTypeWel,
+        sqr:CurveTypeSqr, squared    :CurveTypeSqr,
+        cub:CurveTypeCub, cubed      :CurveTypeCub
+    };
     
     var $ = Envelope.prototype;
     
     $.clone = function() {
-        var new_instance = new Envelope(this.step);
+        var new_instance = new Envelope(this.samplerate);
         new_instance.setTable(this.originaltable);
         new_instance.setCurve(this.curveName);
         if (this.releaseNode !== null) {
@@ -214,6 +214,7 @@
                 }
                 
                 _counter = counterMax / n;
+                
                 switch (curveType) {
                 case CurveTypeStep:
                     level = endLevel;

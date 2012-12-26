@@ -4,7 +4,6 @@
     var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     var Envelope  = timbre.modules.Envelope;
-    var ZERO = Envelope.ZERO;
     
     function Env(_args) {
         timbre.Object.call(this, _args);
@@ -213,6 +212,7 @@
         return x;
     }
     
+    var ZERO = Envelope.ZERO;
     
     fn.register("perc", function(_args) {
         if (!isDictionary(_args[0])) {
