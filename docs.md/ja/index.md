@@ -4,7 +4,7 @@ JavaScript Library for Objective Sound Programming
 
 ## What is timbre.js? ##
 
-timbre.js は lisp のような簡潔な記述をアイデアの出発点として [jQuery](http://jquery.com/) や [node.js](http://nodejs.org/) などの先進的なインターフェイスを参考に開発された [SuperCollider](http://supercollider.sourceforge.net/) のようにガリガリ書ける [Max/MSP](http://cycling74.com/) のようなオブジェクト指向サウンドプログラミング用の JavaScript ライブラリです。このプロジェクトは GitHub でホストされています。
+timbre.js は lisp のような簡潔な記述をアイデアの出発点として [jQuery](http://jquery.com/) や [node.js](http://nodejs.org/) などの先進的なインターフェイスを参考に開発された [SuperCollider](http://supercollider.sourceforge.net/) のようにガリガリ書ける [Max/MSP](http://cycling74.com/) のようなオブジェクト指向サウンドプログラミング用の JavaScript ライブラリです。このプロジェクトは [GitHub](https://github.com/mohayonao/timbre.js/) でホストされています。
 
 ## Supports ##
 timbre.js は Chrome, Safari, Firefox, node.js, オプションとして Opera をサポートします。

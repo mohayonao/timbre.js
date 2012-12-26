@@ -9,7 +9,6 @@ class DocFile
     re = /\/(?:(\w+)\/)?(_?)(?:([a-z]+)-)?(?:(\d+)-)?([\w.]+?)\.md$/i
 
     constructor: (@path)->
-
         if (m = re.exec @path)
             @lang     =   m[1] or 'en'
             @dev      = !!m[2]
@@ -158,6 +157,9 @@ class IndexFileBuilder extends HTMLBuilder
                 else a.sort - b.sort
             indexes[name] = indexes[name].map (x)->
                 title:formatTitle(x.title), url:x.url, dev:x.dev
+
+        indexes.T.unshift
+            title:'Introduction', url:'./'
 
         jade.compile(fs.readFileSync("#{__dirname}/index.jade"))
             indexes:indexes, categories:[
