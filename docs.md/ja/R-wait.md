@@ -25,7 +25,7 @@ T("wait", {timeout:80}).then(function() {
 - `ended` タイムアウト時に発生します。
 
 ## Note ##
-同じような動作をするオブジェクトに [T("timeout")](/timbre.js/docs/ja/timeout.html) があります。
+同じような動作をするオブジェクトに [T("timeout")](./timeout.html) があります。
 
 - `T("wait")` は Deferred オブジェクトで 1回しか作動しません。
 - `T("timeout")` は `bang()` を呼ぶ度に動作を再開します。

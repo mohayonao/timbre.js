@@ -29,13 +29,13 @@ timbre.jsの内部で高精度なだけで setInterval 等の既存のタイマ�
 ### Objects ###
 リファレンスページで {timer} マークがあるのがリスナーオブジェクトです。
 
-- [`T("interval")`](/timbre.js/docs/ja/interval.html)
+- [`T("interval")`](./interval.html)
   - 指定した間隔で処理を呼び出します
-- [`T("timer")`](/timbre.js/docs/ja/timer.html)
+- [`T("timer")`](./timer.html)
   - 指定した間隔で処理を呼び出します (Deferredタイプ)
-- [`T("timeout")`](/timbre.js/docs/ja/timeout.html)
+- [`T("timeout")`](./timeout.html)
   - 指定時間後に処理を呼び出します
-- [`T("wait")`](/timbre.js/docs/ja/wait.html)
+- [`T("wait")`](./wait.html)
   -指定時間後に処理を呼び出します (Deferredタイプ)
 
 - - -
@@ -76,9 +76,9 @@ T("spectrum", {interval:100}).on("fft", function() {
 ### Objects ###
 リファレンスページで {listener} マークがあるのがリスナーオブジェクトです。
 
-- [`T("fft")`](/timbre.js/docs/ja/fft.html)
+- [`T("fft")`](./fft.html)
   - FFTを行い実部、虚部を出力します
-- [`T("spectrum")`](/timbre.js/docs/ja/fft.html)
+- [`T("spectrum")`](./fft.html)
   - FFTを行い表示用のスペクトラムを作成します
-- [`T("wave")`](/timbre.js/docs/ja/wave.html)
+- [`T("wave")`](./wave.html)
   - 表示用の波形を作成します

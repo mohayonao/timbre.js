@@ -31,7 +31,7 @@ T("timer", {interval:i, timeout:"10sec"}, freqs).start();
 - `ended` タイムアウト時に発生します。
 
 ## Note ##
-同じような動作をするオブジェクトに [T("interval")](/timbre.js/docs/ja/interval.html) があります。
+同じような動作をするオブジェクトに [T("interval")](./interval.html) があります。
 
 - `T("timer")` は Deferred オブジェクトで タイムアウト後に再起動しません。
 - `T("interval")` は タイムアウト後も `start()` で再起動が出来ます。

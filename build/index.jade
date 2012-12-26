@@ -4,6 +4,6 @@ for items in categories
     ul
       each o in indexes[items.key]
         li
-          a(href=o.url) #{o.name}
+          a(href=o.url) #{o.title}
           if o.dev
-            span(class="label label-important") dev
+            span(class="dev") dev

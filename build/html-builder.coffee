@@ -6,17 +6,21 @@ marked = require 'marked'
 isDev = false
 
 class DocFile
-    re = /\/(?:(\w+)\/)?(_?)(?:([a-z]{3})-)?(?:(\d+)-)?([\w.]+?)\.md$/
+    re = /\/(?:(\w+)\/)?(_?)(?:([a-z]+)-)?(?:(\d+)-)?([\w.]+?)\.md$/i
 
     constructor: (@path)->
+
         if (m = re.exec @path)
             @lang     =   m[1] or 'en'
             @dev      = !!m[2]
             @category =   m[3] or '*'
             @sort     = +(m[4] ? 50)
             @name     =   m[5]
+            @title    = getTitle @path
         else @error = true
 
+    getTitle = (path)->
+        fs.readFileSync(path, 'utf-8').split('\n')[0]
 
 class HTMLBuilder
     constructor: (dirpath, urlpath)->
@@ -27,7 +31,7 @@ class HTMLBuilder
             for filename in fs.readdirSync dirpath
                 doc = new DocFile("#{dirpath}/#{filename}")
                 if doc.error or (doc.dev and not isDev) then continue
-                doc.url = "/timbre.js/#{urlpath}/#{doc.name}.html"
+                doc.url = "./#{doc.name}.html"
                 map[doc.name] = doc
             map
 
@@ -41,16 +45,15 @@ class HTMLBuilder
         html = insert_height html
         html = insert_label  html
         jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
-            lang: doc.lang, title: formatName(doc.name)
+            lang: doc.lang, title: doc.title
             main: html
 
     get  : (name)-> @files[name]
     names: -> Object.keys(@files)
 
-    get_indexes: (indexes, def='def')->
+    get_indexes: (indexes)->
         for name in @names()
             doc = @get(name)
-            if doc.category is '*' then doc.category = def
             unless indexes[doc.category]
                 indexes[doc.category] = []
             indexes[doc.category].push doc
@@ -119,10 +122,11 @@ class HTMLBuilder
 
 class DocFileBuilder extends HTMLBuilder
     constructor: (@lang)->
-        super path.normalize("#{__dirname}/../docs.md/#{@lang}"), "docs/#{lang}"
-
-    get_indexes: (indexes)->
-        super indexes, 'ref'
+        dirpath = if @lang is 'en'
+            "#{__dirname}/../docs.md"
+        else
+            "#{__dirname}/../docs.md/#{@lang}"
+        super path.normalize(dirpath), "docs/#{lang}"
 
     @build_statics = (langlist=['en', 'ja'])->
         dstpath = path.normalize "#{__dirname}/../docs/"
@@ -139,66 +143,39 @@ class DocFileBuilder extends HTMLBuilder
                 htmlfilepath = "#{dstpath}/#{lang}/#{name}.html"
                 fs.writeFileSync htmlfilepath, html, 'utf-8'
 
-
-class ExampleFileBuilder extends HTMLBuilder
-    constructor: ->
-        super path.normalize("#{__dirname}/../examples.md"), "examples"
-
-    get_indexes: (indexes)->
-        super indexes, 'exa'
-
-    @build_statics = ->
-        dstpath = path.normalize "#{__dirname}/../examples/"
-        unless fs.existsSync dstpath
-            fs.mkdir dstpath
-        miscpath = path.normalize "#{__dirname}/../misc/"
-
-        builder = new ExampleFileBuilder()
-        for name in builder.names()
-            doc = builder.get(name)
-            html = builder.build name
-            htmlfilepath = "#{dstpath}/#{name}.html"
-            fs.writeFileSync htmlfilepath, html, 'utf-8'
-
-
 class IndexFileBuilder extends HTMLBuilder
     constructor: (@lang)->
         @doc      = new DocFileBuilder(@lang)
-        @examples = new ExampleFileBuilder()
 
     build: (categories=[])->
         indexes = {}
-        @doc     .get_indexes(indexes)
-        @examples.get_indexes(indexes)
+        @doc.get_indexes(indexes)
 
         for name in Object.keys(indexes)
             indexes[name].sort (a, b)->
                 if a.sort is b.sort
-                    if a.name.toLowerCase() < b.name.toLowerCase() then -1 else +1
+                    if a.title.toLowerCase() < b.title.toLowerCase() then -1 else +1
                 else a.sort - b.sort
             indexes[name] = indexes[name].map (x)->
-                name:formatName(x.name), url:x.url, dev:x.dev
+                title:formatTitle(x.title), url:x.url, dev:x.dev
 
         jade.compile(fs.readFileSync("#{__dirname}/index.jade"))
-            indexes:indexes, categories: [
-                { key:'tut', caption:'Tutorials'     }
-                { key:'exa', caption:'Examples'      }
-                { key:'ref', caption:'References'    }
+            indexes:indexes, categories:[
+                {key:'T', caption:'Tutorials' }
+                {key:'R', caption:'References'}
             ]
+
+    formatTitle = (title)->
+        title.replace /T\("([\w\W]+?)"\)/, '$1'
 
     @build_statics = ->
         null # TODO: implements
 
-formatName = (name)->
-    name.replace /_/g, ' '
-
 if not module.parent
     DocFileBuilder.build_statics()
-    ExampleFileBuilder.build_statics()
     IndexFileBuilder.build_statics()
 else
     isDev = true
     module.exports =
         DocFileBuilder: DocFileBuilder
-        ExampleFileBuilder: ExampleFileBuilder
         IndexFileBuilder: IndexFileBuilder

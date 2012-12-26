@@ -48,12 +48,12 @@ env.play();
   - `delay` が 0 で初期化される `T("interval")` オブジェクト
 
 ## Note ##
-同じような動作をするオブジェクトに [T("timer")](/timbre.js/docs/ja/timer.html) があります。
+同じような動作をするオブジェクトに [T("timer")](./timer.html) があります。
 
 - `T("timer")` は Deferred オブジェクトで タイムアウト後に再起動しません。
 - `T("interval")` は タイムアウト後も `start()` で再起動が出来ます。
 
 ## See Also ##
-- [T("timer")](/timbre.js/docs.md/ja/timer.html)
-- [T("timeout")](/timbre.js/docs.md/ja/timeout.html)
-- [T("wait)](/timbre.js/docs.md/ja/wait.html)
+- [T("timer")](./timer.html)
+- [T("timeout")](./timeout.html)
+- [T("wait)](./wait.html)

@@ -78,6 +78,6 @@ $.when(dfd0, dfd1, wait).then(function() {
 
 ## Deferredオブジェクトの一覧 ##
 
-- [`T("wait")`](/timbre.js/docs/ja/wait.html)
-- [`T("timer")`](/timbre.js/docs/ja/timer.html)
-- [`T("audio")`](/timbre.js/docs/ja/audio.html)
+- [`T("wait")`](./wait.html)
+- [`T("timer")`](./timer.html)
+- [`T("audio")`](./audio.html)

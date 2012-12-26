@@ -29,7 +29,7 @@ T("interval", {interval:1000}, freqs).start();
 - `freq` _(T Object)_
 
 ## See Also ##
-- [T("noise")](/timbre.js/docs/ja/noise.html) 
+- [T("noise")](./noise.html) 
   - White Noise Generator
-- [T("pink")](/timbre.js/docs/ja/pink.html)
+- [T("pink")](./pink.html)
   - Pink Noise Generator

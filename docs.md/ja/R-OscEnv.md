@@ -3,7 +3,7 @@ T("OscEnv")
 Oscillator x Envelope
 
 ## Description ##
-[`T("osc")`](/timbre.js/docs/ja/osc.html) と [`T("env")`](/timbre.js/docs/ja/env.html) を組み合わせた音源インターフェースです。
+[`T("osc")`](./osc.html) と [`T("env")`](./env.html) を組み合わせた音源インターフェースです。
 
 ```timbre
 var env = {type:"perc", a:50, r:2500};
@@ -34,7 +34,7 @@ T("interval", {delay:0, interval:500}, function(count) {
 - `noteOffWithFreq(freq)`
 
 ## See Also ##
-- [`T("osc")`](/timbre.js/docs/ja/osc.html)
+- [`T("osc")`](./osc.html)
   - Oscillator
-- [`T("env")`](/timbre.js/docs/ja/env.html)
+- [`T("env")`](./env.html)
   - Envelope

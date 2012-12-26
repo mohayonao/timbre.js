@@ -25,6 +25,11 @@ hr {
     margin: 20px 0;
 }
 
+pre code {
+    padding: 15px;
+    display: block;
+}
+
 #sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
@@ -42,21 +47,21 @@ hr {
     background: #DBF0F6;
 }
 
-#title {
-    position: fixed;
-    top: 0; left: 0px;
-    width: 120px;
-    height: 20px;
-    padding: 10px 25px;
+#sidebar h1 {
     font-family: 'Arial';
     font-size: 18px;
+    margin-bottom: 15px;
     color: #333;
-    background: #DBF0F6;
     text-shadow: 0 0 1px #999;
 }
 
+#footer a {
+    margin: 5px;
+    font-size: 12px;
+}
+
 #index {
-    margin-top: 30px;
+
 }
 
 #index h2 {

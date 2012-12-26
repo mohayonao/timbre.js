@@ -31,7 +31,7 @@ var fft = T("spectrum", {size:512, interval:100}).on("fft", function() {
 - `fft`
 
 ## See Also ##
-- [T("fft")](/timbre.js/docs/ja/fft.html)
+- [T("fft")](./fft.html)
   - Fast Fourier Transform
-- [T("ifft")](/timbre.js/docs/ja/ifft.html)
+- [T("ifft")](./ifft.html)
   - Inverse Fast Fourier Transform

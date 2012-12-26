@@ -6,14 +6,11 @@ html_builder   = require './html-builder'
 
 app = express()
 
-app.get '/timbre.js/docs/:lang/:name\.html', (req, res)->
-    builder = new html_builder.DocFileBuilder(req.params.lang)
-    html = builder.build(req.params.name)
-    res.send html
-
-app.get '/timbre.js/examples/:name\.html', (req, res)->
-    builder = new html_builder.ExampleFileBuilder()
-    html = builder.build(req.params.name)
+app.get /^\/timbre\.js\/(?:(ja)\/)?(?:([.\w]+)\.html)?$/, (req, res)->
+    lang     = req.params[0] or 'en'
+    name     = req.params[1] or 'index'
+    builder = new html_builder.DocFileBuilder(lang)
+    html = builder.build(name)
     res.send html
 
 app.get '/timbre.js/misc/index-:lang\.html', (req, res)->

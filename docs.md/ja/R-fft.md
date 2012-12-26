@@ -33,7 +33,7 @@ window.animate(function() {
 スペクトルを表示することだけが目的の場合は `T("spectrum")` オブジェクトのほうが適しています。
 
 ## See Also ##
-- [T("ifft")](/timbre.js/docs/ja/ifft.html)
+- [T("ifft")](./ifft.html)
   - Inverse Fast Fourier Transform
-- [T("spectrum")](/timbre.js/docs/ja/spectrum.html)
+- [T("spectrum")](./spectrum.html)
   - Spectrum Viewer

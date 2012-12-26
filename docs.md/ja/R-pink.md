@@ -1,17 +1,17 @@
-T("noise")
-==========
-White Noise Generator
+T("pink")
+======================
+Pink Noise Generator
 
 ## Description ##
 
 (canvas noise w:240 h:80)
 
-ホワイトノイズを出力します。
+ピンクノイズを出力します。
 
 (height 70)
 
 ```timbre
-var noise = T("noise", {mul:0.15}).play();
+var noise = T("pink", {mul:0.15}).play();
 
 var canvas = window.getCanvasById("noise");
 var fft = T("spectrum", {size:512, interval:100}, noise).on("fft", function() {
@@ -24,7 +24,7 @@ var fft = T("spectrum", {size:512, interval:100}, noise).on("fft", function() {
 ## Properties ##
 
 ## See Also ##
-- [T("pink")](/timbre.js/docs/ja/pink.html)
-  - Pink Noise Generator
-- [T("fnoise")](/timbre.js/docs/ja/fnoise.html) 
+- [T("noise")](./noise.html)
+  - White Noise Generator
+- [T("fnoise")](./fnoise.html) 
   - Frequency Noise Generator
