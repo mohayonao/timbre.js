@@ -22,7 +22,6 @@
         this._table      = [];
         this._index      = 0;
         this._counter    = 0;
-        this._counterMax = 0;
         this._grow   = 0;
         
         this._a2 = 0;
@@ -100,13 +99,13 @@
     $.reset = function() {
         this.level = this._endLevel = this._initLevel;
         this._index   = 0;
-        this._counter = this._counterMax = 0;
+        this._counter = 0;
         this._curveType  = CurveTypeStep;
         this._grow   = 0;
         this.status = StatusWait;
     };
     $.release = function() {
-        this._counter = this._counterMax = 0;
+        this._counter = 0;
         this.status = StatusRelease;
     };
     $.getInfo = function(sustainTime) {
@@ -157,8 +156,6 @@
         var loopNode    = this.loopNode;
         var releaseNode = this.releaseNode;
         var counter = this._counter;
-        var counterMax = this._counterMax;
-        var _counter;
         var w, items, time;
         var a1;
         var a2 = this._a2;
@@ -174,26 +171,26 @@
             break;
         case StatusGate:
         case StatusRelease:
-            while (counter >= counterMax) {
+            while (counter <= 0) {
                 if (index >= table.length) {
                     if (status === StatusGate && loopNode !== null) {
                         index = loopNode;
                         continue;
                     }
-                    status     = StatusEnd;
-                    counterMax = Infinity;
-                    curveType   = CurveTypeStep;
-                    emit    = "ended";
+                    status    = StatusEnd;
+                    counter   = Infinity;
+                    curveType = CurveTypeStep;
+                    emit      = "ended";
                     continue;
                 } else if (status === StatusGate && index === releaseNode) {
                     if (this.loopNode !== null && loopNode < releaseNode) {
                         index = loopNode;
                         continue;
                     }
-                    status     = StatusSustain;
-                    counterMax = Infinity;
-                    curveType   = CurveTypeStep;
-                    emit    = "sustained";
+                    status    = StatusSustain;
+                    counter   = Infinity;
+                    curveType = CurveTypeStep;
+                    emit      = "sustained";
                     continue;
                 }
                 items = table[index++];
@@ -213,27 +210,25 @@
                 
                 time = items[1];
                 
-                counterMax  = time * 0.001 * samplerate;
-                if (counterMax < 1) {
-                    counterMax = 1;
+                counter = ((time * 0.001 * samplerate) / n)|0;
+                if (counter < 1) {
+                    counter = 1;
                 }
-                
-                _counter = counterMax / n;
                 
                 switch (curveType) {
                 case CurveTypeStep:
                     level = endLevel;
                     break;
                 case CurveTypeLin:
-                    grow = (endLevel - level) / _counter;
+                    grow = (endLevel - level) / counter;
                     break;
                 case CurveTypeExp:
                     grow = Math.pow(
-                        endLevel / level, 1 / _counter
+                        endLevel / level, 1 / counter
                     );
                     break;
                 case CurveTypeSin:
-                    w = Math.PI / _counter;
+                    w = Math.PI / counter;
                     a2 = (endLevel + level) * 0.5;
                     b1 = 2 * Math.cos(w);
                     y1 = (endLevel - level) * 0.5;
@@ -241,7 +236,7 @@
                     level = a2 - y1;
                     break;
                 case CurveTypeWel:
-                    w = (Math.PI * 0.5) / _counter;
+                    w = (Math.PI * 0.5) / counter;
                     b1 = 2 * Math.cos(w);
                     if (endLevel >= level) {
                         a2 = level;
@@ -258,20 +253,19 @@
                     a1 = (endLevel - level) / (1.0 - Math.exp(curveValue));
                     a2 = level + a1;
                     b1 = a1;
-                    grow = Math.exp(curveValue / _counter);
+                    grow = Math.exp(curveValue / counter);
                     break;
                 case CurveTypeSqr:
                     y1 = Math.sqrt(level);
                     y2 = Math.sqrt(endLevel);
-                    grow = (y2 - y1) / _counter;
+                    grow = (y2 - y1) / counter;
                     break;
                 case CurveTypeCub:
                     y1 = Math.pow(level   , 0.33333333);
                     y2 = Math.pow(endLevel, 0.33333333);
-                    grow = (y2 - y1) / _counter;
+                    grow = (y2 - y1) / counter;
                     break;
                 }
-                counter = 0;
             }
             break;
         }
@@ -314,15 +308,13 @@
         this.level = level || ZERO;
         
         this.status = status;
+        this.emit   = emit;
+        
         this._index = index;
         this._grow  = grow;
         this._endLevel  = endLevel;
         this._curveType = curveType;
-        this.emit      = emit;
-        
-        this._counter    = counter + n;
-        this._counterMax = counterMax;
-        
+        this._counter   = counter - 1;
         this._a2 = a2;
         this._b1 = b1;
         this._y1 = y1;
