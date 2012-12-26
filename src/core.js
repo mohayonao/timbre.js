@@ -91,6 +91,20 @@
     var utils   = timbre.utils = {}; // TODO: remove
     var modules = timbre.modules = {};
     
+    (function() {
+        var dict = {};
+        modules.ready = function(type, fn) {
+            dict[type] = fn;
+        };
+        modules.ready.done = function(type, res) {
+            var fn = dict[type];
+            if (fn) {
+                fn(res);
+            }
+            delete dict[type];
+        };
+    })();
+    
     // properties
     Object.defineProperties(timbre, {
         version: {
@@ -179,7 +193,7 @@
     
     timbre.reset = function() {
         _sys.reset();
-        _sys.emit("reset");
+        _sys.events.emit("reset");
         return timbre;
     };
     
@@ -353,7 +367,7 @@
                 
                 if (_sys.timers.indexOf(self) === -1) {
                     _sys.timers.push(self);
-                    _sys.emit("addObject");
+                    _sys.events.emit("addObject");
                     self._.emit("start");
                 }
             });
@@ -365,7 +379,7 @@
             this._.remove_check = true;
             if (_sys.timers.indexOf(this) !== -1) {
                 _sys.nextTick(function() {
-                    _sys.emit("removeObject");
+                    _sys.events.emit("removeObject");
                     self._.emit("stop");
                 });
             }
@@ -393,7 +407,7 @@
                     }
                     if (_sys.listeners.indexOf(self) === -1) {
                         _sys.listeners.push(self);
-                        _sys.emit("addObject");
+                        _sys.events.emit("addObject");
                         self._.emit("listen");
                     }
                 });
@@ -410,7 +424,7 @@
                 this._.remove_check = true;
                 if (_sys.listeners.indexOf(this) !== -1) {
                     _sys.nextTick(function() {
-                        _sys.emit("removeObject");
+                        _sys.events.emit("removeObject");
                         self._.emit("unlisten");
                     });
                 }
@@ -520,200 +534,12 @@
     };
     fn.outputSignalAR = __outputSignalAR;
     
-    // borrowed from node.js
-    var EventEmitter = (function() {
-        function EventEmitter(context) {
-            this.context = context;
-            if (!this._) {
-                this._ = {};
-            }
-        }
-        
-        var $ = EventEmitter.prototype;
-        
-        $.emit = function(type) {
-            var _ = this._;
-            
-            if (!_.events) {
-                return false;
-            }
-            
-            var handler = _.events[type];
-            if (!handler) {
-                return false;
-            }
-            
-            var args;
-            
-            if (typeof handler === "function") {
-                switch (arguments.length) {
-                case 1:
-                    handler.call(this.context);
-                    break;
-                case 2:
-                    handler.call(this.context, arguments[1]);
-                    break;
-                case 3:
-                    handler.call(this.context, arguments[1], arguments[2]);
-                    break;
-                default:
-                    args = slice.call(arguments, 1);
-                    handler.apply(this.context, args);
-                }
-                return true;
-            } else if (isArray(handler)) {
-                args = slice.call(arguments, 1);
-                var listeners = handler.slice();
-                for (var i = 0, imax = listeners.length; i < imax; ++i) {
-                    listeners[i].apply(this.context, args);
-                }
-                return true;
-            } else {
-                return false;
-            }
-        };
-        
-        $.addListener = function(type, listener) {
-            if (typeof listener !== "function") {
-                throw new Error("addListener only takes instances of Function");
-            }
-            var _ = this._;
-            
-            if (!_.events) {
-                _.events = {};
-            }
-            
-            if (!_.events[type]) {
-                // Optimize the case of one listener. Don't need the extra array object.
-                _.events[type] = listener;
-            } else if (isArray(_.events[type])) {
-                // If we've already got an array, just append.
-                _.events[type].push(listener);
-            } else {
-                // Adding the second element, need to change to array.
-                _.events[type] = [_.events[type], listener];
-            }
-            
-            return this;
-        };
-        
-        $.on = $.addListener;
-        
-        $.once = function(type, listener) {
-            if (typeof listener !== "function") {
-                throw new Error("once only takes instances of Function");
-            }
-            var self = this;
-            function g() {
-                self.removeListener(type, g);
-                listener.apply(self.context, arguments);
-            }
-            g.listener = listener;
-            
-            self.on(type, g);
-            
-            return this;
-        };
-        
-        $.removeListener = function(type, listener) {
-            if (typeof listener !== "function") {
-                throw new Error("removeListener only takes instances of Function");
-            }
-            var _ = this._;
-            
-            if (!_.events || !_.events[type]) {
-                return this;
-            }
-            
-            var list = _.events[type];
-            
-            if (isArray(list)) {
-                var position = -1;
-                for (var i = 0, imax = list.length; i < imax; ++i) {
-                    if (list[i] === listener ||
-                        // once listener
-                        (list[i].listener && list[i].listener === listener)) {
-                        position = i;
-                        break;
-                    }
-                }
-                
-                if (position < 0) {
-                    return this;
-                }
-                list.splice(position, 1);
-                if (list.length === 0) {
-                    _.events[type] = null;
-                }
-            } else if (list === listener ||
-                       // once listener
-                       (list.listener && list.listener === listener)) {
-                _.events[type] = null;
-            }
-            
-            return this;
-        };
-        
-        $.removeAllListeners = function(type) {
-            var _ = this._;
-            if (!_.events) {
-                return this;
-            }
-            
-            var remain = false;
-            var listeners = _.events[type];
-            if (isArray(listeners)) {
-                for (var i = listeners.length; i--; ) {
-                    var listener = listeners[i];
-                    if (listener.unremovable) {
-                        remain = true;
-                        continue;
-                    }
-                    this.removeListener(type, listener);
-                }
-            } else if (listeners) {
-                if (!listeners.unremovable) {
-                    this.removeListener(type, listeners);
-                } else {
-                    remain = true;
-                }
-            }
-            if (!remain) {
-                _.events[type] = null;
-            }
-            
-            return this;
-        };
-        
-        $.listeners = function(type) {
-            var _ = this._;
-            if (!_.events || !_.events[type]) {
-                return [];
-            }
-            var a, e = _.events[type];
-            if (!isArray(e)) {
-                return e.unremovable ? [] : [e];
-            }
-            e = e.slice();
-            a = [];
-            for (var i = 0, imax = e.length; i < imax; ++i) {
-                if (!e[i].unremovable) {
-                    a.push(e[i]);
-                }
-            }
-            return a;
-        };
-        
-        return EventEmitter;
-    })();
-    utils.EventEmitter = EventEmitter;
-    
     
     // root object
     var TimbreObject = (function() {
         function TimbreObject(_args) {
             this._ = {}; // private members
-            this._.events = new EventEmitter(this);
+            this._.events = new modules.EventEmitter(this);
             this._.emit   = this._.events.emit.bind(this._.events);
             
             if (isDictionary(_args[0])) {
@@ -1561,7 +1387,7 @@
             _sys.nextTick(function() {
                 if (_sys.inlets.indexOf(self) === -1) {
                     _sys.inlets.push(self);
-                    _sys.emit("addObject");
+                    _sys.events.emit("addObject");
                     self._.isPlaying = true;
                     self._.emit("play");
                 }
@@ -1573,7 +1399,7 @@
             if (_sys.inlets.indexOf(this) !== -1) {
                 this._.remove_check = true;
                 _sys.nextTick(function() {
-                    _sys.emit("removeObject");
+                    _sys.events.emit("removeObject");
                 });
                 this._.isPlaying = false;
                 this._.emit("pause");
@@ -1651,9 +1477,11 @@
             this.recStart   = 0;
             this.recBuffers = null;
             
-            this.reset();
+            modules.ready("events", function() {
+                this.events = new modules.EventEmitter(this);
+                this.reset();
+            }.bind(this));
         }
-        __extend(SoundSystem, EventEmitter);
         
         var ACCEPT_SAMPLERATES = [
             8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000
@@ -1715,7 +1543,7 @@
                 this.strmR = new Float32Array(this.streamsize);
                 
                 this.impl.play();
-                this.emit("play");
+                this.events.emit("play");
             }
             return this;
         };
@@ -1724,7 +1552,7 @@
             if (this.status === STATUS_PLAY) {
                 this.status = STATUS_NONE;
                 this.impl.pause();
-                this.emit("pause");
+                this.events.emit("pause");
             }
             return this;
         };
@@ -1738,14 +1566,14 @@
             this.inlets    = [];
             this.timers    = [];
             this.listeners = [];
-            this.on("addObject", function() {
+            this.events.on("addObject", function() {
                 if (this.status === STATUS_NONE) {
                     if (this.inlets.length > 0 || this.timers.length > 0) {
                         this.play();
                     }
                 }
             });
-            this.on("removeObject", function() {
+            this.events.on("removeObject", function() {
                 if (this.status === STATUS_PLAY) {
                     if (this.inlets.length === 0 && this.timers.length === 0) {
                         this.pause();
@@ -2040,6 +1868,24 @@
         
         $.ready = function() {
             return modules.Deferred.when.apply(null, arguments);
+        };
+        
+        // EventEmitter
+        $.on = function(type, listeners) {
+            this.events.on(type, listeners);
+        };
+        $.addListener = $.on;
+        $.once = function(type, listeners) {
+            this.events.once(type, listeners);
+        };
+        $.removeListener = function(type, listener) {
+            this.events.removeListener(type, listener);
+        };
+        $.removeAllListeners = function(type) {
+            this.events.removeListeners(type);
+        };
+        $.listeners = function(type) {
+            return this.events.listeners(type);
         };
         
         return SoundSystem;
