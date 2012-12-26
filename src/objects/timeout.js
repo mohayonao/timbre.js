@@ -81,7 +81,7 @@
         return this;
     };
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var cell = this.cell;
         var _ = this._;
 
@@ -89,8 +89,8 @@
             return cell;
         }
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             
             if (_.samples > 0) {
                 _.samples -= cell.length;

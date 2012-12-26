@@ -495,14 +495,14 @@
         var inputs = object.inputs;
         var i, imax = inputs.length;
         var j, jmax = cell.length;
-        var seq_id = object.seq_id;
+        var tickID = object.tickID;
         var tmp;
         
         for (j = jmax; j--; ) {
             cell[j] = 0;
         }
         for (i = 0; i < imax; ++i) {
-            tmp = inputs[i].seq(seq_id);
+            tmp = inputs[i].process(tickID);
             for (j = jmax; j--; ) {
                 cell[j] += tmp[j];
             }
@@ -921,7 +921,7 @@
                 });
             }
             
-            this.seq_id = -1;
+            this.tickID = -1;
             this.cell   = new Float32Array(_sys.cellsize);
             this.inputs = _args.map(timbre);
             
@@ -992,8 +992,8 @@
         };
 
         $.valueOf = function() {
-            if (_sys.seq_id !== this.seq_id) {
-                this.seq(_sys.seq_id);
+            if (_sys.tickID !== this.tickID) {
+                this.process(_sys.tickID);
             }
             return this.cell[0];
         };
@@ -1116,7 +1116,7 @@
             return this;
         };
         
-        $.seq = function() {
+        $.process = function() {
             return this.cell;
         };
         
@@ -1288,10 +1288,10 @@
         }
         __extend(ChannelObject);
         
-        ChannelObject.prototype.seq = function(seq_id) {
-            if (this.seq_id !== seq_id) {
-                this.seq_id = seq_id;
-                this._.parent.seq(seq_id);
+        ChannelObject.prototype.process = function(tickID) {
+            if (this.tickID !== tickID) {
+                this.tickID = tickID;
+                this._.parent.process(tickID);
             }
             return this.cell;
         };
@@ -1560,19 +1560,19 @@
             return this;
         };
         
-        $.seq = function(seq_id) {
+        $.process = function(tickID) {
             var cell = this.cell;
             var _ = this._;
             
-            if (this.seq_id !== seq_id) {
-                this.seq_id = seq_id;
+            if (this.tickID !== tickID) {
+                this.tickID = tickID;
                 
                 var mul = _.mul, add = _.add;
                 var i, imax = cell.length;
                 
                 var object = _.array[ClipFunctions[_.clipMode](_.index, _.array.length)];
                 
-                cell.set(object.seq(seq_id));
+                cell.set(object.process(tickID));
 
                 for (i = imax; i--; ) {
                     cell[i] = cell[i] * mul + add;
@@ -1779,7 +1779,7 @@
             return this;
         };
         
-        $.seq = function(seq_id) {
+        $.process = function(tickID) {
             var _ = this._;
             var cell  = this.cell;
             var cellL = this.cellL;
@@ -1790,8 +1790,8 @@
             var add = _.add, mul = _.mul;
             var tmp, tmpL, tmpR, x;
             
-            if (this.seq_id !== seq_id) {
-                this.seq_id = seq_id;
+            if (this.tickID !== tickID) {
+                this.tickID = tickID;
                 
                 for (j = jmax; j--; ) {
                     cellL[j] = cellR[j] = cell[j] = 0;
@@ -1799,7 +1799,7 @@
                 
                 for (i = 0; i < imax; ++i) {
                     tmp = inputs[i];
-                    tmp.seq(seq_id);
+                    tmp.process(tickID);
                     if (tmp.isStereo) {
                         tmpL = tmp.cellL;
                         tmpR = tmp.cellR;
@@ -1829,7 +1829,7 @@
         function SoundSystem() {
             this._ = {};
             this.context = this;
-            this.seq_id = 0;
+            this.tickID = 0;
             this.impl = null;
             this.amp  = 0.8;
             this.status = STATUS_NONE;
@@ -1960,7 +1960,7 @@
         };
         
         $.process = function() {
-            var seq_id = this.seq_id;
+            var tickID = this.tickID;
             var strmL = this.strmL, strmR = this.strmR;
             var amp = this.amp;
             var x, tmpL, tmpR;
@@ -1979,15 +1979,15 @@
             }
             
             while (n--) {
-                ++seq_id;
+                ++tickID;
                 
                 for (j = 0, jmax = timers.length; j < jmax; ++j) {
-                    timers[j].seq(seq_id);
+                    timers[j].process(tickID);
                 }
                 
                 for (j = 0, jmax = inlets.length; j < jmax; ++j) {
                     x = inlets[j];
-                    x.seq(seq_id);
+                    x.process(tickID);
                     tmpL = x.cellL;
                     tmpR = x.cellR;
                     for (k = 0, i = saved_i; k < kmax; ++k, ++i) {
@@ -1998,7 +1998,7 @@
                 saved_i = i;
                 
                 for (j = 0, jmax = listeners.length; j < jmax; ++j) {
-                    listeners[j].seq(seq_id);
+                    listeners[j].process(tickID);
                 }
                 
                 for (j = timers.length; j--; ) {
@@ -2037,7 +2037,7 @@
                 strmR[i] = x;
             }
             
-            this.seq_id = seq_id;
+            this.tickID = tickID;
             
             var currentTime = this.currentTime;
             

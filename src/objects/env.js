@@ -173,12 +173,12 @@
         return this;
     };
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             
             var inputs  = this.inputs;
             var i, imax = cell.length;

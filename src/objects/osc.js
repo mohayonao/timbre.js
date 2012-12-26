@@ -102,12 +102,12 @@
         return this;
     };
 
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
 
             var inputs  = this.inputs;
             var i, imax = cell.length;
@@ -120,7 +120,7 @@
                 }
             }
             
-            var freq = _.freq.seq(seq_id);
+            var freq = _.freq.process(tickID);
             var wave = _.wave, x   = _.x, coeff = _.coeff;
             var index, delta, x0, x1, xx, dx;
             

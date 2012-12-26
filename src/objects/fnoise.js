@@ -54,16 +54,16 @@
         }
     });
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
 
             var lastValue = _.lastValue;
             var phase     = _.phase;
-            var phaseStep = _.freq.seq(seq_id)[0] / _.samplerate;
+            var phaseStep = _.freq.process(tickID)[0] / _.samplerate;
             var reg = _.reg;
             var mul = _.mul, add = _.add;
             var i, imax;

@@ -136,12 +136,12 @@
         return this.noteOff(cpsmidi(freq));
     };
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var cell = this.cell;
         var _ = this._;
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
@@ -154,7 +154,7 @@
                 
                 list = _.genList;
                 for (i = 0, imax = list.length; i < imax; ++i) {
-                    tmp = list[i].seq(seq_id);
+                    tmp = list[i].process(tickID);
                     for (j = jmax; j--; ) {
                         cell[j] += tmp[j];
                     }

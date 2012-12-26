@@ -63,22 +63,22 @@
         }
     });
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
 
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
             var changed = false;
-            var feedback = _.feedback.seq(seq_id)[0];
+            var feedback = _.feedback.process(tickID)[0];
             if (_.prevFeedback !== feedback) {
                 _.prevFeedback = feedback;
                 changed = true;
             }
-            var wet = _.wet.seq(seq_id)[0];
+            var wet = _.wet.process(tickID)[0];
             if (_.prevWet !== wet) {
                 _.prevWet = wet;
                 changed = true;

@@ -1,6 +1,7 @@
 (function() {
     "use strict";
-    
+
+    var fn = timbre.fn;
     var instance = null;
     
     function MouseListener(_args) {
@@ -10,14 +11,14 @@
         instance = this;
         
         timbre.Object.call(this, _args);
-        timbre.fn.stereo(this);
+        fn.stereo(this);
         
         this.X = this.L;
         this.Y = this.R;
         
-        timbre.fn.fixKR(this);
+        fn.fixKR(this);
     }
-    timbre.fn.extend(MouseListener, timbre.Object);
+    fn.extend(MouseListener);
     
     
     var mouseX = 0;
@@ -66,7 +67,7 @@
         return this;
     };
     
-    timbre.fn.register("mouse", MouseListener);
+    fn.register("mouse", MouseListener);
     
     
     function MouseXY(_args) {
@@ -74,9 +75,9 @@
         if (!instance) {
             instance = new MouseListener([]);
         }
-        timbre.fn.fixKR(this);
+        fn.fixKR(this);
     }
-    timbre.fn.extend(MouseXY, timbre.Object);
+    fn.extend(MouseXY, timbre.Object);
     
     Object.defineProperties(MouseXY.prototype, {
         minval: {
@@ -113,17 +114,17 @@
         instance.stop();
         return this;
     };
-    MouseXY.prototype.seq = function(seq_id) {
-        return this._.map.seq(seq_id);
+    MouseXY.prototype.process = function(tickID) {
+        return this._.map.process(tickID);
     };
     
-    timbre.fn.register("mouse.x", function(_args) {
+    fn.register("mouse.x", function(_args) {
         var self = new MouseXY(_args);
         self._.map = timbre("map", {inMin:1e-9}, instance.X);
         self.cell = self._.map.cell;
         return self;
     });
-    timbre.fn.register("mouse.y", function(_args) {
+    fn.register("mouse.y", function(_args) {
         var self = new MouseXY(_args);
         self._.map = timbre("map", {inMin:1e-9}, instance.Y);
         self.cell = self._.map.cell;

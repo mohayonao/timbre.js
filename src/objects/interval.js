@@ -120,7 +120,7 @@
         return this;
     };
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var cell = this.cell;
         
         var _ = this._;
@@ -129,13 +129,13 @@
             return cell;
         }
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             
             if (_.delaySamples > 0) {
                 _.delaySamples -= cell.length;
             }
-            _.interval.seq(seq_id);
+            _.interval.process(tickID);
             
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;

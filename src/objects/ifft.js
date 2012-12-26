@@ -36,18 +36,18 @@
         }
     });
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             
             if (_.real && _.imag) {
                 var real = _.realBuffer;
                 var imag = _.imagBuffer;
-                var _real = _.real.seq(seq_id);
-                var _imag = _.imag.seq(seq_id);
+                var _real = _.real.process(tickID);
+                var _imag = _.imag.process(tickID);
                 
                 real.set(_real);
                 imag.set(_imag);

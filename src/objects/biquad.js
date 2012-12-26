@@ -69,28 +69,28 @@
         }
     });
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
             var changed = false;
             
-            var freq = _.freq.seq(seq_id)[0];
+            var freq = _.freq.process(tickID)[0];
             if (_.prevFreq !== freq) {
                 _.prevFreq = freq;
                 changed = true;
             }
-            var Q = _.Q.seq(seq_id)[0];
+            var Q = _.Q.process(tickID)[0];
             if (_.prevQ !== Q) {
                 _.prevQ = Q;
                 changed = true;
             }
-            var gain = _.gain.seq(seq_id)[0];
+            var gain = _.gain.process(tickID)[0];
             if (_.prevGain !== gain) {
                 _.prevGain = gain;
                 changed = true;

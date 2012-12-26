@@ -41,23 +41,23 @@
         }
     });
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
             var changed = false;
 
-            var preGain = _.preGain.seq(seq_id)[0];
+            var preGain = _.preGain.process(tickID)[0];
             if (_.prevPreGain !== preGain) {
                 _.prevPreGain = preGain;
                 changed = true;
             }
-            var postGain = _.postGain.seq(seq_id)[0];
+            var postGain = _.postGain.process(tickID)[0];
             if (_.prevPostGain !== postGain) {
                 _.prevPostGain = postGain;
                 changed = true;

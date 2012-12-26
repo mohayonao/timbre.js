@@ -1,11 +1,13 @@
 (function() {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function PicoBinder(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.stereo(this);
+        fn.stereo(this);
     }
-    timbre.fn.extend(PicoBinder, timbre.Object);
+    fn.extend(PicoBinder, timbre.Object);
     
     var $ = PicoBinder.prototype;
     
@@ -22,11 +24,11 @@
         }
     });
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             if (_.gen) {
                 var cellL = this.cellL;
                 var cellR = this.cellR;
@@ -87,6 +89,6 @@
             }
         });
         
-        timbre.fn.register("pico.js", PicoBinder);
+        fn.register("pico.js", PicoBinder);
     }
 })();

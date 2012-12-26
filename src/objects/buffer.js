@@ -163,15 +163,15 @@
         return this;
     };
     
-    $.seq = function(seq_id) {
+    $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
         
-        if (this.seq_id !== seq_id) {
-            this.seq_id = seq_id;
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
             
             if (!_.isEnded && _.buffer) {
-                var pitch  = _.pitch.seq(seq_id)[0];
+                var pitch  = _.pitch.process(tickID)[0];
                 var buffer = _.buffer;
                 var phase  = _.phase;
                 var phaseIncr = _.phaseIncr * pitch;
