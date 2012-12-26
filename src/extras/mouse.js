@@ -25,10 +25,10 @@
     var mouseY = 0;
     
     var onclick = function(e) {
-        instance.emit("click", e);
+        instance._.emit("click", e);
     };
     var onmousedown = function(e) {
-        instance.emit("mousedown", e);
+        instance._.emit("mousedown", e);
     };
     var onmousemove = function(e) {
         var x = (mouseX = e.pageX / window.innerWidth);
@@ -42,7 +42,7 @@
         }
     };
     var onmouseup = function(e) {
-        instance.emit("mouseup", e);
+        instance._.emit("mouseup", e);
     };
     
     var $ = MouseListener.prototype;
