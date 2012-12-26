@@ -516,7 +516,6 @@
         for (var i = cell.length; i--; ) {
             cell[i] = cell[i] * mul + add;
         }
-        console.log(mul);
     };
     fn.outputSignalAR = __outputSignalAR;
     
