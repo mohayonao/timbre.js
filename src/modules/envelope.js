@@ -97,7 +97,6 @@
         }
     };
     $.reset = function() {
-        this.level = this._endLevel = this._initLevel;
         this._index   = 0;
         this._counter = 0;
         this._curveType  = CurveTypeStep;
