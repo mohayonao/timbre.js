@@ -1,17 +1,19 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function Panner(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.stereo(this);
-        timbre.fn.fixAR(this);
+        fn.stereo(this);
+        fn.fixAR(this);
         
         this._.panL = 0.5;
         this._.panR = 0.5;
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(Panner);
+    fn.extend(Panner);
     
     var oninit = function() {
         if (!this._.value) {
@@ -82,5 +84,5 @@
         return cell;
     };
     
-    timbre.fn.register("pan", Panner);
+    fn.register("pan", Panner);
 })(timbre);

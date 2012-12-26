@@ -1,9 +1,11 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function SoundBuffer(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.fixAR(this);
+        fn.fixAR(this);
         
         this._.isLooped   = false;
         this._.isReversed = false;
@@ -15,7 +17,7 @@
         this._.phaseIncr = 0;
         this._.pitch = timbre(1);
     }
-    timbre.fn.extend(SoundBuffer);
+    fn.extend(SoundBuffer);
     
     var $ = SoundBuffer.prototype;
     
@@ -182,15 +184,15 @@
                 
                 if (phase >= buffer.length) {
                     if (_.isLooped) {
-                        timbre.fn.nextTick(onlooped.bind(this));
+                        fn.nextTick(onlooped.bind(this));
                     } else {
-                        timbre.fn.nextTick(onended.bind(this));
+                        fn.nextTick(onended.bind(this));
                     }
                 } else if (phase < 0) {
                     if (_.isLooped) {
-                        timbre.fn.nextTick(onlooped.bind(this));
+                        fn.nextTick(onlooped.bind(this));
                     } else {
-                        timbre.fn.nextTick(onended.bind(this));
+                        fn.nextTick(onended.bind(this));
                     }
                 }
                 _.phase = phase;
@@ -212,7 +214,7 @@
     };
     
     var onended = function() {
-        timbre.fn.onended(this, 0);
+        fn.onended(this, 0);
     };
     
     var super_plot = timbre.Object.prototype.plot;
@@ -233,5 +235,5 @@
         return super_plot.call(this, opts);
     };
     
-    timbre.fn.register("buffer", SoundBuffer);
+    fn.register("buffer", SoundBuffer);
 })(timbre);

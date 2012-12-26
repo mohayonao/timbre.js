@@ -1,13 +1,15 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function EfxDistortion(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.fixAR(this);
+        fn.fixAR(this);
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(EfxDistortion);
+    fn.extend(EfxDistortion);
     
     var oninit = function() {
         if (!this._.preGain) {
@@ -46,21 +48,7 @@
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
             
-            var inputs  = this.inputs;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var mul = _.mul, add = _.add;
-            var tmp;
-            
-            for (j = jmax; j--; ) {
-                cell[j] = 0;
-            }
-            for (i = 0; i < imax; ++i) {
-                tmp = inputs[i].seq(seq_id);
-                for (j = jmax; j--; ) {
-                    cell[j] += tmp[j];
-                }
-            }
+            fn.inputSignalAR(this);
             
             var changed = false;
 
@@ -82,17 +70,18 @@
             
             var preScale = _.preScale;
             var limit    = _.limit;
+            var mul = _.mul, add = _.add;
             var x;
             
-            for (j = jmax; j--; ) {
-                x = cell[j] * preScale;
+            for (var i = cell.length; i--; ) {
+                x = cell[i] * preScale;
                 x = (x > limit) ? limit : (x < -limit) ? -limit : x;
-                cell[j] = x * mul + add;
+                cell[i] = x * mul + add;
             }
         }
         
         return cell;
     };
     
-    timbre.fn.register("efx.dist", EfxDistortion);
+    fn.register("efx.dist", EfxDistortion);
 })(timbre);

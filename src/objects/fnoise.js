@@ -1,11 +1,12 @@
 (function() {
     "use strict";
     
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
     function FNoise(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.fixAR(this);
+        fn.fixAR(this);
         
         var _ = this._;
         _.samplerate = timbre.samplerate;
@@ -16,7 +17,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(FNoise);
+    fn.extend(FNoise);
     
     var oninit = function() {
         var _ = this._;
@@ -98,5 +99,5 @@
         return cell;
     };
     
-    timbre.fn.register("fnoise", FNoise);
+    fn.register("fnoise", FNoise);
 })();

@@ -5,10 +5,11 @@
     // http://www.firstpr.com.au/dsp/pink-noise/
     
     var MAX_KEY = 31;
+    var fn = timbre.fn;
     
     function PinkNoise(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.fixAR(this);
+        fn.fixAR(this);
         
         var whites = new Uint8Array(5);
         for (var i = 0; i < 5; ++i) {
@@ -17,7 +18,7 @@
         this._.whites = whites;
         this._.key = 0;
     }
-    timbre.fn.extend(PinkNoise);
+    fn.extend(PinkNoise);
     
     var $ = PinkNoise.prototype;
     
@@ -52,5 +53,5 @@
         return cell;
     };
     
-    timbre.fn.register("pink", PinkNoise);
+    fn.register("pink", PinkNoise);
 })(timbre);

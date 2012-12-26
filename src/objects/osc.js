@@ -1,6 +1,7 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
     function Oscillator(_args) {
@@ -12,7 +13,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(Oscillator);
+    fn.extend(Oscillator);
     
     var oninit = function() {
         var _ = this._;
@@ -109,24 +110,13 @@
             this.seq_id = seq_id;
 
             var inputs  = this.inputs;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var mul = _.mul, add = _.add;
-            var tmp;
+            var i, imax = cell.length;
             
             if (inputs.length) {
-                for (j = jmax; j--; ) {
-                    cell[j] = 0;
-                }
-                for (i = 0; i < imax; ++i) {
-                    tmp = inputs[i].seq(seq_id);
-                    for (j = jmax; j--; ) {
-                        cell[j] += tmp[j];
-                    }
-                }
+                fn.inputSignalAR(this);
             } else {
-                for (j = jmax; j--; ) {
-                    cell[j] = 1;
+                for (i = imax; i--; ) {
+                    cell[i] = 1;
                 }
             }
             
@@ -136,22 +126,22 @@
             
             if (_.ar) { // audio-rate
                 if (_.freq.isAr) {
-                    for (j = 0; j < jmax; ++j) {
+                    for (i = 0; i < imax; ++i) {
                         index = x|0;
                         delta = x - index;
                         x0 = wave[index & 1023];
                         x1 = wave[(index+1) & 1023];
-                        cell[j] *= ((1.0 - delta) * x0 + delta * x1);
-                        x += freq[j] * coeff;
+                        cell[i] *= ((1.0 - delta) * x0 + delta * x1);
+                        x += freq[i] * coeff;
                     }
                 } else { // _.freq.isKr
                     dx = freq[0] * coeff;
-                    for (j = 0; j < jmax; ++j) {
+                    for (i = 0; i < imax; ++i) {
                         index = x|0;
                         delta = x - index;
                         x0 = wave[index & 1023];
                         x1 = wave[(index+1) & 1023];
-                        cell[j] *= ((1.0 - delta) * x0 + delta * x1);
+                        cell[i] *= ((1.0 - delta) * x0 + delta * x1);
                         x += dx;
                     }
                 }
@@ -161,19 +151,17 @@
                 x0 = wave[index & 1023];
                 x1 = wave[(index+1) & 1023];
                 xx = ((1.0 - delta) * x0 + delta * x1);
-                for (j = jmax; j--; ) {
-                    cell[j] *= xx;
+                for (i = imax; i--; ) {
+                    cell[i] *= xx;
                 }
-                x += freq[0] * coeff * jmax;
+                x += freq[0] * coeff * imax;
             }
             while (x > 1024) {
                 x -= 1024;
             }
             _.x = x;
             
-            for (j = jmax; j--; ) {
-                cell[j] = cell[j] * mul + add;
-            }
+            fn.outputSignalAR(this);
         }
         
         return cell;
@@ -442,41 +430,41 @@
         }
     };
     
-    timbre.fn.register("osc", Oscillator);
+    fn.register("osc", Oscillator);
     
-    timbre.fn.register("sin", function(_args) {
+    fn.register("sin", function(_args) {
         return new Oscillator(_args).set("wave", "sin");
     });
-    timbre.fn.register("cos", function(_args) {
+    fn.register("cos", function(_args) {
         return new Oscillator(_args).set("wave", "cos");
     });
-    timbre.fn.register("pulse", function(_args) {
+    fn.register("pulse", function(_args) {
         return new Oscillator(_args).set("wave", "pulse");
     });
-    timbre.fn.register("tri", function(_args) {
+    fn.register("tri", function(_args) {
         return new Oscillator(_args).set("wave", "tri");
     });
-    timbre.fn.register("saw", function(_args) {
+    fn.register("saw", function(_args) {
         return new Oscillator(_args).set("wave", "saw");
     });
-    timbre.fn.register("fami", function(_args) {
+    fn.register("fami", function(_args) {
         return new Oscillator(_args).set("wave", "fami");
     });
-    timbre.fn.register("konami", function(_args) {
+    fn.register("konami", function(_args) {
         return new Oscillator(_args).set("wave", "konami");
     });
-    timbre.fn.register("+sin", function(_args) {
+    fn.register("+sin", function(_args) {
         return new Oscillator(_args).set("wave", "+sin");
     });
-    timbre.fn.register("+pulse", function(_args) {
+    fn.register("+pulse", function(_args) {
         return new Oscillator(_args).set("wave", "+pulse");
     });
-    timbre.fn.register("+tri", function(_args) {
+    fn.register("+tri", function(_args) {
         return new Oscillator(_args).set("wave", "+tri");
     });
-    timbre.fn.register("+saw", function(_args) {
+    fn.register("+saw", function(_args) {
         return new Oscillator(_args).set("wave", "+saw");
     });
     
-    timbre.fn.alias("square", "pulse");
+    fn.alias("square", "pulse");
 })(timbre);

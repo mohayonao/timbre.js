@@ -1,10 +1,12 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function Mul(_args) {
         timbre.Object.call(this, _args);
     }
-    timbre.fn.extend(Mul);
+    fn.extend(Mul);
     
     var $ = Mul.prototype;
     
@@ -52,5 +54,5 @@
         return cell;
     };
     
-    timbre.fn.register("*", Mul);
+    fn.register("*", Mul);
 })(timbre);

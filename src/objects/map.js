@@ -1,9 +1,11 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function Map(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.fixKR(this);
+        fn.fixKR(this);
         
         this._.inMin  = 0;
         this._.inMax  = 1;
@@ -12,7 +14,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(Map);
+    fn.extend(Map);
     
     var oninit = function() {
         if (!this._.warp) {
@@ -160,5 +162,5 @@
         }
     };
     
-    timbre.fn.register("map", Map);
+    fn.register("map", Map);
 })(timbre);

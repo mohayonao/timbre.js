@@ -1,9 +1,11 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function Biquad(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.fixAR(this);
+        fn.fixAR(this);
         
         this._.biquad = new BiquadFilter({samplerate:timbre.samplerate});
         
@@ -12,7 +14,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(Biquad);
+    fn.extend(Biquad);
     
     var oninit = function() {
         if (!this._.freq) {
@@ -74,6 +76,8 @@
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
             
+            fn.inputSignalAR(this);
+            
             var changed = false;
             
             var freq = _.freq.seq(seq_id)[0];
@@ -96,27 +100,9 @@
                 _.plotFlush = true;
             }
             
-            var inputs = this.inputs;
-            var tmp;
-            var i, imax;
-            var j;
-            var mul = _.mul, add = _.add;
-            
-            for (j = cell.length; j--; ) {
-                cell[j] = 0;
-            }
-            for (i = 0, imax = inputs.length; i < imax; ++i) {
-                tmp = inputs[i].seq(seq_id);
-                for (j = cell.length; j--; ) {
-                    cell[j] += tmp[j];
-                }
-            }
-            
             _.biquad.process(cell);
             
-            for (j = cell.length; j--; ) {
-                cell[j] = cell[j] * mul + add;
-            }
+            fn.outputSignalAR(this);
         }
         
         return cell;
@@ -432,39 +418,39 @@
     setParams.BRF = setParams.notch;
     setParams.APF = setParams.allpass;
     
-    timbre.fn.register("biquad", Biquad);
+    fn.register("biquad", Biquad);
     
-    timbre.fn.register("lowpass", function(_args) {
+    fn.register("lowpass", function(_args) {
         return new Biquad(_args).set("type", "lowpass");
     });
-    timbre.fn.register("highpass", function(_args) {
+    fn.register("highpass", function(_args) {
         return new Biquad(_args).set("type", "highpass");
     });
-    timbre.fn.register("bandpass", function(_args) {
+    fn.register("bandpass", function(_args) {
         return new Biquad(_args).set("type", "bandpass");
     });
-    timbre.fn.register("lowshelf", function(_args) {
+    fn.register("lowshelf", function(_args) {
         return new Biquad(_args).set("type", "lowshelf");
     });
-    timbre.fn.register("highshelf", function(_args) {
+    fn.register("highshelf", function(_args) {
         return new Biquad(_args).set("type", "highshelf");
     });
-    timbre.fn.register("peaking", function(_args) {
+    fn.register("peaking", function(_args) {
         return new Biquad(_args).set("type", "peaking");
     });
-    timbre.fn.register("notch", function(_args) {
+    fn.register("notch", function(_args) {
         return new Biquad(_args).set("type", "notch");
     });
-    timbre.fn.register("allpass", function(_args) {
+    fn.register("allpass", function(_args) {
         return new Biquad(_args).set("type", "allpass");
     });
     
-    timbre.fn.alias("LPF", "lowpass");
-    timbre.fn.alias("HPF", "highpass");
-    timbre.fn.alias("BPF", "bandpass");
-    timbre.fn.alias("BEF", "notch");
-    timbre.fn.alias("BRF", "notch");
-    timbre.fn.alias("APF", "allpass");
+    fn.alias("LPF", "lowpass");
+    fn.alias("HPF", "highpass");
+    fn.alias("BPF", "bandpass");
+    fn.alias("BEF", "notch");
+    fn.alias("BRF", "notch");
+    fn.alias("APF", "allpass");
     
     timbre.utils.BiquadFilter = BiquadFilter;
 })(timbre);

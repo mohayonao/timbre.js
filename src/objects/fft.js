@@ -1,11 +1,13 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function FFTListener(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.listener(this);
-        timbre.fn.stereo(this);
-        timbre.fn.fixAR(this);
+        fn.listener(this);
+        fn.stereo(this);
+        fn.fixAR(this);
         
         this.real = this.L;
         this.imag = this.R;
@@ -18,7 +20,7 @@
         this._.plotRange = [0, 0.5];
         this._.plotBarStyle = true;
     }
-    timbre.fn.extend(FFTListener);
+    fn.extend(FFTListener);
     
     var $ = FFTListener.prototype;
     
@@ -45,24 +47,10 @@
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
             
-            var inputs = this.inputs;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var tmp;
-            
-            for (j = jmax; j--; ) {
-                cell[j] = 0;
-            }
-            
-            for (i = 0; i < imax; ++i) {
-                tmp = inputs[i].seq(seq_id);
-                for (j = jmax; j--; ) {
-                    cell[j] += tmp[j];
-                }
-            }
+            fn.inputSignalAR(this);
             
             _.fftCell.set(_.prevCell);
-            _.fftCell.set(cell, jmax);
+            _.fftCell.set(cell, cell.length);
             _.fft.forward(_.fftCell);
             _.prevCell.set(cell);
             
@@ -71,9 +59,9 @@
             var _real = _.fft.real;
             var _imag = _.fft.imag;
             
-            for (j = jmax; j--; ) {
-                real[j] = _real[j];
-                imag[j] = _imag[j];
+            for (var i = cell.length; i--; ) {
+                real[i] = _real[i];
+                imag[i] = _imag[i];
             }
             
             this._.plotFlush = true;
@@ -109,7 +97,7 @@
         return super_plot.call(this, opts);
     };
     
-    timbre.fn.register("fft", FFTListener);
+    fn.register("fft", FFTListener);
     
     
     function FFT(n) {

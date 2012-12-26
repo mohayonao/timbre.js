@@ -1,17 +1,18 @@
 (function(timbre) {
     "use strict";
-    
+
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
     function EfxDelayNode(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.fixAR(this);
+        fn.fixAR(this);
         
         this._.delay = new EfxDelay();
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(EfxDelayNode);
+    fn.extend(EfxDelayNode);
     
     var oninit = function() {
         if (!this._.time) {
@@ -67,7 +68,10 @@
         var cell = this.cell;
 
         if (this.seq_id !== seq_id) {
-
+            this.seq_id = seq_id;
+            
+            fn.inputSignalAR(this);
+            
             var changed = false;
             var feedback = _.feedback.seq(seq_id)[0];
             if (_.prevFeedback !== feedback) {
@@ -83,27 +87,9 @@
                 _.delay.setParams({feedback:feedback, wet:wet});
             }
             
-            var inputs = this.inputs;
-            var tmp;
-            var i, imax;
-            var j;
-            var mul = _.mul, add = _.add;
-            
-            for (j = cell.length; j--; ) {
-                cell[j] = 0;
-            }
-            for (i = 0, imax = inputs.length; i < imax; ++i) {
-                tmp = inputs[i].seq(seq_id);
-                for (j = cell.length; j--; ) {
-                    cell[j] += tmp[j];
-                }
-            }
-            
             _.delay.process(cell, true);
             
-            for (j = cell.length; j--; ) {
-                cell[j] = cell[j] * mul + add;
-            }
+            fn.outputSignalAR(this);
         }
         
         return cell;
@@ -180,5 +166,5 @@
     
     timbre.utils.EfxDelay = EfxDelay;
     
-    timbre.fn.register("efx.delay", EfxDelayNode);
+    fn.register("efx.delay", EfxDelayNode);
 })(timbre);

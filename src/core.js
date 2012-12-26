@@ -87,8 +87,8 @@
         return instance;
     };
     
-    timbre.fn    = {};
-    timbre.utils = {};
+    var fn    = timbre.fn    = {};
+    var utils = timbre.utils = {};
     
     // properties
     Object.defineProperties(timbre, {
@@ -178,6 +178,7 @@
     
     timbre.reset = function() {
         _sys.reset();
+        _sys.emit("reset");
         return timbre;
     };
     
@@ -242,7 +243,7 @@
     var __nop = function() {
         return this;
     };
-    timbre.fn.nop = __nop;
+    fn.nop = __nop;
     
     // borrowed from coffee-script
     var __extend = function(child, parent) {
@@ -261,7 +262,7 @@
         child.__super__ = parent.prototype;
         return child;
     };
-    timbre.fn.extend = __extend;
+    fn.extend = __extend;
 
     var __constructorof = function(ctor, Klass) {
         var f = ctor && ctor.prototype;
@@ -273,7 +274,7 @@
         }
         return false;
     };
-    timbre.fn.constructorof = __constructorof;
+    fn.constructorof = __constructorof;
     
     var __register = function(key, ctor) {
         if (__constructorof(ctor, TimbreObject)) {
@@ -282,7 +283,7 @@
             _factories[key] = ctor;
         }
     };
-    timbre.fn.register = __register;
+    fn.register = __register;
 
     var __alias = function(key, alias) {
         if (_constructors[alias]) {
@@ -292,30 +293,30 @@
         }
         
     };
-    timbre.fn.alias = __alias;
+    fn.alias = __alias;
     
     var __getClass = function(key) {
         return _constructors[key];
     };
-    timbre.fn.getClass = __getClass;
+    fn.getClass = __getClass;
     
     var __nextTick = function(func) {
         _sys.nextTick(func);
         return timbre;
     };
-    timbre.fn.nextTick = __nextTick;
+    fn.nextTick = __nextTick;
     
     var __fixAR = function(object) {
         object._.ar = true;
         object._.aronly = true;
     };
-    timbre.fn.fixAR = __fixAR;
+    fn.fixAR = __fixAR;
     
     var __fixKR = function(object) {
         object._.ar = false;
         object._.kronly = true;
     };
-    timbre.fn.fixKR = __fixKR;
+    fn.fixKR = __fixKR;
     
     var __changeWithValue = function() {
         var _ = this._;
@@ -328,7 +329,7 @@
     Object.defineProperty(__changeWithValue, "unremovable", {
         value:true, writable:false
     });
-    timbre.fn.changeWithValue = __changeWithValue;
+    fn.changeWithValue = __changeWithValue;
     
     var __stereo = function(object) {
         object.L = new ChannelObject(object);
@@ -339,7 +340,7 @@
             value:true, writable:false
         });
     };
-    timbre.fn.stereo = __stereo;
+    fn.stereo = __stereo;
     
     var __timer = (function() {
         var start = function() {
@@ -376,7 +377,7 @@
             return object;
         };
     })();
-    timbre.fn.timer = __timer;
+    fn.timer = __timer;
 
     var __listener = (function() {
         var listen = function() {
@@ -422,7 +423,7 @@
             return object;
         };
     })();
-    timbre.fn.listener = __listener;
+    fn.listener = __listener;
     
     var __deferred = (function() {
         var then = function() {
@@ -456,7 +457,7 @@
             return this._.deferred.promise();
         };
         return function(object) {
-            object._.deferred = new timbre.utils.Deferred(object);
+            object._.deferred = new Deferred(object);
             object.then = then.bind(object);
             object.done = done.bind(object);
             object.fail = fail.bind(object);
@@ -468,7 +469,7 @@
             });
         };
     })();
-    timbre.fn.deferred = __deferred;
+    fn.deferred = __deferred;
     
     var __onended = function(object, lastValue) {
         var cell = object.cell;
@@ -487,7 +488,37 @@
         object._.isEnded = true;
         object._.emit("ended");
     };
-    timbre.fn.onended = __onended;
+    fn.onended = __onended;
+
+    var __inputSignalAR = function(object) {
+        var cell   = object.cell;
+        var inputs = object.inputs;
+        var i, imax = inputs.length;
+        var j, jmax = cell.length;
+        var seq_id = object.seq_id;
+        var tmp;
+        
+        for (j = jmax; j--; ) {
+            cell[j] = 0;
+        }
+        for (i = 0; i < imax; ++i) {
+            tmp = inputs[i].seq(seq_id);
+            for (j = jmax; j--; ) {
+                cell[j] += tmp[j];
+            }
+        }
+    };
+    fn.inputSignalAR = __inputSignalAR;
+
+    var __outputSignalAR = function(object) {
+        var cell = object.cell;
+        var mul = object._.mul, add = object._.add;
+        for (var i = cell.length; i--; ) {
+            cell[i] = cell[i] * mul + add;
+        }
+        console.log(mul);
+    };
+    fn.outputSignalAR = __outputSignalAR;
     
     // borrowed from node.js
     var EventEmitter = (function() {
@@ -675,7 +706,7 @@
         
         return EventEmitter;
     })();
-    timbre.utils.EventEmitter = EventEmitter;
+    utils.EventEmitter = EventEmitter;
     
     var Deferred = (function() {
         var STATUS_PENDING  = 0;
@@ -844,7 +875,7 @@
         
         return Deferred;
     })();
-    timbre.utils.Deferred = Deferred;
+    utils.Deferred = Deferred;
     
     var Promise = (function() {
         function Promise(dfd) {
@@ -1685,7 +1716,7 @@
         }
         return 0;
     };
-    timbre.utils.timevalue = timevalue;
+    utils.timevalue = timevalue;
     
     var SystemInlet = (function() {
         function SystemInlet(object) {
@@ -1925,7 +1956,6 @@
                 }
                 this._.deferred = null;
             }
-            this.emit("reset");
             return this;
         };
         

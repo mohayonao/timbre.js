@@ -1,10 +1,12 @@
 (function(timbre) {
     "use strict";
-
+    
+    var fn = timbre.fn;
+    
     function MML(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.timer(this);
-        timbre.fn.fixKR(this);
+        fn.timer(this);
+        fn.fixKR(this);
         
         this._.mml = "";
         this._.commands = [];
@@ -13,7 +15,7 @@
         
         this.on("start", onstart);
     }
-    timbre.fn.extend(MML);
+    fn.extend(MML);
     
     var onstart = function() {
         this._.commands = compile(this._.mml);
@@ -76,6 +78,6 @@
         }}
     ];
     
-    timbre.fn.register("mml", MML);
+    fn.register("mml", MML);
     
 })(timbre);

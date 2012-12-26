@@ -1,6 +1,7 @@
 (function(timbre) {
     "use strict";
-
+    
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
 
     var TYPE_TIMER    = 0;
@@ -8,8 +9,8 @@
     
     function Interval(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.timer(this);
-        timbre.fn.fixKR(this);
+        fn.timer(this);
+        fn.fixKR(this);
         
         this._.count = 0;
         this._.timeout = Infinity;
@@ -23,12 +24,12 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
-    timbre.fn.extend(Interval);
+    fn.extend(Interval);
     
     var oninit = function() {
         if (this._.originkey === "timer") {
             this._.type = TYPE_TIMER;
-            timbre.fn.deferred(this);
+            fn.deferred(this);
         } else {
             this._.type = TYPE_INTERVAL;
         }
@@ -155,7 +156,7 @@
             _.currentTime += _.currentTimeIncr;
 
             if (_.currentTime >= _.timeout) {
-                timbre.fn.nextTick(onended.bind(this));
+                fn.nextTick(onended.bind(this));
             }
         }
         return cell;
@@ -166,7 +167,7 @@
         _.isEnded = true;
         if (_.type === TYPE_TIMER && !this.isResolved) {
             var stop = this.stop;
-            this.start = this.stop = timbre.fn.nop;
+            this.start = this.stop = fn.nop;
             _.emit("ended");
             _.deferred.resolve();
             stop.call(this);
@@ -176,8 +177,8 @@
         }
     };
     
-    timbre.fn.register("interval", Interval);
-    timbre.fn.alias("interval0", "interval");
-    timbre.fn.alias("timer", "interval");
+    fn.register("interval", Interval);
+    fn.alias("interval0", "interval");
+    fn.alias("timer", "interval");
     
 })(timbre);

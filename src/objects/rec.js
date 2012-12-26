@@ -1,6 +1,7 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
     var STATUS_WAIT = 0;
@@ -8,8 +9,8 @@
     
     function Recorder(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.listener(this);
-        timbre.fn.fixAR(this);
+        fn.listener(this);
+        fn.fixAR(this);
         
         var _ = this._;
         
@@ -21,7 +22,7 @@
         _.currentTime     = 0;
         _.currentTimeIncr = 1000 / timbre.samplerate;
     }
-    timbre.fn.extend(Recorder);
+    fn.extend(Recorder);
     
     var $ = Recorder.prototype;
     
@@ -79,7 +80,7 @@
         if (_.status === STATUS_REC) {
             _.status = STATUS_WAIT;
             _.emit("stop");
-            timbre.fn.nextTick(onended.bind(this));
+            fn.nextTick(onended.bind(this));
         }
         return this;
     };
@@ -100,25 +101,11 @@
 
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
-            
-            var inputs = this.inputs;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var mul = _.mul, add = _.add;
-            var tmp;
-            
-            for (j = jmax; j--; ) {
-                cell[j] = 0;
-            }
-            
-            for (i = 0; i < imax; ++i) {
-                tmp = inputs[i].seq(seq_id);
-                for (j = jmax; j--; ) {
-                    cell[j] += tmp[j];
-                }
-            }
+
+            fn.inputSignalAR(this);
             
             if (_.status === STATUS_REC) {
+                var i, imax = cell.len;
                 var buffer  = _.buffer;
                 var timeout = _.timeout;
                 var writeIndex      = _.writeIndex;
@@ -126,22 +113,20 @@
                 var currentTime     = _.currentTime;
                 var currentTimeIncr = _.currentTimeIncr;
                 
-                for (j = 0; j < jmax; ++j) {
-                    buffer[writeIndex|0] = cell[j];
+                for (i = 0; i < imax; ++i) {
+                    buffer[writeIndex|0] = cell[i];
                     writeIndex += writeIndexIncr;
                     
                     currentTime += currentTimeIncr;
                     if (timeout <= currentTime) {
-                        timbre.fn.nextTick(onended.bind(this));
+                        fn.nextTick(onended.bind(this));
                     }
                 }
                 _.writeIndex  = writeIndex;
                 _.currentTime = currentTime;
             }
             
-            for (j = jmax; j--; ) {
-                cell[j] = cell[j] * mul + add;
-            }
+            fn.outputSignalAR(this);
         }
         return cell;
     };
@@ -160,6 +145,6 @@
         });
     };
     
-    timbre.fn.register("rec", Recorder);
+    fn.register("rec", Recorder);
     
 })(timbre);

@@ -1,13 +1,14 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     var FFT = timbre.utils.FFT;
     
     function FFTSpectrum(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.listener(this);
-        timbre.fn.fixAR(this);
+        fn.listener(this);
+        fn.fixAR(this);
         
         this._.status  = 0;
         this._.samples = 0;
@@ -20,7 +21,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(FFTSpectrum);
+    fn.extend(FFTSpectrum);
     
     var oninit = function() {
         var _ = this._;
@@ -119,23 +120,10 @@
 
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
+
+            fn.inputSignalAR(this);
             
-            var inputs = this.inputs;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var tmp;
-            
-            for (j = jmax; j--; ) {
-                cell[j] = 0;
-            }
-            
-            for (i = 0; i < imax; ++i) {
-                tmp = inputs[i].seq(seq_id);
-                for (j = jmax; j--; ) {
-                    cell[j] += tmp[j];
-                }
-            }
-            
+            var i, imax = cell.length;
             var status  = _.status;
             var samples = _.samples;
             var samplesIncr = _.samplesIncr;
@@ -145,7 +133,7 @@
             var mul = _.mul, add = _.add;
             var emit;
             
-            for (j = 0; j < jmax; ++j) {
+            for (i = 0; i < imax; ++i) {
                 if (samples <= 0) {
                     if (status === 0) {
                         status = 1;
@@ -154,14 +142,14 @@
                     }
                 }
                 if (status === 1) {
-                    buffer[writeIndex++] = cell[j];
+                    buffer[writeIndex++] = cell[i];
                     if (bufferLength <= writeIndex) {
                         _.fft.forward(buffer);
                         emit = _.plotFlush = true;
                         status = 0;
                     }
                 }
-                cell[j] = cell[j] * mul + add;
+                cell[i] = cell[i] * mul + add;
                 --samples;
             }
             
@@ -204,6 +192,6 @@
         return super_plot.call(this, opts);
     };
     
-    timbre.fn.register("spectrum", FFTSpectrum);
+    fn.register("spectrum", FFTSpectrum);
 
 })(timbre);

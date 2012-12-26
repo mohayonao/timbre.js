@@ -1,10 +1,12 @@
 (function(timbre) {
     "use strict";
+
+    var fn = timbre.fn;
     
-    timbre.fn.register("audio", function(_args) {
+    fn.register("audio", function(_args) {
         var instance = timbre.apply(null, ["buffer"].concat(_args));
         
-        timbre.fn.deferred(instance);
+        fn.deferred(instance);
         
         instance._.isLoaded = false;
         instance._.isEnded  = true;
@@ -52,7 +54,7 @@
         } else if (timbre.envtype === "node") {
             return getLoadFunctionForNodeJS();
         } else {
-            return timbre.fn.nop;
+            return fn.nop;
         }
     })();
     

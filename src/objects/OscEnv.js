@@ -1,6 +1,8 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function OscEnv(_args) {
         timbre.Object.call(this, _args);
         
@@ -12,7 +14,7 @@
         _.env = { type:"perc" };
         _.isEnded = true;
     }
-    timbre.fn.extend(OscEnv);
+    fn.extend(OscEnv);
     
     var $ = OscEnv.prototype;
 
@@ -141,25 +143,15 @@
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
             
-            var inputs = this.inputs;
-            var mul = _.mul, add = _.add;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var tmp, list;
+            fn.inputSignalAR(this);
             
-            for (j = jmax; j--; ) {
-                cell[j] = 0;
-            }
-
-            for (i = 0; i < imax; ++i) {
-                tmp = inputs[i].seq(seq_id);
-                for (j = jmax; j--; ) {
-                    cell[j] += tmp[j];
-                }
-            }
-
             // process
             if (!_.isEnded) {
+                var list;
+                var i, imax;
+                var j, jmax = cell.length;
+                var tmp;
+                
                 list = _.genList;
                 for (i = 0, imax = list.length; i < imax; ++i) {
                     tmp = list[i].seq(seq_id);
@@ -168,22 +160,20 @@
                     }
                 }
                 if (imax === 0) {
-                    timbre.fn.nextTick(onended.bind(this));
+                    fn.nextTick(onended.bind(this));
                 }
             }
             
-            for (j = jmax; j--; ) {
-                cell[j] = cell[j] * mul + add;
-            }
+            fn.outputSignalAR(this);
         }
         
         return cell;
     };
     
     var onended = function() {
-        timbre.fn.onended(this);
+        fn.onended(this);
     };
     
-    timbre.fn.register("OscEnv", OscEnv);
+    fn.register("OscEnv", OscEnv);
     
 })(timbre);

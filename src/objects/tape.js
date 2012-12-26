@@ -1,15 +1,17 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function ScissorNode(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.stereo(this);
-        timbre.fn.fixAR(this);
+        fn.stereo(this);
+        fn.fixAR(this);
         
         this._.isLooped = false;
         this._.isEnded  = false;
     }
-    timbre.fn.extend(ScissorNode);
+    fn.extend(ScissorNode);
     
     var $ = ScissorNode.prototype;
     
@@ -83,7 +85,7 @@
             }
             
             if (!_.isEnded && tapeStream.isEnded) {
-                timbre.fn.nextTick(onended.bind(this));
+                fn.nextTick(onended.bind(this));
             }
         }
         
@@ -91,10 +93,10 @@
     };
     
     var onended = function() {
-        timbre.fn.onended(this, 0);
+        fn.onended(this, 0);
     };
     
-    timbre.fn.register("tape", ScissorNode);
+    fn.register("tape", ScissorNode);
     
     
     var DummyBuffer = new Float32Array(60);

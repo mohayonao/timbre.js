@@ -1,6 +1,7 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
     var TYPE_WAIT    = 0;
@@ -8,8 +9,8 @@
     
     function Timeout(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.timer(this);
-        timbre.fn.fixKR(this);
+        fn.timer(this);
+        fn.fixKR(this);
         
         this._.currentTime = 0;
         this._.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
@@ -21,12 +22,12 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
-    timbre.fn.extend(Timeout);
+    fn.extend(Timeout);
     
     var oninit = function() {
         if (this._.originkey === "wait") {
             this._.type = TYPE_WAIT;
-            timbre.fn.deferred(this);
+            fn.deferred(this);
         } else {
             this._.type = TYPE_TIMEOUT;
         }
@@ -100,7 +101,7 @@
                 for (var i = 0, imax = inputs.length; i < imax; ++i) {
                     inputs[i].bang();
                 }
-                timbre.fn.nextTick(onended.bind(this));
+                fn.nextTick(onended.bind(this));
             }
             _.currentTime += _.currentTimeIncr;
         }
@@ -115,14 +116,14 @@
             _.emit("ended");
             _.deferred.resolve();
             var stop = this.stop;
-            this.start = this.stop = timbre.fn.nop;
+            this.start = this.stop = fn.nop;
             stop.call(this);
         } else {
             _.emit("ended");
         }
     };
     
-    timbre.fn.register("timeout", Timeout);
-    timbre.fn.alias("wait", "timeout");
+    fn.register("timeout", Timeout);
+    fn.alias("wait", "timeout");
     
 })(timbre);

@@ -1,12 +1,14 @@
 (function(timbre) {
     "use strict";
-
+    
+    var fn = timbre.fn;
+    
     function Clip(_args) {
         timbre.Object.call(this, _args);
         
         this._.lv = 0.8;
     }
-    timbre.fn.extend(Clip);
+    fn.extend(Clip);
     
     var $ = Clip.prototype;
     
@@ -74,6 +76,6 @@
         return cell;
     };
     
-    timbre.fn.register("clip", Clip);
+    fn.register("clip", Clip);
     
 })(timbre);

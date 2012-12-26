@@ -2,6 +2,7 @@
     "use strict";
     
     var ZERO = 1e-6;
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
     function Envelope(_args) {
@@ -25,7 +26,7 @@
         
         this._.plotFlush = true;
     }
-    timbre.fn.extend(Envelope);
+    fn.extend(Envelope);
     
     var CurveTypeNone = 0;
     var CurveTypeLin  = 1;
@@ -180,24 +181,14 @@
             this.seq_id = seq_id;
             
             var inputs  = this.inputs;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
+            var i, imax = cell.length;
             var mul = _.mul, add = _.add;
-            var tmp;
-
+            
             if (inputs.length) {
-                for (j = jmax; j--; ) {
-                    cell[j] = 0;
-                }
-                for (i = 0; i < imax; ++i) {
-                    tmp = inputs[i].seq(seq_id);
-                    for (j = jmax; j--; ) {
-                        cell[j] += tmp[j];
-                    }
-                }
+                fn.inputSignalAR(this);
             } else {
-                for (j = jmax; j--; ) {
-                    cell[j] = 1;
+                for (i = imax; i--; ) {
+                    cell[i] = 1;
                 }
             }
             
@@ -259,8 +250,8 @@
             }
             
             value = _.value;
-            for (j = jmax; j--; ) {
-                cell[j] = (cell[j] * value) * mul + add;
+            for (i = imax; i--; ) {
+                cell[i] = (cell[i] * value) * mul + add;
             }
             
             switch (_.curve) {
@@ -276,7 +267,7 @@
             
             if (emit) {
                 if (emit === "ended") {
-                    timbre.fn.nextTick(onended.bind(this));
+                    fn.nextTick(onended.bind(this));
                 } else {
                     this._.emit(emit, _.value);
                 }
@@ -287,7 +278,7 @@
     };
     
     var onended = function() {
-        timbre.fn.onended(this, 0);
+        fn.onended(this, 0);
     };
     
     var super_plot = timbre.Object.prototype.plot;
@@ -337,7 +328,8 @@
         }
         return super_plot.call(this, opts);
     };
-    timbre.fn.register("env", Envelope);
+    fn.register("env", Envelope);
+    
     
     function EnvPlotter(env) {
         this.initValue = env._.initValue;
@@ -477,7 +469,7 @@
     }
     
     
-    timbre.fn.register("perc", function(_args) {
+    fn.register("perc", function(_args) {
         if (!isDictionary(_args[0])) {
             _args.unshift({});
         }
@@ -492,7 +484,7 @@
         return timbre.apply(null, ["env"].concat(_args));
     });
     
-    timbre.fn.register("adsr", function(_args) {
+    fn.register("adsr", function(_args) {
         if (!isDictionary(_args[0])) {
             _args.unshift({});
         }
@@ -510,7 +502,7 @@
         return timbre.apply(null, ["env"].concat(_args));
     });
     
-    timbre.fn.register("asr", function(_args) {
+    fn.register("asr", function(_args) {
         if (!isDictionary(_args[0])) {
             _args.unshift({});
         }
@@ -526,7 +518,7 @@
         return timbre.apply(null, ["env"].concat(_args));
     });
     
-    timbre.fn.register("dadsr", function(_args) {
+    fn.register("dadsr", function(_args) {
         if (!isDictionary(_args[0])) {
             _args.unshift({});
         }
@@ -545,7 +537,7 @@
         return timbre.apply(null, ["env"].concat(_args));
     });
     
-    timbre.fn.register("linen", function(_args) {
+    fn.register("linen", function(_args) {
         if (!isDictionary(_args[0])) {
             _args.unshift({});
         }
@@ -561,7 +553,7 @@
         return timbre.apply(null, ["env"].concat(_args));
     });
     
-    timbre.fn.register("env.tri", function(_args) {
+    fn.register("env.tri", function(_args) {
         if (!isDictionary(_args[0])) {
             _args.unshift({});
         }
@@ -576,7 +568,7 @@
         return timbre.apply(null, ["env"].concat(_args));
     });
     
-    timbre.fn.register("env.cutoff", function(_args) {
+    fn.register("env.cutoff", function(_args) {
         if (!isDictionary(_args[0])) {
             _args.unshift({});
         }

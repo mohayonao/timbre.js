@@ -1,10 +1,12 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function Add(_args) {
         timbre.Object.call(this, _args);
     }
-    timbre.fn.extend(Add);
+    fn.extend(Add);
     
     var $ = Add.prototype;
     
@@ -51,5 +53,5 @@
         return cell;
     };
     
-    timbre.fn.register("+", Add);
+    fn.register("+", Add);
 })(timbre);

@@ -1,12 +1,13 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
     function WaveListener(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.listener(this);
-        timbre.fn.fixAR(this);
+        fn.listener(this);
+        fn.fixAR(this);
         
         this._.samples    = 0;
         this._.writeIndex = 0;
@@ -15,7 +16,7 @@
         
         this.once("init", oninit);
     }
-    timbre.fn.extend(WaveListener);
+    fn.extend(WaveListener);
     
     var oninit = function() {
         if (!this._.buffer) {
@@ -91,22 +92,9 @@
         if (this.seq_id !== seq_id) {
             this.seq_id = seq_id;
             
-            var inputs = this.inputs;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var tmp;
+            fn.inputSignalAR(this);
             
-            for (j = jmax; j--; ) {
-                cell[j] = 0;
-            }
-            
-            for (i = 0; i < imax; ++i) {
-                tmp = inputs[i].seq(seq_id);
-                for (j = jmax; j--; ) {
-                    cell[j] += tmp[j];
-                }
-            }
-            
+            var i, imax = cell.length;
             var samples     = _.samples;
             var samplesIncr = _.samplesIncr;
             var buffer      = _.buffer;
@@ -115,14 +103,14 @@
             var mul = _.mul, add = _.add;
             var mask = buffer.length - 1;
             
-            for (j = 0; j < jmax; ++j) {
+            for (i = 0; i < imax; ++i) {
                 if (samples <= 0) {
-                    buffer[writeIndex++] = cell[j];
+                    buffer[writeIndex++] = cell[i];
                     writeIndex &= mask;
                     emit = _.plotFlush = true;
                     samples += samplesIncr;
                 }
-                cell[j] = cell[j] * mul + add;
+                cell[i] = cell[i] * mul + add;
                 --samples;
             }
             _.samples    = samples;
@@ -154,5 +142,5 @@
         return super_plot.call(this, opts);
     };
     
-    timbre.fn.register("wave", WaveListener);
+    fn.register("wave", WaveListener);
 })(timbre);

@@ -1,6 +1,7 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
     function ParamEvent(type, value, time) {
@@ -16,7 +17,7 @@
     
     function Param(_args) {
         timbre.Object.call(this, _args);
-        timbre.fn.fixKR(this);
+        fn.fixKR(this);
         
         this._.value = 0;
         this._.minvalue = -Infinity;
@@ -31,9 +32,9 @@
         this.on("setAdd", __changeWithValue);
         this.on("setMul", __changeWithValue);
     }
-    timbre.fn.extend(Param);
+    fn.extend(Param);
 
-    var __changeWithValue = timbre.fn.changeWithValue;
+    var __changeWithValue = fn.changeWithValue;
     
     var $ = Param.prototype;
     
@@ -206,9 +207,9 @@
                 if (_.eventtype !== ParamEvent.None && _.currentTime >= _.goalTime) {
                     _.value = _.goalValue;
                     if (schedules.length === 0) {
-                        timbre.fn.nextTick(onended.bind(this));
+                        fn.nextTick(onended.bind(this));
                     } else {
-                        timbre.fn.nextTick(onnext.bind(this));
+                        fn.nextTick(onnext.bind(this));
                     }
                     changed = true;
                 }
@@ -227,7 +228,7 @@
     
     var onended = function() {
         this._.eventtype = ParamEvent.None;
-        timbre.fn.onended(this);
+        fn.onended(this);
     };
     
     var onnext = function() {
@@ -236,5 +237,5 @@
         this._.emit("next", _.value);
     };
     
-    timbre.fn.register("param", Param);
+    fn.register("param", Param);
 })(timbre);

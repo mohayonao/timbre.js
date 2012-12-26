@@ -1,10 +1,12 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    
     function Noise(_args) {
         timbre.Object.call(this, _args);
     }
-    timbre.fn.extend(Noise);
+    fn.extend(Noise);
     
     var $ = Noise.prototype;
 
@@ -32,5 +34,5 @@
         return cell;
     };
     
-    timbre.fn.register("noise", Noise);
+    fn.register("noise", Noise);
 })(timbre);
