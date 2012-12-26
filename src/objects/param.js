@@ -4,17 +4,6 @@
     var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
-    function ParamEvent(type, value, time) {
-        this.type  = type;
-        this.value = value;
-        this.time  = time;
-    }
-    ParamEvent.None                   = 0;
-    ParamEvent.SetValue               = 1;
-    ParamEvent.LinearRampToValue      = 2;
-    ParamEvent.ExponentialRampToValue = 3;
-    ParamEvent.SetValueCurve          = 4;
-    
     function ParamNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixKR(this);
@@ -34,6 +23,16 @@
     }
     fn.extend(ParamNode);
 
+    function ParamEvent(type, value, time) {
+        this.type  = type;
+        this.value = value;
+        this.time  = time;
+    }
+    var ParamEvent_None                   = 0;
+    var ParamEvent_SetValue               = 1;
+    var ParamEvent_LinearRampToValue      = 2;
+    var ParamEvent_ExponentialRampToValue = 3;
+    
     var __changeWithValue = fn.changeWithValue;
     
     var $ = ParamNode.prototype;
@@ -46,7 +45,7 @@
                     value = (value < _.minvalue) ?
                         _.minvalue : (value > _.maxValue) ? _.maxValue : value;
                     _.value = isNaN(value) ? 0 : value;
-                    _.eventtype = ParamEvent.None;
+                    _.eventtype = ParamEvent_None;
                     __changeWithValue.call(this);
                 }
             },
@@ -88,7 +87,7 @@
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(_.schedules, ParamEvent.SetValue, value, time);
+            insertEvent(_.schedules, ParamEvent_SetValue, value, time);
         }
         return this;
     };
@@ -102,7 +101,7 @@
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(_.schedules, ParamEvent.LinearRampToValue, value, time);
+            insertEvent(_.schedules, ParamEvent_LinearRampToValue, value, time);
         }
         return this;
     };
@@ -116,7 +115,7 @@
         if (typeof value === "number" && typeof time === "number") {
             value = (value < _.minvalue) ?
                 _.minvalue : (value > _.maxValue) ? _.maxValue : value;
-            insertEvent(_.schedules, ParamEvent.ExponentialRampToValue, value, time);
+            insertEvent(_.schedules, ParamEvent_ExponentialRampToValue, value, time);
         }
         return this;
     };
@@ -132,7 +131,7 @@
                 if (time <= s[i].time) {
                     s.splice(i);
                     if (i === 0) {
-                        this._.eventtype = ParamEvent.None;
+                        this._.eventtype = ParamEvent_None;
                     }
                     break;
                 }
@@ -152,29 +151,29 @@
             var schedules = _.schedules;
             var e, samples;
             
-            while (_.eventtype === ParamEvent.None && schedules.length > 0) {
+            while (_.eventtype === ParamEvent_None && schedules.length > 0) {
                 e = schedules.shift();
                 switch (e.type) {
-                case ParamEvent.SetValue:
-                    _.eventtype = ParamEvent.SetValue;
+                case ParamEvent_SetValue:
+                    _.eventtype = ParamEvent_SetValue;
                     _.goalValue = e.value;
                     _.goalTime  = e.time + _.currentTime;
                     _.isEnded = false;
                     break;
-                case ParamEvent.LinearRampToValue:
+                case ParamEvent_LinearRampToValue:
                     samples = e.time * 0.001 * timbre.samplerate;
                     if (samples > 0) {
-                        _.eventtype = ParamEvent.LinearRampToValue;
+                        _.eventtype = ParamEvent_LinearRampToValue;
                         _.goalValue = e.value;
                         _.goalTime  = e.time + _.currentTime;
                         _.variation = (e.value - _.value) / (samples / cell.length);
                         _.isEnded = false;
                     }
                     break;
-                case ParamEvent.ExponentialRampToValue:
+                case ParamEvent_ExponentialRampToValue:
                     samples = e.time * 0.001 * timbre.samplerate;
                     if (_.value !== 0 && samples > 0) {
-                        _.eventtype = ParamEvent.ExponentialRampToValue;
+                        _.eventtype = ParamEvent_ExponentialRampToValue;
                         _.goalValue = e.value;
                         _.goalTime  = e.time + _.currentTime;
                         _.variation = Math.pow(e.value/_.value, 1/(samples/cell.length));
@@ -189,13 +188,13 @@
 
             if (!_.isEnded) {
                 switch (_.eventtype) {
-                case ParamEvent.LinearRampToValue:
+                case ParamEvent_LinearRampToValue:
                     if (_.currentTime < _.goalTime) {
                         _.value += _.variation;
                         changed = true;
                     }
                     break;
-                case ParamEvent.ExponentialRampToValue:
+                case ParamEvent_ExponentialRampToValue:
                     if (_.currentTime < _.goalTime) {
                         _.value *= _.variation;
                         changed = true;
@@ -204,7 +203,7 @@
                 }
                 _.currentTime += _.currentTimeIncr;
                 
-                if (_.eventtype !== ParamEvent.None && _.currentTime >= _.goalTime) {
+                if (_.eventtype !== ParamEvent_None && _.currentTime >= _.goalTime) {
                     _.value = _.goalValue;
                     if (schedules.length === 0) {
                         fn.nextTick(onended.bind(this));
@@ -227,13 +226,13 @@
     };
     
     var onended = function() {
-        this._.eventtype = ParamEvent.None;
+        this._.eventtype = ParamEvent_None;
         fn.onended(this);
     };
     
     var onnext = function() {
         var _ = this._;
-        _.eventtype = ParamEvent.None;
+        _.eventtype = ParamEvent_None;
         this._.emit("next", _.value);
     };
     
