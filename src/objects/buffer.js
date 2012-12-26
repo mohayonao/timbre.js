@@ -40,6 +40,7 @@
                 _.buffer = buffer;
                 _.phaseIncr = _.samplerate / timbre.samplerate;
                 _.duration  = _.buffer.length * 1000 / _.samplerate;
+                _.plotFlush = true;
             }
         }
     };
