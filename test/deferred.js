@@ -136,24 +136,24 @@ describe("Deferred", function() {
 
 describe("Deferred T-Object", function() {
     it("then should return self", function() {
-        var wait = T("wait");
-        assert.equal(wait, wait.then());
+        var timeout = T("timeout", {once:true});
+        assert.equal(timeout, timeout.then());
     });
     it("done should return self", function() {
-        var wait = T("wait");
-        assert.equal(wait, wait.done());
+        var timeout = T("timeout", {once:true});
+        assert.equal(timeout, timeout.done());
     });
     it("fail should return self", function() {
-        var wait = T("wait");
-        assert.equal(wait, wait.fail());
+        var timeout = T("timeout", {once:true});
+        assert.equal(timeout, timeout.fail());
     });
     it("always should return self", function() {
-        var wait = T("wait");
-        assert.equal(wait, wait.always());
+        var timeout = T("timeout", {once:true});
+        assert.equal(timeout, timeout.always());
     });
     it("promise", function(done) {
-        var wait = T("wait", {timeout:100});
-        wait.promise().then(function() {
+        var timeout = T("timeout", {once:true, timeout:100});
+        timeout.promise().then(function() {
             assert(true);
             done();
         }, function() {
@@ -163,16 +163,16 @@ describe("Deferred T-Object", function() {
         }).fail(function() {
             assert(false);
         });
-        wait.start();
+        timeout.start();
     });
     it("pipe", function(done) {
-        var wait = T("wait", {timeout:100});
-        wait.pipe(function() {
+        var timeout = T("timeout", {once:true, timeout:100});
+        timeout.pipe(function() {
             return 100;
         }).then(function(x) {
             assert.equal(x, 100);
             done();
         });
-        wait.start();
+        timeout.start();
     });
 });

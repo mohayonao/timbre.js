@@ -4,35 +4,37 @@
     var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
     
-    var TYPE_WAIT    = 0;
-    var TYPE_TIMEOUT = 1;
-    
     function TimeoutNode(_args) {
+        var isonce = false;
+        if (typeof _args[0] === "object" && _args[0].constructor === Object) {
+            if (_args[0].once) {
+                isonce = true;
+            }
+        }
         timbre.Object.call(this, _args);
         fn.timer(this);
         fn.fixKR(this);
         
-        this._.currentTime = 0;
-        this._.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
-        
-        this._.waitSamples = 0;
-        this._.samples = 0;
-        this._.isEnded = true;
+        var _ = this._;
+        _.currentTime = 0;
+        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        _.samplesMax = 0;
+        _.samples    = 0;
+        _.isEnded = true;
+        _.isonce = isonce;
         
         this.once("init", oninit);
         this.on("start", onstart);
+        
+        if (_.isonce) {
+            fn.deferred(this);
+            this.on("stop", onstop);
+        }
     }
     
     fn.extend(TimeoutNode);
     
     var oninit = function() {
-        if (this._.originkey === "wait") {
-            this._.type = TYPE_WAIT;
-            fn.deferred(this);
-            this.on("stop", onstop);
-        } else {
-            this._.type = TYPE_TIMEOUT;
-        }
         if (!this._.timeout) {
             this.timeout = 1000;
         }
@@ -46,9 +48,9 @@
     });
     var onstop = function() {
         var _ = this._;
-        if (_.type === TYPE_WAIT && !this.isResolved) {
+        if (_.isonce && !this.isResolved) {
+            _.samplesMax = Infinity;
             _.isEnded = true;
-            _.waitSamples = Infinity;
             _.deferred.rejectWith(this);
             this.start = this.stop = fn.nop;
         }
@@ -59,8 +61,8 @@
     var onended = function() {
         var _ = this._;
         _.isEnded = true;
-        if (_.type === TYPE_WAIT && !this.isResolved) {
-            _.waitSamples = Infinity;
+        if (_.isonce && !this.isResolved) {
+            _.samplesMax = Infinity;
             _.emit("ended");
             _.deferred.resolveWith(this);
             var stop = this.stop;
@@ -82,8 +84,8 @@
                 }
                 if (typeof value === "number" && value >= 0) {
                     _.timeout = value;
-                    _.waitSamples = (timbre.samplerate * (value * 0.001))|0;
-                    _.samples = _.waitSamples;
+                    _.samplesMax = (timbre.samplerate * (value * 0.001))|0;
+                    _.samples = _.samplesMax;
                     _.isEnded = false;
                 }
             },
@@ -97,13 +99,13 @@
             }
         }
     });
-
+    
     $.bang = function() {
         var _ = this._;
-        if (_.type === TYPE_TIMEOUT) {
-            _.samples     = _.waitSamples;
+        if (!_.isonce ) {
+            _.samples = _.samplesMax;
             _.currentTime = 0;
-            _.isEnded     = false;
+            _.isEnded = false;
         }
         _.emit("bang");
         return this;
@@ -137,6 +139,5 @@
     };
     
     fn.register("timeout", TimeoutNode);
-    fn.alias("wait", "timeout");
     
 })(timbre);

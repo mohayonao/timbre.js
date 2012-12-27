@@ -1,35 +1,35 @@
 var T = require("..");
 var assert = require("assert");
 
-describe('T("wait")', function() {
+describe('T("timeout")', function() {
     it("isDefined", function() {
-        assert.equal(false, T("wait").isUndefined);
+        assert.equal(false, T("timeout").isUndefined);
     });
     it("work", function(done) {
-        T("wait", {timeout:10}).then(function() {
+        T("timeout", {once:true,timeout:10}).then(function() {
             assert(true);
             done();
         }).start();
     });
     it("this is self when callback(resolve)", function(done) {
-        var wait = T("wait", {timeout:10}).then(function() {
-            assert.equal(this, wait);
+        var timeout = T("timeout", {once:true,timeout:10}).then(function() {
+            assert.equal(this, timeout);
             done();
         }).start();
     });
     it("this is self when callback(reject)", function(done) {
-        var wait = T("wait", {timeout:1000}).then(function() {
+        var timeout = T("timeout", {once:true,timeout:1000}).then(function() {
             assert(false);
         }).fail(function() {
-            assert.equal(this, wait);
+            assert.equal(this, timeout);
             done();
         }).start();
         setTimeout(function() {
-            wait.stop();
+            timeout.stop();
         }, 100);
     });
     it("zero time stop", function(done) {
-        T("wait", {timeout:1000}).then(function() {
+        T("timeout", {once:true,timeout:1000}).then(function() {
         }, function() {
             assert(true);
             done();

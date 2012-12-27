@@ -3,15 +3,19 @@ T("timeout")
 {timer} Timeout
 
 ## Description ##
-指定時間後に入力オブジェクトに対して `bang()` する。
-
+指定時間後に入力オブジェクトに対して `bang()` します。
 
 ```timbre
 T("timeout", {timeout:1000}).on("ended", function() {
-    console.log("ended");
-    this.bang();
+    this.stop();
 }).start();
 ```
+
+## Properties
+- `timeout` _(Number or timevalue)_
+  - タイムアウトの時間
+- `currentTime` _(Number)_
+  - 経過時間
 
 ## Method ##
 - `bang()`
@@ -21,10 +25,16 @@ T("timeout", {timeout:1000}).on("ended", function() {
 - `ended` タイムアウト時に発生します。
 
 ## Note ##
-同じような動作をするオブジェクトに [T("wait")](./wait.html) があります。
+オブジェクト生成時に `once` を設定すると Deferred オブジェクトとなり、各Deferredメソッドのサポートとタイムアウト時に resolve、タイムアウト前に停止した場合に reject されます。
 
-- `T("wait")` は Deferred オブジェクトで 1回しか作動しません。
-- `T("timeout")` は `bang()` を呼ぶ度に動作を再開します。
+```timbre
+T("timeout", {timeout:1000, once:true}).then(function() {
+    
+}).start();
+```
+
+## See Also ##
+- [T("interval")](./interval.html)
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/timeout.js

@@ -4,11 +4,10 @@ T("interval")
 
 ## Description ##
 
-指定した間隔で入力オブジェクトに対して `bang()` する。
+指定した間隔で入力オブジェクトに対して `bang()` します。
 
 `delay` の設定が無い場合は `start()` の後、
 JavaScript の setInterval と同じように `interval` と同じ時間の待機ののち動作を開始します。
-
 
 ```timbre
 var freqs = T([220, 440, 660, 880]);
@@ -42,21 +41,20 @@ env.play();
 ## Events ##
 - `ended`
   - タイムアウト時に発生します。
-
-## Alias ##
-- `T("interval0")`
-  - `delay` が 0 で初期化される `T("interval")` オブジェクト
-
+  
 ## Note ##
-同じような動作をするオブジェクトに [T("timer")](./timer.html) があります。
+オブジェクト生成時に `once` を設定すると Deferred オブジェクトとなり、各Deferredメソッドのサポートとタイムアウト時に resolve、タイムアウト前に停止した場合に reject されます。
 
-- `T("timer")` は Deferred オブジェクトで タイムアウト後に再起動しません。
-- `T("interval")` は タイムアウト後も `start()` で再起動が出来ます。
+```timbre
+T("interval", {timeout:2500, once:true}, function(count) {
+    console.log(count);
+}).then(function() {
+    this.pause();
+}).start();
+```
 
 ## See Also ##
-- [T("timer")](./timer.html)
 - [T("timeout")](./timeout.html)
-- [T("wait)](./wait.html)
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/interval.js

@@ -3,37 +3,40 @@
     
     var fn = timbre.fn;
     var timevalue = timbre.utils.timevalue;
-
-    var TYPE_TIMER    = 0;
-    var TYPE_INTERVAL = 1;
     
     function IntervalNode(_args) {
+        var isonce = false;
+        if (typeof _args[0] === "object" && _args[0].constructor === Object) {
+            if (_args[0].once) {
+                isonce = true;
+            }
+        }
         timbre.Object.call(this, _args);
         fn.timer(this);
         fn.fixKR(this);
         
-        this._.count = 0;
-        this._.timeout = Infinity;
-        this._.currentTime = 0;
-        this._.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        var _ = this._;
+        _.count = 0;
+        _.timeout = Infinity;
+        _.currentTime = 0;
+        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
         
-        this._.delaySamples = 0;
-        this._.countSamples = 0;
-        this._.isEnded = false;
+        _.delaySamples = 0;
+        _.countSamples = 0;
+        _.isEnded = false;
+        _.isonce = isonce;
         
         this.once("init", oninit);
         this.on("start", onstart);
+        
+        if (_.isonce) {
+            fn.deferred(this);
+            this.on("stop", onstop);
+        }
     }
     fn.extend(IntervalNode);
     
     var oninit = function() {
-        if (this._.originkey === "timer") {
-            this._.type = TYPE_TIMER;
-            fn.deferred(this);
-            this.on("stop", onstop);
-        } else {
-            this._.type = TYPE_INTERVAL;
-        }
         if (!this._.interval) {
             this.interval = 1000;
         }
@@ -55,7 +58,7 @@
     });
     var onstop = function() {
         var _ = this._;
-        if (_.type === TYPE_TIMER && !this.isResolved) {
+        if (_.isonce && !this.isResolved) {
             _.isEnded = true;
             _.waitSamples = Infinity;
             _.deferred.rejectWith(this);
@@ -68,7 +71,7 @@
     var onended = function() {
         var _ = this._;
         _.isEnded = true;
-        if (_.type === TYPE_TIMER && !this.isResolved) {
+        if (_.isonce && !this.isResolved) {
             var stop = this.stop;
             this.start = this.stop = fn.nop;
             _.emit("ended");
@@ -190,7 +193,5 @@
     };
     
     fn.register("interval", IntervalNode);
-    fn.alias("interval0", "interval");
-    fn.alias("timer", "interval");
     
 })(timbre);
