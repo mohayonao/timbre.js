@@ -22,7 +22,7 @@ class DocFile
         fs.readFileSync(path, 'utf-8').split('\n')[0]
 
 class HTMLBuilder
-    constructor: (dirpath, urlpath)->
+    constructor: (dirpath)->
         @files = do =>
             unless fs.existsSync dirpath then return {}
 
@@ -38,7 +38,7 @@ class HTMLBuilder
         doc = @files[name]
         unless doc then return 'NOT FOUND'
 
-        html = marked fs.readFileSync(doc.path, 'utf-8')
+        html = marked_with_filtering_by_lang doc.path, @lang
         html = lang_process  html
         html = insert_canvas html
         html = insert_label  html
@@ -55,6 +55,18 @@ class HTMLBuilder
             unless indexes[doc.category]
                 indexes[doc.category] = []
             indexes[doc.category].push doc
+
+    marked_with_filtering_by_lang = (filepath, lang)->
+        items = marked.lexer fs.readFileSync(filepath, 'utf-8')
+        tokens = []
+        skip = false
+        for item in items
+            if item.type is 'heading' and item.depth is 6
+                skip = item.text != lang and item.text != '--'
+                continue
+            if skip then continue
+            tokens.push item
+        marked.parser tokens
 
     lang_process = (doc)->
         re  = /<pre><code class="lang-(timbre|js|html|sh)">([\w\W]+?)<\/code><\/pre>/g
@@ -110,11 +122,7 @@ class HTMLBuilder
 
 class DocFileBuilder extends HTMLBuilder
     constructor: (@lang)->
-        dirpath = if @lang is 'en'
-            "#{__dirname}/../docs.md"
-        else
-            "#{__dirname}/../docs.md/#{@lang}"
-        super path.normalize(dirpath), "docs/#{lang}"
+        super path.normalize("#{__dirname}/../docs.md")
 
     @build_statics = (langlist=['en', 'ja'])->
         dstpath = path.normalize "#{__dirname}/../docs/"
@@ -132,8 +140,8 @@ class DocFileBuilder extends HTMLBuilder
                 fs.writeFileSync htmlfilepath, html, 'utf-8'
 
 class IndexFileBuilder extends HTMLBuilder
-    constructor: (@lang)->
-        @doc      = new DocFileBuilder(@lang)
+    constructor: ->
+        @doc = new DocFileBuilder('en')
 
     build: (categories=[])->
         indexes = {}

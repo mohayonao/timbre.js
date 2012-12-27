@@ -1,8 +1,7 @@
 $(function() {
     "use strict";
-
-    var lang = $("html").attr("lang") === "ja" ? "ja" : "en";
-    $("#list").load("/timbre.js/misc/index-" + lang + ".html");
+    
+    $("#list").load("/timbre.js/misc/index.html");
     
     var nowPlaying, animationId;
     

@@ -13,8 +13,8 @@ app.get /^\/timbre\.js\/(?:(ja)\/)?(?:([.\w]+)\.html)?$/, (req, res)->
     html = builder.build(name)
     res.send html
 
-app.get '/timbre.js/misc/index-:lang\.html', (req, res)->
-    builder = new html_builder.IndexFileBuilder(req.params.lang)
+app.get '/timbre.js/misc/index.html', (req, res)->
+    builder = new html_builder.IndexFileBuilder()
     html = builder.build()
     res.send html
 
