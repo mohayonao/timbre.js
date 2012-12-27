@@ -1,8 +1,8 @@
-deferred
+Deferred
 ========
 Deferred {deferred}
 
-`T("wait")` のようないくつかの Tオブジェクトは Deferred インターフェイスを持ちます。
+`T("timeout")` のようないくつかの Tオブジェクトは Deferred インターフェイスを持ちます。
 
 ## Methods ##
 - `then(done, fail)`
@@ -25,12 +25,12 @@ Tオブジェクトの Deferredインターフェイスでは `then`, `done`, `f
 
 ```timbre
 var osc  = T("sin" , {freq:440}).play();
-var wait = T("wait", {timeout:500});
+var timeout = T("timeout", {timeout:500, once:true});
 
-wait.pipe(function() {
+timeout.pipe(function() {
     osc.freq = 660;
     
-    return T("wait", {timeout:500}).start();
+    return T("timeout", {timeout:500, once:true}).start();
     
 }).pipe(function() {
     osc.freq = 880;
@@ -45,7 +45,7 @@ wait.pipe(function() {
     osc.pause();
 });
 
-wait.start();
+timeout.start();
 ```
 
 以下の例では jQueryの when を使用しています。
@@ -53,9 +53,9 @@ wait.start();
 ```timbre
 var osc  = T("sin", {freq:440, mul:0.5}).play();
 
-var wait = T("wait", {time:500});
+var timeout = T("timeout", {timeout:500, once:true});
 
-wait.then(function() {
+timeout.then(function() {
     osc.wave = "saw";
     osc.mul  = 0.25;
 }).start();
@@ -71,13 +71,7 @@ setTimeout(function() {
     dfd1.resolve();
 }, 250);
 
-$.when(dfd0, dfd1, wait).then(function() {
+$.when(dfd0, dfd1, timeout).then(function() {
     osc.pause();
 });
 ```
-
-## Deferredオブジェクトの一覧 ##
-
-- [`T("wait")`](./wait.html)
-- [`T("timer")`](./timer.html)
-- [`T("audio")`](./audio.html)

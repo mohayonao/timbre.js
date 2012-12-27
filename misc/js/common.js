@@ -25,7 +25,9 @@ $(function() {
         } else {
             timbre.reset();
             eval(code);
-            nowPlaying = code;
+            if (timbre.isPlaying) {
+                nowPlaying = code;
+            }
         }
     }
     

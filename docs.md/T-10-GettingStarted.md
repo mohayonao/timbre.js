@@ -28,7 +28,10 @@ T("sin", {freq:880}).play();
 以下の例では 500msecで減衰するエンベロープに 2つのサイン波オシレーターをインプットして起動/再生、エンベロープが終了したときに再生を停止しています。この例のように Tオブジェクトのだいたいの関数は自分自身を返すのでメソッドチェインを使ったり、そのまま別の Tオブジェクトの入力にすることができます。
 
 ```timbre
-T("perc", {r:500}, T("sin"), T("sin", {freq:880})).on("ended", function() {
+var sine1 = T("sin", {freq:440, mul:0.5});
+var sine2 = T("sin", {freq:660, mul:0.5});
+
+T("perc", {r:500}, sine1, sine2).on("ended", function() {
     this.pause();
 }).bang().play();
 ```
