@@ -172,6 +172,24 @@ class IndexFileBuilder extends HTMLBuilder
     @build_statics = ->
         null # TODO: implements
 
+class TestBuilder
+    build: (name)->
+        testcode = if name then getTestCode(name) else getAllTestCode()
+        name ?= 'all test'
+        jade.compile(fs.readFileSync("#{__dirname}/test.jade"))
+            name:name, testcode:testcode
+
+    getTestCode = (name)->
+        filepath = "#{__dirname}/../test/#{name}.js"
+        if fs.existsSync filepath
+            fs.readFileSync filepath
+
+    getAllTestCode = ->
+        dirpath = "#{__dirname}/../test/"
+        testcode = for filename in fs.readdirSync dirpath
+            fs.readFileSync "#{dirpath}#{filename}", 'utf-8'
+        testcode.join ''
+
 if not module.parent
     DocFileBuilder.build_statics()
     IndexFileBuilder.build_statics()
@@ -180,3 +198,4 @@ else
     module.exports =
         DocFileBuilder: DocFileBuilder
         IndexFileBuilder: IndexFileBuilder
+        TestBuilder: TestBuilder

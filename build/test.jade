@@ -1,0 +1,26 @@
+doctype 5
+html
+  head
+    meta(charset="utf-8")
+    title #{name}
+    link(rel="stylesheet", href="/timbre.js/misc/css/mocha.css", type="text/css")
+    script(src="/timbre.js/timbre.dev.js")
+    script(src="/timbre.js/misc/js/jquery.js")
+    script(src="/timbre.js/misc/js/mocha.js")
+    script
+        mocha.setup('bdd');
+        var require = function() { return timbre; };
+    script
+        !{testcode}
+  body
+    #mocha
+    script
+      assert = function(expr, msg) {
+        if (!expr) throw new Error(msg || 'failed');
+      };
+      assert.equal = function(a, b, msg) {
+        if (a !== b) throw new Error(msg || ('failed : '+a+','+b));
+      };
+      $(function() {
+        mocha.run();
+      });

@@ -1,6 +1,7 @@
 fs       = require 'fs'
 path     = require 'path'
 express  = require 'express'
+jade     = require 'jade'
 timbre_builder = require './timbre-builder'
 html_builder   = require './html-builder'
 
@@ -26,5 +27,10 @@ app.get '/timbre.js/*', (req, res)->
     filename = req.url.replace '/timbre.js/', ''
     filepath = path.normalize "#{__dirname}/../#{filename}"
     res.sendfile filepath
+
+app.get '/test/:name?', (req, res)->
+    builder = new html_builder.TestBuilder()
+    html = builder.build(req.params.name)
+    res.send html
 
 app.listen process.env.PORT or 3000
