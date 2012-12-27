@@ -6,7 +6,11 @@ Limit signal amplitude
 
 (canvas clip w:240 h:80)
 
-クリップする
+###### en ######
+`T("clip")` constrains input signals between two specified values.
+###### ja ######
+`T("clip")` は入力シグナルをクリップして出力します
+###### -- ######
 
 ```timbre
 var env  = T("env", {table:[0, [2, 2000], [0.2, 2000]], loopNode:1}).bang();
@@ -22,6 +26,8 @@ window.animate(function() {
 
 ## Properties ##
 - `lv`
+- `minlv`
+- `maxlv`
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/clip.js

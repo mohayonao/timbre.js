@@ -6,7 +6,11 @@ White Noise Generator
 
 (canvas noise w:240 h:80)
 
-ホワイトノイズを出力します。
+###### en ######
+`T("noise")` generates white noise.
+###### ja ######
+`T("noise")` はホワイトノイズを出力します。
+###### -- ######
 
 ```timbre
 var noise = T("noise", {mul:0.15}).play();

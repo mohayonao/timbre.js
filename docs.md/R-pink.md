@@ -6,7 +6,11 @@ Pink Noise Generator
 
 (canvas noise w:240 h:80)
 
-ピンクノイズを出力します。
+###### en ######
+`T("pink")` generates pink noise.
+###### ja ######
+`T("pink")` はピンクノイズを出力します。
+###### -- ######
 
 ```timbre
 var noise = T("pink", {mul:0.15}).play();

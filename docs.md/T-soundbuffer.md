@@ -2,9 +2,13 @@ SoundBuffer
 =========
 SoundBuffer
 
-`T("buffer")` や `T("tape")` では `SoundBuffer` 形式のデータを扱います。
-
-以下はサンプルレート 44.1KHz の 1秒間のデータを表わします。
+###### en ######
+`T("buffer")` and `T("tape")` use the data of `SoundBuffer` form.  
+The below code defines a 1sec 44.1kHz `SoundBuffer`.
+###### ja ######
+`T("buffer")` や `T("tape")` では `SoundBuffer` 形式のデータを扱います。  
+以下はサンプルレート 44.1KHzの 1秒間の `SoundBuffer` を表わします。
+###### -- ######
 
 ```js
 var soundbuffer = {
