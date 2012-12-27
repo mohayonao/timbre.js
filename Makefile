@@ -8,6 +8,9 @@ timbre:
 minify: timbre
 	uglifyjs --unsafe -nc -nm -o ./timbre.js ./timbre.dev.js
 
+test:
+	mocha --reporter dot
+
 html: clear-html
 	coffee build/html-builder.coffee
 
@@ -20,3 +23,5 @@ clear:
 
 clear-html:
 	rm -rf docs/*
+
+.PHONY: test
