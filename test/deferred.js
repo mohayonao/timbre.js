@@ -116,9 +116,11 @@ describe("Deferred", function() {
             return 20;
         }).pipe(function(x) {
             assert.equal(x, 20);
-            // assert.equal(this, dfd);
+            assert.equal(this, dfd);
             dfd2 = new Deferred();
+            dfd2.name = "dfd2";
             setTimeout(function() {
+                console.log("dfd2.resolve(30)");
                 dfd2.resolve(30);
             }, 150);
             return dfd2.promise();

@@ -465,7 +465,7 @@
             return this;
         };
         var isResolved = function() {
-            return this._.deferred.isResolved;
+            return this._.deferred.isResolved();
         };
         var promise = function() {
             return this._.deferred.promise();

@@ -2,115 +2,109 @@
     "use strict";
     
     var slice = [].slice;
+    var isDeferred = function(x) {
+        return x && typeof x.promise === "function";
+    };
     
-    var STATUS_PENDING  = 0;
-    var STATUS_RESOLVED = 1;
-    var STATUS_REJECTED = 2;
-    
-    function Deferred() {
-        this._ = { status:STATUS_PENDING, doneList:[], failList:[] };
+    function Deferred(context) {
+        this.context = context || this;
+        this.state = "pending";
+        this._doneList = [];
+        this._failList = [];
+        
+        this._promise = {
+            then: this.then.bind(this),
+            done: this.done.bind(this),
+            fail: this.fail.bind(this),
+            pipe: this.pipe.bind(this),
+            always : this.always.bind(this),
+            promise: this.promise.bind(this),
+            isResolved: this.isResolved.bind(this),
+            isRejected: this.isRejected.bind(this)
+        };
     }
     
     var $ = Deferred.prototype;
     
-    Object.defineProperties($, {
-        isResolved: {
-            get: function() {
-                return this._.status === STATUS_RESOLVED;
-            }
-        },
-        isRejected: {
-            get: function() {
-                return this._.status === STATUS_REJECTED;
-            }
-        }
-    });
-    
-    var done = function(status, list, context,args) {
-        if (this._.status === STATUS_PENDING) {
-            this._.status = status;
+    var exec = function(statue, list, context, args) {
+        if (this.state === "pending") {
+            this.state = statue;
             for (var i = 0, imax = list.length; i < imax; ++i) {
                 list[i].apply(context, args);
             }
-            // this._.doneList = this._.failList = null;
+            this._doneList = this._failList = null;
         }
     };
     
     $.resolve = function() {
         var args = slice.call(arguments, 0);
-        done.call(this, STATUS_RESOLVED, this._.doneList, this, args);
+        exec.call(this, "resolved", this._doneList, this.context || this, args);
         return this;
     };
-    
     $.resolveWith = function(context) {
         var args = slice.call(arguments, 1);
-        done.call(this, STATUS_RESOLVED, this._.doneList, context, args);
+        exec.call(this, "resolved", this._doneList, context, args);
         return this;
     };
-    
     $.reject = function() {
         var args = slice.call(arguments, 0);
-        done.call(this, STATUS_REJECTED, this._.failList, this, args);
+        exec.call(this, "rejected", this._failList, this.context || this, args);
         return this;
     };
-    
     $.rejectWith = function(context) {
         var args = slice.call(arguments, 1);
-        done.call(this, STATUS_REJECTED, this._.failList, context, args);
+        exec.call(this, "rejected", this._failList, context, args);
         return this;
     };
     
     $.promise = function() {
-        return new Promise(this);
+        return this._promise;
     };
-    
-    $.then = function(done, fail) {
-        return this.done(done).fail(fail);
-    };
-    
     $.done = function() {
         var args = slice.call(arguments);
-        var status = this._.status;
-        var doneList = this._.doneList;
+        var isResolved = (this.state === "resolved");
+        var isPending  = (this.state === "pending");
+        var list = this._doneList;
         for (var i = 0, imax = args.length; i < imax; ++i) {
             if (typeof args[i] === "function") {
-                if (status === STATUS_RESOLVED) {
+                if (isResolved) {
                     args[i]();
-                } else if (status === STATUS_PENDING) {
-                    doneList.push(args[i]);
+                } else if (isPending) {
+                    list.push(args[i]);
                 }
             }
         }
         return this;
     };
-    
     $.fail = function() {
         var args = slice.call(arguments);
-        var status = this._.status;
-        var failList = this._.failList;
+        var isRejected = (this.state === "rejected");
+        var isPending  = (this.state === "pending");
+        var list = this._failList;
         for (var i = 0, imax = args.length; i < imax; ++i) {
             if (typeof args[i] === "function") {
-                if (status === STATUS_REJECTED) {
+                if (isRejected) {
                     args[i]();
-                } else if (status === STATUS_PENDING) {
-                    failList.push(args[i]);
+                } else if (isPending) {
+                    list.push(args[i]);
                 }
             }
         }
         return this;
     };
-    
     $.always = function() {
         this.done.apply(this, arguments);
         this.fail.apply(this, arguments);
         return this;
     };
-    
+    $.then = function(done, fail) {
+        return this.done(done).fail(fail);
+    };
     $.pipe = function(done, fail) {
-        var dfd = new Deferred();
+        var dfd = new Deferred(this.context);
         
-        this.then(function() {
-            var res = done.apply(this, arguments);
+        this.done(function() {
+            var res = done.apply(this.context, arguments);
             if (isDeferred(res)) {
                 res.then(function() {
                     var args = slice.call(arguments);
@@ -119,9 +113,10 @@
             } else {
                 dfd.resolveWith(this, res);
             }
-        }.bind(this), function() {
+        }.bind(this));
+        this.fail(function() {
             if (typeof fail === "function") {
-                var res = fail.apply(this, arguments);
+                var res = fail.apply(this.context, arguments);
                 if (isDeferred(res)) {
                     res.fail(function() {
                         var args = slice.call(arguments);
@@ -133,13 +128,18 @@
             }
         }.bind(this));
         
-        return dfd;
+        return dfd.promise();
+    };
+    // $.then = $.pipe;
+
+    $.isResolved = function() {
+        return this.state === "resolved";
+    };
+    $.isRejected = function() {
+        return this.state === "rejected";
     };
     
-    var isDeferred = function(x) {
-        return x && typeof x.promise === "function";
-    };
-    
+    // TODO: test
     Deferred.when = function(subordinate) {
         var i = 0;
         var resolveValues = slice.call(arguments);
@@ -180,36 +180,6 @@
         
         return deferred.promise();
     };
-    
-    var Promise = (function() {
-        var then = function(done, fail) {
-            return this.then(done, fail);
-        };
-        var done = function() {
-            return this.done.apply(this, arguments);
-        };
-        var fail = function() {
-            return this.fail.apply(this, arguments);
-        };
-        var pipe = function() {
-            return this.pipe.apply(this, arguments);
-        };
-        var always = function() {
-            return this.always.apply(this, arguments);
-        };
-        var promise = function() {
-            return this;
-        };
-        function Promise(dfd) {
-            this.then = then.bind(dfd);
-            this.done = done.bind(dfd);
-            this.fail = fail.bind(dfd);
-            this.pipe = pipe.bind(dfd);
-            this.always  = always.bind(dfd);
-            this.promise = promise.bind(this);
-        }
-        return Promise;
-    })();
     
     timbre.modules.Deferred = Deferred;
     
