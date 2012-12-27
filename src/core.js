@@ -364,7 +364,6 @@
                 if (self._.remove_check) {
                     return self._.remove_check = null;
                 }
-                
                 if (_sys.timers.indexOf(self) === -1) {
                     _sys.timers.push(self);
                     _sys.events.emit("addObject");
@@ -376,13 +375,13 @@
         
         var stop = function() {
             var self = this;
-            this._.remove_check = true;
-            if (_sys.timers.indexOf(this) !== -1) {
-                _sys.nextTick(function() {
+            _sys.nextTick(function() {
+                self._.remove_check = true;
+                if (_sys.timers.indexOf(self) !== -1) {
                     _sys.events.emit("removeObject");
                     self._.emit("stop");
-                });
-            }
+                }
+            });
             return this;
         };
         
@@ -472,7 +471,7 @@
             return this._.deferred.promise();
         };
         return function(object) {
-            object._.deferred = new modules.Deferred(object);
+            object._.deferred = new modules.Deferred();
             object.then = then.bind(object);
             object.done = done.bind(object);
             object.fail = fail.bind(object);

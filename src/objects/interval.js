@@ -30,6 +30,7 @@
         if (this._.originkey === "timer") {
             this._.type = TYPE_TIMER;
             fn.deferred(this);
+            this.on("stop", onstop);
         } else {
             this._.type = TYPE_INTERVAL;
         }
@@ -52,6 +53,32 @@
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
     });
+    var onstop = function() {
+        var _ = this._;
+        if (_.type === TYPE_TIMER && !this.isResolved) {
+            _.isEnded = true;
+            _.waitSamples = Infinity;
+            _.deferred.rejectWith(this);
+            this.start = this.stop = fn.nop;
+        }
+    };
+    Object.defineProperty(onstop, "unremovable", {
+        value:true, writable:false
+    });
+    var onended = function() {
+        var _ = this._;
+        _.isEnded = true;
+        if (_.type === TYPE_TIMER && !this.isResolved) {
+            var stop = this.stop;
+            this.start = this.stop = fn.nop;
+            _.emit("ended");
+            _.deferred.resolveWith(this);
+            stop.call(this);
+        } else {
+            this.stop();
+            _.emit("ended");
+        }
+    };
     
     var $ = IntervalNode.prototype;
     
@@ -160,21 +187,6 @@
             }
         }
         return cell;
-    };
-    
-    var onended = function() {
-        var _ = this._;
-        _.isEnded = true;
-        if (_.type === TYPE_TIMER && !this.isResolved) {
-            var stop = this.stop;
-            this.start = this.stop = fn.nop;
-            _.emit("ended");
-            _.deferred.resolve();
-            stop.call(this);
-        } else {
-            this.stop();
-            _.emit("ended");
-        }
     };
     
     fn.register("interval", IntervalNode);

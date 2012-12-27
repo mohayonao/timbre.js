@@ -7,8 +7,7 @@
     var STATUS_RESOLVED = 1;
     var STATUS_REJECTED = 2;
     
-    function Deferred(context) {
-        this.context = context;
+    function Deferred() {
         this._ = { status:STATUS_PENDING, doneList:[], failList:[] };
     }
     
@@ -27,24 +26,37 @@
         }
     });
     
-    var done = function(status, list, args) {
+    var done = function(status, list, context,args) {
         if (this._.status === STATUS_PENDING) {
             this._.status = status;
-            var c = this.context;
             for (var i = 0, imax = list.length; i < imax; ++i) {
-                list[i].apply(c, args);
+                list[i].apply(context, args);
             }
             // this._.doneList = this._.failList = null;
         }
     };
     
     $.resolve = function() {
-        done.call(this, STATUS_RESOLVED, this._.doneList, arguments);
+        var args = slice.call(arguments, 0);
+        done.call(this, STATUS_RESOLVED, this._.doneList, this, args);
+        return this;
+    };
+    
+    $.resolveWith = function(context) {
+        var args = slice.call(arguments, 1);
+        done.call(this, STATUS_RESOLVED, this._.doneList, context, args);
         return this;
     };
     
     $.reject = function() {
-        done.call(this, STATUS_REJECTED, this._.failList, arguments);
+        var args = slice.call(arguments, 0);
+        done.call(this, STATUS_REJECTED, this._.failList, this, args);
+        return this;
+    };
+    
+    $.rejectWith = function(context) {
+        var args = slice.call(arguments, 1);
+        done.call(this, STATUS_REJECTED, this._.failList, context, args);
         return this;
     };
     
@@ -98,20 +110,22 @@
         var dfd = new Deferred();
         
         this.then(function() {
-            var res = done.apply(this.context || this, arguments);
+            var res = done.apply(this, arguments);
             if (isDeferred(res)) {
-                dfd.context = res;
                 res.then(function() {
-                    dfd.resolve.apply(dfd, arguments);
+                    var args = slice.call(arguments);
+                    dfd.resolveWith.apply(dfd, [res].concat(args));
                 });
+            } else {
+                dfd.resolveWith(this, res);
             }
         }.bind(this), function() {
             if (typeof fail === "function") {
-                var res = fail.apply(this.contex || this, arguments);
+                var res = fail.apply(this, arguments);
                 if (isDeferred(res)) {
-                    dfd.context = res;
                     res.fail(function() {
-                        dfd.reject.apply(dfd, arguments);
+                        var args = slice.call(arguments);
+                        dfd.rejectWith.apply(dfd, [res].concat(args));
                     });
                 }
             } else {
@@ -119,7 +133,7 @@
             }
         }.bind(this));
         
-        return dfd.promise();
+        return dfd;
     };
     
     var isDeferred = function(x) {
@@ -187,7 +201,7 @@
             return this;
         };
         function Promise(dfd) {
-            this.then = then.bid(dfd);
+            this.then = then.bind(dfd);
             this.done = done.bind(dfd);
             this.fail = fail.bind(dfd);
             this.pipe = pipe.bind(dfd);

@@ -276,7 +276,7 @@
         
         var onloadeddata = function() {
             self._.emit("loadeddata");
-            dfd.resolve();
+            dfd.resolveWith(self);
         };
         
         var iter = function() {

@@ -22,12 +22,14 @@
         this.once("init", oninit);
         this.on("start", onstart);
     }
+    
     fn.extend(TimeoutNode);
     
     var oninit = function() {
         if (this._.originkey === "wait") {
             this._.type = TYPE_WAIT;
             fn.deferred(this);
+            this.on("stop", onstop);
         } else {
             this._.type = TYPE_TIMEOUT;
         }
@@ -42,6 +44,32 @@
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
     });
+    var onstop = function() {
+        var _ = this._;
+        if (_.type === TYPE_WAIT && !this.isResolved) {
+            _.isEnded = true;
+            _.waitSamples = Infinity;
+            _.deferred.rejectWith(this);
+            this.start = this.stop = fn.nop;
+        }
+    };
+    Object.defineProperty(onstop, "unremovable", {
+        value:true, writable:false
+    });
+    var onended = function() {
+        var _ = this._;
+        _.isEnded = true;
+        if (_.type === TYPE_WAIT && !this.isResolved) {
+            _.waitSamples = Infinity;
+            _.emit("ended");
+            _.deferred.resolveWith(this);
+            var stop = this.stop;
+            this.start = this.stop = fn.nop;
+            stop.call(this);
+        } else {
+            _.emit("ended");
+        }
+    };
     
     var $ = TimeoutNode.prototype;
     
@@ -106,21 +134,6 @@
             _.currentTime += _.currentTimeIncr;
         }
         return cell;
-    };
-    
-    var onended = function() {
-        var _ = this._;
-        _.isEnded = true;
-        if (_.type === TYPE_WAIT && !this.isResolved) {
-            _.waitSamples = Infinity;
-            _.emit("ended");
-            _.deferred.resolve();
-            var stop = this.stop;
-            this.start = this.stop = fn.nop;
-            stop.call(this);
-        } else {
-            _.emit("ended");
-        }
     };
     
     fn.register("timeout", TimeoutNode);
