@@ -70,6 +70,9 @@
         if (instance === undefined) {
             instance = new NumberWrapper([0]);
             instance._.isUndefined = true;
+            //debug--
+            throw new Error("T(\"" + key + "\") is an undefined object");
+            //--debug
         } else {
             instance._.isUndefined = false;
         }
