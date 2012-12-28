@@ -479,7 +479,7 @@
         return [cellL, cellR];
     };
     
-    timbre.utils.scissor = {
+    timbre.modules.scissor = {
         Scissor: Scissor,
         join   : Scissor.join,
         silence: Scissor.silence
