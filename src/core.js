@@ -760,7 +760,7 @@
         };
         
         $.bang = function() {
-            this._.emit("bang");
+            this._.emit.apply(this, ["bang"].concat(slice.call(arguments)));
             return this;
         };
         
@@ -1084,23 +1084,9 @@
     })();
     
     var ArrayWrapper = (function() {
-        var MODE_CLIP = 0;
-        var MODE_WRAP = 1;
-        var MODE_FOLD = 2;
-        
         function ArrayWrapper(_args) {
             TimbreObject.call(this, []);
             __fixKR(this);
-            
-            this._.index = 0;
-            this._.array = _args[0].map(timbre);
-            this._.elem =  this._.array[0] || timbre(0);
-            this._.clipMode = MODE_WRAP;
-            this._.modeName = "wrap";
-            this._.withBang = false;
-            
-            this._.ignoreFirstBang      = false;
-            this._.savedIgnoreFirstBang = false;
             
             if (isDictionary(_args[1])) {
                 var params = _args[1];
@@ -1114,167 +1100,31 @@
         var $ = ArrayWrapper.prototype;
         
         Object.defineProperties($, {
-            array: {
-                set: function(value) {
-                    var _ = this._;
-                    if (isArray(value)) {
-                        _.array = value.map(timbre);
-                        _.index = 0;
-                        _.elem  = _.array[0] || timbre(0);
-                        _.ignoreFirstBang = _.savedIgnoreFirstBang;
-                    }
-                },
-                get: function() {
-                    return this._.array;
-                }
-            },
-            index: {
-                set: function(value) {
-                    if (typeof value === "number") {
-                        var _ = this._;
-                        var i = ClipFunctions[_.clipMode](value, _.array.length);
-                        _.index = value;
-                        _.elem  = _.array[i] || timbre(0);
-                    }
-                },
-                get: function() {
-                    var _ = this._;
-                    return ClipFunctions[_.clipMode](_.index, _.array.length);
-                }
-            },
-            clipMode: {
-                set: function(value) {
-                    var _ = this._;
-                    switch (value) {
-                    case "clip":
-                        _.clipMode = MODE_CLIP;
-                        _.modeName = value;
-                        break;
-                    case "wrap":
-                        _.clipMode = MODE_WRAP;
-                        _.modeName = value;
-                        break;
-                    case "fold":
-                        _.clipMode = MODE_FOLD;
-                        _.modeName = value;
-                        break;
-                    }
-                    var i = ClipFunctions[_.clipMode](_.index, _.array.length);
-                    _.elem  = _.array[i] || timbre(0);
-                },
-                get: function() {
-                    return this._.modeName;
-                }
-            },
-            withBang: {
-                set: function(value) {
-                    this._.withBang = !!value;
-                },
-                get: function() {
-                    return this._.withBang;
-                }
-            },
-            ignoreFirstBang: {
-                set: function(value) {
-                    this._.ignoreFirstBang = this._.savedIgnoreFirstBang = !!value;
-                },
-                get: function() {
-                    return this._.savedIgnoreFirstBang;
-                }
-            },
-            length: {
-                get: function() {
-                    return this._.array.length;
-                }
-            },
-            current: {
-                get: function() {
-                    return this._.elem;
-                }
-            }
+            
         });
-        
-        $.bang = function() {
-            var _ = this._;
-
-            if (_.ignoreFirstBang) {
-                _.ignoreFirstBang = false;
-                return this;
-            }
-            
-            _.index += 1;
-            
-            var i = ClipFunctions[_.clipMode](_.index, _.array.length);
-            _.elem = _.array[i] || timbre(0);
-            _.emit("bang");
-            
-            if (_.withBang) {
-                _.elem.bang();
-            }
-            
-            return this;
-        };
-        
-        $.process = function(tickID) {
-            var cell = this.cell;
-            var _ = this._;
-            
-            if (this.tickID !== tickID) {
-                this.tickID = tickID;
-                
-                var mul = _.mul, add = _.add;
-                var i, imax = cell.length;
-                
-                var object = _.array[ClipFunctions[_.clipMode](_.index, _.array.length)];
-                
-                cell.set(object.process(tickID));
-
-                for (i = imax; i--; ) {
-                    cell[i] = cell[i] * mul + add;
-                }
-            }
-            
-            return cell;
-        };
-        
-        
-        var ClipFunctions = [
-            function(index, length) {
-                return index < 0 ? 0 : index < (length-1) ? index : (length-1);
-            },
-            function(index, length) {
-                if (index < 0 || length <= index) {
-                    index %= length;
-                    if (index < 0) {
-                        index += length;
-                    }
-                }
-                return index;
-            },
-            function(index, length) {
-                length -= 1;
-                if (index < 0 || length <= index) {
-                    var length2 = length << 1;
-                    index %= length2;
-                    if (index < 0) {
-                        index += length2;
-                    }
-                    if (index > length) {
-                        index = length2 - index;
-                    }
-                }
-                return index;
-            }
-        ];
         
         return ArrayWrapper;
     })();
     
     var ObjectWrapper = (function() {
-        function ObjectWrapper() {
+        function ObjectWrapper(_args) {
             TimbreObject.call(this, []);
+            __fixKR(this);
+
+            if (isDictionary(_args[1])) {
+                var params = _args[1];
+                this.once("init", function() {
+                    this.set(params);
+                });
+            }
         }
         __extend(ObjectWrapper);
+        
+        var $ = ObjectWrapper.prototype;
+        
+        Object.defineProperties($, {
+            
+        });
         
         return ObjectWrapper;
     })();
