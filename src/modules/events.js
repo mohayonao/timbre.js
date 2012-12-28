@@ -50,14 +50,16 @@
                 listeners[i].apply(this.context, args);
             }
             return true;
+        } else if (handler instanceof timbre.Object) {
+            handler.bang.apply(handler, arguments);
         } else {
             return false;
         }
     };
     
     $.addListener = function(type, listener) {
-        if (typeof listener !== "function") {
-            throw new Error("addListener only takes instances of Function");
+        if (typeof listener !== "function" && !(listener instanceof timbre.Object)) {
+            throw new Error("addListener takes instances of Function or timbre.Object");
         }
         var _ = this._;
         
@@ -82,8 +84,8 @@
     $.on = $.addListener;
     
     $.once = function(type, listener) {
-        if (typeof listener !== "function") {
-            throw new Error("once only takes instances of Function");
+        if (typeof listener !== "function" && !(listener instanceof timbre.Object)) {
+            throw new Error("once takes instances of Function or timbre.Object");
         }
         var self = this;
         function g() {
@@ -98,8 +100,8 @@
     };
     
     $.removeListener = function(type, listener) {
-        if (typeof listener !== "function") {
-            throw new Error("removeListener only takes instances of Function");
+        if (typeof listener !== "function" && !(listener instanceof timbre.Object)) {
+            throw new Error("removeListener takes instances of Function or timbre.Object");
         }
         var _ = this._;
         
