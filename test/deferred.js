@@ -102,23 +102,23 @@ describe("Deferred", function() {
 
 describe("Deferred T-Object", function() {
     it("then should return self", function() {
-        var timeout = T("timeout", {once:true});
+        var timeout = T("timeout", {deferred:true});
         assert.equal(timeout, timeout.then());
     });
     it("done should return self", function() {
-        var timeout = T("timeout", {once:true});
+        var timeout = T("timeout", {deferred:true});
         assert.equal(timeout, timeout.done());
     });
     it("fail should return self", function() {
-        var timeout = T("timeout", {once:true});
+        var timeout = T("timeout", {deferred:true});
         assert.equal(timeout, timeout.fail());
     });
     it("always should return self", function() {
-        var timeout = T("timeout", {once:true});
+        var timeout = T("timeout", {deferred:true});
         assert.equal(timeout, timeout.always());
     });
     it("promise", function(done) {
-        var timeout = T("timeout", {once:true, timeout:100});
+        var timeout = T("timeout", {deferred:true, timeout:100});
         timeout.promise().then(function() {
             assert(true);
             done();
@@ -132,7 +132,7 @@ describe("Deferred T-Object", function() {
         timeout.start();
     });
     it("pipe", function(done) {
-        var timeout = T("timeout", {once:true, timeout:100});
+        var timeout = T("timeout", {deferred:true, timeout:100});
         timeout.pipe(function() {
             return 100;
         }).then(function(x) {
