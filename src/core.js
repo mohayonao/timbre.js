@@ -539,6 +539,24 @@
     };
     fn.outputSignalAR = __outputSignalAR;
     
+    //debug--
+    fn.debug = {};
+    fn.debug.process = function(object) {
+        var cell = object.process(+new Date());
+        var min = +Infinity, max = -Infinity, nan = false;
+        for (var i = cell.length; i--; ) {
+            if (isNaN(cell[i])) {
+                nan = true;
+            }
+            if (cell[i] < min) {
+                min = cell[i];
+            } else if (cell[i] > max) {
+                max = cell[i];
+            }
+        }
+        return { min:min, max:max, isNaN:nan };
+    };
+    //--debug
     
     // root object
     var TimbreObject = (function() {
