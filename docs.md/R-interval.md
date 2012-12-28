@@ -6,9 +6,6 @@ T("interval")
 
 指定した間隔で入力オブジェクトに対して `bang()` します。
 
-`delay` の設定が無い場合は `start()` の後、
-JavaScript の setInterval と同じように `interval` と同じ時間の待機ののち動作を開始します。
-
 ```timbre
 var freqs = T([220, 440, 660, 880]);
 
@@ -30,7 +27,7 @@ env.play();
 - `count` _(Number)_
   - `bang` を送出した回数
 - `timeout` _(Number or timevalue)_
-  - タイムアウトの時間を設定します
+  - タイムアウトの時間
 - `currentTime` _(Number)_
   - 経過時間
 
@@ -43,14 +40,19 @@ env.play();
   - タイムアウト時に発生します。
   
 ## Note ##
-オブジェクト生成時に `once` を設定すると Deferred オブジェクトとなり、各Deferredメソッドのサポートとタイムアウト時に resolve、タイムアウト前に停止した場合に reject されます。
+- `delay` の設定が無い場合は `start()` の後、JavaScript の setInterval と同じように `interval` と同じ時間の待機ののち動作を開始します。
+- オブジェクト生成時に `deferred` を設定すると Deferred オブジェクトとなり、各Deferredメソッドがサポートされ、タイムアウト時に `resolve`、タイムアウト前の停止時に `reject` されます。以下の例では Deferred な `T("interval")` を jQuery の when で待機しています。
 
 ```timbre
-T("interval", {timeout:2500, once:true}, function(count) {
-    console.log(count);
-}).then(function() {
-    this.pause();
-}).start();
+var sin = T("sin", {mul:0.5}).play();
+
+var interval = T("interval", {deferred:true}, function(count) {
+    sin.freq = count * 20 + 440;
+}).set({interval:100, timeout:1500}).start();
+
+$.when(interval.promise()).then(function() {
+    sin.pause();
+});
 ```
 
 ## See Also ##

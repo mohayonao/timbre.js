@@ -11,6 +11,7 @@
         
         var _ = this._;
         _.count = 0;
+        _.delay   = null;
         _.timeout = Infinity;
         _.currentTime = 0;
         _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
@@ -33,18 +34,14 @@
         if (!this._.interval) {
             this.interval = 1000;
         }
-        if (this._.delay === undefined) {
-            if (this._.originkey === "interval") {
-                this.delay = this.interval.valueOf();
-            } else {
-                this.delay = 0;
-            }
-        }
     };
     
     var onstart = function() {
-        this._.currentTime = 0;
-        this._.isEnded = false;
+        var _ = this._;
+        var delay = (_.delay === null) ? _.interval : _.delay;
+        _.delaySamples = (timbre.samplerate * (delay * 0.001))|0;
+        _.countSamples = _.count = _.currentTime = 0;
+        _.isEnded = false;
     };
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
@@ -101,7 +98,8 @@
                 }
             },
             get: function() {
-                return this._.delay;
+                var _ = this._;
+                return _.delay === null ? _.interval : _.delay;
             }
         },
         count: {
@@ -136,9 +134,10 @@
     
     $.bang = function() {
         var _ = this._;
-        _.currentTime = 0;
-        _.delaySamples = (timbre.samplerate * (_.delay * 0.001))|0;
+        var delay = (_.delay === null) ? _.interval : _.delay;
+        _.delaySamples = (timbre.samplerate * (delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
+        _.isEnded = false;
         _.emit("bang");
         return this;
     };
