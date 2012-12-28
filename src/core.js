@@ -1064,7 +1064,7 @@
         
         $.bang = function() {
             var _ = this._;
-            var x = _.func.apply(this, _.args);
+            var x = _.func.apply(this, arguments.length ? arguments : _.args);
             if (typeof x === "number") {
                 _.value = x;
                 __changeWithValue.call(this);
