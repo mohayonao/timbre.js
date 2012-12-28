@@ -339,6 +339,9 @@
     var __changeWithValue = function() {
         var _ = this._;
         var x = _.value * _.mul + _.add;
+        if (isNaN(x)) {
+            x = 0;
+        }
         var cell = this.cell;
         for (var i = cell.length; i--; ) {
             cell[i] = x;
@@ -1044,9 +1047,9 @@
             }
         });
         
-        $.bang = function(arg) {
+        $.bang = function() {
             var _ = this._;
-            var x = _.func.call(this, arg);
+            var x = _.func.apply(this, _.args);
             if (typeof x === "number") {
                 _.value = x;
                 __changeWithValue.call(this);
