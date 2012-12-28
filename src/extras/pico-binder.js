@@ -85,7 +85,7 @@
                 }
             },
             DelayNode: {
-                value: timbre.utils.EfxDelay
+                value: timbre.modules.EfxDelay
             }
         });
         
