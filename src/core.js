@@ -365,32 +365,28 @@
     
     var __timer = (function() {
         var start = function() {
-            var self = this;
-            _sys.nextTick(function() {
-                if (self._.remove_check) {
-                    return self._.remove_check = null;
-                }
-                if (_sys.timers.indexOf(self) === -1) {
-                    _sys.timers.push(self);
-                    _sys.events.emit("addObject");
-                    self._.emit("start");
-                }
-            });
+            _sys.nextTick(onstart.bind(this));
             return this;
         };
-        
+        var onstart = function() {
+            if (_sys.timers.indexOf(this) === -1) {
+                _sys.timers.push(this);
+                _sys.events.emit("addObject");
+                this._.emit("start");
+            }
+        };
         var stop = function() {
-            var self = this;
-            _sys.nextTick(function() {
-                self._.remove_check = true;
-                if (_sys.timers.indexOf(self) !== -1) {
-                    _sys.events.emit("removeObject");
-                    self._.emit("stop");
-                }
-            });
+            _sys.nextTick(onstop.bind(this));
             return this;
         };
-        
+        var onstop = function() {
+            var i = _sys.timers.indexOf(this);
+            if (i !== -1) {
+                _sys.timers.splice(i, 1);
+                this._.emit("stop");
+                _sys.events.emit("removeObject");
+            }
+        };
         return function(object) {
             object.start = start;
             object.stop  = stop;
@@ -401,40 +397,37 @@
 
     var __listener = (function() {
         var listen = function() {
-            var self = this;
             if (arguments.length) {
                 this.append.apply(this, arguments);
             }
             if (this.inputs.length) {
-                _sys.nextTick(function() {
-                    if (self._.remove_check) {
-                        return self._.remove_check = null;
-                    }
-                    if (_sys.listeners.indexOf(self) === -1) {
-                        _sys.listeners.push(self);
-                        _sys.events.emit("addObject");
-                        self._.emit("listen");
-                    }
-                });
+                _sys.nextTick(onlisten.bind(this));
             }
             return this;
         };
-        
+        var onlisten = function() {
+            if (_sys.listeners.indexOf(this) === -1) {
+                _sys.listeners.push(this);
+                _sys.events.emit("addObject");
+                this._.emit("listen");
+            }
+        };
         var unlisten = function() {
-            var self = this;
             if (arguments.length) {
                 this.remove.apply(this, arguments);
             }
             if (!this.inputs.length) {
-                this._.remove_check = true;
-                if (_sys.listeners.indexOf(this) !== -1) {
-                    _sys.nextTick(function() {
-                        _sys.events.emit("removeObject");
-                        self._.emit("unlisten");
-                    });
-                }
+                _sys.nextTick(onunlisten.bind(this));
             }
             return this;
+        };
+        var onunlisten = function() {
+            var i = _sys.listeners.indexOf(this);
+            if (i !== -1) {
+                _sys.listeners.splice(i, 1);
+                this._.emit("unlisten");
+                _sys.events.emit("removeObject");
+            }
         };
         
         return function(object) {
@@ -1410,28 +1403,30 @@
         });
         
         $.play = function() {
-            var self = this;
-            _sys.nextTick(function() {
-                if (_sys.inlets.indexOf(self) === -1) {
-                    _sys.inlets.push(self);
-                    _sys.events.emit("addObject");
-                    self._.isPlaying = true;
-                    self._.emit("play");
-                }
-            });
+            _sys.nextTick(onplay.bind(this));
             return this;
+        };
+        var onplay = function() {
+            if (_sys.inlets.indexOf(this) === -1) {
+                _sys.inlets.push(this);
+                _sys.events.emit("addObject");
+                this._.isPlaying = true;
+                this._.emit("play");
+            }
         };
         
         $.pause = function() {
-            if (_sys.inlets.indexOf(this) !== -1) {
-                this._.remove_check = true;
-                _sys.nextTick(function() {
-                    _sys.events.emit("removeObject");
-                });
+            _sys.nextTick(onpause.bind(this));
+            return this;
+        };
+        var onpause = function() {
+            var i = _sys.inlets.indexOf(this);
+            if (i !== -1) {
+                _sys.inlets.splice(i, 1);
                 this._.isPlaying = false;
                 this._.emit("pause");
+                _sys.events.emit("removeObject");
             }
-            return this;
         };
         
         $.process = function(tickID) {
@@ -1656,25 +1651,6 @@
                 
                 for (j = 0, jmax = listeners.length; j < jmax; ++j) {
                     listeners[j].process(tickID);
-                }
-                
-                for (j = timers.length; j--; ) {
-                    if (timers[j]._.remove_check) {
-                        timers[j]._.remove_check = null;
-                        timers.splice(j, 1);
-                    }
-                }
-                for (j = inlets.length; j--; ) {
-                    if (inlets[j]._.remove_check) {
-                        inlets[j]._.remove_check = null;
-                        inlets.splice(j, 1);
-                    }
-                }
-                for (j = listeners.length; j--; ) {
-                    if (listeners[j]._.remove_check) {
-                        listeners[j]._.remove_check = null;
-                        listeners.splice(j, 1);
-                    }
                 }
                 
                 this.currentTime += currentTimeIncr;
