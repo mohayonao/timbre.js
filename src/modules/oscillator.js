@@ -38,6 +38,10 @@
         } else if (typeof value === "string") {
             if ((dx = getWavetable(value)) !== undefined) {
                 this.wave.set(dx);
+                //debug--
+            } else {
+                throw new Error("Oscillator undefined wave: " + value);
+                //--debug
             }
         }
     };
