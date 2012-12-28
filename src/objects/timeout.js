@@ -5,12 +5,6 @@
     var timevalue = timbre.utils.timevalue;
     
     function TimeoutNode(_args) {
-        var isonce = false;
-        if (typeof _args[0] === "object" && _args[0].constructor === Object) {
-            if (_args[0].once) {
-                isonce = true;
-            }
-        }
         timbre.Object.call(this, _args);
         fn.timer(this);
         fn.fixKR(this);
@@ -21,12 +15,11 @@
         _.samplesMax = 0;
         _.samples    = 0;
         _.isEnded = true;
-        _.isonce = isonce;
         
         this.once("init", oninit);
         this.on("start", onstart);
         
-        if (_.isonce) {
+        if (_.deferred) {
             fn.deferred(this);
             this.on("stop", onstop);
         }
@@ -48,7 +41,7 @@
     });
     var onstop = function() {
         var _ = this._;
-        if (_.isonce && !this.isResolved) {
+        if (_.deferred && !this.isResolved) {
             _.samplesMax = Infinity;
             _.isEnded = true;
             _.deferred.rejectWith(this);
@@ -61,7 +54,7 @@
     var onended = function() {
         var _ = this._;
         _.isEnded = true;
-        if (_.isonce && !this.isResolved) {
+        if (_.deferred && !this.isResolved) {
             _.samplesMax = Infinity;
             _.emit("ended");
             _.deferred.resolveWith(this);
@@ -102,11 +95,9 @@
     
     $.bang = function() {
         var _ = this._;
-        if (!_.isonce ) {
-            _.samples = _.samplesMax;
-            _.currentTime = 0;
-            _.isEnded = false;
-        }
+        _.samples = _.samplesMax;
+        _.currentTime = 0;
+        _.isEnded = false;
         _.emit("bang");
         return this;
     };
