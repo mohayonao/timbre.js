@@ -167,7 +167,7 @@ class IndexFileBuilder extends HTMLBuilder
             ]
 
     formatTitle = (title)->
-        title.replace /T\("([\w\W]+?)"\)/, '$1'
+        title.replace /T\("?([\w\W]+?)"?\)/, '$1'
 
     @build_statics = ->
         null # TODO: implements

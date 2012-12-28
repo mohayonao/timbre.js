@@ -3,10 +3,13 @@ T("timeout")
 {timer} Timeout
 
 ## Description ##
-指定時間後に入力オブジェクトに対して `bang()` します。
+指定した時間後に入力オブジェクトに対して `bang()` します。
 
 ```timbre
+var osc = T("sin", {freq:880, mul:0.5}).play();
+
 T("timeout", {timeout:1000}).on("ended", function() {
+    osc.pause();
     this.stop();
 }).start();
 ```
@@ -25,12 +28,16 @@ T("timeout", {timeout:1000}).on("ended", function() {
 - `ended` タイムアウト時に発生します。
 
 ## Note ##
-オブジェクト生成時に `once` を設定すると Deferred オブジェクトとなり、各Deferredメソッドのサポートとタイムアウト時に resolve、タイムアウト前に停止した場合に reject されます。
+- オブジェクト生成時に `deferred` を設定すると Deferred オブジェクトとなり、各Deferredメソッドがサポートされ、タイムアウト時に `resolve`、タイムアウト前の停止時に `reject` されます。以下の例では Deferred な `T("timeout")` を jQuery の when で待機しています。
 
 ```timbre
-T("timeout", {timeout:1000, once:true}).then(function() {
-    
-}).start();
+var sin = T("sin", {mul:0.5}).play();
+
+var timeout = T("timeout", {deferred:true}).set({timeout:500}).start();
+
+$.when(timeout.promise()).then(function() {
+    sin.pause();
+});
 ```
 
 ## See Also ##
