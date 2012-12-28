@@ -1027,8 +1027,14 @@
             __fixKR(this);
             
             this.func    = _args[0];
-            this._.args  = _args.slice(1);
             this._.value = 0;
+            
+            if (isDictionary(_args[1])) {
+                var params = _args[1];
+                this.once("init", function() {
+                    this.set(params);
+                });
+            }
             
             this.on("setAdd", __changeWithValue);
             this.on("setMul", __changeWithValue);
@@ -1064,7 +1070,8 @@
         
         $.bang = function() {
             var _ = this._;
-            var x = _.func.apply(this, arguments.length ? arguments : _.args);
+            var args = slice.call(arguments).concat(_.args);
+            var x = _.func.apply(this, args);
             if (typeof x === "number") {
                 _.value = x;
                 __changeWithValue.call(this);
