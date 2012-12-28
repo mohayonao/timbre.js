@@ -187,6 +187,7 @@ class TestBuilder
     getAllTestCode = ->
         dirpath = "#{__dirname}/../test/"
         testcode = for filename in fs.readdirSync dirpath
+            if filename is 'timbre.debug.js' then continue
             fs.readFileSync "#{dirpath}#{filename}", 'utf-8'
         testcode.join ''
 

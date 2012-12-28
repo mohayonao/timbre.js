@@ -1,18 +1,18 @@
-dev: hint timbre
+dev: timbre
 
-all: hint timbre minify html
+all: hint test timbre minify
 
-timbre:
+timbre: hint
 	coffee build/timbre-builder.coffee
 
 minify: timbre
 	uglifyjs --unsafe -nc -nm -o ./timbre.js ./timbre.dev.js
 
-test:
+test: hint
 	mocha --reporter dot
 
-html: clear-html
-	coffee build/html-builder.coffee
+# html: clear-html
+# 	coffee build/html-builder.coffee
 
 hint:
 	jshint src/core.js src/objects/*.js src/modules/*.js src/extras/*.js
@@ -21,7 +21,7 @@ clear:
 	rm -f timbre.dev.js
 	rm -f timbre.js
 
-clear-html:
-	rm -rf docs/*
+# clear-html:
+# 	rm -rf docs/*
 
 .PHONY: test

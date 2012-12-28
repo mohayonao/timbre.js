@@ -1,4 +1,4 @@
-var T = require("..");
+var T = require("./timbre.debug.js");
 var assert = require("assert");
 
 describe('T(timeout)', function() {

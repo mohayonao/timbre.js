@@ -19,9 +19,10 @@ app.get '/timbre.js/misc/index.html', (req, res)->
     html = builder.build()
     res.send html
 
-app.get /^\/timbre\.js\/timbre(\.dev)?.js$/, (req, res)->
+app.get /^\/timbre\.js\/timbre(?:\.(dev|debug))?.js$/, (req, res)->
+    debug = req.params[0] is 'debug'
     res.type '.js'
-    res.send timbre_builder.build()
+    res.send timbre_builder.build debug:debug
 
 app.get '/timbre.js/*', (req, res)->
     filename = req.url.replace '/timbre.js/', ''

@@ -1,112 +1,78 @@
-var T = require("..");
-var assert = require("assert");
+var T = require("./timbre.debug.js");
+var assert = require("chai").assert;
 
 var Deferred = timbre.modules.Deferred;
 
 describe("Deferred", function() {
-    it("resolve()", function(done) {
+    it("resolve()", function() {
         var dfd = new Deferred();
         var i = 0;
-        dfd.then(function(x, y) {
-            i += 1;
-            assert.equal(i, 1);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
+        dfd.then(function() {
+            i++;
         }, function() {
             assert(false);
-        }).done(function(x, y) {
-            i += 1;
-            assert.equal(i, 2);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
-        }, function(x, y) {
-            i += 1;
-            assert.equal(i, 3);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
+        }).done(function() {
+            i++;
+        }, function() {
+            i++;
         }).fail(function() {
             assert(false);
-        }).always(function(x, y) {
-            i += 1;
-            assert.equal(i, 4);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
-            done();
+        }).always(function() {
+            i++;
         });
-        dfd.resolve(10, 20);
+        after(function() {
+            assert.equal(i, 4);
+        });
+        dfd.resolve();
     });
-    it("reject()", function(done) {
+    it("reject()", function() {
         var dfd = new Deferred();
         var i = 0;
         dfd.then(function() {
             assert(false);
         }, function(x, y) {
-            i += 1;
-            assert.equal(i, 1);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
+            i++;
         }).done(function() {
             assert(false);
         }).fail(function(x, y) {
-            i += 1;
-            assert.equal(i, 2);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
+            i++;
         }, function(x, y) {
-            i += 1;
-            assert.equal(i, 3);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
+            i++;
         }).always(function(x, y) {
-            i += 1;
+            i++;
+        });
+        after(function() {
             assert.equal(i, 4);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
-            done();
         });
         dfd.reject(10, 20);
     });
-    it("resolveWith()", function(done) {
+    it("resolveWith()", function() {
         var dfd = new Deferred();
         var a = {};
-        dfd.then(function(x, y) {
+        dfd.then(function() {
             assert.equal(this, a);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
-        }).done(function(x, y) {
+        }).done(function() {
             assert.equal(this, a);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
         }).fail(function() {
             assert(false);
-        }).always(function(x, y) {
+        }).always(function() {
             assert.equal(this, a);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
-            done();
         });
-        dfd.resolveWith(a, 10, 20);
+        dfd.resolveWith(a);
     });
-    it("rejectWith()", function(done) {
+    it("rejectWith()", function() {
         var dfd = new Deferred();
         var a = {};
-        dfd.then(null, function(x, y) {
+        dfd.then(null, function() {
             assert.equal(this, a);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
         }).done(function() {
             assert(false);
-        }).fail(function(x, y) {
+        }).fail(function() {
             assert.equal(this, a);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
-        }).always(function(x, y) {
+        }).always(function() {
             assert.equal(this, a);
-            assert.equal(x, 10);
-            assert.equal(y, 20);
-            done();
         });
-        dfd.rejectWith(a, 10, 20);
+        dfd.rejectWith(a);
     });
     it("pipe()", function(done) {
         var dfd = new Deferred(), dfd2;
