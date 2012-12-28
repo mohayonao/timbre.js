@@ -2,7 +2,7 @@
     "use strict";
     
     var fn = timbre.fn;
-    var timevalue = timbre.utils.timevalue;
+    var timevalue = timbre.timevalue;
     
     var STATUS_WAIT = 0;
     var STATUS_REC  = 1;

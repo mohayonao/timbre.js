@@ -2,7 +2,7 @@
     "use strict";
     
     var fn = timbre.fn;
-    var timevalue = timbre.utils.timevalue;
+    var timevalue = timbre.timevalue;
     
     function TimeoutNode(_args) {
         timbre.Object.call(this, _args);

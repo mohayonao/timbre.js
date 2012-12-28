@@ -2,7 +2,7 @@
     "use strict";
     
     var fn = timbre.fn;
-    var timevalue = timbre.utils.timevalue;
+    var timevalue = timbre.timevalue;
     var FFT = timbre.modules.FFT;
     
     function SpectrumNode(_args) {

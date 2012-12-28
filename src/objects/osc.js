@@ -2,7 +2,7 @@
     "use strict";
     
     var fn = timbre.fn;
-    var timevalue  = timbre.utils.timevalue;
+    var timevalue  = timbre.timevalue;
     var Oscillator = timbre.modules.Oscillator;
     
     function OscNode(_args) {

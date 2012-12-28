@@ -1,7 +1,7 @@
 (function(timbre) {
     "use strict";
     
-    var timevalue = timbre.utils.timevalue;
+    var timevalue = timbre.timevalue;
     
     function Envelope(samplerate) {
         this.samplerate = samplerate || 44100;
