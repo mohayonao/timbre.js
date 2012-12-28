@@ -11,7 +11,7 @@ build_timbre = (opts={})->
         list = fs.readdirSync dirpath
         list = list.filter (x)-> /.*\.js$/.test(x)
         if not isDev
-            list = list.filter (x)-> not /^_/.test(x)
+            list = list.filter (x)-> not /^~?_/.test(x)
         list.sort()
         list.map (x)->
             fs.readFileSync "#{dirpath}/#{x}", 'utf-8'

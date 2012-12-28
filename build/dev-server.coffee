@@ -29,9 +29,9 @@ app.get '/timbre.js/*', (req, res)->
     filepath = path.normalize "#{__dirname}/../#{filename}"
     res.sendfile filepath
 
-app.get '/test/:name?', (req, res)->
+app.get /\/test\/(\w*)(?:\.js)?$/, (req, res)->
     builder = new html_builder.TestBuilder()
-    html = builder.build(req.params.name)
+    html = builder.build(req.params[0])
     res.send html
 
 app.listen process.env.PORT or 3000
