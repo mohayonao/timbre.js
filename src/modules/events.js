@@ -47,11 +47,16 @@
             args = slice.call(arguments, 1);
             var listeners = handler.slice();
             for (var i = 0, imax = listeners.length; i < imax; ++i) {
-                listeners[i].apply(this.context, args);
+                if (listeners[i] instanceof timbre.Object) {
+                    listeners[i].bang.apply(listeners[i], args);
+                } else {
+                    listeners[i].apply(this.context, args);
+                }
             }
             return true;
         } else if (handler instanceof timbre.Object) {
-            handler.bang.apply(handler, arguments);
+            args = slice.call(arguments, 1);
+            handler.bang.apply(handler, args);
         } else {
             return false;
         }
@@ -84,13 +89,20 @@
     $.on = $.addListener;
     
     $.once = function(type, listener) {
-        if (typeof listener !== "function" && !(listener instanceof timbre.Object)) {
-            throw new Error("once takes instances of Function or timbre.Object");
-        }
         var self = this;
-        function g() {
-            self.removeListener(type, g);
-            listener.apply(self.context, arguments);
+        var g;
+        if (typeof listener === "function") {
+            g = function () {
+                self.removeListener(type, g);
+                listener.apply(self.context, arguments);
+            };
+        } else if (listener instanceof timbre.Object) {
+            g = function () {
+                self.removeListener(type, g);
+                listener.bang.apply(listener, arguments);
+            };
+        } else {
+            throw new Error("once takes instances of Function or timbre.Object");
         }
         g.listener = listener;
         
