@@ -22,7 +22,7 @@ build_timbre = (opts={})->
     source = source.join ''
 
     if not opts.debug
-        source = source.replace /\/\/debug--[\w\W]+\/\/--debug/g, ''
+        source = source.replace /\/\/debug--[\w\W]+?\/\/--debug/g, ''
 
     source
 
