@@ -155,7 +155,7 @@
         }
         
         // duty-cycle
-        if (width !== undefined) {
+        if (width !== undefined && width !== 50) {
             width *= 0.01;
             width = (width < 0) ? 0 : (width > 1) ? 1 : width;
             

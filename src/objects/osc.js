@@ -148,16 +148,16 @@
         return new OscNode(_args).set("wave", "konami");
     });
     fn.register("+sin", function(_args) {
-        return new OscNode(_args).set("wave", "+sin");
+        return new OscNode(_args).set("wave", "+sin").kr();
     });
     fn.register("+pulse", function(_args) {
-        return new OscNode(_args).set("wave", "+pulse");
+        return new OscNode(_args).set("wave", "+pulse").kr();
     });
     fn.register("+tri", function(_args) {
-        return new OscNode(_args).set("wave", "+tri");
+        return new OscNode(_args).set("wave", "+tri").kr();
     });
     fn.register("+saw", function(_args) {
-        return new OscNode(_args).set("wave", "+saw");
+        return new OscNode(_args).set("wave", "+saw").kr();
     });
     
     fn.alias("square", "pulse");
