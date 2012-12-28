@@ -5,12 +5,6 @@
     var timevalue = timbre.utils.timevalue;
     
     function IntervalNode(_args) {
-        var isonce = false;
-        if (typeof _args[0] === "object" && _args[0].constructor === Object) {
-            if (_args[0].once) {
-                isonce = true;
-            }
-        }
         timbre.Object.call(this, _args);
         fn.timer(this);
         fn.fixKR(this);
@@ -24,12 +18,11 @@
         _.delaySamples = 0;
         _.countSamples = 0;
         _.isEnded = false;
-        _.isonce = isonce;
         
         this.once("init", oninit);
         this.on("start", onstart);
         
-        if (_.isonce) {
+        if (_.deferred) {
             fn.deferred(this);
             this.on("stop", onstop);
         }
@@ -58,7 +51,7 @@
     });
     var onstop = function() {
         var _ = this._;
-        if (_.isonce && !this.isResolved) {
+        if (_.deferred && !this.isResolved) {
             _.isEnded = true;
             _.waitSamples = Infinity;
             _.deferred.rejectWith(this);
@@ -71,7 +64,7 @@
     var onended = function() {
         var _ = this._;
         _.isEnded = true;
-        if (_.isonce && !this.isResolved) {
+        if (_.deferred && !this.isResolved) {
             var stop = this.stop;
             this.start = this.stop = fn.nop;
             _.emit("ended");

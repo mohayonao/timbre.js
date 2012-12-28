@@ -570,6 +570,10 @@
                 this.once("init", function() {
                     this.set(params);
                 });
+                if (params.deferred) {
+                    this._.deferred = true;
+                    delete params.deferred;
+                }
             }
             
             this.tickID = -1;
