@@ -27,6 +27,7 @@
         }
         return "unknown";
     })();
+    var _usefunc = {};
     
     var timbre = function() {
         var args = slice.call(arguments);
@@ -257,6 +258,15 @@
         return _sys.ready.apply(_sys, arguments);
     };
     
+    timbre.use = function(name) {
+        if (isArray(_usefunc[name])) {
+            _usefunc[name].forEach(function(func) {
+                func();
+            });
+        }
+        return this;
+    };
+    
     timbre.timevalue = function(str) {
         var m, bpm, ticks, x;
         m = /^(\d+(?:\.\d+)?)Hz$/i.exec(str);
@@ -347,6 +357,14 @@
             return m[1]|0;
         }
         return 0;
+    };
+    
+    fn.use = function(name, func) {
+        if (isArray(_usefunc[name])) {
+            _usefunc[name].push(func);
+        } else {
+            _usefunc[name] = [func];
+        }
     };
     
     var __nop = function() {
