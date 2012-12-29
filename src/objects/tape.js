@@ -5,11 +5,11 @@
     
     function ScissorNode(_args) {
         timbre.Object.call(this, _args);
-        fn.stereo(this);
         fn.fixAR(this);
-        
-        this._.isLooped = false;
-        this._.isEnded  = false;
+
+        var _ = this._;
+        _.isLooped = false;
+        _.isEnded  = false;
     }
     fn.extend(ScissorNode);
     
@@ -64,8 +64,6 @@
     $.process = function(tickID) {
         var _ = this._;
         var cell  = this.cell;
-        var cellL = this.cellL;
-        var cellR = this.cellR;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -78,9 +76,7 @@
                 var tmpL = tmp[0];
                 var tmpR = tmp[1];
                 for (var i = cell.length; i--; ) {
-                    cellL[i] = tmpL[i] * mul + add;
-                    cellR[i] = tmpR[i] * mul + add;
-                    cell[i] = (cellL[i] + cellR[i]) * 0.5;
+                    cell[i] = (tmpL[i] + tmpR[i]) * 0.5 * mul + add;
                 }
             }
             
