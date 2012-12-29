@@ -8,12 +8,12 @@
     
     function Deferred(context) {
         this.context = context || this;
-        this.state = "pending";
+        this._state = "pending";
         this._doneList = [];
         this._failList = [];
         
         this._promise = {
-            then: this.then.bind(this),
+            then: this.then,
             done: this.done.bind(this),
             fail: this.fail.bind(this),
             pipe: this.pipe.bind(this),
@@ -27,8 +27,8 @@
     var $ = Deferred.prototype;
     
     var exec = function(statue, list, context, args) {
-        if (this.state === "pending") {
-            this.state = statue;
+        if (this._state === "pending") {
+            this._state = statue;
             for (var i = 0, imax = list.length; i < imax; ++i) {
                 list[i].apply(context, args);
             }
@@ -62,8 +62,8 @@
     };
     $.done = function() {
         var args = slice.call(arguments);
-        var isResolved = (this.state === "resolved");
-        var isPending  = (this.state === "pending");
+        var isResolved = (this._state === "resolved");
+        var isPending  = (this._state === "pending");
         var list = this._doneList;
         for (var i = 0, imax = args.length; i < imax; ++i) {
             if (typeof args[i] === "function") {
@@ -78,8 +78,8 @@
     };
     $.fail = function() {
         var args = slice.call(arguments);
-        var isRejected = (this.state === "rejected");
-        var isPending  = (this.state === "pending");
+        var isRejected = (this._state === "rejected");
+        var isPending  = (this._state === "pending");
         var list = this._failList;
         for (var i = 0, imax = args.length; i < imax; ++i) {
             if (typeof args[i] === "function") {
@@ -97,7 +97,7 @@
         this.fail.apply(this, arguments);
         return this;
     };
-    $.then = function(done, fail) {
+    $.then = function then(done, fail) {
         return this.done(done).fail(fail);
     };
     $.pipe = function(done, fail) {
@@ -133,10 +133,13 @@
     // $.then = $.pipe;
 
     $.isResolved = function() {
-        return this.state === "resolved";
+        return this._state === "resolved";
     };
     $.isRejected = function() {
-        return this.state === "rejected";
+        return this._state === "rejected";
+    };
+    $.state = function() {
+        return this._state;
     };
     
     // TODO: test
