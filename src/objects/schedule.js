@@ -11,9 +11,9 @@
         
         var _ = this._;
         _.queue = [];
-        _.currentTime = 0;
-        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
-        _.maxSize = 1000;
+        _.elapse = 0;
+        _.elapseIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        _.maxRemain = 1000;
     }
     fn.extend(ScheduleNode);
     
@@ -25,19 +25,19 @@
                 return this._.queue;
             }
         },
-        size: {
+        remain: {
             get: function() {
                 return this._.queue.length;
             }
         },
-        maxSize: {
+        maxRemain: {
             set: function(value) {
                 if (typeof value === "number" && value > 0) {
-                    this._.maxSize = value;
+                    this._.maxRemain = value;
                 }
             },
             get: function() {
-                return this._.maxSize;
+                return this._.maxRemain;
             }
         },
         isEmpty: {
@@ -52,7 +52,7 @@
             delta = timevalue(delta);
         }
         if (typeof delta === "number") {
-            this.schedAbs(this._.currentTime + delta, item);
+            this.schedAbs(this._.elapse + delta, item);
         }
         return this;
     };
@@ -63,16 +63,16 @@
         }
         if (typeof time === "number") {
             var _ = this._;
-            var list = _.queue;
-            if (list.length >= _.maxSize) {
+            var queue = _.queue;
+            if (queue.length >= _.maxRemain) {
                 return this;
             }
-            for (var i = list.length; i--; ) {
-                if (list[i][0] < time) {
+            for (var i = queue.length; i--; ) {
+                if (queue[i][0] < time) {
                     break;
                 }
             }
-            list.splice(i + 1, 0, [time, timbre(item)]);
+            queue.splice(i + 1, 0, [time, timbre(item)]);
         }
         return this;
     };
@@ -82,7 +82,7 @@
             delta = timevalue(delta);
         }
         if (typeof delta === "number") {
-            this._.currentTime += delta;
+            this._.elapse += delta;
         }
         return this;
     };
@@ -104,20 +104,20 @@
             this.tickID = tickID;
             
             var emit = null;
-            var list = _.queue;
+            var queue = _.queue;
             
-            if (list.length) {
-                while (list[0][0] < _.currentTime) {
+            if (queue.length) {
+                while (queue[0][0] < _.elapse) {
                     var nextItem = _.queue.shift();
                     nextItem[1].bang(); // TODO: args?
                     emit = "sched";
-                    if (list.length === 0) {
+                    if (queue.length === 0) {
                         emit = "empty";
                         break;
                     }
                 }
             }
-            _.currentTime += _.currentTimeIncr;
+            _.elapse += _.elapseIncr;
             if (emit) {
                 _.emit(emit);
             }
