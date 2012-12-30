@@ -1,6 +1,6 @@
 Deferred
 ========
-Deferred {deferred}
+{deferred} Deferred
 
 `T("timeout")` のようないくつかの Tオブジェクトは Deferred インターフェイスを持ちます。
 

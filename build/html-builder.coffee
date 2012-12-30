@@ -164,6 +164,7 @@ class IndexFileBuilder extends HTMLBuilder
                 {key:'T', caption:'Tutorials' }
                 {key:'E', caption:'Examples'  }
                 {key:'R', caption:'References'}
+                {key:'D', caption:'Developers'}
             ]
 
     formatTitle = (title)->
