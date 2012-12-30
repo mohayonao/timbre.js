@@ -89,6 +89,7 @@
         }).bang();
         gen.noteNum = noteNum;
         list.push(gen);
+        dict[noteNum] = gen;
         
         _.isEnded = false;
         
