@@ -1,5 +1,5 @@
 var T = require("./timbre.debug.js");
-var assert = require("assert");
+var assert = require("chai").assert;
 
 describe('T("timeout")', function() {
     it("new", function() {
@@ -28,15 +28,14 @@ describe('T("timeout")', function() {
         var t = T("timeout", {timeout:50}, function() {
             assert(false);
         }).start();
-        var count = 0;
-        var tid = setInterval(function() {
+        T("interval", {interval:10, timeout:200}, function(count) {
             t.bang();
-            if (count++ >= 5) {
-                t.stop();
-                clearInterval(tid);
-                done();
-            }
-        }, 20);
+        }).on("ended", function() {
+            t.stop();
+            this.stop();
+            done();
+        }).start();
+        t.start();
     });
     it("cannot restart with 'deferred' option", function(done) {
         var check = true;

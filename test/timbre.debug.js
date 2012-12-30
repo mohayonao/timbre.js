@@ -20,6 +20,31 @@ require("../src/core.js");
 require.from(SRC_DIR + "/modules");
 require.from(SRC_DIR + "/objects");
 
-timbre.bind(require("../libs/PicoNodePlayer"));
+function DummyPlayer(sys) {
+    this.maxSamplerate     = 48000;
+    this.defaultSamplerate = 44100;
+    this.env = "node";
+
+    var tid = 0;
+
+    this.play = function() {
+        if (tid) {
+            clearInterval(tid);
+        }
+        
+        tid = setInterval(function() {
+            var n = sys.streamsize / sys.cellsize;
+            while (n--) {
+                sys.process();
+            }
+        }.bind(this), 5);
+    };
+
+    this.pause = function() {
+        clearInterval(tid);
+    };
+}
+
+timbre.bind(DummyPlayer);
 
 module.exports = timbre;

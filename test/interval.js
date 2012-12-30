@@ -22,13 +22,15 @@ describe('T("interval")', function() {
         assert.isFalse(t.isAr);
     });
     it("process()", function(done) {
-        var count = 0;
-        var t = T("interval", {interval:10}, function() {
-            count++;
-        }, function() {
-            count++;
+        var passed = 0;
+        var t = T("interval", {interval:10}, function(count) {
+            assert.equal(count, 0);
+            passed++;
+        }, function(count, timer) {
+            assert.equal(count, 0);
+            passed++;
+            assert.equal(passed, 2);
             t.stop();
-            assert.equal(count, 2);
             done();
         }).start();
     });
@@ -40,16 +42,15 @@ describe('T("interval")', function() {
     it("bang() reset timer", function(done) {
         var t = T("interval", {interval:50}, function() {
             assert(false);
-        }).start();
-        var count = 0;
-        var tid = setInterval(function() {
+        });
+        T("interval", {interval:10, timeout:200}, function(count) {
             t.bang();
-            if (count++ >= 5) {
-                t.stop();
-                clearInterval(tid);
-                done();
-            }
-        }, 20);
+        }).on("ended", function() {
+            t.stop();
+            this.stop();
+            done();
+        }).start();
+        t.start();
     });
     it("cannot restart with 'deferred' option", function(done) {
         var check = true;

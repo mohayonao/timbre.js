@@ -3,101 +3,127 @@ var assert = require("chai").assert;
 
 var Deferred = timbre.modules.Deferred;
 
+if (!true) {
+    Deferred = $.Deferred;
+}
+
 describe("Deferred", function() {
+    it.skip("new", function() {
+        var dfd = new Deferred();
+        assert.instanceOf(dfd, Deferred);
+    });
     it("resolve()", function() {
         var dfd = new Deferred();
-        var i = 0;
+        var passed = 0;
         dfd.then(function() {
-            i++;
+            passed++;
         }, function() {
             assert(false);
         }).done(function() {
-            i++;
+            passed++;
         }, function() {
-            i++;
+            passed++;
         }).fail(function() {
             assert(false);
         }).always(function() {
-            i++;
-        });
-        after(function() {
-            assert.equal(i, 4);
+            passed++;
         });
         dfd.resolve();
+        dfd.resolve();
+        dfd.reject();
+        assert.equal(passed, 4);
+        assert.equal(dfd.state(), "resolved");
+        assert.isTrue(dfd.isResolved());
     });
-    it("reject()", function() {
+    it("fail()", function() {
         var dfd = new Deferred();
-        var i = 0;
+        var passed = 0;
         dfd.then(function() {
             assert(false);
-        }, function(x, y) {
-            i++;
-        }).done(function() {
-            assert(false);
-        }).fail(function(x, y) {
-            i++;
-        }, function(x, y) {
-            i++;
-        }).always(function(x, y) {
-            i++;
-        });
-        after(function() {
-            assert.equal(i, 4);
-        });
-        dfd.reject(10, 20);
-    });
-    it("resolveWith()", function() {
-        var dfd = new Deferred();
-        var a = {};
-        dfd.then(function() {
-            assert.equal(this, a);
-        }).done(function() {
-            assert.equal(this, a);
-        }).fail(function() {
-            assert(false);
-        }).always(function() {
-            assert.equal(this, a);
-        });
-        dfd.resolveWith(a);
-    });
-    it("rejectWith()", function() {
-        var dfd = new Deferred();
-        var a = {};
-        dfd.then(null, function() {
-            assert.equal(this, a);
+        }, function() {
+            passed++;            
         }).done(function() {
             assert(false);
         }).fail(function() {
-            assert.equal(this, a);
+            passed++;
+        }, function() {
+            passed++;
         }).always(function() {
-            assert.equal(this, a);
+            passed++;
         });
-        dfd.rejectWith(a);
+        dfd.reject();
+        dfd.reject();
+        dfd.resolve();
+        assert.equal(dfd.state(), "rejected");
+        assert.equal(passed, 4);
     });
-    it("pipe()", function(done) {
-        var dfd = new Deferred(), dfd2;
+    it("pipe()", function() {
+        var dfd = new Deferred();
+        var passed = 0;
         dfd.pipe(function(x) {
+            assert.equal(x, 0);
+            passed++;
+            return 10;
+        }).pipe(function(x) {
             assert.equal(x, 10);
-            assert.equal(this, dfd);
+            passed++;
             return 20;
         }).pipe(function(x) {
             assert.equal(x, 20);
-            assert.equal(this, dfd);
-            dfd2 = new Deferred();
-            dfd2.name = "dfd2";
-            setTimeout(function() {
-                console.log("dfd2.resolve(30)");
-                dfd2.resolve(30);
-            }, 150);
-            return dfd2.promise();
+            passed++
+        });
+        dfd.resolve(0);
+        dfd.resolve(0);
+        assert.equal(passed, 3);
+    });
+    it("pipe() with deferred", function(done) {
+        var dfd = new Deferred();
+        var passed  = 0;
+        dfd.pipe(function() {
+            passed++;
+            return 10;
         }).pipe(function(x) {
-            assert.equal(x, 30);
-            // assert.equal(this, dfd2);
+            var dfd2 = new Deferred();
+            dfd2.then(function(x) {
+                assert.equal(x, 20);
+                passed++;
+            });
+            setTimeout(function() {
+                dfd2.resolve(20);
+            }, 10);
+            return dfd2;
+        }).pipe(function(x) {
+            assert.equal(passed, 2);
+            assert.equal(x, 20);
             done();
         });
-        dfd.resolve(10);
+        dfd.resolve();
+        dfd.resolve();
     });
-    it("pipe === then");
+    it.skip("pipe() context", function(done) {
+        var dfd = new Deferred(), dfd2;
+        var passed  = 0;
+        dfd.pipe(function() {
+            assert.equal(this, dfd);
+            passed++;
+        }).pipe(function() {
+            assert.notEqual(this, dfd);
+            dfd2 = new Deferred();
+            dfd2.then(function() {
+                passed++;
+            });
+            setTimeout(function() {
+                dfd2.resolve();
+            }, 10);
+            return dfd2;
+        }).pipe(function() {
+            assert.equal(this, dfd2);
+            assert.equal(passed, 2);
+            done();
+        });
+        dfd.resolve();
+        dfd.resolve();
+    });
 });
 
 describe("Deferred T-Object", function() {
@@ -117,28 +143,66 @@ describe("Deferred T-Object", function() {
         var timeout = T("timeout", {deferred:true});
         assert.equal(timeout, timeout.always());
     });
-    it("promise", function(done) {
-        var timeout = T("timeout", {deferred:true, timeout:100});
-        timeout.promise().then(function() {
-            assert(true);
-            done();
+    it("then()", function(done) {
+        var timeout = T("timeout", {deferred:true, timeout:10});
+        var passed = 0;
+        timeout.then(function() {
+            passed++;
+            assert.equal(passed, 2);
+            assert.equal(this, timeout);
         }, function() {
             assert(false);
         }).done(function() {
-            assert(true);
+            passed++;
+            assert.equal(passed, 3);
+            assert.equal(this, timeout);
+            done();
         }).fail(function() {
             assert(false);
         });
-        timeout.start();
+        timeout.on("ended", function() {
+            passed++;
+            assert.equal(passed, 1);
+        }).start();
     });
-    it("pipe", function(done) {
-        var timeout = T("timeout", {deferred:true, timeout:100});
+    it("promise()", function(done) {
+        var timeout = T("timeout", {deferred:true, timeout:10});
+        var passed = 0;
+        timeout.promise().then(function() {
+            passed++;
+            assert.equal(passed, 2);
+            assert.equal(this, timeout);
+        }, function() {
+            assert(false);
+        }).done(function() {
+            passed++;
+            assert.equal(passed, 3);
+            assert.equal(this, timeout);
+            done();
+        }).fail(function() {
+            assert(false);
+        });
+        timeout.on("ended", function() {
+            passed++;
+            assert.equal(passed, 1);
+        }).start();
+    });
+    it("pipe()", function(done) {
+        var timeout = T("timeout", {deferred:true, timeout:10});
+        var passed = 0;
         timeout.pipe(function() {
+            passed++;
+            assert.equal(passed, 2);
             return 100;
         }).then(function(x) {
+            passed++;
+            assert.equal(passed, 3);
             assert.equal(x, 100);
             done();
         });
-        timeout.start();
+        timeout.on("ended", function() {
+            passed++;
+            assert.equal(passed, 1);
+        }).start();
     });
 });
