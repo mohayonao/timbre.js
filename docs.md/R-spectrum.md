@@ -20,9 +20,9 @@ var fft = T("spectrum", {size:512, interval:100}).on("fft", function() {
 - `size` _(Number)_
 - `window` _(String)_
 - `interval` _(Number or timevalue)_
-- `spectrum` _(Float32Array)_
-- `real` _(Float32Array)_
-- `imag` _(Float32Array)_
+- `spectrum` _(ReadOnly Float32Array)_
+- `real` _(ReadOnly Float32Array)_
+- `imag` _(ReadOnly Float32Array)_
 
 ## Methods ##
 - `plot(opts)`

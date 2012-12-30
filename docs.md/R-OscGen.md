@@ -1,4 +1,4 @@
-T("OscEnv")
+T("OscGen")
 ===========
 Oscillator x Envelope
 
@@ -7,7 +7,7 @@ Oscillator x Envelope
 
 ```timbre
 var env = {type:"perc", a:50, r:2500};
-var oscenv = T("OscEnv", {wave:"pulse", env:env, mul:0.15}).play();
+var oscenv = T("OscGen", {wave:"pulse", env:env, mul:0.15}).play();
 
 T("interval", {delay:0, interval:500}, function(count) {
     var noteNum  = 69 + [0, 2, 4, 5, 7, 9, 11, 12][count % 8];
@@ -40,4 +40,4 @@ T("interval", {delay:0, interval:500}, function(count) {
   - Envelope
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/OscEnv.js
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/OscGen.js

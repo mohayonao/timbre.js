@@ -20,10 +20,10 @@ window.animate(function() {
 ```
 
 ## Properties ##
-- `real` _(T Object)_
-- `imag` _(T Object)_
+- `real` _(ReadOnly T Object)_
+- `imag` _(ReadOnly T Object)_
 - `window` _(String)_
-- `spectrum` _(Float32Array)_
+- `spectrum` _(ReadOnly Float32Array)_
 
 ## Methods ##
 - `plot(opts)`

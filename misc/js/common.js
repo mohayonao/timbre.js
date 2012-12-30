@@ -4,6 +4,7 @@ $(function() {
     $("#list").load("/timbre.js/misc/index.html");
     
     var nowPlaying, animationId;
+    var current;
     
     var onreset = function() {
         nowPlaying = null;
@@ -16,7 +17,10 @@ $(function() {
         $(".CodeMirror").css("border-color", "silver");
     };
     
-    timbre.on("pause", onreset).on("reset", onreset).amp = 0.6;
+    timbre.on("play", function() {
+        $(current.button).text("Pause");
+        $(".CodeMirror", current.container).css("border-color", "#DF81A2");
+    }).on("pause", onreset).on("reset", onreset).amp = 0.6;
     
     function playCode(code) {
         if (timbre.isPlaying && nowPlaying === code) {
@@ -25,9 +29,7 @@ $(function() {
         } else {
             timbre.reset();
             eval(code);
-            if (timbre.isPlaying) {
-                nowPlaying = code;
-            }
+            nowPlaying = code;
         }
     }
     
@@ -44,12 +46,8 @@ $(function() {
         
         if (lang === "timbre") {
             $("<button>").addClass("play-button").on("click", function() {
+                current = {container:container, button:$(this)};
                 playCode(editor.getValue().trim());
-                
-                if (nowPlaying) {
-                    $(this).text("Pause");
-                    $(".CodeMirror", container).css("border-color", "#DF81A2");
-                }
             }).append("Play").appendTo(container);
         }
     });

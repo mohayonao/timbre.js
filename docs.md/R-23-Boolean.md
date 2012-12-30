@@ -16,7 +16,7 @@ T("interval", {interval:500}, function() {
 ```
 
 ## Properties ##
-- `value`
+- `value` _(Boolean)_
   - 格納しているブール値
 
 ## See Also ##

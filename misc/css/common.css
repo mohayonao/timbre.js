@@ -30,6 +30,13 @@ pre code {
     display: block;
 }
 
+table {
+    width: 100%;
+}
+th {
+    text-align: left;
+}
+
 #sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;

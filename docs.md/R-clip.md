@@ -25,9 +25,9 @@ window.animate(function() {
 ```
 
 ## Properties ##
-- `minmax`
-- `min`
-- `max`
+- `minmax` _(WriteOnly Number)_
+- `min` _(Number)_
+- `max` _(Number)_
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/clip.js

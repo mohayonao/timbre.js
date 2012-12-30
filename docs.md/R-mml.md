@@ -1,0 +1,134 @@
+T("MML")
+========
+{timer} MML Based Scheduler
+
+## Description ##
+MMLスタイルのスケジューラ。  
+入力オブジェクトには `T("OscGen")` などの音源オブジェクトか `T("env")` を指定します。`noteOn` 時に `noteOn()` か `bang()` が呼ばれ、`noteOff` 時に `noteOff()` か `release()` が呼ばれる。
+
+```timbre
+var mml = "l8 q7 $";
+mml += "[d0f0<c> r d0f0<c> r r d0f0<c> d0f0<c4> d0f0b d0f0b r d0f0b r d0f0b d0f0b4";
+mml += " c0e0b r c0e0b r r c0e0b c0e0b4 | c0e0a c0e0a r c0e0a r c0e0a c0e0a4]";
+mml += " c0e0<c> c0e0<c> r c0e0<c> r c0e0<c> c0e0<c4>";
+
+var gen = T("OscGen", {wave:"sin(5)", env:{type:"adsr", d:500, s:0.2, r:150}, mul:0.20}).play();
+
+T("MML", {mml:mml}, gen).start();
+
+var osc = T("pulse", {mul:0.1});
+var env = T("asr", {a:30, r:150, lv:0.5}, osc);
+
+T("efx.delay", {time:250, feedback:0.75}, env).play();
+
+T("MML", {mml:"o7 q2 l8 $ e>a<c>a< r2"}, osc, env).on("mml", function(type, opts) {
+    if (type === "noteOn") {
+        osc.freq.value = 440 * Math.pow(2, (opts.noteNum - 69) * 1/12);
+    }
+}).start();
+```
+
+## Properties ##
+- `mml` _(String)_
+- `currentTime` _(ReadOnly Number)_
+
+## Events ##
+- `mml`
+  - MMLコマンドを実行したときに発生する. コールバック関数には `type, opts` が渡される.
+- `ended`
+  - 終端に達したときに発生する.
+
+## MML Commands Reference ##
+
+### `cdefgab` ###
+**ノート** c-bがそれぞれド-シに対応. `+` を続けるとシャープ, `-` でフラット. 数字を続けると長さ指定. 数字省略時は `l` コマンドの指定値を採用.
+
+```timbre
+var mml = "l8 c4c+d d+4ef f+4gg+ a4a+b <c>bb-aa-gg-fee-dd-c2.";
+
+var gen = T("OscGen", {wave:"saw", env:{type:"perc"}, mul:0.25}).play();
+
+T("MML", {mml:mml}, gen).on("ended", function() {
+    gen.pause();
+    this.stop();
+}).start();
+```
+
+長さを 0 にした場合は後に続く音の長さを基準に和音になる。
+
+```timbre
+var mml = "l2 g0<c0e> f0g0<d> e0g0<c1";
+
+var gen = T("OscGen", {wave:"sin(10)", env:{type:"adsr"}, mul:0.2}).play();
+
+T("MML", {mml:mml}, gen).on("ended", function() {
+    gen.pause();
+    this.stop();
+}).start();
+```
+
+### `r` ###
+**休符** 数値で音長指定
+
+```timbre
+var mml = "l16 o2 [ a r aa ]16";
+
+var gen = T("OscGen", {wave:"pulse", env:{type:"adsr", r:150}, mul:0.25}).play();
+
+T("MML", {mml:mml}, gen).on("ended", function() {
+    gen.pause();
+    this.stop();
+}).start();
+```
+
+### `&` ###
+**タイ** 直前の音とつなげる
+
+```timbre
+var mml = "l8 cc ee ff g&g ee dd c2";
+
+var gen = T("OscGen", {wave:"pulse", env:{type:"adsr", d:500}, mul:0.25}).play();
+
+T("MML", {mml:mml}, gen).on("ended", function() {
+    gen.pause();
+    this.stop();
+}).start();
+```
+
+### `t` ###
+**テンポ** テンポを指定する. 値を省略したときは `timbre.bpm` の値
+
+### `l` ###
+**音長** _(4)_ ノート/休符で音長を省略したときの値
+
+### `o` ###
+**オクターブ** _(4)_ 中央が 4. 略記 `<>` で上下できる
+
+### `v` ###
+**ベロシティ** _(0-15)_ 略記 `()` で上下できる
+
+### `q` ###
+**クォンタイズ** _(0-8)_ キーオフのタイミング. 0 だと即時キーオフ. 8 でキーオフなし.
+
+### `[|]` ###
+**ループ** _(2)_ 指定区間を繰り返す. 末尾で繰り返し回数を指定できる. `|` は最終ループ時に以降をスキップする.
+
+### `$` ###
+**無限ループ** MMLの終端に達したとき、この位置に戻る.
+
+```timbre
+var mml = "[cf+d+ | f <]3 d l16 $ c<c> )";
+
+var gen = T("OscGen", {wave:"saw", env:{type:"adsr", d:500}, mul:0.25}).play();
+
+T("MML", {mml:mml}, gen).on("ended", function() {
+    gen.pause();
+    this.stop();
+}).start();
+```
+
+## See Also ##
+- [`T("OscGen")`](./OscGen.html)
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/mml.js

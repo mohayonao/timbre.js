@@ -15,7 +15,7 @@ T("audio").load("/timbre.js/misc/audio/amen.wav").then(function() {
     tapes.sort(function() {
         return Math.random() - 0.01;
     });
-    tape = timbre.utils.scissor.join(tapes);
+    tape = timbre.modules.scissor.join(tapes);
     tape = tape.pitch(90).loop(2);
         
     T("tape", {tape:tape}).on("ended", function() {
@@ -36,8 +36,8 @@ T("audio").load("/timbre.js/misc/audio/amen.wav").then(function() {
 - **reverse()**
 - **pitch(pitch)**
 - **duration()**
-- **timbre.utils.scissor.join(tapes)**
-- **timbre.utils.scissor.scilence(duration)**
+- **timbre.modules.scissor.join(tapes)**
+- **timbre.modules.scissor.scilence(duration)**
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/tape.js

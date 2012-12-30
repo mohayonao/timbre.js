@@ -23,15 +23,15 @@ T("audio").load(src).then(function() {
 ## Properties ##
 - `src` _(String)_
   - 読み込むオーディオファイルのパスを指定します
-- `isLoaded`
+- `isLoaded` _(ReadOnly Boolean)_
   - ロード済みかどうかを返します
-- `loadedTime`
+- `loadedTime` _(ReadOnly Number)_
   - デコード済み時間を返します
 
 ## Methods ##
 - {deferred} `load(src, done, fail)`
   - オーディオファイルを読み込みます
-  
+
 ## Events ##
 - `load`
   - 読み込みを開始したとき

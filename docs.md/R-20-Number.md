@@ -20,7 +20,7 @@ T("sin", {freq:freq, mul:0.5}).play();
 ```
 
 ## Properties ##
-- `value`
+- `value` _(Number)_
   - 格納している数値
 
 ## See Also ##

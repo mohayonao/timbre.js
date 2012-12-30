@@ -7,7 +7,9 @@ T("interval")
 指定した間隔で入力オブジェクトに対して `bang()` します。
 
 ```timbre
-var freqs = T([220, 440, 660, 880]);
+var freqs = T(function(count) {
+    return [220, 440, 660, 880][count % 4];
+});
 
 var osc = T("sin", {freq:freqs, mul:0.5});
 var env = T("perc", {a:50, r:500}, osc).bang();
@@ -28,7 +30,7 @@ env.play();
   - `bang` を送出した回数
 - `timeout` _(Number or timevalue)_
   - タイムアウトの時間
-- `currentTime` _(Number)_
+- `currentTime` _(ReadOnly Number)_
   - 経過時間
 
 ## Methods ##

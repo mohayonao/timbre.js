@@ -17,7 +17,7 @@ T("timeout", {timeout:1000}).on("ended", function() {
 ## Properties
 - `timeout` _(Number or timevalue)_
   - タイムアウトの時間
-- `currentTime` _(Number)_
+- `currentTime` _(ReadOnly Number)_
   - 経過時間
 
 ## Method ##

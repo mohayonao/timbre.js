@@ -9,7 +9,9 @@ Frequency Noise Generator
 周期的ノイズを出力します。
 
 ```timbre
-var freqs = T([220, 440, 880, 1760, 3520, 7040, 14080]);
+var freqs = T(function(count) {
+    return [220, 440, 880, 1760, 3520, 7040, 14080][count % 7];
+});
 
 var noise = T("fnoise", {freq:freqs, mul:0.15}).play();
 

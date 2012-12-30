@@ -25,12 +25,12 @@ Tオブジェクトの Deferredインターフェイスでは `then`, `done`, `f
 
 ```timbre
 var osc  = T("sin" , {freq:440}).play();
-var timeout = T("timeout", {timeout:500, once:true});
+var timeout = T("timeout", {timeout:500, deferred:true});
 
 timeout.pipe(function() {
     osc.freq = 660;
     
-    return T("timeout", {timeout:500, once:true}).start();
+    return T("timeout", {timeout:500, deferred:true}).start();
     
 }).pipe(function() {
     osc.freq = 880;
@@ -53,7 +53,7 @@ timeout.start();
 ```timbre
 var osc  = T("sin", {freq:440, mul:0.5}).play();
 
-var timeout = T("timeout", {timeout:500, once:true});
+var timeout = T("timeout", {timeout:500, deferred:true});
 
 timeout.then(function() {
     osc.wave = "saw";
