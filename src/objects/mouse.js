@@ -1,6 +1,10 @@
 (function() {
     "use strict";
-
+    
+    if (timbre.envtype !== "browser") {
+        return;
+    }
+    
     var fn = timbre.fn;
     var instance = null;
     
@@ -80,28 +84,28 @@
     fn.extend(MouseXY, timbre.Object);
     
     Object.defineProperties(MouseXY.prototype, {
-        minval: {
+        min: {
             set: function(value) {
-                this._.map.outMin = value;
+                this._.trans.outMin = value;
             },
             get: function() {
-                return this._.map.outMin;
+                return this._.trans.outMin;
             }
         },
-        maxval: {
+        max: {
             set: function(value) {
-                this._.map.outMax = value;
+                this._.trans.outMax = value;
             },
             get: function() {
-                return this._.map.outMax;
+                return this._.trans.outMax;
             }
         },
         warp: {
             set: function(value) {
-                this._.map.warp = value;
+                this._.trans.warp = value;
             },
             get: function() {
-                return this._.map.warp;
+                return this._.trans.warp;
             }
         }
     });
@@ -115,19 +119,19 @@
         return this;
     };
     MouseXY.prototype.process = function(tickID) {
-        return this._.map.process(tickID);
+        return this._.trans.process(tickID);
     };
     
     fn.register("mouse.x", function(_args) {
         var self = new MouseXY(_args);
-        self._.map = timbre("map", {inMin:1e-9}, instance.X);
-        self.cell = self._.map.cell;
+        self._.trans = timbre("trans", {inMin:1e-9}, instance.X);
+        self.cell = self._.trans.cell;
         return self;
     });
     fn.register("mouse.y", function(_args) {
         var self = new MouseXY(_args);
-        self._.map = timbre("map", {inMin:1e-9}, instance.Y);
-        self.cell = self._.map.cell;
+        self._.trans = timbre("trans", {inMin:1e-9}, instance.Y);
+        self.cell = self._.trans.cell;
         return self;
     });
 })();

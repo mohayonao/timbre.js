@@ -3,7 +3,7 @@
     
     var fn = timbre.fn;
     
-    function MapNode(_args) {
+    function TransNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixKR(this);
         
@@ -14,7 +14,7 @@
         
         this.once("init", oninit);
     }
-    fn.extend(MapNode);
+    fn.extend(TransNode);
     
     var oninit = function() {
         if (!this._.warp) {
@@ -22,7 +22,7 @@
         }
     };
     
-    var $ = MapNode.prototype;
+    var $ = TransNode.prototype;
     
     Object.defineProperties($, {
         inMin: {
@@ -162,6 +162,6 @@
         }
     };
     
-    fn.register("map", MapNode);
+    fn.register("trans", TransNode);
     
 })(timbre);
