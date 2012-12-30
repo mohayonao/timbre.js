@@ -3,7 +3,7 @@
     
     var fn = timbre.fn;
     
-    function OscEnv(_args) {
+    function OscGen(_args) {
         timbre.Object.call(this, _args);
         
         var _ = this._;
@@ -14,9 +14,9 @@
         _.env = { type:"perc" };
         _.isEnded = true;
     }
-    fn.extend(OscEnv);
+    fn.extend(OscGen);
     
-    var $ = OscEnv.prototype;
+    var $ = OscGen.prototype;
 
     Object.defineProperties($, {
         wave: {
@@ -175,6 +175,6 @@
         fn.onended(this);
     };
     
-    fn.register("OscEnv", OscEnv);
+    fn.register("OscGen", OscGen);
     
 })(timbre);
