@@ -174,7 +174,7 @@
                 
                 if (len > 0) {
                     duration = (60 / tempo) * (4 / len) * 1000;
-                    duration *= [1, 1.7, 1.75, 1.875][dot] || 1;
+                    duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
                     
                     quantize = status.q / 8;
                     // noteOff
@@ -206,7 +206,7 @@
                 }
                 if (len > 0) {
                     duration = (60 / tempo) * (4 / len) * 1000;
-                    duration *= [1, 1.7, 1.75, 1.875][dot] || 1;
+                    duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
                     elapse += duration;
                 }
                 break;
