@@ -632,6 +632,18 @@
     };
     fn.inputSignalAR = __inputSignalAR;
 
+    var __inputSignalKR = function(object) {
+        var inputs = object.inputs;
+        var i, imax = inputs.length;
+        var tickID = object.tickID;
+        var tmp = 0;
+        for (i = 0; i < imax; ++i) {
+            tmp += inputs[i].process(tickID)[0];
+        }
+        return tmp;
+    };
+    fn.inputSignalKR = __inputSignalKR;
+    
     var __outputSignalAR = function(object) {
         var cell = object.cell;
         var mul = object._.mul, add = object._.add;
@@ -640,6 +652,16 @@
         }
     };
     fn.outputSignalAR = __outputSignalAR;
+    
+    var __outputSignalKR = function(object) {
+        var cell = object.cell;
+        var mul = object._.mul, add = object._.add;
+        var value = cell[0] * mul * add;
+        for (var i = cell.length; i--; ) {
+            cell[i] = value;
+        }
+    };
+    fn.outputSignalKR = __outputSignalKR;
     
     //debug--
     fn.debug = {};
