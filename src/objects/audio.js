@@ -135,14 +135,19 @@
                     dfd.reject();
                 }
             } else if (src instanceof File) {
-                // TODO:
-                var reader = new FileReader();
-                reader.onload = function() {
-                    then.call(this, null,
-                              new Uint8Array(xhr.response), dfd);
-                };
-                reader.readAsArrayBuffer(src);
-                this._.emit("load");
+                if (webkit_decoder) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        then.call(self, [webkit_decoder],
+                                  new Uint8Array(e.target.result), dfd);
+                    };
+                    reader.readAsArrayBuffer(src);
+                    this._.emit("load");
+                } else {
+                    var msg = "no support";
+                    this._.emit("error", msg);
+                    dfd.reject();
+                }
             }
             return this;
         };
