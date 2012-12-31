@@ -17,7 +17,7 @@ T("interval", {interval:500}, function() {
 
 ## Properties ##
 - `value` _(Boolean)_
-  - 格納しているブール値
+  - 格納しているブール値. デファルト値は **false**
 
 ## See Also ##
 - [T(Number)](./Number.html)

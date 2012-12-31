@@ -4,7 +4,7 @@ T("efx.delay")
 
 
 ```timbre
-var src = "/timbre.js/misc/audio/guitar.wav";
+var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";
 
 var audio = T("audio", {isLooped:true}).load(src, function(res) {
     
@@ -15,8 +15,11 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 
 ## Properties ##
 - `time` _(Number or timevalue)_
+  - ディレイタイム. デフォルト値は **100** ms
 - `feedback` _(T Object)_
+  - フィードバッック. デフォルト値は **0.25**
 - `wet` _(T Object)_
+  - エフェクターの利き具合. デフォルト値は **0.2**
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/efx.delay.js

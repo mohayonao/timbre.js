@@ -7,7 +7,9 @@ T("tape")
 磁気テープを切り貼りする要領で音声データを編集します。
 
 ```timbre
-T("audio").load("/timbre.js/misc/audio/amen.wav").then(function() {
+var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";
+
+T("audio").load(src).then(function() {
 
     var tape = T("tape", {tape:this}).tape;
 

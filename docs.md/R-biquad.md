@@ -6,7 +6,7 @@ T("biquad")
 フィルター
 
 ```timbre
-var src = "/timbre.js/misc/audio/amen.wav";
+var src = window.getDraggedFile() || "/timbre.js/misc/audio/amen.wav";
 
 var audio = T("audio", {isLooped:true}).load(src, function(res) {
     

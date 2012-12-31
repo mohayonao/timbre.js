@@ -72,4 +72,19 @@ $(function() {
         animationId = requestAnimationFrame(_animate);
     };
     
+    window.getDraggedFile = function() {
+        return draggedfile;
+    };
+    
+    var draggedfile = null;
+    
+    $(document.body).on("dragover", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }).on("drop", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        draggedfile = e.originalEvent.dataTransfer.files[0];
+    });    
 });

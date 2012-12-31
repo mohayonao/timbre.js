@@ -11,7 +11,7 @@ T("*")
 ###### -- ######
 
 ```timbre
-var param = T("param").linTo(1, 1000).on("ended", function() {
+var param = T("param").linTo(1, "10sec").on("ended", function() {
     synth.pause();
 });
 var osc = T("osc", {wave:"saw", mul:0.25});

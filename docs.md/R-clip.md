@@ -26,8 +26,11 @@ window.animate(function() {
 
 ## Properties ##
 - `minmax` _(WriteOnly Number)_
+  - 最小値と最小値をセットします
 - `min` _(Number)_
+  - 最小値. デファルト値は **0**
 - `max` _(Number)_
+  - 最大値. デファルト値は **1**
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/clip.js
