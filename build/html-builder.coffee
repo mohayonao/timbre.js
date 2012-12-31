@@ -116,9 +116,13 @@ class HTMLBuilder
         src.replace re, '<canvas id="$1" style="width:$2px;height:$3px"></canvas>'
 
     insert_label = (src)->
-        src = src.replace /{deferred}/ig, '<span class="label deferred">D</span>'
-        src = src.replace /{listener}/ig, '<span class="label listener">L</span>'
-        src = src.replace /{timer}/ig   , '<span class="label timer">T</span>'
+        src = src.replace /{deferred}/ig, '<span class="label deferred">DEFERRED</span>'
+        src = src.replace /{listener}/ig, '<span class="label listener">LISTENER</span>'
+        src = src.replace /{timer}/ig   , '<span class="label timer">TIMER</span>'
+        src = src.replace /{kr}/ig   , '<span class="label kr">KR</span>'
+        src = src.replace /{ar}/ig   , '<span class="label ar">AR</span>'
+        src = src.replace /{arkr}/ig   , '<span class="label ar">AR/KR</span>'
+        src = src.replace /{krar}/ig   , '<span class="label kr">KR/AR</span>'
 
 class DocFileBuilder extends HTMLBuilder
     constructor: (@lang)->

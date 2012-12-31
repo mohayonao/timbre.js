@@ -119,6 +119,10 @@ th {
     float: right;
 }
 
+#main h1:nth-of-type(n+2) {
+    margin-top: 50px;
+}
+
 #main h2 {
     font-size: 20px;
     margin: 15px 0 5px;
@@ -179,6 +183,14 @@ th {
     margin: 5px 0 0 5px;
     font-style: normal;
     font-size: 12px;
+    background: #a0a0a0;
+}
+
+.ar {
+    background: #E38692;
+}
+
+.kr {
     background: #6EB7DB;
 }
 
