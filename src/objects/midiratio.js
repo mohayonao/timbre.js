@@ -6,7 +6,7 @@
     function MidiRatioNode(_args) {
         timbre.Object.call(this, _args);
         var _ = this._;
-        _.index = 0;
+        _.midi = 0;
         _.value = 0;
         _.prev  = null;
         _.range = 12;
@@ -16,14 +16,14 @@
     var $ = MidiRatioNode.prototype;
     
     Object.defineProperties($, {
-        index: {
+        midi: {
             set: function(value) {
                 if (typeof value === "number") {
-                    this._.index = value;
+                    this._.midi = value;
                 }
             },
             get: function() {
-                return this._.index;
+                return this._.midi;
             }
         },
         range: {
@@ -38,9 +38,15 @@
         }
     });
     
-    $.at = function(index) {
+    $.bang = function() {
+        this._.prev = null;
+        this._.emit("bang");
+        return this;
+    };
+    
+    $.at = function(midi) {
         var _ = this._;
-        return Math.pow(2, index / _.range);
+        return Math.pow(2, midi / _.range);
     };
     
     $.process = function(tickID) {
@@ -50,11 +56,11 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var index = (this.inputs.length) ? fn.inputSignalKR(this) : _.index;
+            var midi = (this.inputs.length) ? fn.inputSignalKR(this) : _.midi;
             
-            if (_.prev !== index) {
-                _.prev = index;
-                _.value = Math.pow(2, index / _.range);
+            if (_.prev !== midi) {
+                _.prev = midi;
+                _.value = Math.pow(2, midi / _.range);
             }
             
             var value = _.value * _.mul + _.add;
