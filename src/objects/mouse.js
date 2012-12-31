@@ -35,8 +35,8 @@
         instance._.emit("mousedown", e);
     };
     var onmousemove = function(e) {
-        var x = (mouseX = e.pageX / window.innerWidth);
-        var y = (mouseY = e.pageY / window.innerHeight);
+        var x = (mouseX = (e.clientX / window.innerWidth));
+        var y = (mouseY = (e.clientY / window.innerHeight));
         
         var cellL = instance.cellL;
         var cellR = instance.cellR;
@@ -86,26 +86,37 @@
     Object.defineProperties(MouseXY.prototype, {
         min: {
             set: function(value) {
-                this._.trans.outMin = value;
+                var _ = this._;
+                _.min = value;
+                _.delta = _.max - _.min;
+                _.map.bang();
             },
             get: function() {
-                return this._.trans.outMin;
+                return this._.min;
             }
         },
         max: {
             set: function(value) {
-                this._.trans.outMax = value;
+                var _ = this._;
+                _.max = value;
+                _.delta = _.max - _.min;
+                _.map.bang();
             },
             get: function() {
-                return this._.trans.outMax;
+                return this._.max;
             }
         },
-        warp: {
+        curve: {
             set: function(value) {
-                this._.trans.warp = value;
+                var _ = this._;
+                if (Curves[value]) {
+                    _.map.map = Curves[value].bind(_);
+                    _.map.bang();
+                    _.curveName = value;
+                }
             },
             get: function() {
-                return this._.trans.warp;
+                return this._.curveName;
             }
         }
     });
@@ -119,19 +130,52 @@
         return this;
     };
     MouseXY.prototype.process = function(tickID) {
-        return this._.trans.process(tickID);
+        return this._.map.process(tickID);
+    };
+
+    var Curves = {
+        lin: function(input) {
+            return input * this.delta + this.min;
+        },
+        exp: function(input) {
+            var min = (this.min < 0) ? 1e-6 : this.min;
+            return Math.pow(this.max/min, input) * min;
+        },
+        sqr: function(input) {
+            return (input * input) * this.delta + this.min;
+        },
+        cub: function(input) {
+            return (input * input * input) * this.delta + this.min;
+        }
     };
     
     fn.register("mouse.x", function(_args) {
         var self = new MouseXY(_args);
-        self._.trans = timbre("trans", {inMin:1e-9}, instance.X);
-        self.cell = self._.trans.cell;
+        
+        var _ = self._;
+        _.min   = 0;
+        _.max   = 1;
+        _.delta = 1;
+        _.curveName = "lin";
+        
+        _.map = timbre("map", {map:Curves.lin.bind(_)}, instance.X);
+        
+        self.cell = _.map.cell;
+        
         return self;
     });
     fn.register("mouse.y", function(_args) {
         var self = new MouseXY(_args);
-        self._.trans = timbre("trans", {inMin:1e-9}, instance.Y);
-        self.cell = self._.trans.cell;
+        
+        var _ = self._;
+        _.min   = 0;
+        _.max   = 1;
+        _.delta = 1;
+        _.curveName = "lin";
+        
+        _.map = timbre("map", {map:Curves.lin.bind(_)}, instance.Y);
+        
+        self.cell = _.map.cell;
         return self;
     });
 })();
