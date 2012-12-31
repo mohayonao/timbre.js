@@ -6,16 +6,17 @@
     function BufferNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
-        
-        this._.isLooped   = false;
-        this._.isReversed = false;
-        this._.duration    = 0;
-        this._.currentTime = 0;
-        this._.currentTimeIncr = this.cell.length * 1000 / timbre.samplerate;
-        this._.samplerate  = 44100;
-        this._.phase = 0;
-        this._.phaseIncr = 0;
-        this._.pitch = timbre(1);
+
+        var _ = this._;
+        _.isLooped   = false;
+        _.isReversed = false;
+        _.duration    = 0;
+        _.currentTime = 0;
+        _.currentTimeIncr = this.cell.length * 1000 / timbre.samplerate;
+        _.samplerate  = 44100;
+        _.phase = 0;
+        _.phaseIncr = 0;
+        _.pitch = timbre(1);
     }
     fn.extend(BufferNode);
     
@@ -76,7 +77,7 @@
                     if (_.phaseIncr > 0) {
                         _.phaseIncr *= -1;
                     }
-                    if (_.phase === 0) {
+                    if (_.phase === 0 && _.buffer) {
                         _.phase = _.buffer.length + _.phaseIncr;
                     }
                 } else {
