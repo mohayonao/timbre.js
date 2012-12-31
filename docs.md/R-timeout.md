@@ -1,6 +1,6 @@
 T("timeout")
 ============
-{timer} Timeout
+{kr}{timer} Timeout
 
 ## Description ##
 指定した時間後に入力オブジェクトに対して `bang()` します。

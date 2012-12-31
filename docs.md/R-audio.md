@@ -1,6 +1,6 @@
 T("audio")
 ==========
-{deferred} AudioFile
+{ar}{deferred} AudioFile
 
 ## Description ##
 

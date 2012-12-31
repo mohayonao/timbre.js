@@ -1,6 +1,6 @@
 T("buffer")
 ==========
-SoundBuffer
+{ar} SoundBuffer
 
 ## Description ##
 

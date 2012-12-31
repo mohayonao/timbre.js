@@ -1,6 +1,6 @@
 T("interval")
 =============
-{timer} Interval
+{kr}{timer} Interval
 
 ## Description ##
 

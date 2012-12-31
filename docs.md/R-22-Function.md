@@ -1,6 +1,6 @@
 T(Function)
 ===========
-FunctionWrapper
+{kr} FunctionWrapper
 
 ## Description ##
 関数を格納して `bang()` で実行します。関数の結果を自身値として出力します。

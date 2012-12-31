@@ -1,6 +1,6 @@
 T(Array)
 ===========
-ArrayWrapper
+{kr} ArrayWrapper
 
 ## Description ##
 配列を格納します。

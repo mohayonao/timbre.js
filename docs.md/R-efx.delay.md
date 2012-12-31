@@ -1,6 +1,6 @@
 T("efx.delay")
 ==============
-Delay effector
+{ar} Delay effector
 
 
 ```timbre

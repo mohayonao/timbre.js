@@ -1,6 +1,6 @@
 T(Number)
 ===========
-NumberWrapper
+{kr} NumberWrapper
 
 ## Description ##
 数値を格納します。

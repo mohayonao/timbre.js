@@ -1,6 +1,6 @@
 T("mouse")
 ==========
-Tracking Mouse Event
+{kr} Tracking Mouse Event
 
 _* Browser Only_
 
@@ -42,17 +42,20 @@ Tracking Mouse Position
 マウスカーソルの座標を変換して出力します。
 
 ```timbre
-var freq = T("mouse.x", {min:220, max:1760});
+var freq = T("mouse.y", {min:220, max:1760});
 
-T("saw", {freq:freq}).play();
+T("saw", {freq:freq, mul:0.5}).play();
 
 T("mouse").start();
 ```
 
 ## Properties ##
 - `min`  
-  - 出力の最小値 _(0)_
+  - マウス最小値のときの値 _(0)_
 - `max`  
-  - 出力の最大値 _(1)_
-- `warp`
-  - 出力カーブの種類 (`"linlin"` or `"linexp"`)
+  - マウス最大値のときの値 _(1)_
+- `curve` _("lin")_
+  - 出力カーブの種類 (`"lin"`, `"exp"`, `"sqr"` or `"cub"`)
+
+## Source ##
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/mouse.js

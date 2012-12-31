@@ -1,6 +1,6 @@
 T("fnoise")
 ==========
-Frequency Noise Generator
+{ar} Frequency Noise Generator
 
 ## Description ##
 

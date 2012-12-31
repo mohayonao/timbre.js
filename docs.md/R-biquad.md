@@ -1,6 +1,6 @@
 T("biquad")
 =========
-Biquad Filter
+{ar} Biquad Filter
 
 ## Description ##
 フィルター

@@ -1,6 +1,6 @@
 T("wave")
 =========
-Wave
+{ar} Wave
 
 ## Description ##
 

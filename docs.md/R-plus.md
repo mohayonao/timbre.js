@@ -1,6 +1,6 @@
 T("+")
 ======
-Add signals
+{arkr} Add signals
 
 ## Description ##
 それぞれのインプットの信号を加算して出力します。

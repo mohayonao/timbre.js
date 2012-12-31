@@ -1,6 +1,6 @@
 T("OscGen")
 ===========
-Oscillator x Envelope
+{ar} Oscillator x Envelope
 
 ## Description ##
 [`T("osc")`](./osc.html) と [`T("env")`](./env.html) を組み合わせた音源インターフェースです。

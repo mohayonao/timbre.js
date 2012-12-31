@@ -1,6 +1,6 @@
 T("*")
 ======
-Multiply signals
+{arkr} Multiply signals
 
 ## Description ##
 

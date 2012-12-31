@@ -1,6 +1,6 @@
 T("schedule")
 =============
-{timer} schedules functions to be evaluated in the future
+{kr}{timer} schedules functions to be evaluated in the future
 
 ## Description ##
 

@@ -1,6 +1,6 @@
 T(Boolean)
 ===========
-BooleanWrapper
+{kr} BooleanWrapper
 
 ## Description ##
 ブール値を格納します。`true` のとき 1、 `false` のとき 0 を出力します。

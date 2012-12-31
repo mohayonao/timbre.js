@@ -1,6 +1,6 @@
 T("pink")
 ======================
-Pink Noise Generator
+{ar} Pink Noise Generator
 
 ## Description ##
 

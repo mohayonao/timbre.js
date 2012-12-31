@@ -1,6 +1,6 @@
 T("osc")
 ========
-Oscillator
+{arkr} Oscillator
 
 ## Description ##
 基本的な波形を出力します。

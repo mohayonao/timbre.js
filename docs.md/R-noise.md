@@ -1,6 +1,6 @@
 T("noise")
 ==========
-White Noise Generator
+{ar} White Noise Generator
 
 ## Description ##
 

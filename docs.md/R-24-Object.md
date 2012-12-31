@@ -1,6 +1,6 @@
 T(Object)
 ===========
-ObjectWrapper
+{kr} ObjectWrapper
 
 ## Description ##
 オブジェクトを格納します。

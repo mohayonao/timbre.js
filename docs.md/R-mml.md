@@ -1,6 +1,6 @@
 T("MML")
 ========
-{timer} MML Based Scheduler
+{kr}{timer} MML Based Scheduler
 
 ## Description ##
 MMLスタイルのスケジューラ。  
@@ -16,17 +16,18 @@ var gen = T("OscGen", {wave:"sin(5)", env:{type:"adsr", d:500, s:0.2, r:150}, mu
 
 T("MML", {mml:mml}, gen).start();
 
-var osc = T("pulse", {mul:0.1});
+var osc = T("pulse", {freq:T("midicps"), mul:0.1});
 var env = T("asr", {a:30, r:150, lv:0.5}, osc);
 
 T("efx.delay", {time:250, feedback:0.75}, env).play();
 
 T("MML", {mml:"o7 q2 l8 $ e>a<c>a< r2"}, osc, env).on("mml", function(type, opts) {
     if (type === "noteOn") {
-        osc.freq.value = 440 * Math.pow(2, (opts.noteNum - 69) * 1/12);
+        osc.freq.midi = opts.noteNum;
     }
 }).start();
 ```
+value = 440 * Math.pow(2, (opts.noteNum - 69) * 1/12);
 
 ## Properties ##
 - `mml` _(String)_

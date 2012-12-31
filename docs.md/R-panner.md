@@ -1,6 +1,6 @@
 T("pan")
 ===========
-Panner
+{ar} Panner
 
 ## Description ##
 

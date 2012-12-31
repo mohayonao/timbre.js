@@ -1,6 +1,6 @@
 T("ifft")
 =========
-Inverse Fast Fourier Transform
+{ar} Inverse Fast Fourier Transform
 
 ## Description ##
 

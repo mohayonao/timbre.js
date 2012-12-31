@@ -1,6 +1,6 @@
 T("efx.dist")
 =============
-Distortion
+{ar} Distortion
 
 ```timbre
 var src = "/timbre.js/misc/audio/guitar.wav";
