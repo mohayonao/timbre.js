@@ -8,6 +8,7 @@
         fn.fixAR(this);
 
         var _ = this._;
+        _.buffer     = new Float32Array(0);
         _.isLooped   = false;
         _.isReversed = false;
         _.duration    = 0;
@@ -24,7 +25,7 @@
     
     var setBuffer = function(value) {
         var _ = this._;
-        if (!_.buffer && typeof value === "object") {
+        if (typeof value === "object") {
             var buffer, samplerate;
             if (value instanceof Float32Array) {
                 buffer = value;
@@ -39,9 +40,12 @@
                     _.samplerate = value.samplerate;
                 }
                 _.buffer = buffer;
+                _.phase     = 0;
                 _.phaseIncr = _.samplerate / timbre.samplerate;
                 _.duration  = _.buffer.length * 1000 / _.samplerate;
+                _.currentTime = 0;
                 _.plotFlush = true;
+                this.isReversed = _.isReversed;
             }
         }
     };
