@@ -1138,15 +1138,16 @@
             }
             
             gen = this._.synthdef({freq:freq, amp:velocity});
-            
-            gen.noteNum = noteNum;
-            list.push(gen);
-            dict[noteNum] = gen;
-            
-            _.isEnded = false;
-            
-            if (list.length >= _.poly) {
-                _.remGen(list[0]);
+            if (gen instanceof TimbreObject) {
+                gen.noteNum = noteNum;
+                list.push(gen);
+                dict[noteNum] = gen;
+                
+                _.isEnded = false;
+                
+                if (list.length >= _.poly) {
+                    _.remGen(list[0]);
+                }
             }
         };
         
