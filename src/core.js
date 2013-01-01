@@ -1077,6 +1077,7 @@
         
         return ChannelObject;
     })();
+    timbre.ChannelObject = ChannelObject;
     
     var GenObject = (function() {
         function GenObject(_args) {

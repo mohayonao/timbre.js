@@ -22,5 +22,8 @@ var t = T("interval", {delay:0, interval:1000}, function(count) {
 - `background` _(Boolean)_
   - `true` のとき, 選択中でないオブジェクトも処理を行う. デフォルト値は **false**
 
+## See Also ##
+- [`T("gate")`](./gate.html)
+
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/selector.js
