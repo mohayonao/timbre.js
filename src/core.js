@@ -1197,6 +1197,18 @@
             return this.noteOff(cpsmidi(freq));
         };
         
+        $.allNoteOff = function() {
+            var _ = this._;
+            var list = _.genList;
+            var dict = _.genDict;
+            var gen;
+            while (list.length) {
+                gen = list.shift();
+                gen.release();
+                delete dict[gen.noteNum];
+            }
+        };
+        
         $.process = function(tickID) {
             var cell = this.cell;
             var _ = this._;

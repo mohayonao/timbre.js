@@ -32,6 +32,7 @@ T("interval", {delay:0, interval:500}, function(count) {
 
 - `noteOnWithFreq(freq, velocity)`
 - `noteOffWithFreq(freq)`
+- `allNoteOff()`
 
 ## See Also ##
 - [`T("osc")`](./osc.html)
