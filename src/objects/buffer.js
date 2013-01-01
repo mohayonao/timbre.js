@@ -124,6 +124,22 @@
             }
         }
     });
+
+    $.clone = function() {
+        var _ = this._;
+        var instance = timbre("buffer");
+        
+        if (_.buffer) {
+            setBuffer.call(instance, {
+                buffer    : _.buffer,
+                samplerate: _.samplerate
+            });
+        }
+        instance.isLooped   = this.isLooped;
+        instance.isReversed = this.isReversed;
+        
+        return instance;
+    };
     
     $.slice = function(begin, end) {
         var _ = this._;
@@ -147,9 +163,11 @@
             isReversed = !isReversed;
         }
         
-        instance._.samplerate = _.samplerate;
         if (_.buffer) {
-            setBuffer.call(instance, _.buffer.subarray(begin, end));
+            setBuffer.call(instance, {
+                buffer    : _.buffer.subarray(begin, end),
+                samplerate: _.samplerate
+            });
         }
         instance.isLooped   = this.isLooped;
         instance.isReversed = this.isReversed;
