@@ -860,7 +860,7 @@
             var x, desc;
             switch (typeof key) {
             case "string":
-                x = Object.getPrototypeOf(this);
+                x = this;
                 while (x !== null) {
                     if ((desc = Object.getOwnPropertyDescriptor(x, key)) !== undefined) {
                         if (!desc.configurable) {
