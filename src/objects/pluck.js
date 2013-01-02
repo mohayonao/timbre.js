@@ -18,9 +18,7 @@
     Object.defineProperties($, {
         freq: {
             set: function(value) {
-                if (typeof value === "number" & value >= 55) {
-                    this._.freq = value;
-                }
+                this._.freq = timbre(value);
             },
             get: function() {
                 return this._.freq;
@@ -30,7 +28,8 @@
     
     $.bang = function() {
         var _ = this._;
-        var size   = (timbre.samplerate / _.freq + 0.5)|0;
+        var freq = _.freq.valueOf();
+        var size   = (timbre.samplerate / freq + 0.5)|0;
         var buffer = _.buffer = new Float32Array(size << 1);
         for (var i = size; i--; ) {
             buffer[i] = Math.random() * 2 - 1;
