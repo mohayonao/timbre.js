@@ -25,20 +25,20 @@ T("interval", {delay:0, interval:500}, function(count) {
   - 同時発音数 (1から 64まで、デフォルトは 4)
 
 ## Methods ##
-- `noteOn(noteNum, velocity)`
-  - *noteNum は 音の高さを示す 0 - 127 までの数値です (69 で A4=440Hz になります)*
-  - *velocity は 音の強度を示す 0 - 127 までの数値です (0 の場合、noteOffと同じになります)*
+- `noteOn(noteNum, velocity, opts)`
+- `noteOnWithFreq(freq, velocity, opts)`  
 - `noteOff(noteNum)`
-
-- `noteOnWithFreq(freq, velocity)`
 - `noteOffWithFreq(freq)`
 - `allNoteOff()`
+- `allSoundOff()`
 
 ## See Also ##
+- [`T("SynthDef")`](./SynthDef.html)
+  - Synth Definition
 - [`T("osc")`](./osc.html)
   - Oscillator
 - [`T("env")`](./env.html)
   - Envelope
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/OscGen.js
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/SynthDef.js
