@@ -11,7 +11,7 @@
         
         var _ = this._;
         _.count = 0;
-        _.delay   = null;
+        _.delay   = 0;
         _.timeout = Infinity;
         _.currentTime = 0;
         _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
@@ -38,8 +38,7 @@
     
     var onstart = function() {
         var _ = this._;
-        var delay = (_.delay === null) ? _.interval : _.delay;
-        _.delaySamples = (timbre.samplerate * (delay * 0.001))|0;
+        _.delaySamples = (timbre.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
         _.isEnded = false;
     };
@@ -98,8 +97,7 @@
                 }
             },
             get: function() {
-                var _ = this._;
-                return _.delay === null ? _.interval : _.delay;
+                return this._.delay;
             }
         },
         count: {
@@ -134,8 +132,7 @@
     
     $.bang = function() {
         var _ = this._;
-        var delay = (_.delay === null) ? _.interval : _.delay;
-        _.delaySamples = (timbre.samplerate * (delay * 0.001))|0;
+        _.delaySamples = (timbre.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
         _.isEnded = false;
         _.emit("bang");
