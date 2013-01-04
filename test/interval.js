@@ -8,7 +8,6 @@ describe('T("interval")', function() {
     it("default properties", function() {
         var t = T("interval");
         assert.equal(t.interval, 1000);
-        assert.equal(t.delay   , 1000);
         assert.equal(t.count   ,    0);
         assert.equal(t.timeout, Infinity);
         assert.equal(t.currentTime, 0);
@@ -40,8 +39,8 @@ describe('T("interval")', function() {
         }).start();
     });
     it("bang() reset timer", function(done) {
-        var t = T("interval", {interval:50}, function() {
-            assert(false);
+        var t = T("interval", {delay:50, interval:50}, function() {
+            assert(false, "not reset?");
         });
         T("interval", {interval:10, timeout:200}, function(count) {
             t.bang();
