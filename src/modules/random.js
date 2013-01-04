@@ -2,35 +2,26 @@
     "use strict";
 
     function Random(seed) {
-        var x = new Uint32Array(32);
-
+        var x, y, z, w;
+        
         this.seed = function(seed) {
             if (typeof seed !== "number") {
-                seed = (+new Date() * 100) * Math.random() * 100;
+                seed = +new Date();
             }
             seed |= 0;
-            x[0] = 3;
-            x[1] = seed;
-
-            var i;
-            for (i = 2; i <= 31; ++i) {
-                seed = (16807 * seed) & 0x7FFFFFFF;
-                x[i] = seed;
-            }
-            for (i = 310; i--; ) {
-                this.next();
-            }
+            x = seed;
+            y = 362436069;
+            z = 521288629;
+            w = 88675123;
         };
-
+        
         this.next = function() {
-            var n = x[0];
-            
-            n = (n === 31) ? 1 : n + 1;
-            
-            x[0] = n;
-            x[n] += (n > 3) ? x[n-3] : x[n+31-3];
-            
-            return (x[n] >>> 1) / 2147483647;
+            var t = x ^ (x << 11);
+            x = y;
+            y = z;
+            z = w;
+            w = (w ^ (w >> 19)) ^ (t ^ (t >> 8));
+            return w / 2147483647;
         };
         
         this.seed(seed);
