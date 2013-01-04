@@ -42,7 +42,6 @@ env.play();
   - タイムアウト時に発生します。
   
 ## Note ##
-- `delay` の設定が無い場合は `start()` の後、JavaScript の setInterval と同じように `interval` と同じ時間の待機ののち動作を開始します。
 - オブジェクト生成時に `deferred` を設定すると Deferred オブジェクトとなり、各Deferredメソッドがサポートされ、タイムアウト時に `resolve`、タイムアウト前の停止時に `reject` されます。以下の例では Deferred な `T("interval")` を jQuery の when で待機しています。
 
 ```timbre

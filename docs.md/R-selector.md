@@ -11,7 +11,7 @@ var b = T("sin", {freq:880, mul:0.1});
 
 var selector = T("selector", a, b).play();
 
-var t = T("interval", {delay:0, interval:1000}, function(count) {
+var t = T("interval", {interval:1000}, function(count) {
     selector.selected = count % 2;
 }).start();
 ```

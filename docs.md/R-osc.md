@@ -33,7 +33,7 @@ T("sin", {freq:440, mul:0.5}, T("+pulse", {freq:"1sec"})).play();
 var osc = T("osc", {mul:0.25}).play();
 var canvas = window.getCanvasById("wave");
 
-T("interval", {delay:0, interval:1000}, function(count) {
+T("interval", {interval:1000}, function(count) {
     var wave = ["sin", "saw", "tri", "pulse", "fami"][count % 5];
     osc.wave = wave;
     osc.plot({target:canvas});    
@@ -50,7 +50,7 @@ T("interval", {delay:0, interval:1000}, function(count) {
 var osc = T("osc", {mul:0.15}).play();
 var canvas = window.getCanvasById("wave-width");
 
-T("interval", {delay:0, interval:1000}, function(count) {
+T("interval", {interval:1000}, function(count) {
     var wave = "pulse(" + ((count % 19) * 5 + 5) + ")";
     osc.wave = wave;
     osc.plot({target:canvas});    

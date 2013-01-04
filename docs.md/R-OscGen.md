@@ -9,7 +9,7 @@ T("OscGen")
 var env = {type:"perc", a:50, r:2500};
 var oscenv = T("OscGen", {wave:"pulse", env:env, mul:0.15}).play();
 
-T("interval", {delay:0, interval:500}, function(count) {
+T("interval", {interval:500}, function(count) {
     var noteNum  = 69 + [0, 2, 4, 5, 7, 9, 11, 12][count % 8];
     var velocity = 64 + (count % 64);
     oscenv.noteOn(noteNum, velocity);
