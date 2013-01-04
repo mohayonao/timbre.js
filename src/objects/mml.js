@@ -159,7 +159,7 @@
                     }
                     val = _.prevNote;
                 } else {
-                    val = _.prevNote = (cmd.val) + (status.o) * 12;
+                    val = _.prevNote = (cmd.val) + (status.o + 1) * 12;
                     queue.push([elapse, val, null, vel]);
                 }
                 
