@@ -841,7 +841,7 @@
             var x, desc;
             switch (typeof key) {
             case "string":
-                x = Object.getPrototypeOf(this);
+                x = this;
                 while (x !== null) {
                     if ((desc = Object.getOwnPropertyDescriptor(x, key)) !== undefined) {
                         if (!desc.configurable) {
@@ -1058,6 +1058,7 @@
         
         return ChannelObject;
     })();
+    timbre.ChannelObject = ChannelObject;
     
     var NumberWrapper = (function() {
         function NumberWrapper(_args) {
@@ -3289,6 +3290,286 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    var iterator = {};
+    
+    var Iterator = (function() {
+        function Iterator() {
+            this.position = 0;
+        }
+        
+        Iterator.create = function(opts) {
+            return new Iterator(opts);
+        };
+        
+        var $ = Iterator.prototype;
+        
+        $.next = function() {
+            return null;
+        };
+        
+        $.valueOf = function(item) {
+            if (item.next) {
+                return item.next();
+            } else {
+                return item;
+            }
+        };
+        
+        $.reset = function() {};
+        
+        return Iterator;
+    })();
+    iterator.Iterator = Iterator;
+    
+    var ListSequence = (function() {
+        function ListSequence(list, length, offset) {
+            Iterator.call(this);
+            this.list    = list;
+            this.length = length  || 1;
+            this.offset  = offset || 0;
+        }
+        fn.extend(ListSequence, Iterator);
+        
+        ListSequence.create = function(opts) {
+            return new ListSequence(opts.list, opts.length, opts.offset);
+        };
+        
+        var $ = ListSequence.prototype;
+        
+        $.next = function() {
+            var returnValue;
+            if (this.position < this.length) {
+                var index = (this.position + this.offset) % this.list.length;
+                var item = this.list[index];
+                var value = this.valueOf(item);
+                if (value !== null) {
+                    if (!item.next) {
+                        this.position += 1;
+                    }
+                    returnValue = value;
+                } else {
+                    if (item.reset) {
+                        item.reset();
+                    }
+                    this.position += 1;
+                    returnValue = this.next();
+                }
+            }
+            else {
+                returnValue = null;
+            }
+            return returnValue;
+        };
+        
+        return ListSequence;
+    })();
+    iterator.ListSequence = ListSequence;
+
+    var ListShuffle = (function() {
+        function ListShuffle(list, length, seed) {
+            ListSequence.call(this, list, length, 0);
+
+            if (seed) {
+                var r = new timbre.modules.Random(seed);
+                this.list.sort(function() {
+                    return r.next() - 0.5;
+                });
+            } else {
+                this.list.sort(function() {
+                    return Math.random() - 0.5;
+                });
+            }
+        }
+        fn.extend(ListShuffle, ListSequence);
+
+        ListShuffle.create = function(opts) {
+            return new ListShuffle(opts.list, opts.length, opts.seed);
+        };
+        
+        return ListShuffle;
+    })();
+    iterator.ListShuffle = ListShuffle;
+
+    var ListChoose = (function() {
+        function ListChoose(list, length, seed) {
+            ListSequence.call(this, list, length);
+            if (seed) {
+                var r = new timbre.modules.Random(seed);
+                this._rnd = r.next.bind(r);
+            } else {
+                this._rnd = Math.random;
+            }
+        }
+        fn.extend(ListChoose, ListSequence);
+        
+        ListChoose.create = function(opts) {
+            return new ListChoose(opts.list, opts.length, opts.seed);
+        };
+        
+        var $ = ListChoose.prototype;
+        
+        $.next = function() {
+            var returnValue;
+            if (this.position < this.length) {
+                var index = (this.list.length * this._rnd())|0;
+                var item = this.list[index];
+                var value = this.valueOf(item);
+                if (value !== null) {
+                    if (!item.next) {
+                        this.position += 1;
+                    }
+                    returnValue = value;
+                } else {
+                    if (item.reset) {
+                        item.reset();
+                    }
+                    this.position += 1;
+                    returnValue = this.next();
+                }
+            }
+            else {
+                returnValue = null;
+            }
+            return returnValue;
+        };
+        
+        return ListChoose;
+    })();
+    iterator.ListChoose = ListChoose;
+    
+    var Arithmetic = (function() {
+        function Arithmetic(start, step, length) {
+            Iterator.call(this);
+            this.start    = start || 0;
+            this.value    = this.start;
+            this.step     = step  || 1;
+            this.length  = length || Infinity;
+        }
+        fn.extend(Arithmetic, Iterator);
+        
+        Arithmetic.create = function(opts) {
+            return new Arithmetic(opts.start, opts.step, opts.length);
+        };
+        
+        var $ = Arithmetic.prototype;
+        
+        $.next = function() {
+            var ret;
+            if (this.position === 0) {
+                ret = this.value;
+                this.position += 1;
+            } else if (this.position < this.length) {
+                var step = this.valueOf(this.step);
+                if (step !== null) {
+                    this.value += step;
+                    ret = this.value;
+                    this.position += 1;
+                } else {
+                    ret = null;
+                }
+            } else {
+                ret = null;
+            }
+            return ret;
+        };
+        
+        return Arithmetic;
+    })();
+    iterator.Arithmetic = Arithmetic;
+
+    var Geometric = (function() {
+        function Geometric(start, grow, length) {
+            Iterator.call(this);
+            this.start    = start || 0;
+            this.value    = this.start;
+            this.grow     = grow  || 1;
+            this.length  = length || Infinity;
+        }
+        fn.extend(Geometric, Iterator);
+        
+        Geometric.create = function(opts) {
+            return new Geometric(opts.start, opts.grow, opts.length);
+        };
+        
+        var $ = Geometric.prototype;
+        
+        $.next = function() {
+            var ret;
+            if (this.position === 0) {
+                ret = this.value;
+                this.position += 1;
+            } else if (this.position < this.length) {
+                var grow = this.valueOf(this.grow);
+                if (grow !== null) {
+                    this.value *= grow;
+                    ret = this.value;
+                    this.position += 1;
+                } else {
+                    ret = null;
+                }
+            } else {
+                ret = null;
+            }
+            return ret;
+        };
+        
+        return Geometric;
+    })();
+    iterator.Geometric = Geometric;
+
+    var Drunk = (function() {
+        function Drunk(start, step, length, min, max, seed) {
+            Iterator.call(this);
+            this.start  = start || 0;
+            this.value  = this.start;
+            this.step   = step  || 0;
+            this.length = length || Infinity;
+            this.min    = min   || -Infinity;
+            this.max    = max   || +Infinity;
+            if (seed) {
+                var r = new timbre.modules.Random(seed);
+                this._rnd = r.next.bind(r);
+            } else {
+                this._rnd = Math.random;
+            }
+        }
+        fn.extend(Drunk, Iterator);
+        
+        Drunk.create = function(opts) {
+            return new Drunk(opts.start, opts.step, opts.length, opts.min, opts.max, opts.seed);
+        };
+
+        var $ = Drunk.prototype;
+
+        $.next = function() {
+            var ret = 0;
+            if (this.position === 0) {
+                ret = this.value;
+                this.position += 1;
+            } else if (this.position < this.length) {
+                var step = (this._rnd() * 2 - 1) * this.step;
+                var value = this.value + step;
+                ret = (value < this.min) ? this.min : (value > this.max) ? this.max : value;
+                this.value = ret;
+                this.position += 1;
+            } else {
+                ret = null;
+            }
+            return ret;
+        };
+
+        return Drunk;
+    })();
+    iterator.Drunk = Drunk;
+    
+    
+    timbre.modules.iterator = iterator;
+    
+})(timbre);
+(function(timbre) {
+    "use strict";
+    
     function Oscillator(samplerate) {
         this.samplerate = samplerate || 44100;
         
@@ -3647,221 +3928,32 @@
     "use strict";
 
     function Random(seed) {
-        var x = new Uint32Array(32);
-
+        var x, y, z, w;
+        
         this.seed = function(seed) {
             if (typeof seed !== "number") {
-                seed = (+new Date() * 100) * Math.random() * 100;
+                seed = +new Date();
             }
             seed |= 0;
-            x[0] = 3;
-            x[1] = seed;
-
-            var i;
-            for (i = 2; i <= 31; ++i) {
-                seed = (16807 * seed) & 0x7FFFFFFF;
-                x[i] = seed;
-            }
-            for (i = 310; i--; ) {
-                this.next();
-            }
+            x = seed;
+            y = 362436069;
+            z = 521288629;
+            w = 88675123;
         };
-
+        
         this.next = function() {
-            var n = x[0];
-            
-            n = (n === 31) ? 1 : n + 1;
-            
-            x[0] = n;
-            x[n] += (n > 3) ? x[n-3] : x[n+31-3];
-            
-            return (x[n] >>> 1) / 2147483647;
+            var t = x ^ (x << 11);
+            x = y;
+            y = z;
+            z = w;
+            w = (w ^ (w >> 19)) ^ (t ^ (t >> 8));
+            return w / 2147483647;
         };
         
         this.seed(seed);
     }
     
     timbre.modules.Random = Random;
-    
-})(timbre);
-(function(timbre) {
-    "use strict";
-    
-    var fn = timbre.fn;
-    
-    function OscGen(_args) {
-        timbre.Object.call(this, _args);
-        
-        var _ = this._;
-        _.genList = [];
-        _.genDict = {};
-        _.poly = 4;
-        _.wave = "sin";
-        _.env = { type:"perc" };
-        _.isEnded = true;
-    }
-    fn.extend(OscGen);
-    
-    var $ = OscGen.prototype;
-
-    Object.defineProperties($, {
-        wave: {
-            set: function(value) {
-                if (typeof value === "string") {
-                    this._.wave = value;
-                }
-            },
-            get: function() {
-                return this._.wave;
-            }
-        },
-        env: {
-            set: function(value) {
-                if (typeof value === "object" && value.constructor === Object) {
-                    if (typeof value.type === "string") {
-                        this._.env = value;
-                    }
-                }
-            },
-            get: function() {
-                return this._.env;
-            }
-        },
-        poly: {
-            set: function(value) {
-                if (typeof value === "number") {
-                    if (0 < value && value <= 64) {
-                        this._.poly = value;
-                    }
-                }
-            },
-            get: function() {
-                return this._.poly;
-            }
-        }
-    });
-
-
-    
-    var remGen = function(gen) {
-        var _ = this._;
-        var i = _.genList.indexOf(gen);
-        if (i !== -1) {
-            _.genList.splice(i, 1);
-        }
-        _.genDict[gen.noteNum] = null;
-    };
-    
-    var noteOn = function(freq, noteNum, velocity) {
-        velocity /= 128;
-        if (velocity <= 0) {
-            this.noteOff(this, noteNum);
-        } else if (velocity > 1) {
-            velocity = 1;
-        }
-        var self = this, _ = this._;
-        var list = _.genList, dict = _.genDict;
-        var gen = dict[noteNum];
-        if (gen) {
-            remGen.call(this, gen);
-        }
-        
-        var wave = _.wave;
-        var osc  = timbre("osc", {wave:wave, freq:freq, mul:velocity});
-        var envType = _.env.type;
-        
-        gen = timbre(envType, _.env, osc).on("ended", function() {
-            remGen.call(self, this);
-        }).bang();
-        gen.noteNum = noteNum;
-        list.push(gen);
-        dict[noteNum] = gen;
-        
-        _.isEnded = false;
-        
-        if (list.length >= _.poly) {
-            remGen.call(this, list[0]);
-        }
-    };
-    
-    $.noteOn = function(noteNum, velocity) {
-        var freq = midicps[noteNum|0] || 0;
-        noteOn.call(this, freq, noteNum, velocity);
-        return this;
-    };
-    
-    var midicps = (function() {
-        var table = new Float32Array(128);
-        for (var i = 0; i < 128; ++i) {
-            table[i] = 440 * Math.pow(2, (i - 69) * 1 / 12);
-        }
-        return table;
-    })();
-    
-    var cpsmidi = function(cps) {
-        if (cps > 0) {
-            return ((Math.log(cps * 1 / 440) * Math.LOG2E * 12 + 69) + 0.5)|0;
-        } else {
-            return 0;
-        }
-    };
-    
-    $.noteOnWithFreq = function(freq, velocity) {
-        noteOn.call(this, freq, cpsmidi(freq), velocity);
-        return this;
-    };
-    
-    $.noteOff = function(noteNum /* , velocity */) {
-        var gen = this._.genDict[noteNum];
-        if (gen) {
-            gen.release();
-        }
-        return this;
-    };
-    
-    $.noteOffWithFreq = function(freq /* , velocity */) {
-        return this.noteOff(cpsmidi(freq));
-    };
-    
-    $.process = function(tickID) {
-        var cell = this.cell;
-        var _ = this._;
-        
-        if (this.tickID !== tickID) {
-            this.tickID = tickID;
-            
-            fn.inputSignalAR(this);
-            
-            // process
-            if (!_.isEnded) {
-                var list;
-                var i, imax;
-                var j, jmax = cell.length;
-                var tmp;
-                
-                list = _.genList;
-                for (i = 0, imax = list.length; i < imax; ++i) {
-                    tmp = list[i].process(tickID);
-                    for (j = jmax; j--; ) {
-                        cell[j] += tmp[j];
-                    }
-                }
-                if (imax === 0) {
-                    fn.nextTick(onended.bind(this));
-                }
-            }
-            
-            fn.outputSignalAR(this);
-        }
-        
-        return cell;
-    };
-    
-    var onended = function() {
-        fn.onended(this);
-    };
-    
-    fn.register("OscGen", OscGen);
     
 })(timbre);
 (function(timbre) {
@@ -4686,6 +4778,22 @@
             }
         }
     });
+
+    $.clone = function() {
+        var _ = this._;
+        var instance = timbre("buffer");
+        
+        if (_.buffer) {
+            setBuffer.call(instance, {
+                buffer    : _.buffer,
+                samplerate: _.samplerate
+            });
+        }
+        instance.isLooped   = this.isLooped;
+        instance.isReversed = this.isReversed;
+        
+        return instance;
+    };
     
     $.slice = function(begin, end) {
         var _ = this._;
@@ -4709,9 +4817,11 @@
             isReversed = !isReversed;
         }
         
-        instance._.samplerate = _.samplerate;
         if (_.buffer) {
-            setBuffer.call(instance, _.buffer.subarray(begin, end));
+            setBuffer.call(instance, {
+                buffer    : _.buffer.subarray(begin, end),
+                samplerate: _.samplerate
+            });
         }
         instance.isLooped   = this.isLooped;
         instance.isReversed = this.isReversed;
@@ -4919,6 +5029,117 @@
     };
     
     fn.register("clip", ClipNode);
+    
+})(timbre);
+(function(timbre) {
+    "use strict";
+    
+    var fn = timbre.fn;
+    var timevalue  = timbre.timevalue;
+    var Oscillator = timbre.modules.Oscillator;
+    
+    function COscNode(_args) {
+        timbre.Object.call(this, _args);
+        fn.fixAR(this);
+        
+        var _ = this._;
+        _.osc1 = new Oscillator(timbre.samplerate);
+        _.osc2 = new Oscillator(timbre.samplerate);
+        _.osc1.step = this.cell.length;
+        _.osc2.step = this.cell.length;
+        _.tmp = new Float32Array(this.cell.length);
+        _.beats = 0.5;
+        
+        this.once("init", oninit);
+    }
+    fn.extend(COscNode);
+    
+    var oninit = function() {
+        var _ = this._;
+        if (!this.wave) {
+            this.wave = "sin";
+        }
+        if (!_.freq) {
+            this.freq = 440;
+        }
+    };
+    
+    var $ = COscNode.prototype;
+    
+    Object.defineProperties($, {
+        wave: {
+            set: function(value) {
+                this._.osc1.setWave(value);
+                this._.osc2.setWave(value);
+            },
+            get: function() {
+                return this._.osc1.wave;
+            }
+        },
+        freq: {
+            set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                    if (value <= 0) {
+                        return;
+                    }
+                    value = 1000 / value;
+                }
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
+            }
+        },
+        beats: {
+            set: function(value) {
+                if (typeof value === "number" && value > 0) {
+                    this._.beats = value;
+                }
+            },
+            get: function() {
+                return this._.beats;
+            }
+        }
+    });
+    
+    $.bang = function() {
+        this._.osc1.reset();
+        this._.osc2.reset();
+        this._.emit("bang");
+        return this;
+    };
+    
+    $.process = function(tickID) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+            
+            var i, imax = cell.length;
+            var freq = _.freq.process(tickID)[0];
+            var osc1 = _.osc1, osc2 = _.osc2, tmp = _.tmp;
+            
+            osc1.frequency = freq - (_.beats * 0.5);
+            osc1.process(tmp);
+            for (i = imax; i--; ) {
+                cell[i] = tmp[i] * 0.5;
+            }
+            
+            osc2.frequency = freq + (_.beats * 0.5);
+            osc2.process(tmp);
+            for (i = imax; i--; ) {
+                cell[i] += tmp[i] * 0.5;
+            }
+            
+            fn.outputSignalAR(this);
+        }
+        
+        return cell;
+    };
+    
+    fn.register("cosc", COscNode);
     
 })(timbre);
 (function(timbre) {
@@ -5738,6 +5959,76 @@
 (function(timbre) {
     "use strict";
     
+    var fn = timbre.fn;
+    var ChannelObject = timbre.ChannelObject;
+    var empty;
+    
+    function GateNode(_args) {
+        timbre.Object.call(this, _args);
+        fn.fixAR(this);
+        
+        this._.selected = 0;
+        this._.outputs  = [];
+        
+        empty = new Float32Array(this.cell.length);
+    }
+    fn.extend(GateNode);
+    
+    var $ = GateNode.prototype;
+
+    Object.defineProperties($, {
+        selected: {
+            set: function(value) {
+                var _ = this._;
+                if (typeof value === "number") {
+                    _.selected = value;
+                    var outputs = _.outputs;
+                    for (var i = outputs.length; i--; ) {
+                        if (outputs[i]) {
+                            outputs[i].cell.set(empty);
+                        }
+                    }
+                }
+            },
+            get: function() {
+                return this._.selected;
+            }
+        }
+    });
+
+    $.at = function(index) {
+        var _ = this._;
+        var output = _.outputs[index];
+        if (!output) {
+            _.outputs[index] = output = new ChannelObject(this);
+        }
+        return output;
+    };
+    
+    $.process = function(tickID) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+
+            fn.inputSignalAR(this);
+            fn.outputSignalAR(this);
+            
+            if (_.outputs[_.selected]) {
+                _.outputs[_.selected].cell.set(this.cell);
+            }
+        }
+        
+        return cell;
+    };
+    
+    fn.register("gate", GateNode);
+    
+})(timbre);
+(function(timbre) {
+    "use strict";
+    
     var fn  = timbre.fn;
     var FFT = timbre.modules.FFT;
     
@@ -5814,7 +6105,7 @@
         
         var _ = this._;
         _.count = 0;
-        _.delay   = null;
+        _.delay   = 0;
         _.timeout = Infinity;
         _.currentTime = 0;
         _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
@@ -5841,8 +6132,7 @@
     
     var onstart = function() {
         var _ = this._;
-        var delay = (_.delay === null) ? _.interval : _.delay;
-        _.delaySamples = (timbre.samplerate * (delay * 0.001))|0;
+        _.delaySamples = (timbre.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
         _.isEnded = false;
     };
@@ -5901,8 +6191,7 @@
                 }
             },
             get: function() {
-                var _ = this._;
-                return _.delay === null ? _.interval : _.delay;
+                return this._.delay;
             }
         },
         count: {
@@ -5937,8 +6226,7 @@
     
     $.bang = function() {
         var _ = this._;
-        var delay = (_.delay === null) ? _.interval : _.delay;
-        _.delaySamples = (timbre.samplerate * (delay * 0.001))|0;
+        _.delaySamples = (timbre.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
         _.isEnded = false;
         _.emit("bang");
@@ -6389,7 +6677,7 @@
                     }
                     val = _.prevNote;
                 } else {
-                    val = _.prevNote = (cmd.val) + (status.o) * 12;
+                    val = _.prevNote = (cmd.val) + (status.o + 1) * 12;
                     queue.push([elapse, val, null, vel]);
                 }
                 
@@ -7382,6 +7670,188 @@
     fn.register("param", ParamNode);
     
 })(timbre);
+(function() {
+    "use strict";
+    
+    var fn = timbre.fn;
+    var timevalue = timbre.timevalue;
+
+    function PatternNode(_args) {
+        timbre.Object.call(this, _args);
+        fn.fixKR(this);
+        fn.timer(this);
+        
+        var _ = this._;
+        _.iter = null;
+        _.samples  = 0;
+        _.isEnded  = false;
+        
+        this.once("init", oninit);
+        this.on("start", onstart);
+    }
+    fn.extend(PatternNode);
+    
+    var oninit = function() {
+        if (!this._.interval) {
+            this.interval = 500;
+        }
+    };
+    
+    var onstart = function() {
+        var _ = this._;
+        if (_.iter && _.iter.reset) {
+            _.iter.reset();
+        }
+        _.samples = 0;
+        _.isEnded = false;
+    };
+    Object.defineProperty(onstart, "unremovable", {
+        value:true, writable:false
+    });
+    var onended = function() {
+        this._.isEnded = true;
+        this._.emit("ended");
+    };
+    
+    var $ = PatternNode.prototype;
+    
+    Object.defineProperties($, {
+        interval: {
+            set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                }
+                this._.interval = timbre(value);
+            },
+            get: function() {
+                return this._.interval;
+            }
+        }
+    });
+    
+    $.next = function() {
+        var _ = this._;
+        if (_.iter && _.iter.next) {
+            return _.iter.next();
+        }
+        return null;
+    };
+
+    // TODO: ??
+    $.bang = function() {
+        var _ = this._;
+        _.samples = 0;
+        _.isEnded = false;
+        _.emit("bang");
+        return this;
+    };
+    
+    $.process = function(tickID) {
+        var cell = this.cell;
+        var _ = this._;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+            
+            var isEnded = false;
+            if (!_.isEnded) {
+                _.interval.process(tickID);
+                
+                _.samples -= cell.length;
+                if (_.samples <= 0) {
+                    _.samples += (timbre.samplerate * _.interval.valueOf() * 0.001)|0;
+                    var inputs  = this.inputs;
+                    
+                    var value = null;
+                    if (_.iter && _.iter.next) {
+                        value = _.iter.next();
+                    }
+                    if (value === null) {
+                        value = 0;
+                        isEnded = true;
+                        fn.nextTick(onended.bind(this));
+                    }
+                    
+                    var x = value * _.mul + _.add;
+                    for (var j = cell.length; j--; ) {
+                        cell[j] = x;
+                    }
+                    if (!isEnded) {
+                        for (var i = 0, imax = inputs.length; i < imax; ++i) {
+                            inputs[i].bang(value);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return cell;
+    };
+    
+    
+    
+    
+    var isDictionary = function(object) {
+        return (typeof object === "object" && object.constructor === Object);
+    };
+    
+    var iterator = timbre.modules.iterator;
+    
+    fn.register("p.seq", function(_args) {
+        var opts = isDictionary(_args[0]) ? _args[0] : {
+            list:[], length:1, offset:0
+        };
+        var p = new PatternNode(_args);
+        p._.iter = new iterator.ListSequence.create(opts);
+        return p;
+    });
+    
+    fn.register("p.shuf", function(_args) {
+        var opts = isDictionary(_args[0]) ? _args[0] : {
+            list:[], length:1
+        };
+        var p = new PatternNode(_args);
+        p._.iter = new iterator.ListShuffle.create(opts);
+        return p;
+    });
+    
+    fn.register("p.choose", function(_args) {
+        var opts = isDictionary(_args[0]) ? _args[0] : {
+            list:[], length:1
+        };
+        var p = new PatternNode(_args);
+        p._.iter = new iterator.ListChoose.create(opts);
+        return p;
+    });
+    
+    fn.register("p.arith", function(_args) {
+        var opts = isDictionary(_args[0]) ? _args[0] : {
+            start:0, step:1, length:Infinity
+        };
+        var p = new PatternNode(_args);
+        p._.iter = new iterator.Arithmetic.create(opts);
+        return p;
+    });
+
+    fn.register("p.geom", function(_args) {
+        var opts = isDictionary(_args[0]) ? _args[0] : {
+            start:0, grow:1, length:Infinity
+        };
+        var p = new PatternNode(_args);
+        p._.iter = new iterator.Geometric.create(opts);
+        return p;
+    });
+    
+    fn.register("p.drunk", function(_args) {
+        var opts = isDictionary(_args[0]) ? _args[0] : {
+            start:0, step:1, length:Infinity
+        };
+        var p = new PatternNode(_args);
+        p._.iter = new iterator.Drunk.create(opts);
+        return p;
+    });
+    
+})();
 (function(timbre) {
     "use strict";
     
@@ -7438,6 +7908,86 @@
     };
     
     fn.register("pink", PinkNoiseNode);
+    
+})(timbre);
+(function(timbre) {
+    "use strict";
+    
+    var fn = timbre.fn;
+    
+    function PluckNode(_args) {
+        timbre.Object.call(this, _args);
+        
+        this._.freq   = 440;
+        this._.buffer = null;
+        this._.readIndex  = 0;
+        this._.writeIndex = 0;
+    }
+    fn.extend(PluckNode);
+    
+    var $ = PluckNode.prototype;
+    
+    Object.defineProperties($, {
+        freq: {
+            set: function(value) {
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
+            }
+        }
+    });
+    
+    $.bang = function() {
+        var _ = this._;
+        var freq = _.freq.valueOf();
+        var size   = (timbre.samplerate / freq + 0.5)|0;
+        var buffer = _.buffer = new Float32Array(size << 1);
+        for (var i = size; i--; ) {
+            buffer[i] = Math.random() * 2 - 1;
+        }
+        _.readIndex  = 0;
+        _.writeIndex = size;
+        _.emit("bang");
+        return this;
+    };
+    
+    $.process = function(tickID) {
+        var cell = this.cell;
+        var _ = this._;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+            
+            var buffer = _.buffer;
+            if (buffer) {
+                var bufferLength = buffer.length;
+                var readIndex  = _.readIndex;
+                var writeIndex = _.writeIndex;
+                var mul = _.mul, add = _.add;
+                var x, i, imax = cell.length;
+                
+                for (i = 0; i < imax; ++i) {
+                    x = buffer[readIndex++];
+                    if (readIndex >= bufferLength) {
+                        readIndex = 0;
+                    }
+                    x = (x + buffer[readIndex]) * 0.5;
+                    buffer[writeIndex++] = x;
+                    if (writeIndex >= bufferLength) {
+                        writeIndex = 0;
+                    }
+                    cell[i] = x * mul + add;
+                }
+                _.readIndex  = readIndex;
+                _.writeIndex = writeIndex;
+            }
+        }
+        
+        return cell;
+    };
+    
+    fn.register("pluck", PluckNode);
     
 })(timbre);
 (function(timbre) {
@@ -7780,6 +8330,76 @@
 })(timbre);
 (function(timbre) {
     "use strict";
+
+    var fn = timbre.fn;
+
+    function SelectorNode(_args) {
+        timbre.Object.call(this, _args);
+        
+        this._.selected   = 0;
+        this._.background = false;
+    }
+    fn.extend(SelectorNode);
+    
+    var $ = SelectorNode.prototype;
+
+    Object.defineProperties($, {
+        selected: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    this._.selected = value;
+                    var cell = this.cell;
+                    for (var i = cell.length; i--; ) {
+                        cell[i] = 0;
+                    }
+                }
+            },
+            get: function() {
+                return this._.selected;
+            }
+        },
+        background: {
+            set: function(value) {
+                this._.background = !!value;
+            },
+            get: function() {
+                return this._.background;
+            }
+        }
+    });
+    
+    $.process = function(tickID) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+
+            var inputs = this.inputs;
+            var i, imax = inputs.length;
+            
+            if (_.background) {
+                for (i = 0; i < imax; ++i) {
+                    inputs[i].process(tickID);
+                }
+            }
+            
+            var tmp = inputs[_.selected];
+            if (tmp) {
+                cell.set(tmp.process(tickID));
+            }
+            
+            fn.outputSignalAR(this);
+        }
+        
+        return cell;
+    };
+    
+    fn.register("selector", SelectorNode);
+    
+})(timbre);
+(function(timbre) {
+    "use strict";
     
     var fn = timbre.fn;
     var timevalue = timbre.timevalue;
@@ -7974,6 +8594,287 @@
     
     fn.register("spectrum", SpectrumNode);
 
+})(timbre);
+(function(timbre) {
+    "use strict";
+    
+    var fn = timbre.fn;
+    
+    function SynthDefNode(_args) {
+        timbre.Object.call(this, _args);
+        fn.fixAR(this);
+
+        var _ = this._;
+
+        _.poly     = 4;
+        _.genList  = [];
+        _.genDict  = {};
+        _.synthdef = null;
+        _.isEnded  = true;
+        
+        _.remGen = remGen.bind(this);
+    }
+    fn.extend(SynthDefNode);
+    
+    var $ = SynthDefNode.prototype;
+    
+    Object.defineProperties($, {
+        def: {
+            set: function(value) {
+                if (typeof value === "function") {
+                    this._.synthdef = value;
+                }
+            },
+            get: function() {
+                return this._.synthdef;
+            }
+        },
+        poly: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    if (0 < value && value <= 64) {
+                        this._.poly = value;
+                    }
+                }
+            },
+            get: function() {
+                return this._.poly;
+            }
+        }
+    });
+    
+    var doneAction = function(opts) {
+        remGen.call(this, opts.gen);
+    };
+    
+    var remGen = function(gen) {
+        var _ = this._;
+        var i = _.genList.indexOf(gen);
+        if (i !== -1) {
+            _.genList.splice(i, 1);
+        }
+        _.genDict[gen.noteNum] = null;
+    };
+    
+    var noteOn = function(noteNum, freq, velocity, _opts) {
+        velocity |= 0;
+        if (velocity <= 0) {
+            this.noteOff(this, noteNum);
+        } else if (velocity > 127) {
+            velocity = 127;
+        }
+        var _ = this._;
+        var list = _.genList, dict = _.genDict;
+        var gen = dict[noteNum];
+        if (gen) {
+            _.remGen(gen);
+        }
+        
+        var opts = {
+            freq    : freq,
+            noteNum : noteNum,
+            velocity: velocity
+        };
+        if (_opts) {
+            for (var key in _opts) {
+                opts[key] = _opts[key];
+            }
+        }
+        opts.doneAction = doneAction.bind(this, opts);
+        
+        gen = this._.synthdef.call(this, opts);
+        
+        if (gen instanceof timbre.Object) {
+            gen.noteNum = noteNum;
+            list.push(gen);
+            dict[noteNum] = opts.gen = gen;
+            
+            _.isEnded = false;
+            
+            if (list.length >= _.poly) {
+                _.remGen(list[0]);
+            }
+        }
+    };
+    
+    var midicps = (function() {
+        var table = new Float32Array(128);
+        for (var i = 0; i < 128; ++i) {
+            table[i] = 440 * Math.pow(2, (i - 69) * 1 / 12);
+        }
+        return table;
+    })();
+
+    var cpsmidi = function(cps) {
+        if (cps > 0) {
+            return Math.log(cps * 1 / 440) * Math.LOG2E * 12 + 69;
+        } else {
+            return 0;
+        }
+    };
+    
+    $.noteOn = function(noteNum, velocity, _opts) {
+        var freq = midicps[noteNum] || (440 * Math.pow(2, (noteNum - 69) / 12));
+        noteOn.call(this, (noteNum + 0.5)|0, freq, velocity, _opts);
+        return this;
+    };
+    
+    $.noteOff = function(noteNum) {
+        var gen = this._.genDict[noteNum];
+        if (gen && gen.release) {
+            gen.release();
+        }
+        return this;
+    };
+    
+    $.noteOnWithFreq = function(freq, velocity, _opts) {
+        var noteNum = cpsmidi(freq);
+        noteOn.call(this, (noteNum + 0.5)|0, freq, velocity, _opts);
+        return this;
+    };
+    
+    $.noteOffWithFreq = function(freq) {
+        var noteNum = cpsmidi(freq);
+        return this.noteOff((noteNum + 0.5)|0);
+    };
+    
+    $.allNoteOff = function() {
+        var list = this._.genList;
+        for (var i = 0, imax = list.length; i < imax; ++i) {
+            if (list[i].release) {
+                list[i].release();
+            }
+        }
+    };
+    
+    $.allSoundOff = function() {
+        var _ = this._;
+        var list = _.genList;
+        var dict = _.genDict;
+        while (list.length) {
+            delete dict[list.shift().noteNum];
+        }
+    };
+    
+    $.process = function(tickID) {
+        var cell = this.cell;
+        var _ = this._;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+            
+            fn.inputSignalAR(this);
+            
+            // process
+            if (!_.isEnded) {
+                var list;
+                var i, imax;
+                var j, jmax = cell.length;
+                var tmp;
+                
+                list = _.genList;
+                for (i = 0, imax = list.length; i < imax; ++i) {
+                    tmp = list[i].process(tickID);
+                    for (j = jmax; j--; ) {
+                        cell[j] += tmp[j];
+                    }
+                }
+                if (imax === 0) {
+                    fn.nextTick(fn.onended.bind(null, this));
+                }
+            }
+            
+            fn.outputSignalAR(this);
+        }
+        
+        return cell;
+    };
+    
+    fn.register("SynthDef", SynthDefNode);
+    
+    
+    var env_desc = {
+        set: function(value) {
+            if (typeof value === "object" && value.constructor === Object) {
+                if (typeof value.type === "string") {
+                    this._.env = value;
+                }
+            }
+        },
+        get: function() {
+            return this._.env;
+        }
+    };
+    
+    fn.register("OscGen", (function() {
+
+        var wave_desc = {
+            set: function(value) {
+                if (typeof value === "string") {
+                    this._.wave = value;
+                }
+            },
+            get: function() {
+                return this._.wave;
+            }
+        };
+        
+        var synthdef = function(opts) {
+            var _ = this._;
+            var synth, env, envtype;
+            
+            env = _.env || {};
+            envtype = env.type || "perc";
+            
+            synth = timbre("osc", {wave:_.wave, freq:opts.freq, mul:opts.velocity/128});
+            synth = timbre(envtype, env, synth).on("ended", opts.doneAction).bang();
+            
+            return synth;
+        };
+        
+        return function(_args) {
+            var instance = new SynthDefNode(_args);
+            
+            instance._.wave = "sin";
+            
+            Object.defineProperties(instance, {
+                env: env_desc, wave: wave_desc
+            });
+            
+            instance.def = synthdef;
+            
+            return instance;
+        };
+    })());
+    
+    fn.register("PluckGen", (function() {
+        
+        var synthdef = function(opts) {
+            var _ = this._;
+            var synth, env, envtype;
+            
+            env = _.env || {};
+            envtype = env.type || "perc";
+            
+            synth = timbre("pluck", {freq:opts.freq, mul:opts.velocity/128}).bang();
+            synth = timbre(envtype, env, synth).on("ended", opts.doneAction).bang();
+            
+            return synth;
+        };
+        
+        return function(_args) {
+            var instance = new SynthDefNode(_args);
+            
+            Object.defineProperties(instance, {
+                env: env_desc
+            });
+            
+            instance.def = synthdef;
+            
+            return instance;
+        };
+    })());
+    
 })(timbre);
 (function(timbre) {
     "use strict";
