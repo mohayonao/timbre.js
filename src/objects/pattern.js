@@ -154,13 +154,13 @@
     
     fn.register("p.arith", function(_args) {
         var opts = isDictionary(_args[0]) ? _args[0] : {
-            start:0, step:1, length:Infinity
+            start:0, grow:1, length:Infinity
         };
         var p = new PatternNode(_args);
         p._.iter = new iterator.Arithmetic.create(opts);
         return p;
     });
-
+    
     fn.register("p.geom", function(_args) {
         var opts = isDictionary(_args[0]) ? _args[0] : {
             start:0, grow:1, length:Infinity

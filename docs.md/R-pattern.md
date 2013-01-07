@@ -83,13 +83,13 @@ T("p.choose", {list:list, length:Infinity}, function(noteNum) {
 `T("p.arith")` は初期値からの等差数列を進めます.
 
 - start: 0
-- step: 1
+- grow: 1
 - length: Infinity
 
 ```timbre
 var synth = T("OscGen", {wave:"tri", mul:0.25}).play();
 
-T("p.arith", {start:60, step:3, length:12}, function(noteNum) {
+T("p.arith", {start:60, grow:3, length:12}, function(noteNum) {
     synth.noteOn(noteNum, 64);
 }).on("ended", function() {
     synth.pause();

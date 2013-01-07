@@ -36,9 +36,17 @@
     var ListSequence = (function() {
         function ListSequence(list, length, offset) {
             Iterator.call(this);
-            this.list    = list;
-            this.length = length  || 1;
-            this.offset  = offset || 0;
+            length = (typeof length === "number") ? length : 1;
+            if (length < 0) {
+                length = 0;
+            }
+            offset = (typeof offset === "number") ? offset : 0;
+            if (offset < 0) {
+                offset = 0;
+            }
+            this.list   = list;
+            this.length = length;
+            this.offset = offset;
         }
         fn.extend(ListSequence, Iterator);
         
@@ -49,37 +57,33 @@
         var $ = ListSequence.prototype;
         
         $.next = function() {
-            var returnValue;
-            if (this.position < this.length) {
-                var index = (this.position + this.offset) % this.list.length;
-                var item = this.list[index];
-                var value = this.valueOf(item);
-                if (value !== null) {
-                    if (!item.next) {
-                        this.position += 1;
-                    }
-                    returnValue = value;
-                } else {
-                    if (item.reset) {
-                        item.reset();
-                    }
+            if (this.position >= this.length) {
+                return null;
+            }
+            var index = (this.position + this.offset) % this.list.length;
+            var item  = this.list[index];
+            var value = this.valueOf(item);
+            if (value !== null) {
+                if (typeof item.next !== "function") {
                     this.position += 1;
-                    returnValue = this.next();
                 }
+                return value;
+            } else {
+                if (typeof item.reset === "function") {
+                    item.reset();
+                }
+                this.position += 1;
+                return this.next();
             }
-            else {
-                returnValue = null;
-            }
-            return returnValue;
         };
         
         return ListSequence;
     })();
     iterator.ListSequence = ListSequence;
-
+    
     var ListShuffle = (function() {
         function ListShuffle(list, length, seed) {
-            ListSequence.call(this, list, length, 0);
+            ListSequence.call(this, list.slice(0), length, 0);
 
             if (seed) {
                 var r = new timbre.modules.Random(seed);
@@ -121,28 +125,24 @@
         var $ = ListChoose.prototype;
         
         $.next = function() {
-            var returnValue;
-            if (this.position < this.length) {
-                var index = (this.list.length * this._rnd())|0;
-                var item = this.list[index];
-                var value = this.valueOf(item);
-                if (value !== null) {
-                    if (!item.next) {
-                        this.position += 1;
-                    }
-                    returnValue = value;
-                } else {
-                    if (item.reset) {
-                        item.reset();
-                    }
+            if (this.position >= this.length) {
+                return null;
+            }
+            var index = (this.list.length * this._rnd())|0;
+            var item  = this.list[index];
+            var value = this.valueOf(item);
+            if (value !== null) {
+                if (typeof item.next !== "function") {
                     this.position += 1;
-                    returnValue = this.next();
                 }
+                return value;
+            } else {
+                if (typeof item.reset === "function") {
+                    item.reset();
+                }
+                this.position += 1;
+                return this.next();
             }
-            else {
-                returnValue = null;
-            }
-            return returnValue;
         };
         
         return ListChoose;
@@ -150,52 +150,57 @@
     iterator.ListChoose = ListChoose;
     
     var Arithmetic = (function() {
-        function Arithmetic(start, step, length) {
+        function Arithmetic(start, grow, length) {
             Iterator.call(this);
-            this.start    = start || 0;
-            this.value    = this.start;
-            this.step     = step  || 1;
-            this.length  = length || Infinity;
+            start = (typeof start === "number") ? start : 0;
+            length = (typeof length === "number") ? length : Infinity;
+            if (length < 0) {
+                length = 0;
+            }
+            this.start  = start;
+            this.value  = this.start;
+            this.grow   = grow || 1;
+            this.length = length;
         }
         fn.extend(Arithmetic, Iterator);
         
         Arithmetic.create = function(opts) {
-            return new Arithmetic(opts.start, opts.step, opts.length);
+            return new Arithmetic(opts.start, opts.grow, opts.length);
         };
         
         var $ = Arithmetic.prototype;
         
         $.next = function() {
-            var ret;
             if (this.position === 0) {
-                ret = this.value;
                 this.position += 1;
+                return this.value;
             } else if (this.position < this.length) {
-                var step = this.valueOf(this.step);
-                if (step !== null) {
-                    this.value += step;
-                    ret = this.value;
+                var grow = this.valueOf(this.grow);
+                if (grow !== null) {
+                    this.value += grow;
                     this.position += 1;
-                } else {
-                    ret = null;
+                    return this.value;
                 }
-            } else {
-                ret = null;
             }
-            return ret;
+            return null;
         };
         
         return Arithmetic;
     })();
     iterator.Arithmetic = Arithmetic;
-
+    
     var Geometric = (function() {
         function Geometric(start, grow, length) {
             Iterator.call(this);
-            this.start    = start || 0;
-            this.value    = this.start;
-            this.grow     = grow  || 1;
-            this.length  = length || Infinity;
+            start = (typeof start === "number") ? start : 0;
+            length = (typeof length === "number") ? length : Infinity;
+            if (length < 0) {
+                length = 0;
+            }
+            this.start  = start;
+            this.value  = this.start;
+            this.grow   = grow || 1;
+            this.length = length;
         }
         fn.extend(Geometric, Iterator);
         
@@ -206,23 +211,18 @@
         var $ = Geometric.prototype;
         
         $.next = function() {
-            var ret;
             if (this.position === 0) {
-                ret = this.value;
                 this.position += 1;
+                return this.value;
             } else if (this.position < this.length) {
                 var grow = this.valueOf(this.grow);
                 if (grow !== null) {
                     this.value *= grow;
-                    ret = this.value;
                     this.position += 1;
-                } else {
-                    ret = null;
+                    return this.value;
                 }
-            } else {
-                ret = null;
             }
-            return ret;
+            return null;
         };
         
         return Geometric;
@@ -232,12 +232,19 @@
     var Drunk = (function() {
         function Drunk(start, step, length, min, max, seed) {
             Iterator.call(this);
-            this.start  = start || 0;
+            start = (typeof start === "number") ? start : 0;
+            length = (typeof length === "number") ? length : Infinity;
+            if (length < 0) {
+                length = 0;
+            }
+            min = (typeof min === "number") ? min : -Infinity;
+            max = (typeof max === "number") ? max : +Infinity;
+            this.start  = start;
             this.value  = this.start;
-            this.step   = step  || 0;
-            this.length = length || Infinity;
-            this.min    = min   || -Infinity;
-            this.max    = max   || +Infinity;
+            this.step   = step || 1;
+            this.length = length;
+            this.min = min;
+            this.max = max;
             if (seed) {
                 var r = new timbre.modules.Random(seed);
                 this._rnd = r.next.bind(r);
@@ -250,30 +257,31 @@
         Drunk.create = function(opts) {
             return new Drunk(opts.start, opts.step, opts.length, opts.min, opts.max, opts.seed);
         };
-
+        
         var $ = Drunk.prototype;
-
+        
         $.next = function() {
-            var ret = 0;
             if (this.position === 0) {
-                ret = this.value;
                 this.position += 1;
+                return this.value;
             } else if (this.position < this.length) {
-                var step = (this._rnd() * 2 - 1) * this.step;
-                var value = this.value + step;
-                ret = (value < this.min) ? this.min : (value > this.max) ? this.max : value;
-                this.value = ret;
-                this.position += 1;
-            } else {
-                ret = null;
+                var step = this.valueOf(this.step);
+                if (step !== null) {
+                    step = (this._rnd() * 2 - 1) * step;
+                    var min   = this.min, max = this.max;
+                    var value = this.value + step;
+                    value = (value < min) ? min : (value > max) ? max : value;
+                    this.value = value;
+                    this.position += 1;
+                    return this.value;
+                }
             }
-            return ret;
+            return null;
         };
-
+        
         return Drunk;
     })();
     iterator.Drunk = Drunk;
-    
     
     timbre.modules.iterator = iterator;
     
