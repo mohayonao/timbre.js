@@ -12,12 +12,12 @@ mml += "[d0f0<c> r d0f0<c> r r d0f0<c> d0f0<c4> d0f0b d0f0b r d0f0b r d0f0b d0f0
 mml += " c0e0b r c0e0b r r c0e0b c0e0b4 | c0e0a c0e0a r c0e0a r c0e0a c0e0a4]";
 mml += " c0e0<c> c0e0<c> r c0e0<c> r c0e0<c> c0e0<c4>";
 
-var gen = T("PluckGen", {env:{type:"adsr", d:500, s:0.2, r:150}, mul:0.20}).play();
+var gen = T("PluckGen", {env:{type:"perc", r:500, lv:0.4}}).play();
 
 T("MML", {mml:mml}, gen).start();
 
-var osc = T("pulse", {freq:T("midicps"), mul:0.1});
-var env = T("asr", {a:30, r:150, lv:0.5}, osc);
+var osc = T("pulse", {freq:T("midicps"), mul:0.15});
+var env = T("asr", {a:20, r:150, lv:0.8}, osc);
 
 T("efx.delay", {time:250, feedback:0.75}, env).play();
 
@@ -27,7 +27,6 @@ T("MML", {mml:"o7 q2 l8 $ e>a<c>a< r2"}, osc, env).on("mml", function(type, opts
     }
 }).start();
 ```
-value = 440 * Math.pow(2, (opts.noteNum - 69) * 1/12);
 
 ## Properties ##
 - `mml` _(String)_

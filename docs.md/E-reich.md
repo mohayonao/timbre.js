@@ -3,12 +3,12 @@ Reich
 
 ```timbre
 timbre.rec(function(output) {
-    var notes = _.shuffle([69, 71, 72, 76, 69, 71, 72, 76]);
+    var midis = [69, 71, 72, 76, 69, 71, 72, 76];
     var msec  = timbre.timevalue("bpm120 l8");
-    var synth = T("OscGen", {wave:"tri(25)", env:{type:"perc", r:msec}, mul:0.5});
+    var synth = T("OscGen", {env:{type:"perc", r:msec}});
     
-    T("interval", {interval:msec, timeout:msec*notes.length}, function(count) {
-        synth.noteOn(notes[count % notes.length], 80);
+    T("p.shuf", {interval:msec, list:midis, length:midis.length}, function(midi) {
+        synth.noteOn(midi, 80);
     }).on("ended", function() {
         output.done();
     }).start();
