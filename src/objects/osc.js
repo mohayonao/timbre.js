@@ -101,7 +101,7 @@
                 osc.frequency = freq[0];
                 var value = osc.next();
                 for (i = imax; i--; ) {
-                    cell[i] = value;
+                    cell[i] *= value;
                 }
             }
             
