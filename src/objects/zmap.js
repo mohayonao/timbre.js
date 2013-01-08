@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -164,4 +164,4 @@
     
     fn.register("zmap", ZMapNode);
     
-})(timbre);
+})();

@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn  = timbre.fn;
@@ -166,4 +166,4 @@
     fn.alias("BRF", "notch");
     fn.alias("APF", "allpass");
 
-})(timbre);
+})();

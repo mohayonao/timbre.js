@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn  = timbre.fn;
@@ -100,4 +100,4 @@
     
     fn.register("fft", FFTNode);
     
-})(timbre);
+})();

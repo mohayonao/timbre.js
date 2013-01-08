@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
 
     function Random(seed) {
@@ -29,4 +29,4 @@
     
     timbre.modules.Random = Random;
     
-})(timbre);
+})();

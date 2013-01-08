@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -127,4 +127,4 @@
     fn.register("schedule", ScheduleNode);
     fn.alias("sche", "schedule");
     
-})(timbre);
+})();

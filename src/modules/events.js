@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var isArray = Array.isArray;
@@ -203,4 +203,4 @@
     timbre.modules.EventEmitter = EventEmitter;
     timbre.modules.ready.done("events");
     
-})(timbre);
+})();

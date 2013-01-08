@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -326,4 +326,4 @@
         return timbre.apply(null, ["env"].concat(_args));
     });
     
-})(timbre);
+})();

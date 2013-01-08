@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
 
     var fn = timbre.fn;
@@ -524,4 +524,4 @@
         });
         fs.createReadStream(filepath).pipe(decoder);
     };
-})(timbre);
+})();

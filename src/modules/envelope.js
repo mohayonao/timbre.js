@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var timevalue = timbre.timevalue;
@@ -363,4 +363,4 @@
     
     timbre.modules.Envelope = Envelope;
     
-})(timbre);
+})();

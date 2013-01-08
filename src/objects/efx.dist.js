@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -174,4 +174,4 @@
     
     fn.register("efx.dist", EfxDistNode);
     
-})(timbre);
+})();

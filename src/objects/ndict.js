@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -134,5 +134,5 @@
         return instance;
     });
     
-})(timbre);
+})();
 

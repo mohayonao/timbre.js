@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -261,4 +261,4 @@
     
     fn.register("buffer", BufferNode);
     
-})(timbre);
+})();

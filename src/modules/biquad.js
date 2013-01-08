@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     function Biquad(opts) {
@@ -294,4 +294,4 @@
     
     timbre.modules.Biquad = Biquad;
     
-})(timbre);
+})();

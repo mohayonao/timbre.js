@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     // Voss algorithm
@@ -55,4 +55,4 @@
     
     fn.register("pink", PinkNoiseNode);
     
-})(timbre);
+})();

@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -481,4 +481,4 @@
         silence: Scissor.silence
     };
     
-})(timbre);
+})();

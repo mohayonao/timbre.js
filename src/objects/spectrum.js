@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -194,4 +194,4 @@
     
     fn.register("spectrum", SpectrumNode);
 
-})(timbre);
+})();

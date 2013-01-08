@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -285,4 +285,4 @@
     
     timbre.modules.iterator = iterator;
     
-})(timbre);
+})();

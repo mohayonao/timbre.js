@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     function EfxDelay(opts) {
@@ -73,4 +73,4 @@
     
     timbre.modules.EfxDelay = EfxDelay;
     
-})(timbre);
+})();

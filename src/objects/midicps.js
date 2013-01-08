@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var fn = timbre.fn;
@@ -76,4 +76,4 @@
     
     fn.register("midicps", MidiCpsNode);
     
-})(timbre);
+})();

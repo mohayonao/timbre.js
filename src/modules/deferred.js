@@ -1,4 +1,4 @@
-(function(timbre) {
+(function() {
     "use strict";
     
     var slice = [].slice;
@@ -186,4 +186,4 @@
     
     timbre.modules.Deferred = Deferred;
     
-})(timbre);
+})();
