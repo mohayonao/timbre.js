@@ -1417,7 +1417,7 @@
                 {
                     this.impl = player;
                     if (this.impl.defaultSamplerate) {
-                        this.sampleRate = this.impl.defaultSamplerate;
+                        this.samplerate = this.impl.defaultSamplerate;
                     }
                 }
                 
@@ -1871,17 +1871,30 @@
                 var audio = new Audio();
                 var onaudioprocess;
                 var interleaved = new Float32Array(sys.streamsize * sys.channels);
-                var interval = sys.streamsize / sys.samplerate * 1000;
+                var interval = sys.streammsec;
+                var written  = 0;
+                var limit    = sys.streamsize << 4;
+                
+                if (navigator.userAgent.toLowerCase().indexOf("linux") !== -1) {
+                    interval = sys.streamsize / sys.samplerate * 1000;
+                    written  = -Infinity;
+                }
                 
                 onaudioprocess = function() {
-                    var inL = sys.strmL, inR = sys.strmR,
-                        i = interleaved.length, j = inL.length;
+                    var offset = audio.mozCurrentSampleOffset();
+                    if (written > offset + limit) {
+                        return;
+                    }
+                    var inL = sys.strmL;
+                    var inR = sys.strmR;
+                    var i = interleaved.length;
+                    var j = inL.length;
                     sys.process();
                     while (j--) {
                         interleaved[--i] = inR[j];
                         interleaved[--i] = inL[j];
                     }
-                    audio.mozWriteAudio(interleaved);
+                    written += audio.mozWriteAudio(interleaved);
                 };
                 
                 audio.mozSetup(sys.channels, sys.samplerate);
