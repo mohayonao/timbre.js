@@ -1,17 +1,16 @@
 var T = require("./timbre.debug.js");
 var assert = require("chai").assert;
 
-var iterator = timbre.modules.iterator;
 
-describe('timbre.modules.iterator', function() {
-    describe("ListSequence", function() {
+describe('iterator', function() {
+    describe("ListSequenceIterator", function() {
         it("new", function() {
-            var iter = new iterator.ListSequence([]);
-            assert.instanceOf(iter, iterator.ListSequence);
+            var iter = new timbre.modules.ListSequenceIterator([]);
+            assert.instanceOf(iter, timbre.modules.ListSequenceIterator);
         });
         it("create()", function() {
             var list = [1,2,3];
-            var iter = iterator.ListSequence.create({
+            var iter = timbre.modules.ListSequenceIterator.create({
                 list:list, length:100, offset:5
             });
             assert.equal(iter.list  , list);
@@ -19,7 +18,7 @@ describe('timbre.modules.iterator', function() {
             assert.equal(iter.offset,    5);
         });
         it("next()", function() {
-            var iter = iterator.ListSequence.create({
+            var iter = timbre.modules.ListSequenceIterator.create({
                 list:[0,1,2,3], length:8, offset:1
             });
             assert.equal(iter.next(), 1);
@@ -34,14 +33,14 @@ describe('timbre.modules.iterator', function() {
             assert.equal(iter.next(), null);
         });
     });
-    describe("ListShuffle", function() {
+    describe("ListShuffleIterator", function() {
         it("new", function() {
-            var iter = new iterator.ListShuffle([]);
-            assert.instanceOf(iter, iterator.ListShuffle);
+            var iter = new timbre.modules.ListShuffleIterator([]);
+            assert.instanceOf(iter, timbre.modules.ListShuffleIterator);
         });
         it("create()", function() {
             var list = [1,2,3];
-            var iter = iterator.ListShuffle.create({
+            var iter = timbre.modules.ListShuffleIterator.create({
                 list:list, length:100
             });
             assert.equal(iter.list.length, list.length);
@@ -52,7 +51,7 @@ describe('timbre.modules.iterator', function() {
             
         });
         it("next()", function() {
-            var iter = iterator.ListShuffle.create({
+            var iter = timbre.modules.ListShuffleIterator.create({
                 list:[0,1,2,3], length:8
             });
             var list = iter.list;
@@ -68,30 +67,30 @@ describe('timbre.modules.iterator', function() {
             assert.equal(iter.next(), null);
         });
         it("seed", function() {
-            var iter1 = iterator.ListShuffle.create({
+            var iter1 = timbre.modules.ListShuffleIterator.create({
                 list:[0,1,2,3,4,5,6,7,8,9], seed:103
             });
-            var iter2 = iterator.ListShuffle.create({
+            var iter2 = timbre.modules.ListShuffleIterator.create({
                 list:[0,1,2,3,4,5,6,7,8,9], seed:103
             });
             assert.deepEqual(iter1.list, iter2.list);
         });
     });
-    describe("ListChoose", function() {
+    describe("ListChooseIterator", function() {
         it("new", function() {
-            var iter = new iterator.ListChoose([]);
-            assert.instanceOf(iter, iterator.ListChoose);
+            var iter = new timbre.modules.ListChooseIterator([]);
+            assert.instanceOf(iter, timbre.modules.ListChooseIterator);
         });
         it("create()", function() {
             var list = [1,2,3];
-            var iter = iterator.ListChoose.create({
+            var iter = timbre.modules.ListChooseIterator.create({
                 list:list, length:100
             });
             assert.equal(iter.list  , list);
             assert.equal(iter.length,  100);
         });
         it("next()", function() {
-            var iter = iterator.ListChoose.create({
+            var iter = timbre.modules.ListChooseIterator.create({
                 list:[0,1,2,3], length:8
             });
             var list = iter.list;
@@ -107,13 +106,13 @@ describe('timbre.modules.iterator', function() {
             assert.equal(iter.next(), null);
         });
     });
-    describe("Arithmetic", function() {
+    describe("ArithmeticIterator", function() {
         it("new", function() {
-            var iter = new iterator.Arithmetic();
-            assert.instanceOf(iter, iterator.Arithmetic);
+            var iter = new timbre.modules.ArithmeticIterator();
+            assert.instanceOf(iter, timbre.modules.ArithmeticIterator);
         });
         it("create()", function() {
-            var iter = iterator.Arithmetic.create({
+            var iter = timbre.modules.ArithmeticIterator.create({
                 start:100, grow:2, length:8
             });
             assert.equal(iter.start ,  100);
@@ -121,7 +120,7 @@ describe('timbre.modules.iterator', function() {
             assert.equal(iter.length,    8);
         });
         it("next()", function() {
-            var iter = iterator.Arithmetic.create({
+            var iter = timbre.modules.ArithmeticIterator.create({
                 start:100, grow:2, length:8
             });
             assert.equal(iter.next(), 100);
@@ -136,13 +135,13 @@ describe('timbre.modules.iterator', function() {
             assert.equal(iter.next(), null);
         });
     });
-    describe("Geometric", function() {
+    describe("GeometricIterator", function() {
         it("new", function() {
-            var iter = new iterator.Geometric();
-            assert.instanceOf(iter, iterator.Geometric);
+            var iter = new timbre.modules.GeometricIterator();
+            assert.instanceOf(iter, timbre.modules.GeometricIterator);
         });
         it("create()", function() {
-            var iter = iterator.Geometric.create({
+            var iter = timbre.modules.GeometricIterator.create({
                 start:1, grow:2, length:8
             });
             assert.equal(iter.start , 1);
@@ -150,7 +149,7 @@ describe('timbre.modules.iterator', function() {
             assert.equal(iter.length, 8);
         });
         it("next()", function() {
-            var iter = iterator.Geometric.create({
+            var iter = timbre.modules.GeometricIterator.create({
                 start:1, grow:2, length:8
             });
             assert.equal(iter.next(), 1);
@@ -165,13 +164,13 @@ describe('timbre.modules.iterator', function() {
             assert.equal(iter.next(), null);
         });
     });
-    describe("Drunk", function() {
+    describe("DrunkIterator", function() {
         it("new", function() {
-            var iter = new iterator.Drunk();
-            assert.instanceOf(iter, iterator.Drunk);
+            var iter = new timbre.modules.DrunkIterator();
+            assert.instanceOf(iter, timbre.modules.DrunkIterator);
         });
         it("create()", function() {
-            var iter = iterator.Drunk.create({
+            var iter = timbre.modules.DrunkIterator.create({
                 start:1, step:2, length:8, min:0, max:9
             });
             assert.equal(iter.start , 1);

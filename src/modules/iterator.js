@@ -2,7 +2,6 @@
     "use strict";
     
     var fn = timbre.fn;
-    var iterator = {};
     
     var Iterator = (function() {
         function Iterator() {
@@ -31,10 +30,10 @@
         
         return Iterator;
     })();
-    iterator.Iterator = Iterator;
+    timbre.modules.Iterator = Iterator;
     
-    var ListSequence = (function() {
-        function ListSequence(list, length, offset) {
+    var ListSequenceIterator = (function() {
+        function ListSequenceIterator(list, length, offset) {
             Iterator.call(this);
             length = (typeof length === "number") ? length : 1;
             if (length < 0) {
@@ -48,13 +47,13 @@
             this.length = length;
             this.offset = offset;
         }
-        fn.extend(ListSequence, Iterator);
+        fn.extend(ListSequenceIterator, Iterator);
         
-        ListSequence.create = function(opts) {
-            return new ListSequence(opts.list, opts.length, opts.offset);
+        ListSequenceIterator.create = function(opts) {
+            return new ListSequenceIterator(opts.list, opts.length, opts.offset);
         };
         
-        var $ = ListSequence.prototype;
+        var $ = ListSequenceIterator.prototype;
         
         $.next = function() {
             if (this.position >= this.length) {
@@ -77,13 +76,13 @@
             }
         };
         
-        return ListSequence;
+        return ListSequenceIterator;
     })();
-    iterator.ListSequence = ListSequence;
+    timbre.modules.ListSequenceIterator = ListSequenceIterator;
     
-    var ListShuffle = (function() {
-        function ListShuffle(list, length, seed) {
-            ListSequence.call(this, list.slice(0), length, 0);
+    var ListShuffleIterator = (function() {
+        function ListShuffleIterator(list, length, seed) {
+            ListSequenceIterator.call(this, list.slice(0), length, 0);
 
             if (seed) {
                 var r = new timbre.modules.Random(seed);
@@ -96,19 +95,19 @@
                 });
             }
         }
-        fn.extend(ListShuffle, ListSequence);
+        fn.extend(ListShuffleIterator, ListSequenceIterator);
 
-        ListShuffle.create = function(opts) {
-            return new ListShuffle(opts.list, opts.length, opts.seed);
+        ListShuffleIterator.create = function(opts) {
+            return new ListShuffleIterator(opts.list, opts.length, opts.seed);
         };
         
-        return ListShuffle;
+        return ListShuffleIterator;
     })();
-    iterator.ListShuffle = ListShuffle;
+    timbre.modules.ListShuffleIterator = ListShuffleIterator;
 
-    var ListChoose = (function() {
-        function ListChoose(list, length, seed) {
-            ListSequence.call(this, list, length);
+    var ListChooseIterator = (function() {
+        function ListChooseIterator(list, length, seed) {
+            ListSequenceIterator.call(this, list, length);
             if (seed) {
                 var r = new timbre.modules.Random(seed);
                 this._rnd = r.next.bind(r);
@@ -116,13 +115,13 @@
                 this._rnd = Math.random;
             }
         }
-        fn.extend(ListChoose, ListSequence);
+        fn.extend(ListChooseIterator, ListSequenceIterator);
         
-        ListChoose.create = function(opts) {
-            return new ListChoose(opts.list, opts.length, opts.seed);
+        ListChooseIterator.create = function(opts) {
+            return new ListChooseIterator(opts.list, opts.length, opts.seed);
         };
         
-        var $ = ListChoose.prototype;
+        var $ = ListChooseIterator.prototype;
         
         $.next = function() {
             if (this.position >= this.length) {
@@ -145,12 +144,12 @@
             }
         };
         
-        return ListChoose;
+        return ListChooseIterator;
     })();
-    iterator.ListChoose = ListChoose;
+    timbre.modules.ListChooseIterator = ListChooseIterator;
     
-    var Arithmetic = (function() {
-        function Arithmetic(start, grow, length) {
+    var ArithmeticIterator = (function() {
+        function ArithmeticIterator(start, grow, length) {
             Iterator.call(this);
             start = (typeof start === "number") ? start : 0;
             length = (typeof length === "number") ? length : Infinity;
@@ -162,13 +161,13 @@
             this.grow   = grow || 1;
             this.length = length;
         }
-        fn.extend(Arithmetic, Iterator);
+        fn.extend(ArithmeticIterator, Iterator);
         
-        Arithmetic.create = function(opts) {
-            return new Arithmetic(opts.start, opts.grow, opts.length);
+        ArithmeticIterator.create = function(opts) {
+            return new ArithmeticIterator(opts.start, opts.grow, opts.length);
         };
         
-        var $ = Arithmetic.prototype;
+        var $ = ArithmeticIterator.prototype;
         
         $.next = function() {
             if (this.position === 0) {
@@ -185,12 +184,12 @@
             return null;
         };
         
-        return Arithmetic;
+        return ArithmeticIterator;
     })();
-    iterator.Arithmetic = Arithmetic;
+    timbre.modules.ArithmeticIterator = ArithmeticIterator;
     
-    var Geometric = (function() {
-        function Geometric(start, grow, length) {
+    var GeometricIterator = (function() {
+        function GeometricIterator(start, grow, length) {
             Iterator.call(this);
             start = (typeof start === "number") ? start : 0;
             length = (typeof length === "number") ? length : Infinity;
@@ -202,13 +201,13 @@
             this.grow   = grow || 1;
             this.length = length;
         }
-        fn.extend(Geometric, Iterator);
+        fn.extend(GeometricIterator, Iterator);
         
-        Geometric.create = function(opts) {
-            return new Geometric(opts.start, opts.grow, opts.length);
+        GeometricIterator.create = function(opts) {
+            return new GeometricIterator(opts.start, opts.grow, opts.length);
         };
         
-        var $ = Geometric.prototype;
+        var $ = GeometricIterator.prototype;
         
         $.next = function() {
             if (this.position === 0) {
@@ -225,12 +224,12 @@
             return null;
         };
         
-        return Geometric;
+        return GeometricIterator;
     })();
-    iterator.Geometric = Geometric;
-
-    var Drunk = (function() {
-        function Drunk(start, step, length, min, max, seed) {
+    timbre.modules.GeometricIterator = GeometricIterator;
+    
+    var DrunkIterator = (function() {
+        function DrunkIterator(start, step, length, min, max, seed) {
             Iterator.call(this);
             start = (typeof start === "number") ? start : 0;
             length = (typeof length === "number") ? length : Infinity;
@@ -252,13 +251,13 @@
                 this._rnd = Math.random;
             }
         }
-        fn.extend(Drunk, Iterator);
+        fn.extend(DrunkIterator, Iterator);
         
-        Drunk.create = function(opts) {
-            return new Drunk(opts.start, opts.step, opts.length, opts.min, opts.max, opts.seed);
+        DrunkIterator.create = function(opts) {
+            return new DrunkIterator(opts.start, opts.step, opts.length, opts.min, opts.max, opts.seed);
         };
         
-        var $ = Drunk.prototype;
+        var $ = DrunkIterator.prototype;
         
         $.next = function() {
             if (this.position === 0) {
@@ -279,10 +278,8 @@
             return null;
         };
         
-        return Drunk;
+        return DrunkIterator;
     })();
-    iterator.Drunk = Drunk;
-    
-    timbre.modules.iterator = iterator;
+    timbre.modules.DrunkIterator = DrunkIterator;
     
 })();

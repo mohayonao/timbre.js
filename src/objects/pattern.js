@@ -117,20 +117,16 @@
     };
     
     
-    
-    
     var isDictionary = function(object) {
         return (typeof object === "object" && object.constructor === Object);
     };
-    
-    var iterator = timbre.modules.iterator;
     
     fn.register("p.seq", function(_args) {
         var opts = isDictionary(_args[0]) ? _args[0] : {
             list:[], length:1, offset:0
         };
         var p = new PatternNode(_args);
-        p._.iter = new iterator.ListSequence.create(opts);
+        p._.iter = new timbre.modules.ListSequenceIterator.create(opts);
         return p;
     });
     
@@ -139,7 +135,7 @@
             list:[], length:1
         };
         var p = new PatternNode(_args);
-        p._.iter = new iterator.ListShuffle.create(opts);
+        p._.iter = new timbre.modules.ListShuffleIterator.create(opts);
         return p;
     });
     
@@ -148,7 +144,7 @@
             list:[], length:1
         };
         var p = new PatternNode(_args);
-        p._.iter = new iterator.ListChoose.create(opts);
+        p._.iter = new timbre.modules.ListChooseIterator.create(opts);
         return p;
     });
     
@@ -157,7 +153,7 @@
             start:0, grow:1, length:Infinity
         };
         var p = new PatternNode(_args);
-        p._.iter = new iterator.Arithmetic.create(opts);
+        p._.iter = new timbre.modules.ArithmeticIterator.create(opts);
         return p;
     });
     
@@ -166,7 +162,7 @@
             start:0, grow:1, length:Infinity
         };
         var p = new PatternNode(_args);
-        p._.iter = new iterator.Geometric.create(opts);
+        p._.iter = new timbre.modules.GeometricIterator.create(opts);
         return p;
     });
     
@@ -175,7 +171,7 @@
             start:0, step:1, length:Infinity
         };
         var p = new PatternNode(_args);
-        p._.iter = new iterator.Drunk.create(opts);
+        p._.iter = new timbre.modules.DrunkIterator.create(opts);
         return p;
     });
     
