@@ -89,7 +89,7 @@
         instance._.emit("init");
         
         return instance;
-    };
+    }.bind(null);
     
     var fn      = timbre.fn    = {};
     var modules = timbre.modules = {};
