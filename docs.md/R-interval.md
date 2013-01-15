@@ -22,7 +22,7 @@ env.play();
 ```
 
 ## Properties ##
-- `interval` _(T Object or timevalue)_
+- `i`, `interval` _(T-Object or timevalue)_
   - 入力オブジェクトに対して `bang()` を呼び出す間隔を設定します
 - `delay` _(Number or timevalue)_
   - 待機時間を設定します

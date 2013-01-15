@@ -16,9 +16,9 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 ## Properties ##
 - `time` _(Number or timevalue)_
   - ディレイタイム. デフォルト値は **100** ms
-- `feedback` _(T Object)_
+- `fb`, `feedback` _(T-Object)_
   - フィードバッック. デフォルト値は **0.25**
-- `wet` _(T Object)_
+- `wet` _(T-Object)_
   - エフェクターの利き具合. デフォルト値は **0.2**
 
 ## Source ##

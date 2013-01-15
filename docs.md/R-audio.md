@@ -30,7 +30,7 @@ T("audio").on("ended", function() {
 
 ## Methods ##
 - {deferred} `load(src, done, fail)`
-  - オーディオファイルを読み込みます
+  - オーディオファイルを読み込みます. `promise` オブジェクトが返ります.
 
 ## Events ##
 - `load`

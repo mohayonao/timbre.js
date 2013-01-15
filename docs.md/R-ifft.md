@@ -19,8 +19,8 @@ T("ifft", {real:real, imag:imag}).play();
 ```
 
 ## Properties ##
-- `real` _(T Object)_
-- `imag` _(T Object)_
+- `real` _(T-Object)_
+- `imag` _(T-Object)_
 
 ## See Also ##
 - [T("fft")](./fft.html)

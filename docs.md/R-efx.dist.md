@@ -16,9 +16,9 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 ```
 
 ## Properties ##
-- `preGain` _(T Object)_
+- `pre`, `preGain` _(T-Object)_
   - デフォルト値は **-60** dB
-- `postGain` _(T Object)_
+- `post`, `postGain` _(T-Object)_
   - デフォルト値は **18** dB
 - `cutoff` _(Number)_
   - ハイカット周波数. 0 のときOFF. デフォルト値は **0**

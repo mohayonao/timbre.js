@@ -17,15 +17,21 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 
 ## Properties ##
 - `type` _(String)_
-- `freq` _(T object)_
-- `Q` _(T object)_
-- `gain` _(T object)_
+  - **Filter Types** を参照してください
+- `freq`, `frequency`, `cutoff` _(T-Object or timevalue)_
+  - カットオフ周波数
+- `Q` _(T-Object)_
+  - Q
+- `gain` _(T-Object)_
+  - ゲイン
 
 ## Methods ##
 - `plot(opts)`
   - フィルタ特性を描画します
 
 ## Filter Types ##
+`type` プロパティで指定できるフィルターの種類です. エイリアスが設定されているので `T("lowpass")` や `T("LPF")` のように直接生成することもできます.
+
 ### Low-Pass Filter ###
 
 (canvas lowpass w:240 h:80)
