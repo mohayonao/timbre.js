@@ -16,25 +16,9 @@
     fn.extend(IFFTNode);
     
     var $ = IFFTNode.prototype;
-    
-    Object.defineProperties($, {
-        real: {
-            set: function(value) {
-                this._.real = timbre(value);
-            },
-            get: function() {
-                return this._.real;
-            }
-        },
-        imag: {
-            set: function(value) {
-                this._.imag = timbre(value);
-            },
-            get: function() {
-                return this._.imag;
-            }
-        }
-    });
+
+    var ATTRS_REAL = fn.setAttrs($, "real");
+    var ATTRS_IMAG = fn.setAttrs($, "imag");
     
     $.process = function(tickID) {
         var _ = this._;
@@ -43,11 +27,11 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            if (_.real && _.imag) {
+            if (this.attrs[ATTRS_REAL] && this.attrs[ATTRS_IMAG]) {
                 var real = _.realBuffer;
                 var imag = _.imagBuffer;
-                var _real = _.real.process(tickID);
-                var _imag = _.imag.process(tickID);
+                var _real = this.attrs[ATTRS_REAL].process(tickID);
+                var _imag = this.attrs[ATTRS_IMAG].process(tickID);
                 
                 real.set(_real);
                 imag.set(_imag);

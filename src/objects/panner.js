@@ -8,31 +8,16 @@
         fn.stereo(this);
         fn.fixAR(this);
         
+        this.attrs[ATTRS_PAN] = timbre(0);
+        
         this._.panL = 0.5;
         this._.panR = 0.5;
-        
-        this.once("init", oninit);
     }
     fn.extend(PannerNode);
     
-    var oninit = function() {
-        if (!this._.value) {
-            this.value = 0;
-        }
-    };
-    
     var $ = PannerNode.prototype;
     
-    Object.defineProperties($, {
-        value: {
-            set: function(value) {
-                this._.value = timbre(value);
-            },
-            get: function() {
-                return this._.value;
-            }
-        }
-    });
+    var ATTRS_PAN = fn.setAttrs($, "value");
     
     $.process = function(tickID) {
         var _ = this._;
@@ -43,7 +28,7 @@
             
             var changed = false;
             
-            var value = _.value.process(tickID)[0];
+            var value = this.attrs[ATTRS_PAN].process(tickID)[0];
             if (_.prevValue !== value) {
                 _.prevValue = value;
                 changed = true;

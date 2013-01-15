@@ -2,11 +2,13 @@
     "use strict";
     
     var fn = timbre.fn;
+    var timevalue  = timbre.timevalue;
     
     function PluckNode(_args) {
         timbre.Object.call(this, _args);
         
-        this._.freq   = 440;
+        this.attrs[ATTRS_FREQ] = timbre(440);
+        
         this._.buffer = null;
         this._.readIndex  = 0;
         this._.writeIndex = 0;
@@ -15,20 +17,22 @@
     
     var $ = PluckNode.prototype;
     
-    Object.defineProperties($, {
-        freq: {
-            set: function(value) {
-                this._.freq = timbre(value);
-            },
-            get: function() {
-                return this._.freq;
+    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"], {
+        conv: function(value) {
+            if (typeof value === "string") {
+                value = timevalue(value);
+                if (value <= 0) {
+                    return 0;
+                }
+                return 1000 / value;
             }
+            return value;
         }
     });
     
     $.bang = function() {
         var _ = this._;
-        var freq = _.freq.valueOf();
+        var freq = this.attrs[ATTRS_FREQ].valueOf();
         var size   = (timbre.samplerate / freq + 0.5)|0;
         var buffer = _.buffer = new Float32Array(size << 1);
         for (var i = size; i--; ) {

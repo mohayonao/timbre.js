@@ -8,6 +8,8 @@
     function OscNode(_args) {
         timbre.Object.call(this, _args);
         
+        this.attrs[ATTRS_FREQ] = timbre(440);
+        
         var _ = this._;
         _.osc = new Oscillator(timbre.samplerate);
         _.tmp = new Float32Array(this.cell.length);
@@ -22,9 +24,6 @@
         if (!this.wave) {
             this.wave = "sin";
         }
-        if (!_.freq) {
-            this.freq = 440;
-        }
         _.plotData = _.osc.wave;
         _.plotLineWidth = 2;
         _.plotCyclic = true;
@@ -33,6 +32,19 @@
     
     var $ = OscNode.prototype;
     
+    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"], {
+        conv: function(value) {
+            if (typeof value === "string") {
+                value = timevalue(value);
+                if (value <= 0) {
+                    return 0;
+                }
+                return 1000 / value;
+            }
+            return value;
+        }
+    });
+    
     Object.defineProperties($, {
         wave: {
             set: function(value) {
@@ -40,21 +52,6 @@
             },
             get: function() {
                 return this._.osc.wave;
-            }
-        },
-        freq: {
-            set: function(value) {
-                if (typeof value === "string") {
-                    value = timevalue(value);
-                    if (value <= 0) {
-                        return;
-                    }
-                    value = 1000 / value;
-                }
-                this._.freq = timbre(value);
-            },
-            get: function() {
-                return this._.freq;
             }
         }
     });
@@ -83,22 +80,23 @@
                 }
             }
             
-            var osc  = _.osc;
-            var freq = _.freq.process(tickID);
+            var osc   = _.osc;
+            var  freq = this.attrs[ATTRS_FREQ];
+            var _freq = freq.process(tickID);
             
             if (_.ar) { // audio-rate
                 var tmp  = _.tmp;
-                if (_.freq.isAr) {
-                    osc.processWithFreqArray(tmp, freq);
+                if (freq.isAr) {
+                    osc.processWithFreqArray(tmp, _freq);
                 } else { // _.freq.isKr
-                    osc.frequency = freq[0];
+                    osc.frequency = _freq[0];
                     osc.process(tmp);
                 }
                 for (i = imax; i--; ) {
                     cell[i] = cell[i] * tmp[i];
                 }
             } else {    // control-rate
-                osc.frequency = freq[0];
+                osc.frequency = _freq[0];
                 var value = osc.next();
                 for (i = imax; i--; ) {
                     cell[i] *= value;

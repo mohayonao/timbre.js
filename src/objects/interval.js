@@ -9,6 +9,8 @@
         fn.timer(this);
         fn.fixKR(this);
         
+        this.attrs[ATTRS_I] = timbre(1000);
+        
         var _ = this._;
         _.count = 0;
         _.delay   = 0;
@@ -20,16 +22,9 @@
         _.countSamples = 0;
         _.isEnded = false;
         
-        this.once("init", oninit);
         this.on("start", onstart);
     }
     fn.extend(IntervalNode);
-    
-    var oninit = function() {
-        if (!this._.interval) {
-            this.interval = 1000;
-        }
-    };
     
     var onstart = function() {
         var _ = this._;
@@ -46,19 +41,20 @@
     };
     
     var $ = IntervalNode.prototype;
+
+    var ATTRS_I = fn.setAttrs($, ["interval", "i"], {
+        conv: function(value) {
+            if (typeof value === "string") {
+                value = timevalue(value);
+                if (value <= 0) {
+                    return 0;
+                }
+            }
+            return value;
+        }
+    });
     
     Object.defineProperties($, {
-        interval: {
-            set: function(value) {
-                if (typeof value === "string") {
-                    value = timevalue(value);
-                }
-                this._.interval = timbre(value);
-            },
-            get: function() {
-                return this._.interval;
-            }
-        },
         delay: {
             set: function(value) {
                 if (typeof value === "string") {
@@ -127,12 +123,13 @@
             if (_.delaySamples > 0) {
                 _.delaySamples -= cell.length;
             }
-            _.interval.process(tickID);
+            
+            var interval = this.attrs[ATTRS_I].process(tickID)[0];
             
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;
                 if (_.countSamples <= 0) {
-                    _.countSamples += (timbre.samplerate * _.interval.valueOf() * 0.001)|0;
+                    _.countSamples += (timbre.samplerate * interval * 0.001)|0;
                     var inputs = this.inputs;
                     var count  = _.count;
                     var x = count * _.mul + _.add;

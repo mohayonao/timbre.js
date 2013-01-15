@@ -9,6 +9,8 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
+        this.attrs[ATTRS_FREQ] = timbre(440);
+        
         var _ = this._;
         _.osc1 = new Oscillator(timbre.samplerate);
         _.osc2 = new Oscillator(timbre.samplerate);
@@ -22,16 +24,25 @@
     fn.extend(COscNode);
     
     var oninit = function() {
-        var _ = this._;
         if (!this.wave) {
             this.wave = "sin";
-        }
-        if (!_.freq) {
-            this.freq = 440;
         }
     };
     
     var $ = COscNode.prototype;
+    
+    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"], {
+        conv: function(value) {
+            if (typeof value === "string") {
+                value = timevalue(value);
+                if (value <= 0) {
+                    return 0;
+                }
+                return 1000 / value;
+            }
+            return value;
+        }
+    });
     
     Object.defineProperties($, {
         wave: {
@@ -41,21 +52,6 @@
             },
             get: function() {
                 return this._.osc1.wave;
-            }
-        },
-        freq: {
-            set: function(value) {
-                if (typeof value === "string") {
-                    value = timevalue(value);
-                    if (value <= 0) {
-                        return;
-                    }
-                    value = 1000 / value;
-                }
-                this._.freq = timbre(value);
-            },
-            get: function() {
-                return this._.freq;
             }
         },
         beats: {
@@ -85,7 +81,7 @@
             this.tickID = tickID;
             
             var i, imax = cell.length;
-            var freq = _.freq.process(tickID)[0];
+            var freq = this.attrs[ATTRS_FREQ].process(tickID)[0];
             var osc1 = _.osc1, osc2 = _.osc2, tmp = _.tmp;
             
             osc1.frequency = freq - (_.beats * 0.5);

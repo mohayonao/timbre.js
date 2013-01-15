@@ -9,6 +9,9 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
+        this.attrs[ATTRS_FB] = timbre(0.25);
+        this.attrs[ATTRS_WET] = timbre(0.2);
+        
         this._.delay = new EfxDelay();
         
         this.once("init", oninit);
@@ -19,15 +22,12 @@
         if (!this._.time) {
             this.time = 100;
         }
-        if (!this._.feedback) {
-            this.feedback = 0.25;
-        }
-        if (!this._.wet) {
-            this.wet = 0.2;
-        }
     };
     
     var $ = EfxDelayNode.prototype;
+    
+    var ATTRS_FB  = fn.setAttrs($, ["feedback", "fb"]);
+    var ATTRS_WET = fn.setAttrs($, "wet");
     
     Object.defineProperties($, {
         time: {
@@ -45,41 +45,25 @@
             get: function() {
                 return this._.time;
             }
-        },
-        feedback: {
-            set: function(value) {
-                this._.feedback = timbre(value);
-            },
-            get: function() {
-                return this._.feedback;
-            }
-        },
-        wet: {
-            set: function(value) {
-                this._.wet = timbre(value);
-            },
-            get: function() {
-                return this._.wet;
-            }
         }
     });
     
     $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
             var changed = false;
-            var feedback = _.feedback.process(tickID)[0];
+            var feedback = this.attrs[ATTRS_FB].process(tickID)[0];
             if (_.prevFeedback !== feedback) {
                 _.prevFeedback = feedback;
                 changed = true;
             }
-            var wet = _.wet.process(tickID)[0];
+            var wet = this.attrs[ATTRS_WET].process(tickID)[0];
             if (_.prevWet !== wet) {
                 _.prevWet = wet;
                 changed = true;

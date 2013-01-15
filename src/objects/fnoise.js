@@ -8,42 +8,33 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
+        this.attrs[ATTRS_FREQ] = timbre(440);
+        
         var _ = this._;
         _.samplerate = timbre.samplerate;
         _.reg = 0x8000;
         _.shortFlag = false;
         _.phase     = 0;
         _.lastValue = 0;
-        
-        this.once("init", oninit);
     }
     fn.extend(FNoiseNode);
     
-    var oninit = function() {
-        var _ = this._;
-        if (!_.freq) {
-            this.freq = 440;
-        }
-    };
-    
     var $ = FNoiseNode.prototype;
+
+    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"], {
+        conv: function(value) {
+            if (typeof value === "string") {
+                value = timevalue(value);
+                if (value <= 0) {
+                    return 0;
+                }
+                return 1000 / value;
+            }
+            return value;
+        }
+    });
     
     Object.defineProperties($, {
-        freq: {
-            set: function(value) {
-                if (typeof value === "string") {
-                    value = timevalue(value);
-                    if (value <= 0) {
-                        return;
-                    }
-                    value = 1000 / value;
-                }
-                this._.freq = timbre(value);
-            },
-            get: function() {
-                return this._.freq;
-            }
-        },
         shortFlag: {
             set: function(value) {
                 this._.shortFlag = !!value;
@@ -63,7 +54,7 @@
 
             var lastValue = _.lastValue;
             var phase     = _.phase;
-            var phaseStep = _.freq.process(tickID)[0] / _.samplerate;
+            var phaseStep = this.attrs[ATTRS_FREQ].process(tickID)[0] / _.samplerate;
             var reg = _.reg;
             var mul = _.mul, add = _.add;
             var i, imax;

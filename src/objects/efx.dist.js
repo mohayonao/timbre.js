@@ -7,44 +7,23 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
 
+        this.attrs[ATTRS_PRE]  = timbre(-60);
+        this.attrs[ATTRS_POST] = timbre( 18);
+        
         var _ = this._;
         _.samplerate = timbre.samplerate;
         _.x1 = _.x2 = _.y1 = _.y2 = 0;
         _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
         _.cutoff = 0;
-        
-        this.once("init", oninit);
     }
     fn.extend(EfxDistNode);
     
-    var oninit = function() {
-        if (!this._.preGain) {
-            this.preGain = -60;
-        }
-        if (!this._.postGain) {
-            this.postGain = 18;
-        }
-    };
-    
     var $ = EfxDistNode.prototype;
     
+    var ATTRS_PRE  = fn.setAttrs($, ["pre", "preGain"]);
+    var ATTRS_POST = fn.setAttrs($, ["post", "postGain"]);
+    
     Object.defineProperties($, {
-        preGain: {
-            set: function(value) {
-                this._.preGain = timbre(value);
-            },
-            get: function() {
-                return this._.preGain;
-            }
-        },
-        postGain: {
-            set: function(value) {
-                this._.postGain = timbre(value);
-            },
-            get: function() {
-                return this._.postGain;
-            }
-        },
         cutoff: {
             set: function(value) {
                 if (typeof value === "number" && value > 0) {
@@ -68,12 +47,12 @@
             
             var changed = false;
 
-            var preGain = _.preGain.process(tickID)[0];
+            var preGain = this.attrs[ATTRS_PRE].process(tickID)[0];
             if (_.prevPreGain !== preGain) {
                 _.prevPreGain = preGain;
                 changed = true;
             }
-            var postGain = _.postGain.process(tickID)[0];
+            var postGain = this.attrs[ATTRS_POST].process(tickID)[0];
             if (_.prevPostGain !== postGain) {
                 _.prevPostGain = postGain;
                 changed = true;

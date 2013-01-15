@@ -404,6 +404,48 @@
     };
     fn.nextTick = __nextTick;
     
+    var __setAttrs = function(p, names, opts) {
+        if (p.attrIndex === undefined) {
+            p.attrIndex = 0;
+        } else {
+            p.attrIndex += 1;
+        }
+        var index = p.attrIndex;
+        if (typeof names === "string") {
+            names = [names];
+        }
+        
+        var desc;
+        if (opts && opts.conv) {
+            var conv = opts.conv;
+            desc = {
+                set: function(value) {
+                    this.attrs[index] = timbre(conv(value));
+                },
+                get: function() {
+                    return this.attrs[index];
+                }
+            };
+            names.forEach(function(name) {
+                Object.defineProperty(p, name, desc);
+            });
+        } else {
+            desc = {
+                set: function(value) {
+                    this.attrs[index] = timbre(value);
+                },
+                get: function() {
+                    return this.attrs[index];
+                }
+            };
+            names.forEach(function(name) {
+                Object.defineProperty(p, name, desc);
+            });
+        }
+        return index;
+    };
+    fn.setAttrs = __setAttrs;
+    
     var __fixAR = function(object) {
         object._.ar = true;
         object._.aronly = true;
@@ -624,6 +666,7 @@
             this.tickID = -1;
             this.cell   = new Float32Array(_sys.cellsize);
             this.inputs = _args.map(timbre);
+            this.attrs  = [];
             
             this._.ar  = true;
             this._.mul = 1;
