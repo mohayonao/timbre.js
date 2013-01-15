@@ -226,36 +226,7 @@
     };
     
     timbre.rec = function() {
-        _sys.rec.apply(_sys, arguments);
-        return timbre;
-    };
-    
-    timbre.then = function() {
-        _sys.then.apply(_sys, arguments);
-        return timbre;
-    };
-    
-    timbre.done = function() {
-        _sys.done.apply(_sys, arguments);
-        return timbre;
-    };
-    
-    timbre.fail = function() {
-        _sys.fail.apply(_sys, arguments);
-        return timbre;
-    };
-    
-    timbre.always = function() {
-        _sys.always.apply(_sys, arguments);
-        return timbre;
-    };
-    
-    timbre.promise = function() {
-        return _sys.promise.apply(_sys, arguments);
-    };
-    
-    timbre.ready = timbre.when = function() {
-        return _sys.ready.apply(_sys, arguments);
+        return _sys.rec.apply(_sys, arguments);
     };
     
     timbre.use = function(name) {
@@ -1447,12 +1418,6 @@
                     }
                 }
             });
-            if (this.status === STATUS_REC) {
-                if (this._.deferred) {
-                    this._.deferred.reject();
-                }
-                this._.deferred = null;
-            }
             return this;
         };
         
@@ -1560,15 +1525,16 @@
         };
         
         $.rec = function() {
-            if (this.status !== STATUS_NONE) {
-                // throw error??
-                console.log("status is not none", this.status);
-                return;
-            }
+            var dfd = new modules.Deferred(this);
+            
             if (this._.deferred) {
                 console.warn("rec deferred is exists??");
-                // throw error??
-                return;
+                return dfd.reject().promise();
+            }
+            
+            if (this.status !== STATUS_NONE) {
+                console.log("status is not none", this.status);
+                return dfd.reject().promise();
             }
             
             var i = 0, args = arguments;
@@ -1578,13 +1544,12 @@
             if (typeof func !== "function") {
                 // throw error??
                 console.warn("no function");
-                return;
+                return dfd.reject().promise();
             }
             
+            this._.deferred = dfd;
             this.status = STATUS_REC;
             this.reset();
-            
-            this._.deferred = new modules.Deferred(this);
             
             var rec_inlet = new SystemInlet();
             var inlet_dfd = new modules.Deferred(this);
@@ -1625,6 +1590,8 @@
             func(outlet);
             
             setTimeout(delayProcess.bind(this), 10);
+            
+            return dfd.promise();
         };
         
         var recdone = function() {
@@ -1687,35 +1654,6 @@
             var args = [].concat.apply([result], arguments);
             this._.deferred.resolve.apply(this._.deferred, args);
             this._.deferred = null;
-        };
-        
-        $.then = function() {
-            var dfd = this._.deferred || new modules.Deferred().resolve().promise();
-            dfd.then.apply(dfd, arguments);
-        };
-
-        $.done = function() {
-            var dfd = this._.deferred || new modules.Deferred().resolve().promise();
-            dfd.done.apply(dfd, arguments);
-        };
-        
-        $.fail = function() {
-            var dfd = this._.deferred || new modules.Deferred().resolve().promise();
-            dfd.fail.apply(dfd, arguments);
-        };
-        
-        $.always = function() {
-            var dfd = this._.deferred || new modules.Deferred().resolve().promise();
-            dfd.alywas.apply(dfd, arguments);
-        };
-        
-        $.promise = function() {
-            var dfd = this._.deferred || new modules.Deferred().resolve();
-            return dfd.promise();
-        };
-        
-        $.ready = function() {
-            return modules.Deferred.when.apply(null, arguments);
         };
         
         // EventEmitter
