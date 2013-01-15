@@ -22,11 +22,6 @@
         
         this.once("init", oninit);
         this.on("start", onstart);
-        
-        if (_.deferred) {
-            fn.deferred(this);
-            this.on("stop", onstop);
-        }
     }
     fn.extend(IntervalNode);
     
@@ -45,31 +40,9 @@
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
     });
-    var onstop = function() {
-        var _ = this._;
-        if (_.deferred && !this.isResolved) {
-            _.isEnded = true;
-            _.waitSamples = Infinity;
-            _.deferred.rejectWith(this);
-            this.start = this.stop = fn.nop;
-        }
-    };
-    Object.defineProperty(onstop, "unremovable", {
-        value:true, writable:false
-    });
     var onended = function() {
-        var _ = this._;
-        _.isEnded = true;
-        if (_.deferred && !this.isResolved) {
-            var stop = this.stop;
-            this.start = this.stop = fn.nop;
-            _.emit("ended");
-            _.deferred.resolveWith(this);
-            stop.call(this);
-        } else {
-            this.stop();
-            _.emit("ended");
-        }
+        this._.isEnded = true;
+        this._.emit("ended");
     };
     
     var $ = IntervalNode.prototype;

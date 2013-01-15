@@ -27,19 +27,6 @@ T("timeout", {timeout:1000}).on("ended", function() {
 ## Events ##
 - `ended` タイムアウト時に発生します。
 
-## Note ##
-- オブジェクト生成時に `deferred` を設定すると Deferred オブジェクトとなり、各Deferredメソッドがサポートされ、タイムアウト時に `resolve`、タイムアウト前の停止時に `reject` されます。以下の例では Deferred な `T("timeout")` を jQuery の when で待機しています。
-
-```timbre
-var sin = T("sin", {mul:0.5}).play();
-
-var timeout = T("timeout", {deferred:true}).set({timeout:500}).start();
-
-$.when(timeout.promise()).then(function() {
-    sin.pause();
-});
-```
-
 ## See Also ##
 - [T("interval")](./interval.html)
 

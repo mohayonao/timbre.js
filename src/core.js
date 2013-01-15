@@ -547,52 +547,6 @@
     })();
     fn.listener = __listener;
     
-    var __deferred = (function() {
-        var then = function() {
-            var dfd = this._.deferred;
-            dfd.then.apply(dfd, arguments);
-            return this;
-        };
-        var done = function() {
-            var dfd = this._.deferred;
-            dfd.done.apply(dfd, arguments);
-            return this;
-        };
-        var fail = function() {
-            var dfd = this._.deferred;
-            dfd.fail.apply(dfd, arguments);
-            return this;
-        };
-        var pipe = function() {
-            var dfd = this._.deferred;
-            return dfd.pipe.apply(dfd, arguments);
-        };
-        var always = function() {
-            var dfd = this._.deferred;
-            dfd.always.apply(dfd, arguments);
-            return this;
-        };
-        var isResolved = function() {
-            return this._.deferred.isResolved();
-        };
-        var promise = function() {
-            return this._.deferred.promise();
-        };
-        return function(object) {
-            object._.deferred = new modules.Deferred();
-            object.then = then.bind(object);
-            object.done = done.bind(object);
-            object.fail = fail.bind(object);
-            object.pipe = pipe.bind(object);
-            object.always = always.bind(object);
-            object.promise = promise.bind(object);
-            Object.defineProperty(object, "isResolved", {
-                get: isResolved.bind(object)
-            });
-        };
-    })();
-    fn.deferred = __deferred;
-    
     var __onended = function(object, lastValue) {
         var cell = object.cell;
         var cellL, cellR;
@@ -694,10 +648,6 @@
                 this.once("init", function() {
                     this.set(params);
                 });
-                if (params.deferred) {
-                    this._.deferred = true;
-                    delete params.deferred;
-                }
             }
             
             this.tickID = -1;
@@ -1799,6 +1749,13 @@
             this.maxSamplerate     = context.sampleRate;
             this.defaultSamplerate = context.sampleRate;
             this.env = "webkit";
+            
+            var ua = navigator.userAgent;
+            if (ua.match(/linux/i)) {
+                sys.streammsec *= 8;
+            } else if (ua.match(/win(dows)?\s*(nt 5\.1|xp)/i)) {
+                sys.streammsec *= 4;
+            }
             
             this.play = function() {
                 var onaudioprocess;

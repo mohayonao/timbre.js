@@ -37,27 +37,6 @@ describe('T("timeout")', function() {
         }).start();
         t.start();
     });
-    it("cannot restart with 'deferred' option", function(done) {
-        var check = true;
-        T("timeout", {timeout:20, deferred:true}, function() {
-            assert(check);
-        }).then(function() {
-            check = false;
-            this.start();
-            done();
-        }).start();
-    });
-    if (timbre.envtype === "browser") {
-        describe("jQuery", function() {
-            it("$.Deferred", function(done) {
-                var t = T("timeout", {timeout:100, deferred:true});
-                $.when(t.promise()).then(function() {
-                    done();
-                });
-                t.start();
-            });
-        });
-    }
     after(function() {
         assert.equal(timbre.isPlaying, false);
     });

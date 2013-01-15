@@ -18,11 +18,6 @@
         
         this.once("init", oninit);
         this.on("start", onstart);
-        
-        if (_.deferred) {
-            fn.deferred(this);
-            this.on("stop", onstop);
-        }
     }
     
     fn.extend(TimeoutNode);
@@ -39,31 +34,9 @@
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
     });
-    var onstop = function() {
-        var _ = this._;
-        if (_.deferred && !this.isResolved) {
-            _.samplesMax = Infinity;
-            _.isEnded = true;
-            _.deferred.rejectWith(this);
-            this.start = this.stop = fn.nop;
-        }
-    };
-    Object.defineProperty(onstop, "unremovable", {
-        value:true, writable:false
-    });
     var onended = function() {
-        var _ = this._;
-        _.isEnded = true;
-        if (_.deferred && !this.isResolved) {
-            _.samplesMax = Infinity;
-            _.emit("ended");
-            _.deferred.resolveWith(this);
-            var stop = this.stop;
-            this.start = this.stop = fn.nop;
-            stop.call(this);
-        } else {
-            _.emit("ended");
-        }
+        this._.isEnded = true;
+        this._.emit("ended");
     };
     
     var $ = TimeoutNode.prototype;

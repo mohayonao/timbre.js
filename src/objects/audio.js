@@ -2,11 +2,10 @@
     "use strict";
 
     var fn = timbre.fn;
+    var modules = timbre.modules;
     
     fn.register("audio", function(_args) {
         var instance = timbre.apply(null, ["buffer"].concat(_args));
-        
-        fn.deferred(instance);
         
         instance._.isLoaded = false;
         instance._.isEnded  = true;
@@ -54,7 +53,9 @@
         } else if (timbre.envtype === "node") {
             return getLoadFunctionForNodeJS();
         } else {
-            return fn.nop;
+            return function() {
+                return new modules.Deferred().reject().promise();
+            };
         }
     })();
     
@@ -62,11 +63,7 @@
     function getLoadFunctionForBrowser() {
         return function() {
             var self = this, _ = this._;
-            
-            if (_.deferred.isResolve) {
-                // throw error ??
-                return this;
-            }
+            var dfd = new modules.Deferred();
             
             var args = arguments, i = 0;
             if (typeof args[i] === "string") {
@@ -75,11 +72,8 @@
                 _.src = args[i++];
             }
             if (!_.src) {
-                // throw error ??
-                return this;
+                return dfd.reject().promise();
             }
-            
-            var dfd = _.deferred;
             
             dfd.done(function() {
                 this._.emit("done");
@@ -149,7 +143,7 @@
                     dfd.reject();
                 }
             }
-            return this;
+            return dfd.promise();
         };
     }
     
@@ -158,22 +152,15 @@
         return function() {
             var fs = require("fs");
             var self = this, _ = this._;
-            
-            if (_.deferred.isResolve) {
-                // throw error ??
-                return this;
-            }
+            var dfd = new modules.Deferred();
             
             var args = arguments, i = 0;
             if (typeof args[i] === "string") {
                 _.src = args[i++];
             }
             if (!_.src) {
-                // throw error ??
-                return this;
+                return dfd.reject().promise();
             }
-            
-            var dfd = _.deferred;
             
             if (typeof args[i] === "function") {
                 dfd.done(args[i++]);
@@ -218,7 +205,7 @@
                 });
                 this._.emit("load");
             }
-            return this;
+            return dfd.promise();
         };
     }
     
