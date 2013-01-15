@@ -23,18 +23,7 @@
     
     var $ = BiquadNode.prototype;
     
-    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency", "cutoff"], {
-        conv: function(value) {
-            if (typeof value === "string") {
-                value = timevalue(value);
-                if (value <= 0) {
-                    return 0;
-                }
-                return 1000 / value;
-            }
-            return value;
-        }
-    });
+    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency", "cutoff"]);
     var ATTRS_Q    = fn.setAttrs($, "Q");
     var ATTRS_GAIN = fn.setAttrs($, "gain");
     

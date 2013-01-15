@@ -2,7 +2,6 @@
     "use strict";
     
     var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
     
     function FNoiseNode(_args) {
         timbre.Object.call(this, _args);
@@ -20,19 +19,8 @@
     fn.extend(FNoiseNode);
     
     var $ = FNoiseNode.prototype;
-
-    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"], {
-        conv: function(value) {
-            if (typeof value === "string") {
-                value = timevalue(value);
-                if (value <= 0) {
-                    return 0;
-                }
-                return 1000 / value;
-            }
-            return value;
-        }
-    });
+    
+    var ATTRS_FREQ = fn.setAttrs($, ["f", "freq", "frequency"]);
     
     Object.defineProperties($, {
         shortFlag: {
