@@ -32,11 +32,11 @@ Customize timbre.js
     timbre.fn.register("custom-object", CustomObject);
 })(timbre);
 
-T("audio", {isLooped:true}).then(function() {
+T("audio", {isLooped:true}).load("/timbre.js/misc/audio/amen.wav").then(function() {
 
     T("custom-object", this).play();
     
-}).load("/timbre.js/misc/audio/amen.wav");
+})
 ```
 
 ### 必須 ###

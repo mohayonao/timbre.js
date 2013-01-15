@@ -13,10 +13,10 @@ var src = window.getDraggedFile() || "/timbre.js/misc/audio/amen.wav";
 
 var canvas = window.getCanvasById("audio");
 
-T("audio").load(src).then(function() {
-    this.plot({target:canvas}).play();
-}).on("ended", function() {
+T("audio").on("ended", function() {
     this.pause();
+}).load(src).then(function() {
+    this.plot({target:canvas}).play();
 });
 ```
 
