@@ -2240,57 +2240,62 @@
     
     function Decoder() {}
     
-    Decoder.prototype.decode = function(type, data, onloadedmetadata, onloadeddata) {
+    Decoder.prototype.decode = function(src, onloadedmetadata, onloadeddata) {
         if (timbre.envtype === "browser") {
-            if (type === "wav") {
-                return wav_decoder(data, onloadedmetadata, onloadeddata);
-            } else if (webkit_decoder) {
-                return webkit_decoder(data, onloadedmetadata, onloadeddata);
-            } else if (moz_decoder) {
-                return moz_decoder(data, onloadedmetadata, onloadeddata);
+            if (typeof src === "string") {
+                if (/\.wav$/.test(src)) {
+                    return wav_decoder(src, onloadedmetadata, onloadeddata);
+                }
             }
+            
+            if (webkit_decoder) {
+                return webkit_decoder(src, onloadedmetadata, onloadeddata);
+            } else if (moz_decoder) {
+                return moz_decoder(src, onloadedmetadata, onloadeddata);
+            }
+            
         } else if (timbre.envtype === "node") {
-            if (type === "wav") {
-                return wav_decoder(data, onloadedmetadata, onloadeddata);
-            } else if (type === "ogg") {
-                return node_ogg_decoder(data, onloadedmetadata, onloadeddata);
-            } else if (type === "mp3") {
-                return node_mp3_decoder(data, onloadedmetadata, onloadeddata);
+            if (typeof src === "string") {
+                if (/\.wav$/.test(src)) {
+                    return wav_decoder(src, onloadedmetadata, onloadeddata);
+                } else if (/\.ogg$/.test(src)) {
+                    return node_ogg_decoder(src, onloadedmetadata, onloadeddata);
+                } else if (/\.mp3$/.test(src)) {
+                    return node_mp3_decoder(src, onloadedmetadata, onloadeddata);
+                }
             }
         }
         onloadedmetadata(false);
     };
     timbre.modules.Decoder = Decoder;
-
-    var getBinaryWithPath;
-    if (timbre.envtype === "browser") {
-        getBinaryWithPath = function(path, callback) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", path, true);
-            xhr.responseType = "arraybuffer";
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    callback(new Uint8Array(xhr.response));
-                } else {
-                    var msg = xhr.status + " " + xhr.statusText;
-                    callback(msg);
-                }
-            };
-            xhr.send();
+    
+    var getBinaryWithPath = (timbre.envtype === "browser") ? function(path, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", path, true);
+        xhr.responseType = "arraybuffer";
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                callback(new Uint8Array(xhr.response));
+            } else {
+                callback(xhr.status + " " + xhr.statusText);
+            }
         };
-    } else {
-        getBinaryWithPath = function(path, callback) {
-            var fs = require("fs");
-            fs.readFile(path, function(err, data) {
-                if (!err) {
-                    callback(new Uint8Array(data));
-                } else {
-                    var msg = "can't read file";
-                    callback(msg);
-                }
-            });
-        };
+        xhr.send();
     }
+    : (timbre.envtype === "node") ? function(path, callback) {
+        var fs = require("fs");
+        fs.readFile(path, function(err, data) {
+            if (!err) {
+                callback(new Uint8Array(data));
+            } else {
+                callback("can't read file");
+            }
+        });
+    }
+    : function(path, callback) {
+        callback("no support");
+    };
+    
     
     var deinterleave = function(list) {
         var result = new list.constructor(list.length>>1);
@@ -2317,8 +2322,8 @@
         return int32;
     };
     
-    var wav_decoder = function(filepath, onloadedmetadata, onloadeddata) {
-        getBinaryWithPath(filepath, function(data) {
+    var wav_decoder = function(src, onloadedmetadata, onloadeddata) {
+        getBinaryWithPath(src, function(data) {
             if (data[0] !== 0x52 || data[1] !== 0x49 ||
                 data[2] !== 0x46 || data[3] !== 0x46) { // 'RIFF'
                     // "HeaderError: not exists 'RIFF'"
@@ -2426,16 +2431,16 @@
                 onloadeddata();
             };
             
-            return function(filepath, onloadedmetadata, onloadeddata) {
-                if (filepath instanceof File) {
+            return function(src, onloadedmetadata, onloadeddata) {
+                if (src instanceof File) {
                     var reader = new FileReader();
                     reader.onload = function(e) {
                         _decode(new Uint8Array(e.target.result),
                                 onloadedmetadata, onloadeddata);
                     };
-                    reader.readAsArrayBuffer(filepath);
+                    reader.readAsArrayBuffer(src);
                 } else {
-                    getBinaryWithPath(filepath, function(data) {
+                    getBinaryWithPath(src, function(data) {
                         _decode(data,
                                 onloadedmetadata, onloadeddata);
                     });
@@ -2446,14 +2451,13 @@
     
     var moz_decoder = (function() {
         if (typeof Audio === "function" && typeof new Audio().mozSetup === "function") {
-            return function(data, onloadedmetadata, onloadeddata) {
-                var self = this;
+            return function(src, onloadedmetadata, onloadeddata) {
                 var samplerate, duration, buffer;
                 var writeIndex = 0;
                 
-                var audio = new Audio(data);
+                var audio = new Audio(src);
                 audio.volume = 0.0;
-                audio.speed  = 2;
+                audio.speed  = 4;
                 audio.addEventListener("loadedmetadata", function() {
                     samplerate = audio.mozSampleRate;
                     duration = audio.duration;
@@ -2464,7 +2468,6 @@
                             for (var i = 0, imax = samples.length; i < imax; i += 2) {
                                 buffer[writeIndex++] = (samples[i] + samples[i+1]) * 0.5;
                             }
-                            self._.loadedTime = samples.length * 1000 / samplerate;
                         }, false);
                     } else {
                         audio.addEventListener("MozAudioAvailable", function(e) {
@@ -2472,7 +2475,6 @@
                             for (var i = 0, imax = samples.length; i < imax; ++i) {
                                 buffer[writeIndex++] = samples[i];
                             }
-                            self._.loadedTime = samples.length * 1000 / samplerate;
                         }, false);
                     }
                     audio.play();
@@ -2487,19 +2489,16 @@
                 audio.addEventListener("ended", function() {
                     onloadeddata();
                 }, false);
-                audio.addEventListener("error", function() {
-                    self._.emit("error");
-                }, false);
                 audio.load();
             };
         }
     })();
     
-    var node_ogg_decoder = function(filepath, onloadedmetadata/*, onloadeddata*/) {
+    var node_ogg_decoder = function(src, onloadedmetadata/*, onloadeddata*/) {
         onloadedmetadata(false);
     };
     
-    var node_mp3_decoder = function(filepath, onloadedmetadata, onloadeddata) {
+    var node_mp3_decoder = function(src, onloadedmetadata, onloadeddata) {
         var fs   = require("fs");
         var lame = require("lame");
         var decoder = new lame.Decoder();
@@ -2552,7 +2551,7 @@
             
             onloadeddata();
         });
-        fs.createReadStream(filepath).pipe(decoder);
+        fs.createReadStream(src).pipe(decoder);
     };
     
 })();
@@ -3928,17 +3927,11 @@
         
         instance._.isLoaded = false;
         instance._.isEnded  = true;
-        instance._.loadedTime  = 0;
         
         Object.defineProperties(instance, {
             isLoaded: {
                 get: function() {
                     return this._.isLoaded;
-                }
-            },
-            loadedTime: {
-                get: function() {
-                    return this._.loadedTime;
                 }
             }
         });
@@ -3948,139 +3941,26 @@
         return instance;
     });
     
-    
-    var load = (function() {
-        if (timbre.envtype === "browser") {
-            return getLoadFunctionForBrowser();
-        } else if (timbre.envtype === "node") {
-            return getLoadFunctionForNodeJS();
-        } else {
-            return function() {
-                return new modules.Deferred().reject().promise();
-            };
-        }
-    })();
-    
-    
-    function getLoadFunctionForBrowser() {
-        return function() {
-            var _ = this._;
-            var dfd = new modules.Deferred();
-            
-            var args = arguments, i = 0;
-            if (typeof args[i] === "string") {
-                _.src = args[i++];
-            } else if (args[i] instanceof File) {
-                _.src = args[i++];
-            }
-            if (!_.src) {
-                return dfd.reject().promise();
-            }
-            
-            dfd.done(function() {
-                this._.emit("done");
-            }.bind(this));
-            
-            if (typeof args[i] === "function") {
-                dfd.done(args[i++]);
-                if (typeof args[i] === "function") {
-                    dfd.fail(args[i++]);
-                }
-            }
-            
-            _.loadedTime = 0;
-            
-            var src = _.src;
-            var decoderList;
-            
-            if (typeof src === "string") {
-                if (src !== "") {
-                    if (/.*\.wav/.test(src)) {
-                        decoderList = [wav_decoder];
-                    } else {
-                        if (webkit_decoder) {
-                            decoderList = [webkit_decoder];
-                        } else if (moz_decoder) {
-                            decoderList = [moz_decoder];
-                        }
-                    }
-                    then.call(this, decoderList, src, dfd);
-                    this._.emit("load");
-                } else {
-                    dfd.reject();
-                }
-            } else {
-                if (webkit_decoder) {
-                    decoderList = [webkit_decoder];
-                    then.call(this, decoderList, src, dfd);
-                    this._.emit("load");
-                } else {
-                    var msg = "no support";
-                    this._.emit("error", msg);
-                    dfd.reject();
-                }
-            }
-            return dfd.promise();
-        };
-    }
-    
-    
-    function getLoadFunctionForNodeJS() {
-        return function() {
-            var fs = require("fs");
-            var self = this, _ = this._;
-            var dfd = new modules.Deferred();
-            
-            var args = arguments, i = 0;
-            if (typeof args[i] === "string") {
-                _.src = args[i++];
-            }
-            if (!_.src) {
-                return dfd.reject().promise();
-            }
-            
-            if (typeof args[i] === "function") {
-                dfd.done(args[i++]);
-                if (typeof args[i] === "function") {
-                    dfd.fail(args[i++]);
-                }
-            }
-            
-            _.loadedTime = 0;
-            
-            var src = _.src;
-            
-            if (typeof src === "string") {
-                fs.exists(src, function(exists) {
-                    if (!exists) {
-                        var msg = "file does not exists";
-                        self._.emit("error", msg);
-                        dfd.reject();
-                    }
-                    
-                    if (/.*\.ogg/.test(src)) {
-                        then.call(self, [node_ogg_decoder], src, dfd);
-                    } else if (/.*\.mp3/.test(src)) {
-                        then.call(self, [node_mp3_decoder], src, dfd);
-                    } else if (/.*\.wav/.test(src)) {
-                        then.call(self, [wav_decoder], src, dfd);
-                    }
-                });
-                this._.emit("load");
-            }
-            return dfd.promise();
-        };
-    }
-    
-    var then = function(decoderList, data, dfd) {
-        var self = this;
+    var load = function(src) {
+        var self = this, _ = this._;
+        var dfd = new modules.Deferred();
+
+        var args = arguments, i = 1;
         
-        // TODO:
-        if (!decoderList) {
-            return dfd.reject();
+        dfd.done(function() {
+            this._.emit("done");
+        }.bind(this));
+        
+        if (typeof args[i] === "function") {
+            dfd.done(args[i++]);
+            if (typeof args[i] === "function") {
+                dfd.fail(args[i++]);
+            }
         }
         
-        var onloadedmetadata = function(result) {
+        _.loadedTime = 0;
+        
+        var onloadedmetadata = function(result, msg) {
             var _ = self._;
             if (result) {
                 _.samplerate = result.samplerate;
@@ -4088,7 +3968,6 @@
                 _.phase      = 0;
                 _.phaseIncr  = result.samplerate / timbre.samplerate;
                 _.duration   = result.duration * 1000;
-                _.loadedTime = _.duration;
                 _.isEnded    = false;
                 _.currentTime = 0;
                 if (_.isReversed) {
@@ -4097,7 +3976,7 @@
                 }
                 self._.emit("loadedmetadata");
             } else {
-                iter();
+                dfd.reject(msg);
             }
         };
         
@@ -4108,54 +3987,11 @@
             dfd.resolveWith(self);
         };
         
-        var iter = function() {
-            if (decoderList.length > 0) {
-                var decoder = decoderList.shift();
-                if (decoder) {
-                    decoder(data, onloadedmetadata, onloadeddata);
-                } else {
-                    iter();
-                }
-            } else {
-                self._.emit("error", "can't decode");
-                dfd.reject();
-            }
-        };
-        iter();
+        new modules.Decoder().decode(src, onloadedmetadata, onloadeddata);
+        
+        return dfd.promise();
     };
     
-    var webkit_decoder = (function() {
-        if (typeof webkitAudioContext !== "undefined") {
-            return function(data, onloadedmetadata, onloadeddata) {
-                var decoder = new modules.Decoder();
-                decoder.decode("webkit", data, onloadedmetadata, onloadeddata);
-            };
-        }
-    })();
-    
-    var moz_decoder = (function() {
-        if (typeof Audio === "function" && typeof new Audio().mozSetup === "function") {
-            return function(data, onloadedmetadata, onloadeddata) {
-                var decoder = new modules.Decoder();
-                decoder.decode("moz", data, onloadedmetadata, onloadeddata);
-            };
-        }
-    })();
-    
-    var wav_decoder = function(data, onloadedmetadata, onloadeddata) {
-        var decoder = new modules.Decoder();
-        decoder.decode("wav", data, onloadedmetadata, onloadeddata);
-    };
-    
-    var node_ogg_decoder = function(filepath, onloadedmetadata, onloadeddata) {
-        var decoder = new modules.Decoder();
-        decoder.decode("ogg", filepath, onloadedmetadata, onloadeddata);
-    };
-    
-    var node_mp3_decoder = function(filepath, onloadedmetadata, onloadeddata) {
-        var decoder = new modules.Decoder();
-        decoder.decode("mp3", filepath, onloadedmetadata, onloadeddata);
-    };
 })();
 (function() {
     "use strict";
