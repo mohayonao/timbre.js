@@ -21,8 +21,6 @@ T("audio").on("ended", function() {
 ```
 
 ## Properties ##
-- `src` _(String or File)_
-  - 読み込むオーディオファイルのパスを指定します. Chromeのみ File オブジェクトも可.
 - `isLoaded` _(ReadOnly Boolean)_
   - ロード済みかどうかを返します
 - `loadedTime` _(ReadOnly Number)_

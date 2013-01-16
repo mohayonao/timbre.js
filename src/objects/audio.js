@@ -12,23 +12,6 @@
         instance._.loadedTime  = 0;
         
         Object.defineProperties(instance, {
-            src: {
-                set: function(value) {
-                    var _ = this._;
-                    if (_.value !== value) {
-                        if (typeof value === "string") {
-                            this._.src = value;
-                            this._.isLoaded = false;
-                        } else if (timbre.envtype === "browser" && value instanceof File) {
-                            this._.src = value;
-                            this._.isLoaded = false;
-                        }
-                    }
-                },
-                get: function() {
-                    return this._.src;
-                }
-            },
             isLoaded: {
                 get: function() {
                     return this._.isLoaded;
