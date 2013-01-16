@@ -3,14 +3,16 @@ Reich
 
 ```timbre
 timbre.rec(function(output) {
-    var midis = [69, 71, 72, 76, 69, 71, 72, 76];
+    var midis = _.shuffle([69, 71, 72, 76, 69, 71, 72, 76]);
     var msec  = timbre.timevalue("bpm120 l8");
     var synth = T("OscGen", {env:{type:"perc", r:msec}});
     
-    T("p.shuf", {interval:msec, list:midis, length:midis.length}, function(midi) {
-        synth.noteOn(midi, 80);
-    }).on("ended", function() {
-        output.done();
+    T("interval", {interval:msec}, function(count) {
+        if (count < midis.length) {
+            synth.noteOn(midis[count], 100);
+        } else {
+            output.done();
+        }
     }).start();
     
     output.send(synth);
