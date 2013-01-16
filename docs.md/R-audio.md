@@ -23,8 +23,6 @@ T("audio").on("ended", function() {
 ## Properties ##
 - `isLoaded` _(ReadOnly Boolean)_
   - ロード済みかどうかを返します
-- `loadedTime` _(ReadOnly Number)_
-  - デコード済み時間を返します
 
 ## Methods ##
 - {deferred} `load(src, done, fail)`
@@ -46,8 +44,6 @@ T("audio").on("ended", function() {
 - 対応するコーデックはブラウザに依存します (node.jsの場合は wav と MP3 のみ対応)
 - Chrome または Safari の場合は瞬時にデコードできます
 - Firefoxの場合は wav形式以外のファイルの場合、デコードに実時間が必要です
-- ひとつの `T("audio")` オブジェクトは1回だけ `load()` メソッドが使えます
-- jQuery.when の入力に使用できます
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/audio.js
