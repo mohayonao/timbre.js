@@ -30,7 +30,7 @@
     
     var $ = COscNode.prototype;
     
-    var ATTRS_FREQ = fn.setAttrs($, ["f", "freq", "frequency"]);
+    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"]);
     
     Object.defineProperties($, {
         wave: {

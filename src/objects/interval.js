@@ -42,7 +42,7 @@
     
     var $ = IntervalNode.prototype;
 
-    var ATTRS_I = fn.setAttrs($, ["i", "interval"], {
+    var ATTRS_I = fn.setAttrs($, ["interval"], {
         conv: function(value) {
             if (typeof value === "string") {
                 value = timevalue(value);

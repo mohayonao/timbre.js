@@ -32,7 +32,7 @@
     
     var $ = OscNode.prototype;
     
-    var ATTRS_FREQ = fn.setAttrs($, ["f", "freq", "frequency"], {
+    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"], {
         conv: function(value) {
             if (typeof value === "string") {
                 value = timevalue(value);
