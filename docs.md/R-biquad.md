@@ -30,7 +30,7 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
   - フィルタ特性を描画します
 
 ## Filter Types ##
-`type` プロパティで指定できるフィルターの種類です. エイリアスが設定されているので `T("lowpass")` や `T("LPF")` のように直接生成することもできます.
+`type` プロパティで指定できるフィルターの種類です. エイリアスが設定されているので `T("lowpass")` や `T("lpf")` のように直接生成することもできます.
 
 ### Low-Pass Filter ###
 
@@ -40,7 +40,7 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 T("biquad", {type:"lowpass", freq:8000}).plot({target:lowpass, lineWidth:2});
 ```
 
-alias: `LPF`
+alias: `lpf`
 
 ### High-Pass Filter ###
 
@@ -50,7 +50,7 @@ alias: `LPF`
 T("biquad", {type:"highpass", freq:8000}).plot({target:highpass, lineWidth:2});
 ```
 
-alias: `HPF`
+alias: `hpf`
 
 ### Band-Pass Filter ###
 
@@ -60,7 +60,7 @@ alias: `HPF`
 T("biquad", {type:"bandpass", freq:8000}).plot({target:bandpass, lineWidth:2});
 ```
 
-alias: `BPF`
+alias: `bpf`
 
 ### LowShelf Filter ###
 
@@ -94,7 +94,7 @@ T("biquad", {type:"peaking", freq:8000, gain:6}).plot({target:peaking, lineWidth
 T("biquad", {type:"notch", freq:8000}).plot({target:notch, lineWidth:2});
 ```
 
-alias: `BEF`, `BRF`
+alias: `bef`, `brf`
 
 ### AllPass Filter ###
 
@@ -104,7 +104,7 @@ alias: `BEF`, `BRF`
 T("biquad", {type:"allpass", freq:8000, gain:-6}).plot({target:allpass, lineWidth:2});
 ```
 
-alias: `APF`
+alias: `apf`
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/biquad.js

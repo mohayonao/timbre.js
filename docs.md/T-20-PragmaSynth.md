@@ -129,7 +129,7 @@ VCO.freq = midicps;
 
 ```timbre
 var VCO = T("saw", {mul:0.2});
-var VCF = T("LPF", {freq:1600, Q:10}, VCO).play();
+var VCF = T("lpf", {cutoff:1600, Q:10}, VCO).play();
 
 var keydict = T("ndict.key");
 var midicps = T("midicps");
@@ -149,7 +149,7 @@ var table = [200, [4800, 150], [2400, 500]];
 var cutoff = T("env", {table:table}).bang();
 
 var VCO = T("saw", {mul:0.2});
-var VCF = T("LPF", {freq:cutoff, Q:10}, VCO).play();
+var VCF = T("lpf", {cutoff:cutoff, Q:10}, VCO).play();
 
 var keydict = T("ndict.key");
 var midicps = T("midicps");
@@ -169,7 +169,7 @@ _(line:1,13,14)_
 var cutoff = T("sin", {freq:"400ms", mul:300, add:1760}).kr();
 
 var VCO = T("saw", {mul:0.2});
-var VCF = T("LPF", {freq:cutoff, Q:20}, VCO).play();
+var VCF = T("lpf", {cutoff:cutoff, Q:20}, VCO).play();
 
 var keydict = T("ndict.key");
 var midicps = T("midicps");
@@ -237,7 +237,7 @@ synth.def = function(opts) {
     var VCO = T("saw", {freq:opts.freq});
 
     var cutoff = T("env", {table:[8000, [opts.freq, 500]]}).bang();
-    var VCF    = T("LPF", {freq:cutoff, Q:5}, VCO);
+    var VCF    = T("lpf", {cutoff:cutoff, Q:5}, VCO);
 
     var EG  = T("adsr", {a:150, d:500, s:0.45, r:1500, lv:0.6});
     var VCA = EG.append(VCF).bang();

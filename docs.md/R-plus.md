@@ -23,13 +23,13 @@ var chord = T("+", T("saw", {freq:523.35, mul:0.25}),
                    T("saw", {freq:783.99, mul:0.25}));
 var cutoff = T("sin", {freq:"250ms", mul:800, add:1600}).kr();
 
-T("LPF", {freq:cutoff}, chord).play();
+T("lpf", {cutoff:cutoff}, chord).play();
 ```
 
 ```timbre
 var cutoff = T("sin", {freq:"250ms", mul:800, add:1600}).kr();
 
-T("LPF", {freq:cutoff}, 
+T("lpf", {cutoff:cutoff}, 
     T("saw", {freq:523.35, mul:0.25}),
     T("saw", {freq:659.25, mul:0.25}),
     T("saw", {freq:783.99, mul:0.25})
@@ -45,7 +45,7 @@ var chord = T("+", T("saw", {freq:523.35}),
                    T("saw", {freq:783.99})).set({mul:0.25});
 var cutoff = T("sin", {freq:"250ms", mul:800, add:1600}).kr();
 
-T("LPF", {freq:cutoff}, chord).play();
+T("lpf", {cutoff:cutoff}, chord).play();
 ```
 
 ## Source ##

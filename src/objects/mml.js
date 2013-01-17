@@ -385,6 +385,6 @@
         { re:/\$/g }
     ];
     
-    fn.register("MML", MML);
+    fn.register("mml", MML);
     
 })();

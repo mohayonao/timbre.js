@@ -15,12 +15,12 @@ freq  = T("+", freq, T("sin", {freq:3, mul:0.8}).kr()).kr();
 
 synth = T("saw", {freq:freq});
 
-f1 = T("BPF", {freq:T("param", {value: 700}), Q:9}, synth);
-f2 = T("BPF", {freq:T("param", {value:1200}), Q:9}, synth);
-f3 = T("BPF", {freq:T("param", {value:2900}), Q:9}, synth);
+f1 = T("bpf", {freq:T("param", {value: 700}), Q:9}, synth);
+f2 = T("bpf", {freq:T("param", {value:1200}), Q:9}, synth);
+f3 = T("bpf", {freq:T("param", {value:2900}), Q:9}, synth);
 synth = T("+", f1, f2, f3);
 
-T("BPF", {freq:3200, Q:0.5}, synth).play();
+T("bpf", {freq:3200, Q:0.5}, synth).play();
 
 T("interval", {interval:250}, function() {
     var f = formants["aiueo"[(Math.random()*5)|0]];

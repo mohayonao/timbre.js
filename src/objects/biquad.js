@@ -130,11 +130,11 @@
         return new BiquadNode(_args).set("type", "allpass");
     });
     
-    fn.alias("LPF", "lowpass");
-    fn.alias("HPF", "highpass");
-    fn.alias("BPF", "bandpass");
-    fn.alias("BEF", "notch");
-    fn.alias("BRF", "notch");
-    fn.alias("APF", "allpass");
+    fn.alias("lpf", "lowpass");
+    fn.alias("hpf", "highpass");
+    fn.alias("bpf", "bandpass");
+    fn.alias("bef", "notch");
+    fn.alias("brf", "notch");
+    fn.alias("apf", "allpass");
 
 })();
