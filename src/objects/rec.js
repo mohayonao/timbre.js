@@ -71,6 +71,7 @@
             _.currentTime = 0;
             _.status = STATUS_REC;
             _.emit("start");
+            this.listen();
         }
         return this;
     };
@@ -81,6 +82,7 @@
             _.status = STATUS_WAIT;
             _.emit("stop");
             fn.nextTick(onended.bind(this));
+            this.unlisten();
         }
         return this;
     };
@@ -105,7 +107,7 @@
             fn.inputSignalAR(this);
             
             if (_.status === STATUS_REC) {
-                var i, imax = cell.len;
+                var i, imax = cell.length;
                 var buffer  = _.buffer;
                 var timeout = _.timeout;
                 var writeIndex      = _.writeIndex;
