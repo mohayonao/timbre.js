@@ -5,18 +5,18 @@
     var timevalue = timbre.timevalue;
     var EfxDelay  = timbre.modules.EfxDelay;
     
-    function EfxDelayNode(_args) {
+    function DelayNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_FB] = timbre(0.25);
-        this.attrs[ATTRS_WET] = timbre(0.2);
+        this.attrs[ATTRS_FB]  = timbre(0);
+        this.attrs[ATTRS_WET] = timbre(1);
         
         this._.delay = new EfxDelay();
         
         this.once("init", oninit);
     }
-    fn.extend(EfxDelayNode);
+    fn.extend(DelayNode);
     
     var oninit = function() {
         if (!this._.time) {
@@ -24,7 +24,7 @@
         }
     };
     
-    var $ = EfxDelayNode.prototype;
+    var $ = DelayNode.prototype;
     
     var ATTRS_FB  = fn.setAttrs($, ["feedback", "fb"]);
     var ATTRS_WET = fn.setAttrs($, "wet");
@@ -80,6 +80,6 @@
         return cell;
     };
     
-    fn.register("efx.delay", EfxDelayNode);
+    fn.register("delay", DelayNode);
     
 })();

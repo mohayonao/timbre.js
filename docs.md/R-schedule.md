@@ -20,7 +20,7 @@ for (var i = 0; i < 21; i += 3) {
 }
 sched.start();
 
-T("efx.delay", {time:350, feedback:0.8}, synth).play();
+T("delay", {time:350, fb:0.8, wet:0.4}, synth).play();
 ```
 
 ### Properties ###

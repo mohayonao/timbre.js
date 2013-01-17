@@ -15,7 +15,7 @@ T("interval", {interval:2000}, function(count) {
 }).start();
 
 T("efx.dist" , {preGain:-32, postGain:20 }, gate.at(0)).play();
-T("efx.delay", {time:250   , feedback:0.6}, gate.at(1)).play();
+T("delay", {time:250, fb:0.6, wet:0.5}, gate.at(1)).play();
 ```
 
 ## Properties ##

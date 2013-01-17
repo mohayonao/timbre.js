@@ -1,6 +1,6 @@
-T("efx.delay")
+T("delay")
 ==============
-{ar} Delay effector
+{ar} Delay signal
 
 
 ```timbre
@@ -8,7 +8,7 @@ var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";
 
 var audio = T("audio", {isLooped:true}).load(src, function(res) {
     
-    T("efx.delay", {time:250, feedback:0.6, wet:0.4}, this).play();
+    var d = T("delay", {time:250, fb:0.6, wet:0.5}, this).play();
     
 });
 ```
@@ -17,9 +17,9 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 - `time` _(Number or timevalue)_
   - ディレイタイム. デフォルト値は **100** ms
 - `fb`, `feedback` _(T-Object)_
-  - フィードバッック. デフォルト値は **0.25**
+  - フィードバッック. デフォルト値は **0**
 - `wet` _(T-Object)_
-  - エフェクターの利き具合. デフォルト値は **0.2**
+  - 元のシグナルとのミックスレベル. デフォルト値は **1** (ミックスしない)
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/efx.delay.js
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/delay.js

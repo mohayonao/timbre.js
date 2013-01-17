@@ -5,7 +5,7 @@ Gymnopedie
 var mml, env, gen;
 env = {type:"adsr", d:1600, s:0, r:1600};
 gen = T("OscGen", {wave:"tri(25)", env:env, mul:0.25, poly:8});
-T("efx.delay", {time:"BPM80 L16", feedback:0.4}, gen).play();
+T("delay", {time:"BPM80 L16", fb:0.5, wet:0.4}, gen).play();
 
 mml = "t80 l4 q7";
 mml += "[g b0<d0f+2>> d <a0<c+0f+2>]8 ";

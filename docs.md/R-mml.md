@@ -19,7 +19,7 @@ T("MML", {mml:mml}, gen).start();
 var osc = T("pulse", {freq:T("midicps"), mul:0.15});
 var env = T("asr", {a:20, r:150, lv:0.8}, osc);
 
-T("efx.delay", {time:250, feedback:0.75}, env).play();
+T("delay", {time:250, fb:0.75, wet:0.4}, env).play();
 
 T("MML", {mml:"o7 q2 l8 $ e>a<c>a< r2"}, osc, env).on("mml", function(type, opts) {
     if (type === "noteOn") {
