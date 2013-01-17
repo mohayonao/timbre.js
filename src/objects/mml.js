@@ -21,6 +21,7 @@
         _.loopStack   = [];
         _.prevNote = 0;
         _.isEnded  = false;
+        _.remain   = Infinity;
         
         this.on("start", onstart);
     }
@@ -37,6 +38,8 @@
         _.loopStack   = [];
         _.prevNote = 0;
         _.isEnded  = false;
+        _.remain   = Infinity;
+        
         sched(this);
     };
     Object.defineProperty(onstart, "unremoved", {
@@ -57,14 +60,20 @@
                 return this._.mml;
             }
         },
-        currentTime: function() {
-            return this._.currentTime;
+        currentTime: {
+            get: function() {
+                return this._.currentTime;
+            }
         }
     });
     
     $.process = function(tickID) {
         var cell = this.cell;
         var _ = this._;
+        
+        if (_.isEnded) {
+            return cell;
+        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -85,6 +94,7 @@
                                 gen.bang();
                             }
                         }
+                        _.remain = nextItem[4];
                         _.emit("mml", "noteOn", {noteNum:nextItem[1], velocity:nextItem[3]});
                         sched(this);
                     } else {
@@ -99,10 +109,14 @@
                         _.emit("mml", "noteOff", {noteNum:nextItem[2], velocity:nextItem[3]});
                     }
                     if (queue.length === 0) {
-                        fn.nextTick(onended.bind(this));
+                        
                         break;
                     }
                 }
+            }
+            _.remain -= _.currentTimeIncr;
+            if (queue.length === 0 && _.remain <= 0) {
+                fn.nextTick(onended.bind(this));
             }
             _.currentTime += _.currentTimeIncr;
         }
@@ -141,7 +155,6 @@
                 if (_.segnoIndex >= 0) {
                     index = _.segnoIndex;
                 } else {
-                    _.isEnded = true;
                     break;
                 }
             }
@@ -149,6 +162,17 @@
             
             switch (cmd.name) {
             case "n":
+                tempo = status.t || 120;
+                if (cmd.len !== null) {
+                    len = cmd.len;
+                    dot = cmd.dot || 0;
+                } else {
+                    len = status.l;
+                    dot = cmd.dot || status.dot;
+                }
+                duration = (60 / tempo) * (4 / len) * 1000;
+                duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
+                
                 vel = status.v << 3;
                 if (status.tie) {
                     for (i = queue.length; i--; ) {
@@ -160,22 +184,10 @@
                     val = _.prevNote;
                 } else {
                     val = _.prevNote = (cmd.val) + (status.o + 1) * 12;
-                    queue.push([queueTime, val, null, vel]);
-                }
-                
-                tempo = status.t || 120;
-                if (cmd.len !== null) {
-                    len = cmd.len;
-                    dot = cmd.dot || 0;
-                } else {
-                    len = status.l;
-                    dot = cmd.dot || status.dot;
+                    queue.push([queueTime, val, null, vel, duration]);
                 }
                 
                 if (len > 0) {
-                    duration = (60 / tempo) * (4 / len) * 1000;
-                    duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
-                    
                     quantize = status.q / 8;
                     // noteOff
                     if (quantize < 1) {
