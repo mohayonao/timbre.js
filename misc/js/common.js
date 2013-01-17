@@ -1,8 +1,6 @@
 $(function() {
     "use strict";
     
-    $("#list").load("/timbre.js/misc/index.html");
-    
     var nowPlaying, animationId;
     var current;
     

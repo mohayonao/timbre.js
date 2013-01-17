@@ -14,15 +14,10 @@ app.get /^\/timbre\.js\/(?:(ja)\/)?(?:([.\w]+)\.html)?$/, (req, res)->
     html = builder.build(name)
     res.send html
 
-app.get '/timbre.js/misc/index.html', (req, res)->
-    builder = new html_builder.IndexFileBuilder()
-    html = builder.build()
-    res.send html
-
 app.get /^\/timbre\.js\/timbre(?:\.(dev|debug))?.js$/, (req, res)->
     debug = req.params[0] is 'debug'
     res.type '.js'
-    res.send timbre_builder.build debug:debug
+    res.send timbre_builder.build(debug:debug).source
 
 app.get '/timbre.js/*', (req, res)->
     filename = req.url.replace '/timbre.js/', ''
@@ -31,7 +26,7 @@ app.get '/timbre.js/*', (req, res)->
 
 app.get /\/test\/(\w*)(?:\.js)?$/, (req, res)->
     builder = new html_builder.TestBuilder()
-    html = builder.build(req.params[0])
+    html = builder.build req.params[0]
     res.send html
 
 app.listen process.env.PORT or 3000

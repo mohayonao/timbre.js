@@ -38,23 +38,45 @@ class HTMLBuilder
         doc = @files[name]
         unless doc then return 'NOT FOUND'
 
+        indexes = @get_indexes()
+        indexes.D.unshift
+            title:'Introduction', url:'./'
+
         html = marked_with_filtering_by_lang doc.path, @lang
         html = lang_process  html
         html = insert_canvas html
         html = insert_label  html
         jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
-            lang: doc.lang, title: doc.title
-            main: html
+            lang: doc.lang, title: doc.title, main: html
+            indexes:indexes, categories:[
+                {key:'D', caption:'Documents' }
+                {key:'E', caption:'Examples'  }
+                {key:'R', caption:'References'}
+            ]
 
     get  : (name)-> @files[name]
     names: -> Object.keys(@files)
 
-    get_indexes: (indexes)->
+    get_indexes: ()->
+        indexes = {}
         for name in @names()
             doc = @get(name)
             unless indexes[doc.category]
                 indexes[doc.category] = []
             indexes[doc.category].push doc
+
+        for name in Object.keys(indexes)
+            indexes[name].sort (a, b)->
+                if a.sort is b.sort
+                    if a.title.toLowerCase() < b.title.toLowerCase() then -1 else +1
+                else a.sort - b.sort
+            indexes[name] = indexes[name].map (x)->
+                title:formatTitle(x.title), url:x.url, dev:x.dev
+        unless indexes.D then indexes.D = []
+        indexes
+
+    formatTitle = (title)->
+        title.replace /T\("?([\w\W]+?)"?\)/, '$1'
 
     marked_with_filtering_by_lang = (filepath, lang)->
         items = marked.lexer fs.readFileSync(filepath, 'utf-8')
@@ -129,53 +151,16 @@ class DocFileBuilder extends HTMLBuilder
         super path.normalize("#{__dirname}/../docs.md")
 
     @build_statics = (langlist=['en', 'ja'])->
-        dstpath = path.normalize "#{__dirname}/../docs/"
-        unless fs.existsSync dstpath
-            fs.mkdir dstpath
-        miscpath = path.normalize "#{__dirname}/../misc/"
-
         for lang in langlist
-            fs.mkdir "#{dstpath}/#{lang}"
+            dstpath = path.normalize("#{__dirname}/..")
+            if lang != 'en' then dstpath += "/#{lang}"
+            unless fs.existsSync dstpath
+                fs.mkdir dstpath
             builder = new DocFileBuilder(lang)
             for name in builder.names()
-                doc = builder.get(name)
                 html = builder.build name
-                htmlfilepath = "#{dstpath}/#{lang}/#{name}.html"
+                htmlfilepath = "#{dstpath}/#{name}.html"
                 fs.writeFileSync htmlfilepath, html, 'utf-8'
-
-class IndexFileBuilder extends HTMLBuilder
-    constructor: ->
-        @doc = new DocFileBuilder('en')
-
-    build: (categories=[])->
-        indexes = {}
-        @doc.get_indexes(indexes)
-
-        for name in Object.keys(indexes)
-            indexes[name].sort (a, b)->
-                if a.sort is b.sort
-                    if a.title.toLowerCase() < b.title.toLowerCase() then -1 else +1
-                else a.sort - b.sort
-            indexes[name] = indexes[name].map (x)->
-                title:formatTitle(x.title), url:x.url, dev:x.dev
-
-        unless indexes.T then indexes.T = []
-        indexes.T.unshift
-            title:'Introduction', url:'./'
-
-        jade.compile(fs.readFileSync("#{__dirname}/index.jade"))
-            indexes:indexes, categories:[
-                {key:'T', caption:'Tutorials' }
-                {key:'E', caption:'Examples'  }
-                {key:'R', caption:'References'}
-                {key:'D', caption:'Developers'}
-            ]
-
-    formatTitle = (title)->
-        title.replace /T\("?([\w\W]+?)"?\)/, '$1'
-
-    @build_statics = ->
-        null # TODO: implements
 
 class TestBuilder
     build: (name)->
@@ -199,10 +184,8 @@ class TestBuilder
 
 if not module.parent
     DocFileBuilder.build_statics()
-    IndexFileBuilder.build_statics()
 else
     isDev = true
     module.exports =
         DocFileBuilder: DocFileBuilder
-        IndexFileBuilder: IndexFileBuilder
         TestBuilder: TestBuilder
