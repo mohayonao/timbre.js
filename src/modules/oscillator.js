@@ -55,15 +55,13 @@
         var phase = this._phase;
         var coeff = this._coeff;
         var index = phase|0;
-        var delta = phase - index;
         var x0 = wave[index & TABLE_MASK];
-        var x1 = wave[(index+1) & TABLE_MASK];
         phase += this.frequency * coeff * this.step;
         while (phase > TABLE_SIZE) {
             phase -= TABLE_SIZE;
         }
         this._phase = phase;
-        return ((1.0 - delta) * x0 + delta * x1);
+        return x0;
     };
     
     $.process = function(cell) {
