@@ -6,7 +6,7 @@ T(Boolean)
 ブール値を格納します。`true` のとき 1、 `false` のとき 0 を出力します。
 
 ```timbre
-var bool = T(true);
+var bool = T(false);
 
 T("*", T("sin", {mul:0.5}), bool).play();
 

@@ -117,7 +117,7 @@ T("mml", {mml:mml}, gen).on("ended", function() {
 **無限ループ** MMLの終端に達したとき、この位置に戻る.
 
 ```timbre
-var mml = "[cf+d+ | f <]3 d l16 $ c<c> )";
+var mml = "$ cf+d+f";
 
 var gen = T("OscGen", {wave:"saw", env:{type:"adsr", d:500}, mul:0.25}).play();
 

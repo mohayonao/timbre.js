@@ -11,7 +11,7 @@ T(Function)
 
 ```timbre
 var func = T(function(count) {
-    return (count % 5) * 220 + 220;
+    return 440 * Math.pow(2, (count % 12) * 1/12);
 });
 
 var sine = T("sin", {freq:func}).play();

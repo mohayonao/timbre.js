@@ -6,7 +6,7 @@ T("cosc")
 コーラスつきオシレーター
 
 ```timbre
-T("cosc", {wave:"saw", freq:440, beats:0.5, mul:0.25}).play();
+T("cosc", {wave:"saw", freq:440, beats:5, mul:0.25}).play();
 ```
 
 ## Properties ##

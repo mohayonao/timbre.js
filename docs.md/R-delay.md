@@ -19,7 +19,7 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 - `fb`, `feedback` _(T-Object)_
   - フィードバッック. デフォルト値は **0**
 - `wet` _(T-Object)_
-  - 元のシグナルとのミックスレベル. デフォルト値は **1** (ミックスしない)
+  - 元のシグナルとのミックスレベル. デフォルト値は **1** (ディレイ音のみ出力)
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/delay.js

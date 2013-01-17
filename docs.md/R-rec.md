@@ -1,37 +1,46 @@
 T("rec")
 ========
-{ar}
+{ar}{listener} Recorder
+
+## Description ##
+入力オブジェクトの値を記録します. 以下の例では 1秒間のマウス操作を録音して繰り返し再生しています.
 
 ```timbre
-var BD = function() {
-    BD.impl();
-};
-BD.impl = function() {
+var freq  = T("mouse.y", {min:220, max:1760});
+var synth = T("saw", {freq:freq, mul:0.25});
 
-    var freq = T("param", {value:200}).linTo(10, 50);
-    var synth = T("pulse", {freq:freq, mul:2.5});
-    synth = T("lpf", {freq:100, Q:15}, synth);
-    synth = T("clip", synth, T("pink", {mul:0.15}));
-    
-    synth = T("linen", {s:30, r:60, mul:0.5}, synth).on("ended", function() {
-        this.pause();
-        synth.stop();
-    }).bang();
-    
-    synth = T("rec", {samplerate:11025}, synth).on("ended", function(buffer) {
-        buffer = T("buffer", {buffer:buffer});
-        BD.impl = function() {
-            buffer.play();
-            BD.impl = function() {
-                buffer.bang();
-            };
-        };
-        this.pause();
-    }).start().play();
-};
+T("rec", {timeout:1000}, synth).on("ended", function(buffer) {
 
-T("interval0", {interval:500}, BD).start();
+    T("buffer", {buffer:buffer, isLooped:true}).play();
+    
+    this.pause();
+    
+}).start().play();
+
+T("mouse").start();
 ```
+
+## Properties ##
+- `timeout` _(Number or timevalue)_
+  - 録音時間. デフォルト値は **5000ms**
+- `samplerate` _(Number)_
+- `currentTime` _(ReadOnly Number)_
+
+## Methods ##
+- `start()`
+  - 録音を開始します
+- `stop()`  
+  - 録音を停止します
+- `bang()`
+  - 録音開始/停止を切り換えます
+
+## Events ##
+- `ended`
+  - 録音停止時に発生します. `SoundBuffer` オブジェクトが戻ります
+  
+## Note ##
+- `T("rec")` での録音は実時間が必要です
+- 前処理として録音データを扱いたい場合は `timbre.rec` を使います
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/rec.js

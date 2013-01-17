@@ -7,23 +7,34 @@ T("tape")
 磁気テープを切り貼りする要領で音声データを編集します。
 
 ```timbre
-var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";
+timbre.rec(function(output) {
 
-T("audio").load(src).then(function() {
+    var gen = T("PluckGen");
+    var mml = "o3 l8 d0grf0b-rg0<c4.> d0grf0b-ra-0<d->g0<c2> d0grf0b-rg0<c4.>f0b-rd0g2..";
+    
+    T("mml", {mml:mml}, gen).on("ended", function() {
+        output.done();
+    }).start();
+    
+    var synth = gen;
+    synth = T("dist" , {pre:-60, post:12}, synth);
+    
+    output.send(synth);
 
-    var tape = T("tape", {tape:this}).tape;
-
-    var tapes = tape.split(50);
-    tapes.sort(function() {
-        return Math.random() - 0.01;
+}).then(function(buffer) {
+   
+    var tape = T("tape", {tape:buffer}).tape;
+    
+    var tapes = tape.split(32);
+    
+    tapes = tapes.map(function(t) {
+        return t.loop(4);
     });
+    
     tape = timbre.modules.scissor.join(tapes);
-    tape = tape.pitch(90).loop(2);
         
-    T("tape", {tape:tape}).on("ended", function() {
-        this.pause();
-    }).play();
-
+    T("tape", {tape:tape, isLooped:true}).play();
+    
 });
 ```
 
