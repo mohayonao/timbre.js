@@ -1,6 +1,6 @@
 T("osc")
 ========
-{arkr} Oscillator
+{arkr} Interpolating wavetable oscillator
 
 ## Description ##
 基本的な波形を出力します。

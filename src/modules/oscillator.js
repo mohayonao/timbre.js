@@ -7,6 +7,7 @@
         this.wave = null;
         this.step = 1;
         this.frequency = 0;
+        this.value = 0;
         
         this._phase = 0;
         this._coeff = TABLE_SIZE / this.samplerate;
@@ -55,13 +56,13 @@
         var phase = this._phase;
         var coeff = this._coeff;
         var index = phase|0;
-        var x0 = wave[index & TABLE_MASK];
+        this.value = wave[index & TABLE_MASK];
         phase += this.frequency * coeff * this.step;
         while (phase > TABLE_SIZE) {
             phase -= TABLE_SIZE;
         }
         this._phase = phase;
-        return x0;
+        return this.value;
     };
     
     $.process = function(cell) {
@@ -80,6 +81,7 @@
             phase -= TABLE_SIZE;
         }
         this._phase = phase;
+        this.value = cell[cell.length - 1];
     };
     
     $.processWithFreqArray = function(cell, freqs) {
@@ -99,6 +101,7 @@
             phase -= TABLE_SIZE;
         }
         this._phase = phase;
+        this.value = cell[cell.length - 1];
     };
     
     function waveshape(sign, name, shape, width) {
