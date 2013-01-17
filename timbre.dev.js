@@ -14,9 +14,8 @@
     var STATUS_PLAY = 1;
     var STATUS_REC  = 2;
     
-    var _ver = "${VERSION}";
+    var _ver = "13.01.17";
     var _sys = null;
-    var _bpm = 120;
     var _constructors = {};
     var _factories    = {};
     var _envtype = (function() {
@@ -59,6 +58,8 @@
             if (key !== null) {
                 if (key instanceof TimbreObject) {
                     return key;
+                } else if (key.context instanceof TimbreObject) {
+                    return key.context;
                 } else if (key.constructor === Object) {
                     instance = new ObjectWrapper(args);
                 } else if (isArray(key)) {
@@ -153,18 +154,6 @@
                 return _sys.status === STATUS_REC;
             }
         },
-        bpm: {
-            set: function(value) {
-                if (typeof value === "number" ) {
-                    if (5 <= value && value <= 300) {
-                        _bpm = value;
-                    }
-                }
-            },
-            get: function() {
-                return _bpm;
-            }
-        },
         amp: {
             set: function(value) {
                 if (typeof value === "number") {
@@ -250,11 +239,11 @@
         if (m) {
             bpm = m[1];
             if (bpm === undefined) {
-                bpm = timbre.bpm;
+                bpm = 120;
             } else {
                 bpm = +m[1];
                 if (bpm < 5 || 300 < bpm) {
-                    bpm = timbre.bpm;
+                    bpm = 120;
                 }
             }
             var len = m[2] ? m[2]|0 : 4;
@@ -269,11 +258,11 @@
         if (m) {
             bpm = m[1];
             if (bpm === undefined) {
-                bpm = timbre.bpm;
+                bpm = 120;
             } else {
                 bpm = +m[1];
                 if (bpm < 5 || 300 < bpm) {
-                    bpm = timbre.bpm;
+                    bpm = 120;
                 }
             }
             var bars  = m[2]|0;
@@ -300,11 +289,11 @@
         if (m) {
             bpm = m[1];
             if (bpm === undefined) {
-                bpm = timbre.bpm;
+                bpm = 120;
             } else {
                 bpm = +m[1];
                 if (bpm < 5 || 300 < bpm) {
-                    bpm = timbre.bpm;
+                    bpm = 120;
                 }
             }
             ticks = m[2] ? m[2]|0 : 480;
@@ -2225,12 +2214,12 @@
         }
     };
     
-    setParams.LPF = setParams.lowpass;
-    setParams.HPF = setParams.highpass;
-    setParams.BPF = setParams.bandpass;
-    setParams.BEF = setParams.notch;
-    setParams.BRF = setParams.notch;
-    setParams.APF = setParams.allpass;
+    setParams.lpf = setParams.lowpass;
+    setParams.hpf = setParams.highpass;
+    setParams.bpf = setParams.bandpass;
+    setParams.bef = setParams.notch;
+    setParams.brf = setParams.notch;
+    setParams.apf = setParams.allpass;
     
     timbre.modules.Biquad = Biquad;
     
@@ -2562,6 +2551,18 @@
     var isDeferred = function(x) {
         return x && typeof x.promise === "function";
     };
+
+    function Promise(object) {
+        this.context = object.context;
+        this.then = object.then;
+        this.done = object.done.bind(object);
+        this.fail = object.fail.bind(object);
+        this.pipe = object.pipe.bind(object);
+        this.always  = object.always.bind(object);
+        this.promise = object.promise.bind(object);
+        this.isResolved = object.isResolved.bind(object);
+        this.isRejected = object.isRejected.bind(object);
+    }
     
     function Deferred(context) {
         this.context = context || this;
@@ -2569,16 +2570,7 @@
         this._doneList = [];
         this._failList = [];
         
-        this._promise = {
-            then: this.then,
-            done: this.done.bind(this),
-            fail: this.fail.bind(this),
-            pipe: this.pipe.bind(this),
-            always : this.always.bind(this),
-            promise: this.promise.bind(this),
-            isResolved: this.isResolved.bind(this),
-            isRejected: this.isRejected.bind(this)
-        };
+        this._promise = new Promise(this);
     }
     
     var $ = Deferred.prototype;
@@ -2752,7 +2744,7 @@
     function Envelope(samplerate) {
         this.samplerate = samplerate || 44100;
         this.table  = [];
-        this.level  = ZERO;
+        this.value  = ZERO;
         this.status = StatusWait;
         this.curve  = "linear";
         this.step   = 1;
@@ -2760,8 +2752,8 @@
         this.loopNode    = null;
         this.emit = null;
         
-        this._endLevel   = ZERO;
-        this._initLevel  = ZERO;
+        this._endValue   = ZERO;
+        this._initValue  = ZERO;
         this._curveType  = CurveTypeLin;
         this._curveValue = 0;
         this._defaultCurveType = CurveTypeLin;
@@ -2819,7 +2811,7 @@
         if (Array.isArray(value)) {
             this.table = value;
             this._buildTable(value);
-            this.level = this._initLevel;
+            this.value = this._initValue;
         }
     };
     $.setCurve = function(value) {
@@ -2843,7 +2835,7 @@
         }
     };
     $.reset = function() {
-        this.level = this._initLevel;
+        this.value = this._initValue;
         this._index   = 0;
         this._counter = 0;
         this._curveType  = CurveTypeStep;
@@ -2893,11 +2885,11 @@
         var status  = this.status;
         var index   = this._index;
         var table   = this._table;
-        var endLevel = this._endLevel;
+        var endValue = this._endValue;
         var curveType   = this._curveType;
         var curveValue = this._curveValue;
         var defaultCurveType = this._defaultCurveType;
-        var level   = this.level;
+        var value   = this.value;
         var grow    = this._grow;
         var loopNode    = this.loopNode;
         var releaseNode = this.releaseNode;
@@ -2941,7 +2933,7 @@
                 }
                 items = table[index++];
                 
-                endLevel = items[0];
+                endValue = items[0];
                 if (items[2] === null) {
                     curveType = defaultCurveType;
                 } else {
@@ -2963,52 +2955,52 @@
                 
                 switch (curveType) {
                 case CurveTypeStep:
-                    level = endLevel;
+                    value = endValue;
                     break;
                 case CurveTypeLin:
-                    grow = (endLevel - level) / counter;
+                    grow = (endValue - value) / counter;
                     break;
                 case CurveTypeExp:
                     grow = Math.pow(
-                        endLevel / level, 1 / counter
+                        endValue / value, 1 / counter
                     );
                     break;
                 case CurveTypeSin:
                     w = Math.PI / counter;
-                    a2 = (endLevel + level) * 0.5;
+                    a2 = (endValue + value) * 0.5;
                     b1 = 2 * Math.cos(w);
-                    y1 = (endLevel - level) * 0.5;
+                    y1 = (endValue - value) * 0.5;
                     y2 = y1 * Math.sin(Math.PI * 0.5 - w);
-                    level = a2 - y1;
+                    value = a2 - y1;
                     break;
                 case CurveTypeWel:
                     w = (Math.PI * 0.5) / counter;
                     b1 = 2 * Math.cos(w);
-                    if (endLevel >= level) {
-                        a2 = level;
+                    if (endValue >= value) {
+                        a2 = value;
                         y1 = 0;
-                        y2 = -Math.sin(w) * (endLevel - level);
+                        y2 = -Math.sin(w) * (endValue - value);
                     } else {
-                        a2 = endLevel;
-                        y1 = level - endLevel;
-                        y2 = Math.cos(w) * (level - endLevel);
+                        a2 = endValue;
+                        y1 = value - endValue;
+                        y2 = Math.cos(w) * (value - endValue);
                     }
-                    level = a2 + y1;
+                    value = a2 + y1;
                     break;
                 case CurveTypeCurve:
-                    a1 = (endLevel - level) / (1.0 - Math.exp(curveValue));
-                    a2 = level + a1;
+                    a1 = (endValue - value) / (1.0 - Math.exp(curveValue));
+                    a2 = value + a1;
                     b1 = a1;
                     grow = Math.exp(curveValue / counter);
                     break;
                 case CurveTypeSqr:
-                    y1 = Math.sqrt(level);
-                    y2 = Math.sqrt(endLevel);
+                    y1 = Math.sqrt(value);
+                    y2 = Math.sqrt(endValue);
                     grow = (y2 - y1) / counter;
                     break;
                 case CurveTypeCub:
-                    y1 = Math.pow(level   , 0.33333333);
-                    y2 = Math.pow(endLevel, 0.33333333);
+                    y1 = Math.pow(value   , 0.33333333);
+                    y2 = Math.pow(endValue, 0.33333333);
                     grow = (y2 - y1) / counter;
                     break;
                 }
@@ -3018,47 +3010,47 @@
         
         switch (curveType) {
         case CurveTypeStep:
-            level = endLevel;
+            value = endValue;
             break;
         case CurveTypeLin:
-            level += grow;
+            value += grow;
             break;
         case CurveTypeExp:
-            level *= grow;
+            value *= grow;
             break;
         case CurveTypeSin:
             y0 = b1 * y1 - y2;
-            level = a2 - y0;
+            value = a2 - y0;
             y2  = y1;
             y1  = y0;
             break;
         case CurveTypeWel:
             y0 = b1 * y1 - y2;
-            level = a2 + y0;
+            value = a2 + y0;
             y2  = y1;
             y1  = y0;
             break;
         case CurveTypeCurve:
             b1 *= grow;
-            level = a2 - b1;
+            value = a2 - b1;
             break;
         case CurveTypeSqr:
             y1 += grow;
-            level = y1 * y1;
+            value = y1 * y1;
             break;
         case CurveTypeCub:
             y1 += grow;
-            level = y1 * y1 * y1;
+            value = y1 * y1 * y1;
             break;
         }
-        this.level = level || ZERO;
+        this.value = value || ZERO;
         
         this.status = status;
         this.emit   = emit;
         
         this._index = index;
         this._grow  = grow;
-        this._endLevel  = endLevel;
+        this._endValue  = endValue;
         this._curveType = curveType;
         this._counter   = counter - 1;
         this._a2 = a2;
@@ -3066,22 +3058,22 @@
         this._y1 = y1;
         this._y2 = y2;
         
-        return this.level;
+        return this.value;
     };
     $._buildTable = function(list) {
         if (list.length === 0) {
-            this._initLevel = ZERO;
+            this._initValue = ZERO;
             this._table     = [];
             return;
         }
         
-        this._initLevel = list[0] || ZERO;
+        this._initValue = list[0] || ZERO;
         this._table     = [];
         
         var table = this._table;
-        var level, time, curveType, curveValue;
+        var value, time, curveType, curveValue;
         for (var i = 1, imax = list.length; i < imax; ++i) {
-            level = list[i][0] || ZERO;
+            value = list[i][0] || ZERO;
             time  = list[i][1];
             curveType = list[i][2];
             
@@ -3103,7 +3095,7 @@
                 curveType  = CurveTypeDict[curveType] || null;
                 curveValue = 0;
             }
-            table.push([level, time, curveType, curveValue]);
+            table.push([value, time, curveType, curveValue]);
         }
     };
     
@@ -3568,6 +3560,7 @@
         this.wave = null;
         this.step = 1;
         this.frequency = 0;
+        this.value = 0;
         
         this._phase = 0;
         this._coeff = TABLE_SIZE / this.samplerate;
@@ -3613,15 +3606,13 @@
         var phase = this._phase;
         var coeff = this._coeff;
         var index = phase|0;
-        var delta = phase - index;
-        var x0 = wave[index & TABLE_MASK];
-        var x1 = wave[(index+1) & TABLE_MASK];
+        this.value = wave[index & TABLE_MASK];
         phase += this.frequency * coeff * this.step;
         while (phase > TABLE_SIZE) {
             phase -= TABLE_SIZE;
         }
         this._phase = phase;
-        return ((1.0 - delta) * x0 + delta * x1);
+        return this.value;
     };
     
     $.process = function(cell) {
@@ -3640,6 +3631,7 @@
             phase -= TABLE_SIZE;
         }
         this._phase = phase;
+        this.value = cell[cell.length - 1];
     };
     
     $.processWithFreqArray = function(cell, freqs) {
@@ -3659,6 +3651,7 @@
             phase -= TABLE_SIZE;
         }
         this._phase = phase;
+        this.value = cell[cell.length - 1];
     };
     
     function waveshape(sign, name, shape, width) {
@@ -3943,8 +3936,8 @@
     
     var load = function(src) {
         var self = this, _ = this._;
-        var dfd = new modules.Deferred();
-
+        var dfd = new modules.Deferred(this);
+        
         var args = arguments, i = 1;
         
         dfd.done(function() {
@@ -4125,12 +4118,12 @@
         return new BiquadNode(_args).set("type", "allpass");
     });
     
-    fn.alias("LPF", "lowpass");
-    fn.alias("HPF", "highpass");
-    fn.alias("BPF", "bandpass");
-    fn.alias("BEF", "notch");
-    fn.alias("BRF", "notch");
-    fn.alias("APF", "allpass");
+    fn.alias("lpf", "lowpass");
+    fn.alias("hpf", "highpass");
+    fn.alias("bpf", "bandpass");
+    fn.alias("bef", "notch");
+    fn.alias("brf", "notch");
+    fn.alias("apf", "allpass");
 
 })();
 (function() {
@@ -4609,18 +4602,18 @@
     var timevalue = timbre.timevalue;
     var EfxDelay  = timbre.modules.EfxDelay;
     
-    function EfxDelayNode(_args) {
+    function DelayNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_FB] = timbre(0.25);
-        this.attrs[ATTRS_WET] = timbre(0.2);
+        this.attrs[ATTRS_FB]  = timbre(0);
+        this.attrs[ATTRS_WET] = timbre(1);
         
         this._.delay = new EfxDelay();
         
         this.once("init", oninit);
     }
-    fn.extend(EfxDelayNode);
+    fn.extend(DelayNode);
     
     var oninit = function() {
         if (!this._.time) {
@@ -4628,7 +4621,7 @@
         }
     };
     
-    var $ = EfxDelayNode.prototype;
+    var $ = DelayNode.prototype;
     
     var ATTRS_FB  = fn.setAttrs($, ["feedback", "fb"]);
     var ATTRS_WET = fn.setAttrs($, "wet");
@@ -4684,7 +4677,7 @@
         return cell;
     };
     
-    fn.register("efx.delay", EfxDelayNode);
+    fn.register("delay", DelayNode);
     
 })();
 (function() {
@@ -4692,7 +4685,7 @@
     
     var fn = timbre.fn;
     
-    function EfxDistNode(_args) {
+    function DistNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
 
@@ -4705,9 +4698,9 @@
         _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
         _.cutoff = 0;
     }
-    fn.extend(EfxDistNode);
+    fn.extend(DistNode);
     
-    var $ = EfxDistNode.prototype;
+    var $ = DistNode.prototype;
     
     var ATTRS_PRE  = fn.setAttrs($, ["pre", "preGain"]);
     var ATTRS_POST = fn.setAttrs($, ["post", "postGain"]);
@@ -4839,8 +4832,9 @@
             _.a2 = 2 * beta;
         }
     };
-    
-    fn.register("efx.dist", EfxDistNode);
+
+    fn.register("distortion", DistNode);
+    fn.alias("dist", "distortion");
     
 })();
 (function() {
@@ -5973,17 +5967,18 @@
         
         var _ = this._;
         _.mml = "";
-        _.status = {t:timbre.bpm, l:4, o:4, v:12, q:6, dot:0, tie:false};
+        _.status = {t:120, l:4, o:4, v:12, q:6, dot:0, tie:false};
         _.commands = [];
         _.index    = 0;
         _.queue    = [];
-        _.elapse   = 0;
-        _.elapseIncr = timbre.cellsize * 1000 / timbre.samplerate;
-        _.queueElapse = 0;
+        _.currentTime     = 0;
+        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        _.queueTime = 0;
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
         _.isEnded  = false;
+        _.remain   = Infinity;
         
         this.on("start", onstart);
     }
@@ -5994,12 +5989,14 @@
         _.commands = compile(_.mml);
         _.index    = 0;
         _.queue    = [];
-        _.elapse   = 0;
-        _.queueElapse = 0;
+        _.currentTime   = 0;
+        _.queueTime = 0;
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
         _.isEnded  = false;
+        _.remain   = Infinity;
+        
         sched(this);
     };
     Object.defineProperty(onstart, "unremoved", {
@@ -6020,14 +6017,20 @@
                 return this._.mml;
             }
         },
-        currentTime: function() {
-            return this._.elapse;
+        currentTime: {
+            get: function() {
+                return this._.currentTime;
+            }
         }
     });
     
     $.process = function(tickID) {
         var cell = this.cell;
         var _ = this._;
+        
+        if (_.isEnded) {
+            return cell;
+        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -6037,7 +6040,7 @@
             var gen, i, imax;
             
             if (queue.length) {
-                while (queue[0][0] <= _.elapse) {
+                while (queue[0][0] <= _.currentTime) {
                     var nextItem = _.queue.shift();
                     if (nextItem[1]) {
                         for (i = 0, imax = inputs.length; i < imax; ++i) {
@@ -6048,6 +6051,7 @@
                                 gen.bang();
                             }
                         }
+                        _.remain = nextItem[4];
                         _.emit("mml", "noteOn", {noteNum:nextItem[1], velocity:nextItem[3]});
                         sched(this);
                     } else {
@@ -6062,12 +6066,16 @@
                         _.emit("mml", "noteOff", {noteNum:nextItem[2], velocity:nextItem[3]});
                     }
                     if (queue.length === 0) {
-                        fn.nextTick(onended.bind(this));
+                        
                         break;
                     }
                 }
             }
-            _.elapse += _.elapseIncr;
+            _.remain -= _.currentTimeIncr;
+            if (queue.length === 0 && _.remain <= 0) {
+                fn.nextTick(onended.bind(this));
+            }
+            _.currentTime += _.currentTimeIncr;
         }
         
         return cell;
@@ -6089,10 +6097,10 @@
         var queue  = _.queue;
         var index  = _.index;
         var status = _.status;
-        var elapse = _.queueElapse;
+        var queueTime = _.queueTime;
         var loopStack = _.loopStack;
         var tempo, val, len, dot, vel;
-        var duration, quantize, pending, _elapse;
+        var duration, quantize, pending, _queueTime;
         var peek;
         var i, imax;
         
@@ -6104,7 +6112,6 @@
                 if (_.segnoIndex >= 0) {
                     index = _.segnoIndex;
                 } else {
-                    _.isEnded = true;
                     break;
                 }
             }
@@ -6112,6 +6119,17 @@
             
             switch (cmd.name) {
             case "n":
+                tempo = status.t || 120;
+                if (cmd.len !== null) {
+                    len = cmd.len;
+                    dot = cmd.dot || 0;
+                } else {
+                    len = status.l;
+                    dot = cmd.dot || status.dot;
+                }
+                duration = (60 / tempo) * (4 / len) * 1000;
+                duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
+                
                 vel = status.v << 3;
                 if (status.tie) {
                     for (i = queue.length; i--; ) {
@@ -6123,33 +6141,21 @@
                     val = _.prevNote;
                 } else {
                     val = _.prevNote = (cmd.val) + (status.o + 1) * 12;
-                    queue.push([elapse, val, null, vel]);
-                }
-                
-                tempo = status.t || timbre.bpm;
-                if (cmd.len !== null) {
-                    len = cmd.len;
-                    dot = cmd.dot || 0;
-                } else {
-                    len = status.l;
-                    dot = cmd.dot || status.dot;
+                    queue.push([queueTime, val, null, vel, duration]);
                 }
                 
                 if (len > 0) {
-                    duration = (60 / tempo) * (4 / len) * 1000;
-                    duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
-                    
                     quantize = status.q / 8;
                     // noteOff
                     if (quantize < 1) {
-                        _elapse = elapse + (duration * quantize);
-                        queue.push([_elapse, null, val, vel]);
+                        _queueTime = queueTime + (duration * quantize);
+                        queue.push([_queueTime, null, val, vel]);
                         for (i = 0, imax = pending.length; i < imax; ++i) {
-                            queue.push([_elapse, null, pending[i], vel]);
+                            queue.push([_queueTime, null, pending[i], vel]);
                         }
                     }
                     pending = [];
-                    elapse += duration;
+                    queueTime += duration;
                     if (!status.tie) {
                         break outer;
                     }
@@ -6159,7 +6165,7 @@
                 status.tie = false;
                 break;
             case "r":
-                tempo = status.t || timbre.bpm;
+                tempo = status.t || 120;
                 if (cmd.len !== null) {
                     len = cmd.len;
                     dot = cmd.dot || 0;
@@ -6170,7 +6176,7 @@
                 if (len > 0) {
                     duration = (60 / tempo) * (4 / len) * 1000;
                     duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
-                    elapse += duration;
+                    queueTime += duration;
                 }
                 break;
             case "l":
@@ -6240,12 +6246,12 @@
                 }
                 break;
             case "t":
-                status.t = (cmd.val === null) ? timbre.bpm : cmd.val;
+                status.t = (cmd.val === null) ? 120 : cmd.val;
                 break;
             }
         }
         _.index = index;
-        _.queueElapse = elapse;
+        _.queueTime = queueTime;
     };
     
     var compile = function(mml) {
@@ -6348,7 +6354,7 @@
         { re:/\$/g }
     ];
     
-    fn.register("MML", MML);
+    fn.register("mml", MML);
     
 })();
 (function() {
@@ -6976,14 +6982,14 @@
                 }
             },
             get: function() {
-                return this._.env.level;
+                return this._.env.value;
             }
         }
     });
     
-    $.to = function(nextLevel, time, curve) {
+    $.to = function(nextValue, time, curve) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, curve]]);
+        env.setTable([env.value, [nextValue, time, curve]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = curve;
@@ -6991,9 +6997,9 @@
         return this;
     };
     
-    $.setAt = function(nextLevel, time) {
+    $.setAt = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [env.level, time], [nextLevel, 0]]);
+        env.setTable([env.value, [env.value, time], [nextValue, 0]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "set";
@@ -7001,9 +7007,9 @@
         return this;
     };
     
-    $.linTo = function(nextLevel, time) {
+    $.linTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "lin"]]);
+        env.setTable([env.value, [nextValue, time, "lin"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "lin";
@@ -7011,9 +7017,9 @@
         return this;
     };
     
-    $.expTo = function(nextLevel, time) {
+    $.expTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "exp"]]);
+        env.setTable([env.value, [nextValue, time, "exp"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "exp";
@@ -7021,9 +7027,9 @@
         return this;
     };
     
-    $.sinTo = function(nextLevel, time) {
+    $.sinTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "sin"]]);
+        env.setTable([env.value, [nextValue, time, "sin"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "sin";
@@ -7031,9 +7037,9 @@
         return this;
     };
     
-    $.welTo = function(nextLevel, time) {
+    $.welTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "wel"]]);
+        env.setTable([env.value, [nextValue, time, "wel"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "wel";
@@ -7041,9 +7047,9 @@
         return this;
     };
     
-    $.sqrTo = function(nextLevel, time) {
+    $.sqrTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "sqr"]]);
+        env.setTable([env.value, [nextValue, time, "sqr"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "sqr";
@@ -7051,9 +7057,9 @@
         return this;
     };
     
-    $.cubTo = function(nextLevel, time) {
+    $.cubTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "cub"]]);
+        env.setTable([env.value, [nextValue, time, "cub"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "cub";
@@ -7415,6 +7421,7 @@
             _.currentTime = 0;
             _.status = STATUS_REC;
             _.emit("start");
+            this.listen();
         }
         return this;
     };
@@ -7425,6 +7432,7 @@
             _.status = STATUS_WAIT;
             _.emit("stop");
             fn.nextTick(onended.bind(this));
+            this.unlisten();
         }
         return this;
     };
@@ -7449,7 +7457,7 @@
             fn.inputSignalAR(this);
             
             if (_.status === STATUS_REC) {
-                var i, imax = cell.len;
+                var i, imax = cell.length;
                 var buffer  = _.buffer;
                 var timeout = _.timeout;
                 var writeIndex      = _.writeIndex;
@@ -7505,8 +7513,8 @@
         
         var _ = this._;
         _.queue = [];
-        _.elapse = 0;
-        _.elapseIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        _.currentTime     = 0;
+        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
         _.maxRemain = 1000;
     }
     fn.extend(ScheduleNode);
@@ -7538,6 +7546,11 @@
             get: function() {
                 return this._.queue.length === 0;
             }
+        },
+        currentTime: {
+            get: function() {
+                return this._.currentTime;
+            }
         }
     });
     
@@ -7546,7 +7559,7 @@
             delta = timevalue(delta);
         }
         if (typeof delta === "number") {
-            this.schedAbs(this._.elapse + delta, item);
+            this.schedAbs(this._.currentTime + delta, item);
         }
         return this;
     };
@@ -7576,7 +7589,7 @@
             delta = timevalue(delta);
         }
         if (typeof delta === "number") {
-            this._.elapse += delta;
+            this._.currentTime += delta;
         }
         return this;
     };
@@ -7601,7 +7614,7 @@
             var queue = _.queue;
             
             if (queue.length) {
-                while (queue[0][0] < _.elapse) {
+                while (queue[0][0] < _.currentTime) {
                     var nextItem = _.queue.shift();
                     nextItem[1].bang(); // TODO: args?
                     emit = "sched";
@@ -7611,7 +7624,7 @@
                     }
                 }
             }
-            _.elapse += _.elapseIncr;
+            _.currentTime += _.currentTimeIncr;
             if (emit) {
                 _.emit(emit);
             }
