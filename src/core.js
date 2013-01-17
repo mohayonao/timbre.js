@@ -16,7 +16,6 @@
     
     var _ver = "${VERSION}";
     var _sys = null;
-    var _bpm = 120;
     var _constructors = {};
     var _factories    = {};
     var _envtype = (function() {
@@ -155,18 +154,6 @@
                 return _sys.status === STATUS_REC;
             }
         },
-        bpm: {
-            set: function(value) {
-                if (typeof value === "number" ) {
-                    if (5 <= value && value <= 300) {
-                        _bpm = value;
-                    }
-                }
-            },
-            get: function() {
-                return _bpm;
-            }
-        },
         amp: {
             set: function(value) {
                 if (typeof value === "number") {
@@ -252,11 +239,11 @@
         if (m) {
             bpm = m[1];
             if (bpm === undefined) {
-                bpm = timbre.bpm;
+                bpm = 120;
             } else {
                 bpm = +m[1];
                 if (bpm < 5 || 300 < bpm) {
-                    bpm = timbre.bpm;
+                    bpm = 120;
                 }
             }
             var len = m[2] ? m[2]|0 : 4;
@@ -271,11 +258,11 @@
         if (m) {
             bpm = m[1];
             if (bpm === undefined) {
-                bpm = timbre.bpm;
+                bpm = 120;
             } else {
                 bpm = +m[1];
                 if (bpm < 5 || 300 < bpm) {
-                    bpm = timbre.bpm;
+                    bpm = 120;
                 }
             }
             var bars  = m[2]|0;
@@ -302,11 +289,11 @@
         if (m) {
             bpm = m[1];
             if (bpm === undefined) {
-                bpm = timbre.bpm;
+                bpm = 120;
             } else {
                 bpm = +m[1];
                 if (bpm < 5 || 300 < bpm) {
-                    bpm = timbre.bpm;
+                    bpm = 120;
                 }
             }
             ticks = m[2] ? m[2]|0 : 480;

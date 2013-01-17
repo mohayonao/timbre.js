@@ -10,7 +10,7 @@
         
         var _ = this._;
         _.mml = "";
-        _.status = {t:timbre.bpm, l:4, o:4, v:12, q:6, dot:0, tie:false};
+        _.status = {t:120, l:4, o:4, v:12, q:6, dot:0, tie:false};
         _.commands = [];
         _.index    = 0;
         _.queue    = [];
@@ -163,7 +163,7 @@
                     queue.push([elapse, val, null, vel]);
                 }
                 
-                tempo = status.t || timbre.bpm;
+                tempo = status.t || 120;
                 if (cmd.len !== null) {
                     len = cmd.len;
                     dot = cmd.dot || 0;
@@ -196,7 +196,7 @@
                 status.tie = false;
                 break;
             case "r":
-                tempo = status.t || timbre.bpm;
+                tempo = status.t || 120;
                 if (cmd.len !== null) {
                     len = cmd.len;
                     dot = cmd.dot || 0;
@@ -277,7 +277,7 @@
                 }
                 break;
             case "t":
-                status.t = (cmd.val === null) ? timbre.bpm : cmd.val;
+                status.t = (cmd.val === null) ? 120 : cmd.val;
                 break;
             }
         }
