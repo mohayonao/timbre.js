@@ -285,12 +285,12 @@
         }
     };
     
-    setParams.LPF = setParams.lowpass;
-    setParams.HPF = setParams.highpass;
-    setParams.BPF = setParams.bandpass;
-    setParams.BEF = setParams.notch;
-    setParams.BRF = setParams.notch;
-    setParams.APF = setParams.allpass;
+    setParams.lpf = setParams.lowpass;
+    setParams.hpf = setParams.highpass;
+    setParams.bpf = setParams.bandpass;
+    setParams.bef = setParams.notch;
+    setParams.brf = setParams.notch;
+    setParams.apf = setParams.allpass;
     
     timbre.modules.Biquad = Biquad;
     
