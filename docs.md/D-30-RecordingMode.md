@@ -1,10 +1,10 @@
-timbre.rec
+Recording Mode
 ===============
 Recording Mode
 
-レコーディングモードの説明をします.  
+レコーディングモードの説明をします。  
 
-`timbre.rec` を使うと音声を出力せずに高速に実行して結果を記録できます. 以下の例では 約8秒のフレーズを録音して逆再生しています.
+`timbre.rec` を使うと音声を出力せずに高速に実行して結果を記録できます。以下の例では 約8秒のフレーズを録音して逆再生しています。
 
 ```timbre
 timbre.rec(function(output) {
@@ -34,3 +34,6 @@ timbre.rec(function(output) {
   - 録音する T オブジェクト を指定します
 - `output.done`
   - 録音終了時に呼び出します
+
+## Note ##
+- 再生しながら録音を行う場合は [`T("rec")`](./rec.html) を使用します。

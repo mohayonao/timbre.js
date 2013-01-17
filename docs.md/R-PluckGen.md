@@ -39,4 +39,4 @@ T("interval", {interval:500}, function(count) {
   - Envelope
   
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/SynthDef.js
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/synthdef.js

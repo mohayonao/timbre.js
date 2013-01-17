@@ -6,7 +6,7 @@ T("audio")
 
 (canvas audio w:240 h:80)
 
-音声ファイルを読みこむ `T("buffer")` オブジェクトです. 以下の例では amen.wav か, このページにドラッグ & ドロップしたファイル(Chromeのみ) を読み込んで再生しています.
+音声ファイルを読みこむ `T("buffer")` オブジェクトです。以下の例では amen.wav か、このページにドラッグ & ドロップしたファイル(Chromeのみ) を読み込んで再生しています。
 
 ```timbre
 var src = window.getDraggedFile() || "/timbre.js/misc/audio/amen.wav";
@@ -26,7 +26,7 @@ T("audio").on("ended", function() {
 
 ## Methods ##
 - {deferred} `load(src, done, fail)`
-  - オーディオファイルを読み込みます. `promise` オブジェクトが返ります.
+  - オーディオファイルを読み込みます. `promise` オブジェクトが返ります
 
 ## Events ##
 - `load`

@@ -30,7 +30,7 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
   - フィルタ特性を描画します
 
 ## Filter Types ##
-`type` プロパティで指定できるフィルターの種類です. エイリアスが設定されているので `T("lowpass")` や `T("lpf")` のように直接生成することもできます.
+`type` プロパティで指定できるフィルターの種類です。エイリアスが設定されているので `T("lowpass")` や `T("lpf")` のように直接生成することもできます。
 
 ### Low-Pass Filter ###
 

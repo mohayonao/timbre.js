@@ -3,7 +3,7 @@ T("rec")
 {ar}{listener} Recorder
 
 ## Description ##
-入力オブジェクトの値を記録します. 以下の例では 1秒間のマウス操作を録音して繰り返し再生しています.
+入力オブジェクトの値を記録します。以下の例では 1秒間のマウス操作を録音して繰り返し再生しています。
 
 ```timbre
 var freq  = T("mouse.y", {min:220, max:1760});
@@ -40,7 +40,7 @@ T("mouse").start();
   
 ## Note ##
 - `T("rec")` での録音は実時間が必要です
-- 前処理として録音データを扱いたい場合は `timbre.rec` を使います
+- 前処理として録音データを扱いたい場合は [`timbre.rec`](./RecordingMode.html) を使います
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/rec.js

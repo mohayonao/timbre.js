@@ -3,7 +3,7 @@ T("SynthDef")
 {ar} Synth Definition
 
 ## Description ##
-音源インターフェース. 音源定義を `noteOn`, `noteOff` で管理します.
+音源インターフェース。音源定義を `noteOn`, `noteOff` で管理します。
 
 ```timbre
 var synth = T("SynthDef").play();
@@ -30,8 +30,8 @@ T("interval", {interval:500}, function(count) {
   - 同時発音数 (1から 64まで、デフォルトは 4)
   
 ## SynthDefFunction ##  
-音源定義関数は `noteOn()` の時に呼ばれる関数です. 引数は以下が定義された辞書オブジェクトです.  
-引数を元に T オブジェクト を生成して返します.
+音源定義関数は `noteOn()` の時に呼ばれる関数です。引数は以下が定義された辞書オブジェクトです。  
+引数を元に T オブジェクト を生成して返します。
 
 - `opts.noteNum`
   - noteOn された MIDIノート番号 (0-127)
@@ -40,17 +40,17 @@ T("interval", {interval:500}, function(count) {
 - `opts.velocity`
   - noteOn された velocity (0-127)
 - `opts.doneAction`
-  - 開放関数です.
+  - 開放関数です
 - ohters
   - noteOn の第3引数で指定した値
 
 ## Methods ##
 - `noteOn(noteNum, velocity, opts)`
 - `noteOnWithFreq(freq, velocity, opts)`  
-  - SynthDefFunction を呼び出して戻り値の T オブジェクトの管理を開始する.
+  - SynthDefFunction を呼び出して戻り値の T オブジェクトの管理を開始する
 - `noteOff(noteNum)`
 - `noteOffWithFreq(freq)`
-  - noteOn で管理されている T オブジェクトの `release()` を呼び出す.
+  - noteOn で管理されている T オブジェクトの `release()` を呼び出す
 - `allNoteOff()`
   - すべての音にノートオフする
 - `allSoundOff()`
@@ -61,4 +61,4 @@ T("interval", {interval:500}, function(count) {
 - [`T("PluckGen")`](./PluckGen.html)
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/SynthDef.js
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/synthdef.js

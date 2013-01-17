@@ -3,7 +3,7 @@ T("distortion")
 {ar} Distortion
 
 ## Description ##
-歪みエフェクター. preGain -> highcut -> postGain と処理します.
+歪みエフェクター。 preGain -> highcut -> postGain と処理します。
 
 ```timbre
 var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";

@@ -11,7 +11,7 @@ T("pluck", {freq:500, mul:0.5}).bang().play();
 
 ## Properties ##
 - `freq` _(Number)_
-  - 周波数をセットする. デフォルト値は **440**
+  - 周波数をセットする。デフォルト値は **440**
 
 ## Methods ##
 - `bang()`

@@ -3,7 +3,7 @@ T("midiratio")
 {kr} Convert an interval in semitones to a ratio
 
 ## Description ##
-入力オブジェクト値の合計をMIDIノート番号として比率に変換します.
+入力オブジェクト値の合計をMIDIノート番号として比率に変換します。
 
 ```timbre
 var midiratio = T("midiratio");
@@ -18,9 +18,9 @@ T("interval", {interval:500}, function(count) {
 
 ## Properties ##
 - `midi` _(Number)_
-  - 入力オブジェクトがない場合には, この値が入力値となる
+  - 入力オブジェクトがない場合には、この値が入力値となる
 - `range` _(Number)_
-  - 1オクターブの鍵盤数. デフォルトで 12.
+  - 1オクターブの鍵盤数。デフォルトで **12**
 
 ## Methods ##
 - `at(midi)`

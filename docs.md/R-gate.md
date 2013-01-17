@@ -3,7 +3,7 @@ T("gate")
 Route a signal to one of several outlets
 
 ## Description ##
-出力先を選択します.
+出力先を選択します。
 
 ```timbre
 var audio = T("audio", {isLooped:true}).load("/timbre.js/misc/audio/amen.wav");

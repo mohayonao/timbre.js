@@ -3,7 +3,7 @@ T("midicps")
 {kr} Convert MIDI note to cycles per second
 
 ## Description ##
-入力オブジェクト値の合計をMIDIノート番号として周波数に変換します.
+入力オブジェクト値の合計をMIDIノート番号として周波数に変換します。
 
 ```timbre
 var midicps = T("midicps");
@@ -19,7 +19,7 @@ T("interval", {interval:500}, function(count) {
 - `midi` _(Number)_
   - 入力オブジェクトがない場合には, この値が入力値となる
 - `a4` _(Number)_  
-  - 中央 A4 の周波数. デフォルトは 440Hz.
+  - 中央 A4 の周波数。 デフォルトは **440Hz**
 
 ## Methods ##
 - `at(midi)`

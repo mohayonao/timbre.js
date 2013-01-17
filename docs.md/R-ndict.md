@@ -3,7 +3,7 @@ T("ndict")
 {kr} 
 
 ## Description ##
-数値を別の数値に変換します.
+数値を別の数値に変換します。
 
 ```timbre
 var dict = {0:440, 1:880, 2:1760, 3:660};
@@ -18,11 +18,11 @@ T("interval", {interval:500}, function(count) {
 
 ## Properties ##
 - `dict` _(Object of Function)_
-  - 変換用辞書. 関数を指定した場合は 0 から 127 の計算結果で埋める.
+  - 変換用辞書。関数を指定した場合は 0 から 127 の計算結果で埋める。
 - `defaultValue` _(Number)_
-  - 辞書に値がない場合の出力値
+  - 辞書に値がない場合は、この値が出力値となる。
 - `index` _(Number)_
-  - 入力オブジェクトがない場合には, この値が入力値となる
+  - 入力オブジェクトがない場合は、この値が入力値となる。
 
 ## Methods ##
 - `at(index)`

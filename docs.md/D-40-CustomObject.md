@@ -3,10 +3,13 @@ Custom Object
 Customize timbre.js
 
 ## Description ##
-自作のオブジェクトの作り方について解説します。 標準の T オブジェクトもすべて同じように書かれているので、詳しくは[ソースコード](https://github.com/mohayonao/timbre.js/blob/master/src/objects/)を参照してください。
+自作のオブジェクトの作り方について解説します。  
+標準の T オブジェクトもすべて同じように書かれているので、詳しくは[ソースコード](https://github.com/mohayonao/timbre.js/blob/master/src/objects/)を参照してください。
+
+以下の例は入力値を 2乗して出力する _(line:16)_ カスタムオブジェクトです。
 
 ```timbre
-(function(timbre) {
+(function() {
     "use strict";
     
     function CustomObject(_args) {
@@ -20,8 +23,8 @@ Customize timbre.js
             
             timbre.fn.inputSignalAR(this);
             
-            for (var i = 0, imax = this.cell.length; i < imax; i++) {
-                this.cell[i] = Math.pow(this.cell[i], 2);
+            for (var i = 0; i < this.cell.length; i++) {
+                this.cell[i] = this.cell[i] * this.cell[i];
             }
             
             timbre.fn.outputSignalAR(this);
@@ -30,7 +33,7 @@ Customize timbre.js
     };
     
     timbre.fn.register("custom-object", CustomObject);
-})(timbre);
+})();
 
 T("audio", {isLooped:true}).load("/timbre.js/misc/audio/amen.wav").then(function() {
 
