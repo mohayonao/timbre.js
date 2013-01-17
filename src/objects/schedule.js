@@ -11,8 +11,8 @@
         
         var _ = this._;
         _.queue = [];
-        _.elapse = 0;
-        _.elapseIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        _.currentTime     = 0;
+        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
         _.maxRemain = 1000;
     }
     fn.extend(ScheduleNode);
@@ -44,6 +44,11 @@
             get: function() {
                 return this._.queue.length === 0;
             }
+        },
+        currentTime: {
+            get: function() {
+                return this._.currentTime;
+            }
         }
     });
     
@@ -52,7 +57,7 @@
             delta = timevalue(delta);
         }
         if (typeof delta === "number") {
-            this.schedAbs(this._.elapse + delta, item);
+            this.schedAbs(this._.currentTime + delta, item);
         }
         return this;
     };
@@ -82,7 +87,7 @@
             delta = timevalue(delta);
         }
         if (typeof delta === "number") {
-            this._.elapse += delta;
+            this._.currentTime += delta;
         }
         return this;
     };
@@ -107,7 +112,7 @@
             var queue = _.queue;
             
             if (queue.length) {
-                while (queue[0][0] < _.elapse) {
+                while (queue[0][0] < _.currentTime) {
                     var nextItem = _.queue.shift();
                     nextItem[1].bang(); // TODO: args?
                     emit = "sched";
@@ -117,7 +122,7 @@
                     }
                 }
             }
-            _.elapse += _.elapseIncr;
+            _.currentTime += _.currentTimeIncr;
             if (emit) {
                 _.emit(emit);
             }

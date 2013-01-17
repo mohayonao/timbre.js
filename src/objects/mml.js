@@ -14,9 +14,9 @@
         _.commands = [];
         _.index    = 0;
         _.queue    = [];
-        _.elapse   = 0;
-        _.elapseIncr = timbre.cellsize * 1000 / timbre.samplerate;
-        _.queueElapse = 0;
+        _.currentTime     = 0;
+        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        _.queueTime = 0;
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
@@ -31,8 +31,8 @@
         _.commands = compile(_.mml);
         _.index    = 0;
         _.queue    = [];
-        _.elapse   = 0;
-        _.queueElapse = 0;
+        _.currentTime   = 0;
+        _.queueTime = 0;
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
@@ -58,7 +58,7 @@
             }
         },
         currentTime: function() {
-            return this._.elapse;
+            return this._.currentTime;
         }
     });
     
@@ -74,7 +74,7 @@
             var gen, i, imax;
             
             if (queue.length) {
-                while (queue[0][0] <= _.elapse) {
+                while (queue[0][0] <= _.currentTime) {
                     var nextItem = _.queue.shift();
                     if (nextItem[1]) {
                         for (i = 0, imax = inputs.length; i < imax; ++i) {
@@ -104,7 +104,7 @@
                     }
                 }
             }
-            _.elapse += _.elapseIncr;
+            _.currentTime += _.currentTimeIncr;
         }
         
         return cell;
@@ -126,10 +126,10 @@
         var queue  = _.queue;
         var index  = _.index;
         var status = _.status;
-        var elapse = _.queueElapse;
+        var queueTime = _.queueTime;
         var loopStack = _.loopStack;
         var tempo, val, len, dot, vel;
-        var duration, quantize, pending, _elapse;
+        var duration, quantize, pending, _queueTime;
         var peek;
         var i, imax;
         
@@ -160,7 +160,7 @@
                     val = _.prevNote;
                 } else {
                     val = _.prevNote = (cmd.val) + (status.o + 1) * 12;
-                    queue.push([elapse, val, null, vel]);
+                    queue.push([queueTime, val, null, vel]);
                 }
                 
                 tempo = status.t || 120;
@@ -179,14 +179,14 @@
                     quantize = status.q / 8;
                     // noteOff
                     if (quantize < 1) {
-                        _elapse = elapse + (duration * quantize);
-                        queue.push([_elapse, null, val, vel]);
+                        _queueTime = queueTime + (duration * quantize);
+                        queue.push([_queueTime, null, val, vel]);
                         for (i = 0, imax = pending.length; i < imax; ++i) {
-                            queue.push([_elapse, null, pending[i], vel]);
+                            queue.push([_queueTime, null, pending[i], vel]);
                         }
                     }
                     pending = [];
-                    elapse += duration;
+                    queueTime += duration;
                     if (!status.tie) {
                         break outer;
                     }
@@ -207,7 +207,7 @@
                 if (len > 0) {
                     duration = (60 / tempo) * (4 / len) * 1000;
                     duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
-                    elapse += duration;
+                    queueTime += duration;
                 }
                 break;
             case "l":
@@ -282,7 +282,7 @@
             }
         }
         _.index = index;
-        _.queueElapse = elapse;
+        _.queueTime = queueTime;
     };
     
     var compile = function(mml) {
