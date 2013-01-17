@@ -3,7 +3,7 @@
     
     var fn = timbre.fn;
     
-    function EfxDistNode(_args) {
+    function DistNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
 
@@ -16,9 +16,9 @@
         _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
         _.cutoff = 0;
     }
-    fn.extend(EfxDistNode);
+    fn.extend(DistNode);
     
-    var $ = EfxDistNode.prototype;
+    var $ = DistNode.prototype;
     
     var ATTRS_PRE  = fn.setAttrs($, ["pre", "preGain"]);
     var ATTRS_POST = fn.setAttrs($, ["post", "postGain"]);
@@ -150,7 +150,8 @@
             _.a2 = 2 * beta;
         }
     };
-    
-    fn.register("efx.dist", EfxDistNode);
+
+    fn.register("distortion", DistNode);
+    fn.alias("dist", "distortion");
     
 })();

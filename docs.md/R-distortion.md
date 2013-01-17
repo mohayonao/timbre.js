@@ -1,4 +1,4 @@
-T("efx.dist")
+T("distortion")
 =============
 {ar} Distortion
 
@@ -10,7 +10,7 @@ var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";
 
 var audio = T("audio", {isLooped:true}).load(src, function(res) {
     
-    T("efx.dist", {preGain:-30, postGain:12, cutoff:1600}, this).play();
+    T("distortion", {preGain:-30, postGain:12, cutoff:1600}, this).play();
 
 });
 ```
@@ -22,6 +22,9 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
   - デフォルト値は **18** dB
 - `cutoff` _(Number)_
   - ハイカット周波数. 0 のときOFF. デフォルト値は **0**
+  
+## Alias ##
+`T("dist")`
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/efx.dist.js
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/distortion.js
