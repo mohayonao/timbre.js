@@ -25,8 +25,8 @@
     
     var load = function(src) {
         var self = this, _ = this._;
-        var dfd = new modules.Deferred();
-
+        var dfd = new modules.Deferred(this);
+        
         var args = arguments, i = 1;
         
         dfd.done(function() {

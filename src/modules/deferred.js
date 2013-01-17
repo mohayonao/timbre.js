@@ -5,6 +5,18 @@
     var isDeferred = function(x) {
         return x && typeof x.promise === "function";
     };
+
+    function Promise(object) {
+        this.context = object.context;
+        this.then = object.then;
+        this.done = object.done.bind(object);
+        this.fail = object.fail.bind(object);
+        this.pipe = object.pipe.bind(object);
+        this.always  = object.always.bind(object);
+        this.promise = object.promise.bind(object);
+        this.isResolved = object.isResolved.bind(object);
+        this.isRejected = object.isRejected.bind(object);
+    }
     
     function Deferred(context) {
         this.context = context || this;
@@ -12,16 +24,7 @@
         this._doneList = [];
         this._failList = [];
         
-        this._promise = {
-            then: this.then,
-            done: this.done.bind(this),
-            fail: this.fail.bind(this),
-            pipe: this.pipe.bind(this),
-            always : this.always.bind(this),
-            promise: this.promise.bind(this),
-            isResolved: this.isResolved.bind(this),
-            isRejected: this.isRejected.bind(this)
-        };
+        this._promise = new Promise(this);
     }
     
     var $ = Deferred.prototype;

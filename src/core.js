@@ -58,6 +58,8 @@
             if (key !== null) {
                 if (key instanceof TimbreObject) {
                     return key;
+                } else if (key.context instanceof TimbreObject) {
+                    return key.context;
                 } else if (key.constructor === Object) {
                     instance = new ObjectWrapper(args);
                 } else if (isArray(key)) {
