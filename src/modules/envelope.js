@@ -6,7 +6,7 @@
     function Envelope(samplerate) {
         this.samplerate = samplerate || 44100;
         this.table  = [];
-        this.level  = ZERO;
+        this.value  = ZERO;
         this.status = StatusWait;
         this.curve  = "linear";
         this.step   = 1;
@@ -14,8 +14,8 @@
         this.loopNode    = null;
         this.emit = null;
         
-        this._endLevel   = ZERO;
-        this._initLevel  = ZERO;
+        this._endValue   = ZERO;
+        this._initValue  = ZERO;
         this._curveType  = CurveTypeLin;
         this._curveValue = 0;
         this._defaultCurveType = CurveTypeLin;
@@ -73,7 +73,7 @@
         if (Array.isArray(value)) {
             this.table = value;
             this._buildTable(value);
-            this.level = this._initLevel;
+            this.value = this._initValue;
         }
     };
     $.setCurve = function(value) {
@@ -97,7 +97,7 @@
         }
     };
     $.reset = function() {
-        this.level = this._initLevel;
+        this.value = this._initValue;
         this._index   = 0;
         this._counter = 0;
         this._curveType  = CurveTypeStep;
@@ -147,11 +147,11 @@
         var status  = this.status;
         var index   = this._index;
         var table   = this._table;
-        var endLevel = this._endLevel;
+        var endValue = this._endValue;
         var curveType   = this._curveType;
         var curveValue = this._curveValue;
         var defaultCurveType = this._defaultCurveType;
-        var level   = this.level;
+        var value   = this.value;
         var grow    = this._grow;
         var loopNode    = this.loopNode;
         var releaseNode = this.releaseNode;
@@ -195,7 +195,7 @@
                 }
                 items = table[index++];
                 
-                endLevel = items[0];
+                endValue = items[0];
                 if (items[2] === null) {
                     curveType = defaultCurveType;
                 } else {
@@ -217,52 +217,52 @@
                 
                 switch (curveType) {
                 case CurveTypeStep:
-                    level = endLevel;
+                    value = endValue;
                     break;
                 case CurveTypeLin:
-                    grow = (endLevel - level) / counter;
+                    grow = (endValue - value) / counter;
                     break;
                 case CurveTypeExp:
                     grow = Math.pow(
-                        endLevel / level, 1 / counter
+                        endValue / value, 1 / counter
                     );
                     break;
                 case CurveTypeSin:
                     w = Math.PI / counter;
-                    a2 = (endLevel + level) * 0.5;
+                    a2 = (endValue + value) * 0.5;
                     b1 = 2 * Math.cos(w);
-                    y1 = (endLevel - level) * 0.5;
+                    y1 = (endValue - value) * 0.5;
                     y2 = y1 * Math.sin(Math.PI * 0.5 - w);
-                    level = a2 - y1;
+                    value = a2 - y1;
                     break;
                 case CurveTypeWel:
                     w = (Math.PI * 0.5) / counter;
                     b1 = 2 * Math.cos(w);
-                    if (endLevel >= level) {
-                        a2 = level;
+                    if (endValue >= value) {
+                        a2 = value;
                         y1 = 0;
-                        y2 = -Math.sin(w) * (endLevel - level);
+                        y2 = -Math.sin(w) * (endValue - value);
                     } else {
-                        a2 = endLevel;
-                        y1 = level - endLevel;
-                        y2 = Math.cos(w) * (level - endLevel);
+                        a2 = endValue;
+                        y1 = value - endValue;
+                        y2 = Math.cos(w) * (value - endValue);
                     }
-                    level = a2 + y1;
+                    value = a2 + y1;
                     break;
                 case CurveTypeCurve:
-                    a1 = (endLevel - level) / (1.0 - Math.exp(curveValue));
-                    a2 = level + a1;
+                    a1 = (endValue - value) / (1.0 - Math.exp(curveValue));
+                    a2 = value + a1;
                     b1 = a1;
                     grow = Math.exp(curveValue / counter);
                     break;
                 case CurveTypeSqr:
-                    y1 = Math.sqrt(level);
-                    y2 = Math.sqrt(endLevel);
+                    y1 = Math.sqrt(value);
+                    y2 = Math.sqrt(endValue);
                     grow = (y2 - y1) / counter;
                     break;
                 case CurveTypeCub:
-                    y1 = Math.pow(level   , 0.33333333);
-                    y2 = Math.pow(endLevel, 0.33333333);
+                    y1 = Math.pow(value   , 0.33333333);
+                    y2 = Math.pow(endValue, 0.33333333);
                     grow = (y2 - y1) / counter;
                     break;
                 }
@@ -272,47 +272,47 @@
         
         switch (curveType) {
         case CurveTypeStep:
-            level = endLevel;
+            value = endValue;
             break;
         case CurveTypeLin:
-            level += grow;
+            value += grow;
             break;
         case CurveTypeExp:
-            level *= grow;
+            value *= grow;
             break;
         case CurveTypeSin:
             y0 = b1 * y1 - y2;
-            level = a2 - y0;
+            value = a2 - y0;
             y2  = y1;
             y1  = y0;
             break;
         case CurveTypeWel:
             y0 = b1 * y1 - y2;
-            level = a2 + y0;
+            value = a2 + y0;
             y2  = y1;
             y1  = y0;
             break;
         case CurveTypeCurve:
             b1 *= grow;
-            level = a2 - b1;
+            value = a2 - b1;
             break;
         case CurveTypeSqr:
             y1 += grow;
-            level = y1 * y1;
+            value = y1 * y1;
             break;
         case CurveTypeCub:
             y1 += grow;
-            level = y1 * y1 * y1;
+            value = y1 * y1 * y1;
             break;
         }
-        this.level = level || ZERO;
+        this.value = value || ZERO;
         
         this.status = status;
         this.emit   = emit;
         
         this._index = index;
         this._grow  = grow;
-        this._endLevel  = endLevel;
+        this._endValue  = endValue;
         this._curveType = curveType;
         this._counter   = counter - 1;
         this._a2 = a2;
@@ -320,22 +320,22 @@
         this._y1 = y1;
         this._y2 = y2;
         
-        return this.level;
+        return this.value;
     };
     $._buildTable = function(list) {
         if (list.length === 0) {
-            this._initLevel = ZERO;
+            this._initValue = ZERO;
             this._table     = [];
             return;
         }
         
-        this._initLevel = list[0] || ZERO;
+        this._initValue = list[0] || ZERO;
         this._table     = [];
         
         var table = this._table;
-        var level, time, curveType, curveValue;
+        var value, time, curveType, curveValue;
         for (var i = 1, imax = list.length; i < imax; ++i) {
-            level = list[i][0] || ZERO;
+            value = list[i][0] || ZERO;
             time  = list[i][1];
             curveType = list[i][2];
             
@@ -357,7 +357,7 @@
                 curveType  = CurveTypeDict[curveType] || null;
                 curveValue = 0;
             }
-            table.push([level, time, curveType, curveValue]);
+            table.push([value, time, curveType, curveValue]);
         }
     };
     

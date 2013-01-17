@@ -28,14 +28,14 @@
                 }
             },
             get: function() {
-                return this._.env.level;
+                return this._.env.value;
             }
         }
     });
     
-    $.to = function(nextLevel, time, curve) {
+    $.to = function(nextValue, time, curve) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, curve]]);
+        env.setTable([env.value, [nextValue, time, curve]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = curve;
@@ -43,9 +43,9 @@
         return this;
     };
     
-    $.setAt = function(nextLevel, time) {
+    $.setAt = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [env.level, time], [nextLevel, 0]]);
+        env.setTable([env.value, [env.value, time], [nextValue, 0]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "set";
@@ -53,9 +53,9 @@
         return this;
     };
     
-    $.linTo = function(nextLevel, time) {
+    $.linTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "lin"]]);
+        env.setTable([env.value, [nextValue, time, "lin"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "lin";
@@ -63,9 +63,9 @@
         return this;
     };
     
-    $.expTo = function(nextLevel, time) {
+    $.expTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "exp"]]);
+        env.setTable([env.value, [nextValue, time, "exp"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "exp";
@@ -73,9 +73,9 @@
         return this;
     };
     
-    $.sinTo = function(nextLevel, time) {
+    $.sinTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "sin"]]);
+        env.setTable([env.value, [nextValue, time, "sin"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "sin";
@@ -83,9 +83,9 @@
         return this;
     };
     
-    $.welTo = function(nextLevel, time) {
+    $.welTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "wel"]]);
+        env.setTable([env.value, [nextValue, time, "wel"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "wel";
@@ -93,9 +93,9 @@
         return this;
     };
     
-    $.sqrTo = function(nextLevel, time) {
+    $.sqrTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "sqr"]]);
+        env.setTable([env.value, [nextValue, time, "sqr"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "sqr";
@@ -103,9 +103,9 @@
         return this;
     };
     
-    $.cubTo = function(nextLevel, time) {
+    $.cubTo = function(nextValue, time) {
         var env = this._.env;
-        env.setTable([env.level, [nextLevel, time, "cub"]]);
+        env.setTable([env.value, [nextValue, time, "cub"]]);
         env.reset();
         env.status = Envelope.StatusGate;
         this._.curve = "cub";
