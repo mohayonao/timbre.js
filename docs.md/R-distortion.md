@@ -10,7 +10,7 @@ var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";
 
 var audio = T("audio", {isLooped:true}).load(src, function(res) {
     
-    T("distortion", {preGain:-30, postGain:12, cutoff:1600}, this).play();
+    T("distortion", {preGain:-40, postGain:12, cutoff:800}, this).play();
 
 });
 ```

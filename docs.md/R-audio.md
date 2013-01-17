@@ -28,6 +28,19 @@ T("audio").on("ended", function() {
 - {deferred} `load(src, done, fail)`
   - オーディオファイルを読み込みます. `promise` オブジェクトが返ります
 
+`promise` は jQuery の Deferred.promise とほぼ同等なので jQuery.when の入力に使用できます。
+  
+```timbre
+
+var audio1 = T("audio", {isLooped:true}).load("/timbre.js/misc/audio/drum.wav");
+var audio2 = T("audio", {isLooped:true}).load("/timbre.js/misc/audio/guitar.wav");
+
+$.when(audio1, audio2).then(function() {
+  T("+", audio1, audio2).play();
+});
+
+```
+
 ## Events ##
 - `load`
   - 読み込みを開始したとき

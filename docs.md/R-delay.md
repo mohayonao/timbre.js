@@ -8,7 +8,7 @@ var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";
 
 var audio = T("audio", {isLooped:true}).load(src, function(res) {
     
-    var d = T("delay", {time:250, fb:0.6, wet:0.5}, this).play();
+    var d = T("delay", {time:"80ms", fb:0.4, wet:0.25}, this).play();
     
 });
 ```
