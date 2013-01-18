@@ -864,7 +864,7 @@
             }
             dac.play();
             if (emit) {
-                this._.emit("play");
+                this._.emit.apply(this, ["play"].concat(slice.call(arguments)));
             }
             return this;
         };
@@ -884,18 +884,26 @@
             return this;
         };
         
-        $.ar = function() {
-            if (!this._.kronly) {
-                this._.ar = true;
-                this._.emit("ar", true);
+        $.ar = function(value) {
+            if (value) {
+                if (!this._.kronly) {
+                    this._.ar = true;
+                    this._.emit("ar", true);
+                }
+            } else {
+                this.kr(true);
             }
             return this;
         };
         
-        $.kr = function() {
-            if (!this._.aronly) {
-                this._.ar = false;
-                this._.emit("ar", false);
+        $.kr = function(value) {
+            if (value) {
+                if (!this._.aronly) {
+                    this._.ar = false;
+                    this._.emit("ar", false);
+                }
+            } else {
+                this.ar(true);
             }
             return this;
         };
