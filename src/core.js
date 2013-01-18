@@ -86,11 +86,37 @@
         }
         
         instance._.originkey = key;
-        
+        instance._.meta = __buildMetaData(instance);
         instance._.emit("init");
         
         return instance;
     }.bind(null);
+
+    var __buildMetaData = function(instance) {
+        var meta = instance._.meta;
+        var names, desc;
+        var p = instance;
+        while (p !== null && p.constructor !== Object) {
+            names = Object.getOwnPropertyNames(p);
+            for (var i = names.length; i--; ) {
+                if (meta[names[i]]) {
+                    continue;
+                }
+                if (/^(constructor$|process$|_)/.test(names[i])) {
+                    meta[names[i]] = "ignore";
+                } else {
+                    desc = Object.getOwnPropertyDescriptor(p, names[i]);
+                    if (typeof desc.value === "function") {
+                        meta[names[i]] = "function";
+                    } else if (desc.get || desc.set) {
+                        meta[names[i]] = "property";
+                    }
+                }
+            }
+            p = Object.getPrototypeOf(p);
+        }
+        return meta;
+    };
     
     var fn      = timbre.fn    = {};
     var modules = timbre.modules = {};
@@ -663,6 +689,7 @@
             this._.mul = 1;
             this._.add = 0;
             this._.dac = null;
+            this._.meta = {};
         }
         
         var $ = TimbreObject.prototype;
@@ -810,20 +837,31 @@
             return this._.events.listeners(type);
         };
         
-        //
         $.set = function(key, value) {
-            var x, desc;
+            var x, desc, meta = this._.meta;
+            
             switch (typeof key) {
             case "string":
-                x = this;
-                while (x !== null) {
-                    if ((desc = Object.getOwnPropertyDescriptor(x, key)) !== undefined) {
-                        if (!desc.configurable) {
-                            this[key] = value;
+                switch (meta[key]) {
+                case "property":
+                    this[key] = value;
+                    break;
+                case "function":
+                    this[key](value);
+                    break;
+                default:
+                    x = this;
+                    while (x !== null) {
+                        desc = Object.getOwnPropertyDescriptor(x, key);
+                        if (desc) {
+                            if (typeof desc.value === "function") {
+                                meta[key] = "function";
+                            } else if (desc.get || desc.set) {
+                                meta[key] = "property";
+                            }
                         }
-                        break;
+                        x = Object.getPrototypeOf(x);
                     }
-                    x = Object.getPrototypeOf(x);
                 }
                 break;
             case "object":
@@ -836,12 +874,8 @@
         };
         
         $.get = function(key) {
-            var x = Object.getPrototypeOf(this);
-            while (x !== null) {
-                if (Object.getOwnPropertyDescriptor(x, key) !== undefined) {
-                    return this[key];
-                }
-                x = Object.getPrototypeOf(x);
+            if (this._.meta[key] === "property") {
+                return this[key];
             }
         };
         

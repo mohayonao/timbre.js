@@ -6,8 +6,8 @@
     
     fn.register("audio", function(_args) {
         var params;
-        if (!fn.isDictionary(_args[0])) {
-            params = _args.unshift({});
+        if (fn.isDictionary(_args[0])) {
+            params = _args.shift();
         }
         
         var instance = timbre.apply(null, ["buffer"].concat(_args));
