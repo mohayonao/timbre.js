@@ -5,6 +5,11 @@
     var modules = timbre.modules;
     
     fn.register("audio", function(_args) {
+        var params;
+        if (!fn.isDictionary(_args[0])) {
+            params = _args.unshift({});
+        }
+        
         var instance = timbre.apply(null, ["buffer"].concat(_args));
         
         instance._.isLoaded = false;
@@ -19,6 +24,12 @@
         });
         
         instance.load = load;
+        
+        if (params) {
+            instance.once("init", function() {
+                instance.set(params);
+            });
+        }
         
         return instance;
     });
