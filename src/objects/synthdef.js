@@ -202,6 +202,8 @@
                 if (typeof value.type === "string") {
                     this._.env = value;
                 }
+            } else if (value instanceof timbre.Object) {
+                this._.env = value;
             }
         },
         get: function() {
@@ -230,7 +232,14 @@
             envtype = env.type || "perc";
             
             synth = timbre("osc", {wave:_.wave, freq:opts.freq, mul:opts.velocity/128});
-            synth = timbre(envtype, env, synth).on("ended", opts.doneAction).bang();
+            if (env instanceof timbre.Object) {
+                if (typeof env.clone === "function") {
+                    synth = env.clone().append(synth);
+                }
+            } else {
+                synth = timbre(envtype, env, synth);
+            }
+            synth.on("ended", opts.doneAction).bang();
             
             return synth;
         };
@@ -260,7 +269,14 @@
             envtype = env.type || "perc";
             
             synth = timbre("pluck", {freq:opts.freq, mul:opts.velocity/128}).bang();
-            synth = timbre(envtype, env, synth).on("ended", opts.doneAction).bang();
+            if (env instanceof timbre.Object) {
+                if (typeof env.clone === "function") {
+                    synth = env.clone().append(synth);
+                }
+            } else {
+                synth = timbre(envtype, env, synth);
+            }
+            synth.on("ended", opts.doneAction).bang();
             
             return synth;
         };
