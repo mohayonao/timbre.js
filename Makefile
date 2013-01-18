@@ -5,9 +5,6 @@ all: hint test timbre
 timbre: hint
 	@coffee build/timbre-builder.coffee
 
-minify: timbre
-	@uglifyjs --unsafe -nc -nm -o ./timbre.js ./timbre.dev.js
-
 test: hint
 	@mocha --reporter dot
 
