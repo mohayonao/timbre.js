@@ -25,7 +25,7 @@
     fn.extend(BufferNode);
 
     var onplay = function(value) {
-        this._.isEnded = !value;
+        this._.isEnded = (value === false);
     };
     
     var $ = BufferNode.prototype;
@@ -68,7 +68,7 @@
         },
         isLooped: {
             set: function(value) {
-                this._.isLooped = !!value;
+                this.loop(value);
             },
             get: function() {
                 return this._.isLooped;
@@ -76,20 +76,7 @@
         },
         isReversed: {
             set: function(value) {
-                var _ = this._;
-                _.isReversed = !!value;
-                if (_.isReversed) {
-                    if (_.phaseIncr > 0) {
-                        _.phaseIncr *= -1;
-                    }
-                    if (_.phase === 0 && _.buffer) {
-                        _.phase = _.buffer.length + _.phaseIncr;
-                    }
-                } else {
-                    if (_.phaseIncr < 0) {
-                        _.phaseIncr *= -1;
-                    }
-                }
+                this.reverse(value);
             },
             get: function() {
                 return this._.isReversed;
@@ -177,8 +164,28 @@
         return instance;
     };
     
-    $.reversed = function() {
-        this.isReversed = !this._.isReversed;
+    $.reverse = function(value) {
+        var _ = this._;
+        
+        _.isReversed = !!value;
+        if (_.isReversed) {
+            if (_.phaseIncr > 0) {
+                _.phaseIncr *= -1;
+            }
+            if (_.phase === 0 && _.buffer) {
+                _.phase = _.buffer.length + _.phaseIncr;
+            }
+        } else {
+            if (_.phaseIncr < 0) {
+                _.phaseIncr *= -1;
+            }
+        }
+        
+        return this;
+    };
+
+    $.loop = function(value) {
+        this._.isLooped = !!value;
         return this;
     };
     

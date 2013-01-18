@@ -39,10 +39,7 @@
         },
         isLooped: {
             set: function(value) {
-                this._.isLooped = !!value;
-                if (this._.tapeStream) {
-                    this._.tapeStream.isLooped = this._.isLooped;
-                }
+                this.loop(value);
             },
             get: function() {
                 return this._.isLooped;
@@ -54,6 +51,14 @@
             }
         }
     });
+    
+    $.loop = function(value) {
+        this._.isLooped = !!value;
+        if (this._.tapeStream) {
+            this._.tapeStream.isLooped = this._.isLooped;
+        }
+        return this;
+    };
     
     $.bang = function() {
         if (this._.tapeStream) {
