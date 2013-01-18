@@ -44,6 +44,12 @@ JavaScript Library for Objective Sound Programming
 <script src="./timbre.js"></script>
 ```
 
+node.js
+
+```sh
+npm install timbre
+```
+
 ###### en ######
 
   Timbre.js use global variants `timbre` and abbr `T`.
