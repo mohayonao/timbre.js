@@ -9,10 +9,10 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_FB]  = timbre(0);
-        this.attrs[ATTRS_WET] = timbre(1);
-        
-        this._.delay = new EfxDelay();
+        var _ = this._;
+        _.fb    = timbre(0);
+        _.wet   = timbre(1);
+        _.delay = new EfxDelay();
         
         this.once("init", oninit);
     }
@@ -25,9 +25,6 @@
     };
     
     var $ = DelayNode.prototype;
-    
-    var ATTRS_FB  = fn.setAttrs($, ["feedback", "fb"]);
-    var ATTRS_WET = fn.setAttrs($, "wet");
     
     Object.defineProperties($, {
         time: {
@@ -45,6 +42,22 @@
             get: function() {
                 return this._.time;
             }
+        },
+        fb: {
+            set: function(value) {
+                this._.fb = timbre(value);
+            },
+            get: function() {
+                return this._.fb;
+            }
+        },
+        wet: {
+            set: function(value) {
+                this._.wet = timbre(value);
+            },
+            get: function() {
+                return this._.wet;
+            }
         }
     });
     
@@ -58,12 +71,12 @@
             fn.inputSignalAR(this);
             
             var changed = false;
-            var feedback = this.attrs[ATTRS_FB].process(tickID)[0];
+            var feedback = _.fb.process(tickID)[0];
             if (_.prevFeedback !== feedback) {
                 _.prevFeedback = feedback;
                 changed = true;
             }
-            var wet = this.attrs[ATTRS_WET].process(tickID)[0];
+            var wet = _.wet.process(tickID)[0];
             if (_.prevWet !== wet) {
                 _.prevWet = wet;
                 changed = true;

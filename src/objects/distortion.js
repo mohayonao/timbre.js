@@ -6,11 +6,10 @@
     function DistNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
-
-        this.attrs[ATTRS_PRE]  = timbre(-60);
-        this.attrs[ATTRS_POST] = timbre( 18);
         
         var _ = this._;
+        _.pre  = timbre(-60);
+        _.post = timbre( 18);
         _.samplerate = timbre.samplerate;
         _.x1 = _.x2 = _.y1 = _.y2 = 0;
         _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
@@ -19,9 +18,6 @@
     fn.extend(DistNode);
     
     var $ = DistNode.prototype;
-    
-    var ATTRS_PRE  = fn.setAttrs($, ["pre", "preGain"]);
-    var ATTRS_POST = fn.setAttrs($, ["post", "postGain"]);
     
     Object.defineProperties($, {
         cutoff: {
@@ -32,6 +28,22 @@
             },
             get: function() {
                 return this._.cutoff;
+            }
+        },
+        pre: {
+            set: function(value) {
+                this._.pre = timbre(value);
+            },
+            get: function() {
+                return this._.pre;
+            }
+        },
+        post: {
+            set: function(value) {
+                this._.post = timbre(value);
+            },
+            get: function() {
+                return this._.post;
             }
         }
     });
@@ -47,12 +59,12 @@
             
             var changed = false;
 
-            var preGain = this.attrs[ATTRS_PRE].process(tickID)[0];
+            var preGain = _.pre.process(tickID)[0];
             if (_.prevPreGain !== preGain) {
                 _.prevPreGain = preGain;
                 changed = true;
             }
-            var postGain = this.attrs[ATTRS_POST].process(tickID)[0];
+            var postGain = _.post.process(tickID)[0];
             if (_.prevPostGain !== postGain) {
                 _.prevPostGain = postGain;
                 changed = true;

@@ -9,12 +9,11 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_FREQ] = timbre(340);
-        this.attrs[ATTRS_Q]    = timbre(1);
-        this.attrs[ATTRS_GAIN] = timbre(0);
-        
         var _ = this._;
         _.biquad = new Biquad({samplerate:timbre.samplerate});
+        _.freq = timbre(340);
+        _.Q    = timbre(1);
+        _.gain = timbre(0);
         
         _.plotRange = [0, 1.2];
         _.plotFlush = true;
@@ -22,10 +21,6 @@
     fn.extend(BiquadNode);
     
     var $ = BiquadNode.prototype;
-    
-    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency", "cutoff"]);
-    var ATTRS_Q    = fn.setAttrs($, "Q");
-    var ATTRS_GAIN = fn.setAttrs($, "gain");
     
     Object.defineProperties($, {
         type: {
@@ -38,6 +33,38 @@
             },
             get: function() {
                 return this._.biquad.type;
+            }
+        },
+        freq: {
+            set: function(value) {
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
+            }
+        },
+        cutoff: {
+            set: function(value) {
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
+            }
+        },
+        Q: {
+            set: function(value) {
+                this._.Q = timbre(value);
+            },
+            get: function() {
+                return this._.Q;
+            }
+        },
+        gain: {
+            set: function(value) {
+                this._.gain = timbre(value);
+            },
+            get: function() {
+                return this._.gain;
             }
         }
     });
@@ -53,17 +80,17 @@
             
             var changed = false;
             
-            var freq = this.attrs[ATTRS_FREQ].process(tickID)[0];
+            var freq = _.freq.process(tickID)[0];
             if (_.prevFreq !== freq) {
                 _.prevFreq = freq;
                 changed = true;
             }
-            var Q = this.attrs[ATTRS_Q].process(tickID)[0];
+            var Q = _.Q.process(tickID)[0];
             if (_.prevQ !== Q) {
                 _.prevQ = Q;
                 changed = true;
             }
-            var gain = this.attrs[ATTRS_GAIN].process(tickID)[0];
+            var gain = _.gain.process(tickID)[0];
             if (_.prevGain !== gain) {
                 _.prevGain = gain;
                 changed = true;

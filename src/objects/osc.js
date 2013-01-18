@@ -8,9 +8,8 @@
     function OscNode(_args) {
         timbre.Object.call(this, _args);
         
-        this.attrs[ATTRS_FREQ] = timbre(440);
-        
         var _ = this._;
+        _.freq = timbre(440);
         _.osc = new Oscillator(timbre.samplerate);
         _.tmp = new Float32Array(this.cell.length);
         _.osc.step = this.cell.length;
@@ -32,19 +31,6 @@
     
     var $ = OscNode.prototype;
     
-    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"], {
-        conv: function(value) {
-            if (typeof value === "string") {
-                value = timevalue(value);
-                if (value <= 0) {
-                    return 0;
-                }
-                return 1000 / value;
-            }
-            return value;
-        }
-    });
-    
     Object.defineProperties($, {
         wave: {
             set: function(value) {
@@ -52,6 +38,22 @@
             },
             get: function() {
                 return this._.osc.wave;
+            }
+        },
+        freq: {
+            set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                    if (value <= 0) {
+                        value = 0;
+                    } else {
+                        value = 1000 / value;
+                    }
+                }
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
             }
         }
     });
@@ -81,8 +83,8 @@
             }
             
             var osc   = _.osc;
-            var  freq = this.attrs[ATTRS_FREQ];
-            var _freq = freq.process(tickID);
+            var  freq = _.freq;
+            var _freq = _.freq.process(tickID);
             
             if (_.ar) { // audio-rate
                 var tmp  = _.tmp;

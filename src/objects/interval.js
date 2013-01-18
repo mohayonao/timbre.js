@@ -9,9 +9,8 @@
         fn.timer(this);
         fn.fixKR(this);
         
-        this.attrs[ATTRS_I] = timbre(1000);
-        
         var _ = this._;
+        _.interval = timbre(1000);
         _.count = 0;
         _.delay   = 0;
         _.timeout = Infinity;
@@ -41,20 +40,22 @@
     };
     
     var $ = IntervalNode.prototype;
-
-    var ATTRS_I = fn.setAttrs($, ["interval"], {
-        conv: function(value) {
-            if (typeof value === "string") {
-                value = timevalue(value);
-                if (value <= 0) {
-                    return 0;
-                }
-            }
-            return value;
-        }
-    });
     
     Object.defineProperties($, {
+        interval: {
+            set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                    if (value <= 0) {
+                        value = 0;
+                    }
+                }
+                this._.interval = timbre(value);
+            },
+            get: function() {
+                return this._.interval;
+            }
+        },
         delay: {
             set: function(value) {
                 if (typeof value === "string") {
@@ -124,7 +125,7 @@
                 _.delaySamples -= cell.length;
             }
             
-            var interval = this.attrs[ATTRS_I].process(tickID)[0];
+            var interval = _.interval.process(tickID)[0];
             
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;

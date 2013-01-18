@@ -7,9 +7,8 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_FREQ] = timbre(440);
-        
         var _ = this._;
+        _.freq = timbre(440);
         _.samplerate = timbre.samplerate;
         _.reg = 0x8000;
         _.shortFlag = false;
@@ -20,8 +19,6 @@
     
     var $ = FNoiseNode.prototype;
     
-    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"]);
-    
     Object.defineProperties($, {
         shortFlag: {
             set: function(value) {
@@ -29,6 +26,14 @@
             },
             get: function() {
                 return this._.shortFlag;
+            }
+        },
+        freq: {
+            set: function(value) {
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
             }
         }
     });
@@ -42,7 +47,7 @@
 
             var lastValue = _.lastValue;
             var phase     = _.phase;
-            var phaseStep = this.attrs[ATTRS_FREQ].process(tickID)[0] / _.samplerate;
+            var phaseStep = _.freq.process(tickID)[0] / _.samplerate;
             var reg = _.reg;
             var mul = _.mul, add = _.add;
             var i, imax;

@@ -7,9 +7,8 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_PITCH] = timbre(1);
-        
         var _ = this._;
+        _.pitch      = timbre(1);
         _.buffer     = new Float32Array(0);
         _.isLooped   = false;
         _.isReversed = false;
@@ -23,7 +22,7 @@
         this.on("play", onplay);
     }
     fn.extend(BufferNode);
-
+    
     var onplay = function(value) {
         this._.isEnded = (value === false);
     };
@@ -57,13 +56,19 @@
         }
     };
     
-    var ATTRS_PITCH = fn.setAttrs($, "pitch");
-    
     Object.defineProperties($, {
         buffer: {
             set: setBuffer,
             get: function() {
                 return this._.buffer;
+            }
+        },
+        pitch: {
+            set: function(value) {
+                this._.pitch = timbre(value);
+            },
+            get: function() {
+                return this._.pitch;
             }
         },
         isLooped: {
@@ -204,7 +209,7 @@
             this.tickID = tickID;
             
             if (!_.isEnded && _.buffer) {
-                var pitch  = this.attrs[ATTRS_PITCH].process(tickID)[0];
+                var pitch  = _.pitch.process(tickID)[0];
                 var buffer = _.buffer;
                 var phase  = _.phase;
                 var phaseIncr = _.phaseIncr * pitch;
