@@ -17,14 +17,14 @@ timbre.rec(function(output) {
     }).start();
     
     var synth = gen;
-    synth = T("dist" , {pre:-60, post:12}, synth);
+    synth = T("dist" , {pre:60, post:-12}, synth);
     synth = T("delay", {fb :0.5, wet:0.2}, synth);
     
     output.send(synth);
 
 }).then(function(buffer) {
    
-    T("buffer", {buffer:buffer, isLooped:true, isReversed:true}).play();
+    T("buffer", {buffer:buffer, loop:true, reverse:true}).play();
     
 });
 ```

@@ -33,5 +33,5 @@ for (var i = 0; i < buffer.length; i++) {
 
 buffer = { buffer:buffer, samplerate:22050 };
 
-T("buffer", {buffer:buffer, pitch:50, isLooped:true}).plot({target:canvas}).play();
+T("buffer", {buffer:buffer, pitch:50, loop:true}).plot({target:canvas}).play();
 ```

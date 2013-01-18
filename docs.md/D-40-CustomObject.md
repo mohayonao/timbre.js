@@ -34,12 +34,10 @@ Customize timbre.js
     
     timbre.fn.register("custom-object", CustomObject);
 })();
-
-T("audio", {isLooped:true}).load("/timbre.js/misc/audio/amen.wav").then(function() {
-
-    T("custom-object", this).play();
-    
-})
+ 
+T("custom-object", 
+    T("audio", {load:"/timbre.js/misc/audio/amen.wav", loop:true})
+).play();
 ```
 
 ### 必須 ###

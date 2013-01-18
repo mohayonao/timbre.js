@@ -8,7 +8,7 @@ T("biquad")
 ```timbre
 var src = window.getDraggedFile() || "/timbre.js/misc/audio/amen.wav";
 
-var audio = T("audio", {isLooped:true}).load(src, function(res) {
+var audio = T("audio", {loop:true}).load(src, function(res) {
     
     T("biquad", {type:"lowpass", freq:800, Q:10}, this).play();
     
@@ -18,7 +18,7 @@ var audio = T("audio", {isLooped:true}).load(src, function(res) {
 ## Properties ##
 - `type` _(String)_
   - **Filter Types** を参照してください
-- `freq`, `frequency`, `cutoff` _(T-Object or timevalue)_
+- `freq`, `cutoff` _(T-Object or timevalue)_
   - カットオフ周波数
 - `Q` _(T-Object)_
   - Q

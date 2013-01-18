@@ -6,7 +6,7 @@ Assign one of several inputs to an outlet
 処理を行う入力オブジェクトを選択します。
 
 ```timbre
-var a = T("audio", {isLooped:true}).load("/timbre.js/misc/audio/amen.wav");
+var a = T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav");
 var b = T("sin", {freq:880, mul:0.1});
 
 var selector = T("selector", a, b).play();

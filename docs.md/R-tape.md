@@ -17,7 +17,7 @@ timbre.rec(function(output) {
     }).start();
     
     var synth = gen;
-    synth = T("dist" , {pre:-60, post:12}, synth);
+    synth = T("dist" , {pre:60, post:-12}, synth);
     
     output.send(synth);
 
@@ -31,9 +31,9 @@ timbre.rec(function(output) {
         return t.loop(4);
     });
     
-    tape = timbre.modules.scissor.join(tapes);
+    tape = timbre.modules.Scissor.join(tapes);
         
-    T("tape", {tape:tape, isLooped:true}).play();
+    T("tape", {tape:tape, loop:true}).play();
     
 });
 ```
@@ -49,8 +49,8 @@ timbre.rec(function(output) {
 - **reverse()**
 - **pitch(pitch)**
 - **duration()**
-- **timbre.modules.scissor.join(tapes)**
-- **timbre.modules.scissor.scilence(duration)**
+- **timbre.modules.Scissor.join(tapes)**
+- **timbre.modules.Scissor.scilence(duration)**
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/tape.js

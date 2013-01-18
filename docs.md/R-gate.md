@@ -6,7 +6,7 @@ Route a signal to one of several outlets
 出力先を選択します。
 
 ```timbre
-var audio = T("audio", {isLooped:true}).load("/timbre.js/misc/audio/amen.wav");
+var audio = T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav");
 
 var gate  = T("gate", audio);
 
@@ -14,7 +14,7 @@ T("interval", {interval:2000}, function(count) {
     gate.selected = count % 2;
 }).start();
 
-T("dist" , {preGain:-32, postGain:20 }, gate.at(0)).play();
+T("dist" , {pre:32, post:-20}, gate.at(0)).play();
 T("delay", {time:250, fb:0.6, wet:0.5}, gate.at(1)).play();
 ```
 

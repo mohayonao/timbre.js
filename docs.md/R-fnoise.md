@@ -26,7 +26,7 @@ T("interval", {interval:1000}, freqs).start();
 ```
 
 ## Properties ##
-- `freq`, `frequency` _(T-Object)_
+- `freq` _(T-Object)_
 
 ## See Also ##
 - [T("noise")](./noise.html) 

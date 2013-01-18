@@ -11,7 +11,7 @@ var synth = T("saw", {freq:freq, mul:0.25});
 
 T("rec", {timeout:1000}, synth).on("ended", function(buffer) {
 
-    T("buffer", {buffer:buffer, isLooped:true}).play();
+    T("buffer", {buffer:buffer, loop:true}).play();
     
     this.pause();
     

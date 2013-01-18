@@ -14,15 +14,15 @@ var freqs = T(function(count) {
 var osc = T("sin", {freq:freqs, mul:0.5});
 var env = T("perc", {a:50, r:500}, osc).bang();
 
-var i = T("param", {value:500}).linTo(50, "30sec");
+var interval = T("param", {value:500}).linTo(50, "30sec");
 
-T("interval", {interval:i}, freqs, env).start();
+T("interval", {interval:interval}, freqs, env).start();
 
 env.play();
 ```
 
 ## Properties ##
-- `i`, `interval` _(T-Object or timevalue)_
+- `interval` _(T-Object or timevalue)_
   - 入力オブジェクトに対して `bang()` を呼び出す間隔を設定します
 - `delay` _(Number or timevalue)_
   - 待機時間を設定します

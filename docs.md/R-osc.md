@@ -12,7 +12,7 @@ T("osc", {wave:"sin", freq:880}).play();
 ## Properties ##
 - `wave` _(String or Function or Float32Array)_
   - 波形を設定します。詳細は **Wave Functions** の項目を参照してください
-- `freq`, `frequency` _(T-Object or timevalue)_
+- `freq` _(T-Object or timevalue)_
   - 周波数を設定します。
 
 ## Note ##

@@ -10,8 +10,8 @@ var synth = T("SynthDef").play();
 
 synth.def = function(opts) {
     var osc1, osc2, env;
-    osc1 = T("saw", {freq:opts.freq      , mul:0.25});
-    osc2 = T("saw", {freq:opts.freq * 1.5, mul:0.20});
+    osc1 = T("saw", {freq:opts.freq         , mul:0.25});
+    osc2 = T("saw", {freq:opts.freq * 1.6818, mul:0.20});
     env  = T("linen", {s:450, r:250, lv:0.5}, osc1, osc2);
     return env.on("ended", opts.doneAction).bang();
 };

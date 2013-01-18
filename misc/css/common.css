@@ -225,3 +225,6 @@ th {
     font-weight: bold;
     border-radius: 3px;
 }
+.play-button {
+    width:80px;
+}

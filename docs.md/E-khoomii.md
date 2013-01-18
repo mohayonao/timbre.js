@@ -1,5 +1,5 @@
-Formant Khoomii
-===============
+Khoomii
+=======
 
 ```timbre
 var formants = {
