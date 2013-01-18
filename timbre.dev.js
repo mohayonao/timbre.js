@@ -14,7 +14,7 @@
     var STATUS_PLAY = 1;
     var STATUS_REC  = 2;
     
-    var _ver = "13.01.17";
+    var _ver = "13.01.18";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -84,11 +84,37 @@
         }
         
         instance._.originkey = key;
-        
+        instance._.meta = __buildMetaData(instance);
         instance._.emit("init");
         
         return instance;
     }.bind(null);
+
+    var __buildMetaData = function(instance) {
+        var meta = instance._.meta;
+        var names, desc;
+        var p = instance;
+        while (p !== null && p.constructor !== Object) {
+            names = Object.getOwnPropertyNames(p);
+            for (var i = names.length; i--; ) {
+                if (meta[names[i]]) {
+                    continue;
+                }
+                if (/^(constructor$|process$|_)/.test(names[i])) {
+                    meta[names[i]] = "ignore";
+                } else {
+                    desc = Object.getOwnPropertyDescriptor(p, names[i]);
+                    if (typeof desc.value === "function") {
+                        meta[names[i]] = "function";
+                    } else if (desc.get || desc.set) {
+                        meta[names[i]] = "property";
+                    }
+                }
+            }
+            p = Object.getPrototypeOf(p);
+        }
+        return meta;
+    };
     
     var fn      = timbre.fn    = {};
     var modules = timbre.modules = {};
@@ -325,6 +351,8 @@
         }
     };
     
+    fn.isDictionary = isDictionary;
+    
     var __nop = function() {
         return this;
     };
@@ -390,48 +418,6 @@
         return timbre;
     };
     fn.nextTick = __nextTick;
-    
-    var __setAttrs = function(p, names, opts) {
-        if (p.attrIndex === undefined) {
-            p.attrIndex = 0;
-        } else {
-            p.attrIndex += 1;
-        }
-        var index = p.attrIndex;
-        if (typeof names === "string") {
-            names = [names];
-        }
-        
-        var desc;
-        if (opts && opts.conv) {
-            var conv = opts.conv;
-            desc = {
-                set: function(value) {
-                    this.attrs[index] = timbre(conv(value));
-                },
-                get: function() {
-                    return this.attrs[index];
-                }
-            };
-            names.forEach(function(name) {
-                Object.defineProperty(p, name, desc);
-            });
-        } else {
-            desc = {
-                set: function(value) {
-                    this.attrs[index] = timbre(value);
-                },
-                get: function() {
-                    return this.attrs[index];
-                }
-            };
-            names.forEach(function(name) {
-                Object.defineProperty(p, name, desc);
-            });
-        }
-        return index;
-    };
-    fn.setAttrs = __setAttrs;
     
     var __fixAR = function(object) {
         object._.ar = true;
@@ -636,12 +622,12 @@
             this.tickID = -1;
             this.cell   = new Float32Array(_sys.cellsize);
             this.inputs = _args.map(timbre);
-            this.attrs  = [];
             
             this._.ar  = true;
             this._.mul = 1;
             this._.add = 0;
             this._.dac = null;
+            this._.meta = {};
         }
         
         var $ = TimbreObject.prototype;
@@ -789,20 +775,32 @@
             return this._.events.listeners(type);
         };
         
-        //
         $.set = function(key, value) {
-            var x, desc;
+            var x, desc, meta = this._.meta;
             switch (typeof key) {
             case "string":
-                x = this;
-                while (x !== null) {
-                    if ((desc = Object.getOwnPropertyDescriptor(x, key)) !== undefined) {
-                        if (!desc.configurable) {
-                            this[key] = value;
+                switch (meta[key]) {
+                case "property":
+                    this[key] = value;
+                    break;
+                case "function":
+                    this[key](value);
+                    break;
+                default:
+                    x = this;
+                    while (x !== null) {
+                        desc = Object.getOwnPropertyDescriptor(x, key);
+                        if (desc) {
+                            if (typeof desc.value === "function") {
+                                meta[key] = "function";
+                                this[key](value);
+                            } else if (desc.get || desc.set) {
+                                meta[key] = "property";
+                                this[key] = value;
+                            }
                         }
-                        break;
+                        x = Object.getPrototypeOf(x);
                     }
-                    x = Object.getPrototypeOf(x);
                 }
                 break;
             case "object":
@@ -815,12 +813,8 @@
         };
         
         $.get = function(key) {
-            var x = Object.getPrototypeOf(this);
-            while (x !== null) {
-                if (Object.getOwnPropertyDescriptor(x, key) !== undefined) {
-                    return this[key];
-                }
-                x = Object.getPrototypeOf(x);
+            if (this._.meta[key] === "property") {
+                return this[key];
             }
         };
         
@@ -845,7 +839,7 @@
             }
             dac.play();
             if (emit) {
-                this._.emit("play");
+                this._.emit.apply(this, ["play"].concat(slice.call(arguments)));
             }
             return this;
         };
@@ -865,18 +859,26 @@
             return this;
         };
         
-        $.ar = function() {
-            if (!this._.kronly) {
-                this._.ar = true;
-                this._.emit("ar", true);
+        $.ar = function(value) {
+            if (value === false) {
+                this.kr(true);
+            } else {
+                if (!this._.kronly) {
+                    this._.ar = true;
+                    this._.emit("ar", true);
+                }
             }
             return this;
         };
         
-        $.kr = function() {
-            if (!this._.aronly) {
-                this._.ar = false;
-                this._.emit("ar", false);
+        $.kr = function(value) {
+            if (value === false) {
+                this.ar(true);
+            } else {
+                if (!this._.aronly) {
+                    this._.ar = false;
+                    this._.emit("ar", false);
+                }
             }
             return this;
         };
@@ -2805,6 +2807,7 @@
         if (this.loopNode !== null) {
             new_instance.setLoopNode(this.loopNode + 1);
         }
+        new_instance.step = this.step;
         return new_instance;
     };
     $.setTable = function(value) {
@@ -3911,11 +3914,402 @@
 })();
 (function() {
     "use strict";
+    
+    var DummyBuffer = new Float32Array(60);
+    
+    function Scissor(soundbuffer) {
+        return new Tape(soundbuffer);
+    }
+    
+    var silencebuffer = {
+        buffer:DummyBuffer, samplerate:1
+    };
+    
+    Scissor.silence = function(duration) {
+        return new Scissor(silencebuffer).slice(0, 1).fill(duration);
+    };
+    
+    Scissor.join = function(tapes) {
+        var new_instance = new Tape();
+        
+        for (var i = 0; i < tapes.length; i++) {
+            if (tapes[i] instanceof Tape) {
+                new_instance.add_fragments(tapes[i].fragments);
+            }
+        }
+        
+        return new_instance;
+    };
+    
+    function Tape(soundbuffer) {
+        this.fragments = [];
+        if (soundbuffer) {
+            var samplerate = soundbuffer.samplerate || 44100;
+            var duration   = soundbuffer.buffer.length / samplerate;
+            this.fragments.push(
+                new Fragment(soundbuffer, 0, duration)
+            );
+        }
+    }
+    Scissor.Tape = Tape;
+    
+    Tape.prototype.add_fragment = function(fragment) {
+        this.fragments.push(fragment);
+        return this;
+    };
+    
+    Tape.prototype.add_fragments = function(fragments) {
+        for (var i = 0; i < fragments.length; i++) {
+            this.fragments.push(fragments[i]);
+        }
+        return this;
+    };
+
+    Tape.prototype.duration = function() {
+        var result = 0;
+        for (var i = 0; i < this.fragments.length; i++) {
+            result += this.fragments[i].duration();
+        }
+        return result;
+    };
+    
+    Tape.prototype.slice = function(start, length) {
+        var duration = this.duration();
+        if (start + length > duration) {
+            length = duration - start;
+        }
+        
+        var new_instance  = new Tape();
+        var remainingstart  = start;
+        var remaininglength = length;
+        
+        for (var i = 0; i < this.fragments.length; i++) {
+            var fragment = this.fragments[i];
+            var items = fragment.create(remainingstart, remaininglength);
+            var new_fragment = items[0];
+            remainingstart  = items[1];
+            remaininglength = items[2];
+            if (new_fragment) {
+                new_instance.add_fragment(new_fragment);
+            }
+            if (remaininglength === 0) {
+                break;
+            }
+        }
+        
+        return new_instance;
+    };
+    Tape.prototype.cut = Tape.prototype.slice;
+    
+    Tape.prototype.concat = function(other) {
+        var new_instance = new Tape();
+        new_instance.add_fragments(this.fragments);
+        new_instance.add_fragments(other.fragments);
+        return new_instance;
+    };
+    
+    Tape.prototype.loop = function(count) {
+        var i;
+        var orig_fragments = [];
+        for (i = 0; i < this.fragments.length; i++) {
+            orig_fragments.push(this.fragments[i].clone());
+        }
+        var new_instance = new Tape();
+        for (i = 0; i < count; i++ ) {
+            new_instance.add_fragments(orig_fragments);
+        }
+        return new_instance;
+    };
+    
+    Tape.prototype.times = Tape.prototype.loop;
+
+    Tape.prototype.split = function(count) {
+        var splitted_duration = this.duration() / count;
+        var results = [];
+        for (var i = 0; i < count; i++) {
+            results.push(this.slice(i * splitted_duration, splitted_duration));
+        }
+        return results;
+    };
+    
+    Tape.prototype.fill = function(filled_duration) {
+        var duration = this.duration();
+        if (duration === 0) {
+            throw "EmptyFragment";
+        }
+        var loop_count = (filled_duration / duration)|0;
+        var remain = filled_duration % duration;
+        
+        return this.loop(loop_count).plus(this.slice(0, remain));
+    };
+    
+    Tape.prototype.replace = function(start, length, replaced) {
+        var new_instance = new Tape();
+        var offset = start + length;
+
+        new_instance = new_instance.plus(this.slice(0, start));
+
+        var new_instance_duration = new_instance.duration();
+        if (new_instance_duration < start) {
+            new_instance = new_instance.plus(Scissor.silence(start-new_instance_duration));
+        }
+        
+        new_instance = new_instance.plus(replaced);
+        
+        var duration = this.duration();
+        if (duration > offset) {
+            new_instance = new_instance.plus(this.slice(offset, duration - offset));
+        }
+        
+        return new_instance;
+    };
+
+    Tape.prototype.reverse = function() {
+        var new_instance = new Tape();
+
+        for (var i = this.fragments.length; i--; ) {
+            var fragment = this.fragments[i].clone();
+            fragment.reverse = !fragment.isReversed();
+            new_instance.add_fragment(fragment);
+        }
+        
+        return new_instance;
+    };
+    
+    Tape.prototype.pitch = function(pitch, stretch) {
+        var new_instance = new Tape();
+        
+        stretch = stretch || false;
+        for (var i = 0; i < this.fragments.length; i++) {
+            var fragment = this.fragments[i].clone();
+            fragment.pitch  *= pitch * 0.01;
+            fragment.stretch = stretch;
+            new_instance.add_fragment(fragment);
+        }
+        
+        return new_instance;
+    };
+
+    Tape.prototype.stretch = function(factor) {
+        var factor_for_pitch = 1 / (factor * 0.01) * 100;
+        return this.pitch(factor_for_pitch, true);
+    };
+
+    Tape.prototype.pan = function(right_percent) {
+        var new_instance = new Tape();
+
+        for (var i = 0; i < this.fragments.length; i++) {
+            var fragment = this.fragments[i].clone();
+            fragment.pan = right_percent;
+            new_instance.add_fragment(fragment);
+        }
+        
+        return new_instance;
+    };
+    
+    Tape.prototype.silence = function() {
+        return Scissor.silence(this.duration());
+    };
+    
+    Tape.prototype.join = function(tapes) {
+        var new_instance = new Tape();
+        
+        for (var i = 0; i < tapes.length; i++) {
+            if (tapes[i] instanceof Tape) {
+                new_instance.add_fragments(tapes[i].fragments);
+            }
+        }
+        
+        return new_instance;
+    };
+    
+    function Fragment(soundbuffer, start, duration, reverse, pitch, stretch, pan) {
+        if (!soundbuffer) {
+            soundbuffer = silencebuffer;
+        }
+        this.buffer     = soundbuffer.buffer;
+        this.samplerate = soundbuffer.samplerate || 44100;
+        this.start     = start;
+        this._duration = duration;
+        this.reverse = reverse || false;
+        this.pitch   = pitch   || 100;
+        this.stretch = stretch || false;
+        this.pan     = pan     || 50;
+    }
+    
+    Fragment.prototype.duration = function() {
+        return this._duration * (100 / this.pitch);
+    };
+    Fragment.prototype.original_duration = function() {
+        return this._duration;
+    };
+    Fragment.prototype.isReversed = function() {
+        return this.reverse;
+    };
+    Fragment.prototype.isStretched = function() {
+        return this.stretched;
+    };
+    Fragment.prototype.create = function(remaining_start, remaining_length) {
+        var duration = this.duration();
+        if (remaining_start >= duration) {
+            return [null, remaining_start - duration, remaining_length];
+        }
+        
+        var have_remain_to_retuen = (remaining_start + remaining_length) >= duration;
+        
+        var new_length;
+        if (have_remain_to_retuen) {
+            new_length = duration - remaining_start;
+            remaining_length -= new_length;
+        } else {
+            new_length = remaining_length;
+            remaining_length = 0;
+        }
+        
+        var new_fragment = this.clone();
+        new_fragment.start     = this.start + remaining_start * this.pitch * 0.01;
+        new_fragment._duration = new_length * this.pitch * 0.01;
+        new_fragment.reverse   = false;
+        return [new_fragment, 0, remaining_length];
+    };
+
+    Fragment.prototype.clone = function() {
+        var new_instance = new Fragment();
+        new_instance.buffer     = this.buffer;
+        new_instance.samplerate = this.samplerate;
+        new_instance.start     = this.start;
+        new_instance._duration = this._duration;
+        new_instance.reverse   = this.reverse;
+        new_instance.pitch     = this.pitch;
+        new_instance.stretch   = this.stretch;
+        new_instance.pan       = this.pan;
+        return new_instance;
+    };
+    Scissor.Fragment = Fragment;
+    
+    
+    function TapeStream(tape, samplerate) {
+        this.tape = tape;
+        this.fragments  = tape.fragments;
+        this.samplerate = samplerate || 44100;
+        
+        this.isEnded = false;
+        this.buffer  = null;
+        this.bufferIndex = 0;
+        this.bufferIndexIncr  = 0;
+        this.bufferBeginIndex = 0;
+        this.bufferEndIndex   = 0;
+        this.fragment      = null;
+        this.fragmentIndex = 0;
+        this.panL = 0.7071067811865475;
+        this.panR = 0.7071067811865475;
+    }
+    Scissor.TapeStream = TapeStream;
+    
+    TapeStream.prototype.reset = function() {
+        this.isEnded = false;
+        this.buffer  = null;
+        this.bufferIndex = 0;
+        this.bufferIndexIncr  = 0;
+        this.bufferBeginIndex = 0;
+        this.bufferEndIndex   = 0;
+        this.fragment      = null;
+        this.fragmentIndex = 0;
+        this.panL = 0.7071067811865475;
+        this.panR = 0.7071067811865475;
+        this.isLooped = false;
+        return this;
+    };
+    
+    TapeStream.prototype.fetch = function(n) {
+        var cellL = new Float32Array(n);
+        var cellR = new Float32Array(n);
+        var fragments     = this.fragments;
+        
+        if (fragments.length === 0) {
+            return [cellL, cellR];
+        }
+        
+        var samplerate  = this.samplerate * 100;
+        var buffer      = this.buffer;
+        var bufferIndex = this.bufferIndex;
+        var bufferIndexIncr = this.bufferIndexIncr;
+        var bufferBeginIndex = this.bufferBeginIndex;
+        var bufferEndIndex   = this.bufferEndIndex;
+        var fragment      = this.fragment;
+        var fragmentIndex = this.fragmentIndex;
+        var panL = this.panL;
+        var panR = this.panR;
+        
+        for (var i = 0; i < n; i++) {
+            while (!buffer ||
+                   bufferIndex < bufferBeginIndex || bufferIndex >= bufferEndIndex) {
+                if (!fragment || fragmentIndex < fragments.length) {
+                    fragment = fragments[fragmentIndex++];
+                    buffer   = fragment.buffer;
+                    bufferIndexIncr = fragment.samplerate / samplerate * fragment.pitch;
+                    bufferBeginIndex = fragment.start * fragment.samplerate;
+                    bufferEndIndex   = bufferBeginIndex + fragment.original_duration() * fragment.samplerate;
+                    
+                    panL = Math.cos(0.005 * Math.PI * fragment.pan);
+                    panR = Math.sin(0.005 * Math.PI * fragment.pan);
+                    
+                    if (fragment.reverse) {
+                        bufferIndexIncr *= -1;
+                        bufferIndex = bufferEndIndex + bufferIndexIncr;
+                    } else {
+                        bufferIndex = bufferBeginIndex;
+                    }
+                } else {
+                    if (this.isLooped) {
+                        buffer  = null;
+                        bufferIndex = 0;
+                        bufferIndexIncr  = 0;
+                        bufferBeginIndex = 0;
+                        bufferEndIndex   = 0;
+                        fragment      = null;
+                        fragmentIndex = 0;
+                    } else {
+                        this.isEnded = true;
+                        buffer   = DummyBuffer;
+                        bufferIndexIncr = 0;
+                        bufferIndex = 0;
+                        break;
+                    }
+                }
+            }
+            cellL[i] = buffer[bufferIndex|0] * panL;
+            cellR[i] = buffer[bufferIndex|0] * panR;
+            bufferIndex += bufferIndexIncr;
+        }
+        this.buffer      = buffer;
+        this.bufferIndex = bufferIndex;
+        this.bufferIndexIncr  = bufferIndexIncr;
+        this.bufferBeginIndex = bufferBeginIndex;
+        this.bufferEndIndex   = bufferEndIndex;
+        this.fragment      = fragment;
+        this.fragmentIndex = fragmentIndex;
+        this.panL = panL;
+        this.panR = panR;
+        
+        return [cellL, cellR];
+    };
+    
+    timbre.modules.Scissor = Scissor;
+    
+})();
+(function() {
+    "use strict";
 
     var fn = timbre.fn;
     var modules = timbre.modules;
     
     fn.register("audio", function(_args) {
+        var params;
+        if (fn.isDictionary(_args[0])) {
+            params = _args.shift();
+        }
+        
         var instance = timbre.apply(null, ["buffer"].concat(_args));
         
         instance._.isLoaded = false;
@@ -3930,6 +4324,13 @@
         });
         
         instance.load = load;
+        instance.loadthis = loadthis;
+        
+        if (params) {
+            instance.once("init", function() {
+                instance.set(params);
+            });
+        }
         
         return instance;
     });
@@ -3984,6 +4385,11 @@
         
         return dfd.promise();
     };
+
+    var loadthis = function() {
+        load.apply(this, arguments);
+        return this;
+    };
     
 })();
 (function() {
@@ -3997,12 +4403,11 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_FREQ] = timbre(340);
-        this.attrs[ATTRS_Q]    = timbre(1);
-        this.attrs[ATTRS_GAIN] = timbre(0);
-        
         var _ = this._;
         _.biquad = new Biquad({samplerate:timbre.samplerate});
+        _.freq = timbre(340);
+        _.Q    = timbre(1);
+        _.gain = timbre(0);
         
         _.plotRange = [0, 1.2];
         _.plotFlush = true;
@@ -4010,10 +4415,6 @@
     fn.extend(BiquadNode);
     
     var $ = BiquadNode.prototype;
-    
-    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency", "cutoff"]);
-    var ATTRS_Q    = fn.setAttrs($, "Q");
-    var ATTRS_GAIN = fn.setAttrs($, "gain");
     
     Object.defineProperties($, {
         type: {
@@ -4026,6 +4427,38 @@
             },
             get: function() {
                 return this._.biquad.type;
+            }
+        },
+        freq: {
+            set: function(value) {
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
+            }
+        },
+        cutoff: {
+            set: function(value) {
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
+            }
+        },
+        Q: {
+            set: function(value) {
+                this._.Q = timbre(value);
+            },
+            get: function() {
+                return this._.Q;
+            }
+        },
+        gain: {
+            set: function(value) {
+                this._.gain = timbre(value);
+            },
+            get: function() {
+                return this._.gain;
             }
         }
     });
@@ -4041,17 +4474,17 @@
             
             var changed = false;
             
-            var freq = this.attrs[ATTRS_FREQ].process(tickID)[0];
+            var freq = _.freq.process(tickID)[0];
             if (_.prevFreq !== freq) {
                 _.prevFreq = freq;
                 changed = true;
             }
-            var Q = this.attrs[ATTRS_Q].process(tickID)[0];
+            var Q = _.Q.process(tickID)[0];
             if (_.prevQ !== Q) {
                 _.prevQ = Q;
                 changed = true;
             }
-            var gain = this.attrs[ATTRS_GAIN].process(tickID)[0];
+            var gain = _.gain.process(tickID)[0];
             if (_.prevGain !== gain) {
                 _.prevGain = gain;
                 changed = true;
@@ -4135,9 +4568,8 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_PITCH] = timbre(1);
-        
         var _ = this._;
+        _.pitch      = timbre(1);
         _.buffer     = new Float32Array(0);
         _.isLooped   = false;
         _.isReversed = false;
@@ -4147,8 +4579,14 @@
         _.samplerate  = 44100;
         _.phase = 0;
         _.phaseIncr = 0;
+        
+        this.on("play", onplay);
     }
     fn.extend(BufferNode);
+    
+    var onplay = function(value) {
+        this._.isEnded = (value === false);
+    };
     
     var $ = BufferNode.prototype;
     
@@ -4179,8 +4617,6 @@
         }
     };
     
-    var ATTRS_PITCH = fn.setAttrs($, "pitch");
-    
     Object.defineProperties($, {
         buffer: {
             set: setBuffer,
@@ -4188,9 +4624,17 @@
                 return this._.buffer;
             }
         },
+        pitch: {
+            set: function(value) {
+                this._.pitch = timbre(value);
+            },
+            get: function() {
+                return this._.pitch;
+            }
+        },
         isLooped: {
             set: function(value) {
-                this._.isLooped = !!value;
+                this.loop(value);
             },
             get: function() {
                 return this._.isLooped;
@@ -4198,20 +4642,7 @@
         },
         isReversed: {
             set: function(value) {
-                var _ = this._;
-                _.isReversed = !!value;
-                if (_.isReversed) {
-                    if (_.phaseIncr > 0) {
-                        _.phaseIncr *= -1;
-                    }
-                    if (_.phase === 0 && _.buffer) {
-                        _.phase = _.buffer.length + _.phaseIncr;
-                    }
-                } else {
-                    if (_.phaseIncr < 0) {
-                        _.phaseIncr *= -1;
-                    }
-                }
+                this.reverse(value);
             },
             get: function() {
                 return this._.isReversed;
@@ -4291,6 +4722,7 @@
                 buffer    : _.buffer.subarray(begin, end),
                 samplerate: _.samplerate
             });
+            instance._.isEnded = false;
         }
         instance.isLooped   = this.isLooped;
         instance.isReversed = this.isReversed;
@@ -4298,14 +4730,34 @@
         return instance;
     };
     
-    $.reversed = function() {
-        this.isReversed = !this._.isReversed;
+    $.reverse = function(value) {
+        var _ = this._;
+        
+        _.isReversed = !!value;
+        if (_.isReversed) {
+            if (_.phaseIncr > 0) {
+                _.phaseIncr *= -1;
+            }
+            if (_.phase === 0 && _.buffer) {
+                _.phase = _.buffer.length + _.phaseIncr;
+            }
+        } else {
+            if (_.phaseIncr < 0) {
+                _.phaseIncr *= -1;
+            }
+        }
+        
+        return this;
+    };
+
+    $.loop = function(value) {
+        this._.isLooped = !!value;
         return this;
     };
     
-    $.bang = function() {
+    $.bang = function(value) {
         this._.phase   = 0;
-        this._.isEnded = false;
+        this._.isEnded = (value === false);
         this._.emit("bang");
         return this;
     };
@@ -4318,7 +4770,7 @@
             this.tickID = tickID;
             
             if (!_.isEnded && _.buffer) {
-                var pitch  = this.attrs[ATTRS_PITCH].process(tickID)[0];
+                var pitch  = _.pitch.process(tickID)[0];
                 var buffer = _.buffer;
                 var phase  = _.phase;
                 var phaseIncr = _.phaseIncr * pitch;
@@ -4510,9 +4962,8 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_FREQ] = timbre(440);
-        
         var _ = this._;
+        _.freq = timbre(440);
         _.osc1 = new Oscillator(timbre.samplerate);
         _.osc2 = new Oscillator(timbre.samplerate);
         _.osc1.step = this.cell.length;
@@ -4532,8 +4983,6 @@
     
     var $ = COscNode.prototype;
     
-    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"]);
-    
     Object.defineProperties($, {
         wave: {
             set: function(value) {
@@ -4542,6 +4991,14 @@
             },
             get: function() {
                 return this._.osc1.wave;
+            }
+        },
+        freq: {
+            set: function(value) {
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
             }
         },
         beats: {
@@ -4571,7 +5028,7 @@
             this.tickID = tickID;
             
             var i, imax = cell.length;
-            var freq = this.attrs[ATTRS_FREQ].process(tickID)[0];
+            var freq = _.freq.process(tickID)[0];
             var osc1 = _.osc1, osc2 = _.osc2, tmp = _.tmp;
             
             osc1.frequency = freq - (_.beats * 0.5);
@@ -4606,10 +5063,10 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_FB]  = timbre(0);
-        this.attrs[ATTRS_WET] = timbre(1);
-        
-        this._.delay = new EfxDelay();
+        var _ = this._;
+        _.fb    = timbre(0);
+        _.wet   = timbre(1);
+        _.delay = new EfxDelay();
         
         this.once("init", oninit);
     }
@@ -4622,9 +5079,6 @@
     };
     
     var $ = DelayNode.prototype;
-    
-    var ATTRS_FB  = fn.setAttrs($, ["feedback", "fb"]);
-    var ATTRS_WET = fn.setAttrs($, "wet");
     
     Object.defineProperties($, {
         time: {
@@ -4642,6 +5096,22 @@
             get: function() {
                 return this._.time;
             }
+        },
+        fb: {
+            set: function(value) {
+                this._.fb = timbre(value);
+            },
+            get: function() {
+                return this._.fb;
+            }
+        },
+        wet: {
+            set: function(value) {
+                this._.wet = timbre(value);
+            },
+            get: function() {
+                return this._.wet;
+            }
         }
     });
     
@@ -4655,12 +5125,12 @@
             fn.inputSignalAR(this);
             
             var changed = false;
-            var feedback = this.attrs[ATTRS_FB].process(tickID)[0];
+            var feedback = _.fb.process(tickID)[0];
             if (_.prevFeedback !== feedback) {
                 _.prevFeedback = feedback;
                 changed = true;
             }
-            var wet = this.attrs[ATTRS_WET].process(tickID)[0];
+            var wet = _.wet.process(tickID)[0];
             if (_.prevWet !== wet) {
                 _.prevWet = wet;
                 changed = true;
@@ -4688,11 +5158,10 @@
     function DistNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
-
-        this.attrs[ATTRS_PRE]  = timbre(-60);
-        this.attrs[ATTRS_POST] = timbre( 18);
         
         var _ = this._;
+        _.pre  = timbre( 60);
+        _.post = timbre(-18);
         _.samplerate = timbre.samplerate;
         _.x1 = _.x2 = _.y1 = _.y2 = 0;
         _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
@@ -4701,9 +5170,6 @@
     fn.extend(DistNode);
     
     var $ = DistNode.prototype;
-    
-    var ATTRS_PRE  = fn.setAttrs($, ["pre", "preGain"]);
-    var ATTRS_POST = fn.setAttrs($, ["post", "postGain"]);
     
     Object.defineProperties($, {
         cutoff: {
@@ -4714,6 +5180,22 @@
             },
             get: function() {
                 return this._.cutoff;
+            }
+        },
+        pre: {
+            set: function(value) {
+                this._.pre = timbre(value);
+            },
+            get: function() {
+                return this._.pre;
+            }
+        },
+        post: {
+            set: function(value) {
+                this._.post = timbre(value);
+            },
+            get: function() {
+                return this._.post;
             }
         }
     });
@@ -4728,13 +5210,13 @@
             fn.inputSignalAR(this);
             
             var changed = false;
-
-            var preGain = this.attrs[ATTRS_PRE].process(tickID)[0];
+            
+            var preGain = -_.pre.process(tickID)[0];
             if (_.prevPreGain !== preGain) {
                 _.prevPreGain = preGain;
                 changed = true;
             }
-            var postGain = this.attrs[ATTRS_POST].process(tickID)[0];
+            var postGain = -_.post.process(tickID)[0];
             if (_.prevPostGain !== postGain) {
                 _.prevPostGain = postGain;
                 changed = true;
@@ -4843,6 +5325,7 @@
     var fn = timbre.fn;
     var timevalue = timbre.timevalue;
     var Envelope  = timbre.modules.Envelope;
+    var isDictionary = fn.isDictionary;
     
     function EnvNode(_args) {
         timbre.Object.call(this, _args);
@@ -4895,6 +5378,12 @@
             }
         }
     });
+
+    $.clone = function() {
+        var instance = new EnvNode([]);
+        instance._.env = this._.env.clone();
+        return instance;
+    };
     
     $.reset = function() {
         this._.env.reset();
@@ -5026,10 +5515,6 @@
     };
     fn.register("env", EnvNode);
     
-    
-    var isDictionary = function(x) {
-        return (typeof x === "object" && x.constructor === Object);
-    };
     
     function envValue(opts, min, def, name1, name2, func) {
         var x = def;
@@ -5278,9 +5763,8 @@
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_FREQ] = timbre(440);
-        
         var _ = this._;
+        _.freq = timbre(440);
         _.samplerate = timbre.samplerate;
         _.reg = 0x8000;
         _.shortFlag = false;
@@ -5291,8 +5775,6 @@
     
     var $ = FNoiseNode.prototype;
     
-    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"]);
-    
     Object.defineProperties($, {
         shortFlag: {
             set: function(value) {
@@ -5300,6 +5782,14 @@
             },
             get: function() {
                 return this._.shortFlag;
+            }
+        },
+        freq: {
+            set: function(value) {
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
             }
         }
     });
@@ -5313,7 +5803,7 @@
 
             var lastValue = _.lastValue;
             var phase     = _.phase;
-            var phaseStep = this.attrs[ATTRS_FREQ].process(tickID)[0] / _.samplerate;
+            var phaseStep = _.freq.process(tickID)[0] / _.samplerate;
             var reg = _.reg;
             var mul = _.mul, add = _.add;
             var i, imax;
@@ -5431,18 +5921,35 @@
     function IFFTNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
-        
-        this._.fft = new FFT(timbre.cellsize * 2);
-        this._.fftCell    = new Float32Array(this._.fft.length);
-        this._.realBuffer = new Float32Array(this._.fft.length);
-        this._.imagBuffer = new Float32Array(this._.fft.length);
+
+        var _ = this._;
+        _.fft = new FFT(timbre.cellsize * 2);
+        _.fftCell    = new Float32Array(this._.fft.length);
+        _.realBuffer = new Float32Array(this._.fft.length);
+        _.imagBuffer = new Float32Array(this._.fft.length);
     }
     fn.extend(IFFTNode);
     
     var $ = IFFTNode.prototype;
-
-    var ATTRS_REAL = fn.setAttrs($, "real");
-    var ATTRS_IMAG = fn.setAttrs($, "imag");
+    
+    Object.defineProperties($, {
+        real: {
+            set: function(value) {
+                this._.real = timbre(value);
+            },
+            get: function() {
+                return this._.real;
+            }
+        },
+        imag: {
+            set: function(value) {
+                this._.imag = timbre(value);
+            },
+            get: function() {
+                return this._.imag;
+            }
+        }
+    });
     
     $.process = function(tickID) {
         var _ = this._;
@@ -5451,11 +5958,11 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            if (this.attrs[ATTRS_REAL] && this.attrs[ATTRS_IMAG]) {
+            if (_.real && _.imag) {
                 var real = _.realBuffer;
                 var imag = _.imagBuffer;
-                var _real = this.attrs[ATTRS_REAL].process(tickID);
-                var _imag = this.attrs[ATTRS_IMAG].process(tickID);
+                var _real = _.real.process(tickID);
+                var _imag = _.imag.process(tickID);
                 
                 real.set(_real);
                 imag.set(_imag);
@@ -5483,9 +5990,8 @@
         fn.timer(this);
         fn.fixKR(this);
         
-        this.attrs[ATTRS_I] = timbre(1000);
-        
         var _ = this._;
+        _.interval = timbre(1000);
         _.count = 0;
         _.delay   = 0;
         _.timeout = Infinity;
@@ -5515,20 +6021,22 @@
     };
     
     var $ = IntervalNode.prototype;
-
-    var ATTRS_I = fn.setAttrs($, ["interval"], {
-        conv: function(value) {
-            if (typeof value === "string") {
-                value = timevalue(value);
-                if (value <= 0) {
-                    return 0;
-                }
-            }
-            return value;
-        }
-    });
     
     Object.defineProperties($, {
+        interval: {
+            set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                    if (value <= 0) {
+                        value = 0;
+                    }
+                }
+                this._.interval = timbre(value);
+            },
+            get: function() {
+                return this._.interval;
+            }
+        },
         delay: {
             set: function(value) {
                 if (typeof value === "string") {
@@ -5598,7 +6106,7 @@
                 _.delaySamples -= cell.length;
             }
             
-            var interval = this.attrs[ATTRS_I].process(tickID)[0];
+            var interval = _.interval.process(tickID)[0];
             
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;
@@ -6725,9 +7233,8 @@
     function OscNode(_args) {
         timbre.Object.call(this, _args);
         
-        this.attrs[ATTRS_FREQ] = timbre(440);
-        
         var _ = this._;
+        _.freq = timbre(440);
         _.osc = new Oscillator(timbre.samplerate);
         _.tmp = new Float32Array(this.cell.length);
         _.osc.step = this.cell.length;
@@ -6749,19 +7256,6 @@
     
     var $ = OscNode.prototype;
     
-    var ATTRS_FREQ = fn.setAttrs($, ["freq", "frequency"], {
-        conv: function(value) {
-            if (typeof value === "string") {
-                value = timevalue(value);
-                if (value <= 0) {
-                    return 0;
-                }
-                return 1000 / value;
-            }
-            return value;
-        }
-    });
-    
     Object.defineProperties($, {
         wave: {
             set: function(value) {
@@ -6769,6 +7263,22 @@
             },
             get: function() {
                 return this._.osc.wave;
+            }
+        },
+        freq: {
+            set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                    if (value <= 0) {
+                        value = 0;
+                    } else {
+                        value = 1000 / value;
+                    }
+                }
+                this._.freq = timbre(value);
+            },
+            get: function() {
+                return this._.freq;
             }
         }
     });
@@ -6798,8 +7308,8 @@
             }
             
             var osc   = _.osc;
-            var  freq = this.attrs[ATTRS_FREQ];
-            var _freq = freq.process(tickID);
+            var  freq = _.freq;
+            var _freq = _.freq.process(tickID);
             
             if (_.ar) { // audio-rate
                 var tmp  = _.tmp;
@@ -6888,16 +7398,25 @@
         fn.stereo(this);
         fn.fixAR(this);
         
-        this.attrs[ATTRS_PAN] = timbre(0);
-        
-        this._.panL = 0.5;
-        this._.panR = 0.5;
+        var _ = this._;
+        _.value = timbre(0);
+        _.panL = 0.5;
+        _.panR = 0.5;
     }
     fn.extend(PannerNode);
     
     var $ = PannerNode.prototype;
     
-    var ATTRS_PAN = fn.setAttrs($, "value");
+    Object.defineProperties($, {
+        value: {
+            set: function(value) {
+                this._.value = timbre(value);
+            },
+            get: function() {
+                return this._.value;
+            }
+        }
+    });
     
     $.process = function(tickID) {
         var _ = this._;
@@ -6908,7 +7427,7 @@
             
             var changed = false;
             
-            var value = this.attrs[ATTRS_PAN].process(tickID)[0];
+            var value = _.value.process(tickID)[0];
             if (_.prevValue !== value) {
                 _.prevValue = value;
                 changed = true;
@@ -6976,7 +7495,7 @@
             set: function(value) {
                 if (typeof value === "number") {
                     var env = this._.env;
-                    env.setTable([value]);
+                    env.setTable([value, [value, 0]]);
                     env.reset();
                     env.status = Envelope.StatusGate;
                 }
@@ -7637,6 +8156,153 @@
 })();
 (function() {
     "use strict";
+    
+    var fn = timbre.fn;
+    var timevalue = timbre.timevalue;
+    
+    function ScopeNode(_args) {
+        timbre.Object.call(this, _args);
+        fn.listener(this);
+        fn.fixAR(this);
+        
+        this._.samples    = 0;
+        this._.writeIndex = 0;
+        
+        this._.plotFlush = true;
+        
+        this.once("init", oninit);
+    }
+    fn.extend(ScopeNode);
+    
+    var oninit = function() {
+        if (!this._.buffer) {
+            this.size = 1024;
+        }
+        if (!this._.interval) {
+            this.interval = 1000;
+        }
+    };
+    
+    var $ = ScopeNode.prototype;
+    
+    Object.defineProperties($, {
+        size: {
+            set: function(value) {
+                var _ = this._;
+                if (!_.buffer) {
+                    if (typeof value === "number") {
+                        var n = (value < 64) ? 64 : (value > 2048) ? 2048 : value;
+                        _.buffer = new Float32Array(n);
+                        if (_.reservedinterval) {
+                            this.interval = _.reservedinterval;
+                            _.reservedinterval = null;
+                        }
+                    }
+                }
+            },
+            get: function() {
+                return this._.buffer.length;
+            }
+        },
+        interval: {
+            set: function(value) {
+                var _ = this._;
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                }
+                if (typeof value === "number" && value > 0) {
+                    if (!_.buffer) {
+                        _.reservedinterval = value;
+                    } else {
+                        _.interval    = value;
+                        _.samplesIncr = value * 0.001 * timbre.samplerate / _.buffer.length;
+                        if (_.samplesIncr < 1) {
+                            _.samplesIncr = 1;
+                        }
+                    }
+                }
+            },
+            get: function() {
+                return this._.interval;
+            }
+        }
+    });
+    
+    $.bang = function() {
+        var _ = this._;
+        var buffer = _.buffer;
+        
+        for (var i = buffer.length; i--; ) {
+            buffer[i] = 0;
+        }
+        _.samples    = 0;
+        _.writeIndex = 0;
+        this._.emit("bang");
+        return this;
+    };
+    
+    $.process = function(tickID) {
+        var _ = this._;
+        var cell = this.cell;
+
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+            
+            fn.inputSignalAR(this);
+            
+            var i, imax = cell.length;
+            var samples     = _.samples;
+            var samplesIncr = _.samplesIncr;
+            var buffer      = _.buffer;
+            var writeIndex  = _.writeIndex;
+            var emit = false;
+            var mul = _.mul, add = _.add;
+            var mask = buffer.length - 1;
+            
+            for (i = 0; i < imax; ++i) {
+                if (samples <= 0) {
+                    buffer[writeIndex++] = cell[i];
+                    writeIndex &= mask;
+                    emit = _.plotFlush = true;
+                    samples += samplesIncr;
+                }
+                cell[i] = cell[i] * mul + add;
+                --samples;
+            }
+            _.samples    = samples;
+            _.writeIndex = writeIndex;
+            
+            if (emit) {
+                this._.emit("scope");
+            }
+        }
+        
+        return cell;
+    };
+    
+    var super_plot = timbre.Object.prototype.plot;
+    
+    $.plot = function(opts) {
+        var _ = this._;
+        if (_.plotFlush) {
+            var buffer = _.buffer;
+            var mask   = buffer.length - 1;
+            var data   = new Float32Array(buffer.length);
+            var j = _.writeIndex;
+            for (var i = 0, imax = buffer.length; i < imax; i++) {
+                data[i] = buffer[++j & mask];
+            }
+            _.plotData  = data;
+            _.plotFlush = null;
+        }
+        return super_plot.call(this, opts);
+    };
+    
+    fn.register("scope", ScopeNode);
+    
+})();
+(function() {
+    "use strict";
 
     var fn = timbre.fn;
 
@@ -8102,10 +8768,12 @@
     
     var env_desc = {
         set: function(value) {
-            if (typeof value === "object" && value.constructor === Object) {
+            if (fn.isDictionary(value)) {
                 if (typeof value.type === "string") {
                     this._.env = value;
                 }
+            } else if (value instanceof timbre.Object) {
+                this._.env = value;
             }
         },
         get: function() {
@@ -8134,7 +8802,14 @@
             envtype = env.type || "perc";
             
             synth = timbre("osc", {wave:_.wave, freq:opts.freq, mul:opts.velocity/128});
-            synth = timbre(envtype, env, synth).on("ended", opts.doneAction).bang();
+            if (env instanceof timbre.Object) {
+                if (typeof env.clone === "function") {
+                    synth = env.clone().append(synth);
+                }
+            } else {
+                synth = timbre(envtype, env, synth);
+            }
+            synth.on("ended", opts.doneAction).bang();
             
             return synth;
         };
@@ -8164,7 +8839,14 @@
             envtype = env.type || "perc";
             
             synth = timbre("pluck", {freq:opts.freq, mul:opts.velocity/128}).bang();
-            synth = timbre(envtype, env, synth).on("ended", opts.doneAction).bang();
+            if (env instanceof timbre.Object) {
+                if (typeof env.clone === "function") {
+                    synth = env.clone().append(synth);
+                }
+            } else {
+                synth = timbre(envtype, env, synth);
+            }
+            synth.on("ended", opts.doneAction).bang();
             
             return synth;
         };
@@ -8187,6 +8869,9 @@
     "use strict";
     
     var fn = timbre.fn;
+    var Scissor    = timbre.modules.Scissor;
+    var Tape       = Scissor.Tape;
+    var TapeStream = Scissor.TapeStream;
     
     function ScissorNode(_args) {
         timbre.Object.call(this, _args);
@@ -8221,10 +8906,7 @@
         },
         isLooped: {
             set: function(value) {
-                this._.isLooped = !!value;
-                if (this._.tapeStream) {
-                    this._.tapeStream.isLooped = this._.isLooped;
-                }
+                this.loop(value);
             },
             get: function() {
                 return this._.isLooped;
@@ -8236,6 +8918,14 @@
             }
         }
     });
+    
+    $.loop = function(value) {
+        this._.isLooped = !!value;
+        if (this._.tapeStream) {
+            this._.tapeStream.isLooped = this._.isLooped;
+        }
+        return this;
+    };
     
     $.bang = function() {
         if (this._.tapeStream) {
@@ -8278,393 +8968,6 @@
     };
     
     fn.register("tape", ScissorNode);
-    
-    
-    var DummyBuffer = new Float32Array(60);
-    
-    function Scissor(soundbuffer) {
-        return new Tape(soundbuffer);
-    }
-    
-    var silencebuffer = {
-        buffer:DummyBuffer, samplerate:1
-    };
-    
-    Scissor.silence = function(duration) {
-        return new Scissor(silencebuffer).slice(0, 1).fill(duration);
-    };
-    
-    Scissor.join = function(tapes) {
-        var new_instance = new Tape();
-        
-        for (var i = 0; i < tapes.length; i++) {
-            if (tapes[i] instanceof Tape) {
-                new_instance.add_fragments(tapes[i].fragments);
-            }
-        }
-        
-        return new_instance;
-    };
-    
-    function Tape(soundbuffer) {
-        this.fragments = [];
-        if (soundbuffer) {
-            var samplerate = soundbuffer.samplerate || 44100;
-            var duration   = soundbuffer.buffer.length / samplerate;
-            this.fragments.push(
-                new Fragment(soundbuffer, 0, duration)
-            );
-        }
-    }
-    Scissor.Tape = Tape;
-    
-    Tape.prototype.add_fragment = function(fragment) {
-        this.fragments.push(fragment);
-        return this;
-    };
-    
-    Tape.prototype.add_fragments = function(fragments) {
-        for (var i = 0; i < fragments.length; i++) {
-            this.fragments.push(fragments[i]);
-        }
-        return this;
-    };
-
-    Tape.prototype.duration = function() {
-        var result = 0;
-        for (var i = 0; i < this.fragments.length; i++) {
-            result += this.fragments[i].duration();
-        }
-        return result;
-    };
-    
-    Tape.prototype.slice = function(start, length) {
-        var duration = this.duration();
-        if (start + length > duration) {
-            length = duration - start;
-        }
-        
-        var new_instance  = new Tape();
-        var remainingstart  = start;
-        var remaininglength = length;
-        
-        for (var i = 0; i < this.fragments.length; i++) {
-            var fragment = this.fragments[i];
-            var items = fragment.create(remainingstart, remaininglength);
-            var new_fragment = items[0];
-            remainingstart  = items[1];
-            remaininglength = items[2];
-            if (new_fragment) {
-                new_instance.add_fragment(new_fragment);
-            }
-            if (remaininglength === 0) {
-                break;
-            }
-        }
-        
-        return new_instance;
-    };
-    Tape.prototype.cut = Tape.prototype.slice;
-    
-    Tape.prototype.concat = function(other) {
-        var new_instance = new Tape();
-        new_instance.add_fragments(this.fragments);
-        new_instance.add_fragments(other.fragments);
-        return new_instance;
-    };
-    
-    Tape.prototype.loop = function(count) {
-        var i;
-        var orig_fragments = [];
-        for (i = 0; i < this.fragments.length; i++) {
-            orig_fragments.push(this.fragments[i].clone());
-        }
-        var new_instance = new Tape();
-        for (i = 0; i < count; i++ ) {
-            new_instance.add_fragments(orig_fragments);
-        }
-        return new_instance;
-    };
-    
-    Tape.prototype.times = Tape.prototype.loop;
-
-    Tape.prototype.split = function(count) {
-        var splitted_duration = this.duration() / count;
-        var results = [];
-        for (var i = 0; i < count; i++) {
-            results.push(this.slice(i * splitted_duration, splitted_duration));
-        }
-        return results;
-    };
-    
-    Tape.prototype.fill = function(filled_duration) {
-        var duration = this.duration();
-        if (duration === 0) {
-            throw "EmptyFragment";
-        }
-        var loop_count = (filled_duration / duration)|0;
-        var remain = filled_duration % duration;
-        
-        return this.loop(loop_count).plus(this.slice(0, remain));
-    };
-    
-    Tape.prototype.replace = function(start, length, replaced) {
-        var new_instance = new Tape();
-        var offset = start + length;
-
-        new_instance = new_instance.plus(this.slice(0, start));
-
-        var new_instance_duration = new_instance.duration();
-        if (new_instance_duration < start) {
-            new_instance = new_instance.plus(Scissor.silence(start-new_instance_duration));
-        }
-        
-        new_instance = new_instance.plus(replaced);
-        
-        var duration = this.duration();
-        if (duration > offset) {
-            new_instance = new_instance.plus(this.slice(offset, duration - offset));
-        }
-        
-        return new_instance;
-    };
-
-    Tape.prototype.reverse = function() {
-        var new_instance = new Tape();
-
-        for (var i = this.fragments.length; i--; ) {
-            var fragment = this.fragments[i].clone();
-            fragment.reverse = !fragment.isReversed();
-            new_instance.add_fragment(fragment);
-        }
-        
-        return new_instance;
-    };
-    
-    Tape.prototype.pitch = function(pitch, stretch) {
-        var new_instance = new Tape();
-        
-        stretch = stretch || false;
-        for (var i = 0; i < this.fragments.length; i++) {
-            var fragment = this.fragments[i].clone();
-            fragment.pitch  *= pitch * 0.01;
-            fragment.stretch = stretch;
-            new_instance.add_fragment(fragment);
-        }
-        
-        return new_instance;
-    };
-
-    Tape.prototype.stretch = function(factor) {
-        var factor_for_pitch = 1 / (factor * 0.01) * 100;
-        return this.pitch(factor_for_pitch, true);
-    };
-
-    Tape.prototype.pan = function(right_percent) {
-        var new_instance = new Tape();
-
-        for (var i = 0; i < this.fragments.length; i++) {
-            var fragment = this.fragments[i].clone();
-            fragment.pan = right_percent;
-            new_instance.add_fragment(fragment);
-        }
-        
-        return new_instance;
-    };
-    
-    Tape.prototype.silence = function() {
-        return Scissor.silence(this.duration());
-    };
-    
-    Tape.prototype.join = function(tapes) {
-        var new_instance = new Tape();
-        
-        for (var i = 0; i < tapes.length; i++) {
-            if (tapes[i] instanceof Tape) {
-                new_instance.add_fragments(tapes[i].fragments);
-            }
-        }
-        
-        return new_instance;
-    };
-    
-    function Fragment(soundbuffer, start, duration, reverse, pitch, stretch, pan) {
-        if (!soundbuffer) {
-            soundbuffer = silencebuffer;
-        }
-        this.buffer     = soundbuffer.buffer;
-        this.samplerate = soundbuffer.samplerate || 44100;
-        this.start     = start;
-        this._duration = duration;
-        this.reverse = reverse || false;
-        this.pitch   = pitch   || 100;
-        this.stretch = stretch || false;
-        this.pan     = pan     || 50;
-    }
-    
-    Fragment.prototype.duration = function() {
-        return this._duration * (100 / this.pitch);
-    };
-    Fragment.prototype.original_duration = function() {
-        return this._duration;
-    };
-    Fragment.prototype.isReversed = function() {
-        return this.reverse;
-    };
-    Fragment.prototype.isStretched = function() {
-        return this.stretched;
-    };
-    Fragment.prototype.create = function(remaining_start, remaining_length) {
-        var duration = this.duration();
-        if (remaining_start >= duration) {
-            return [null, remaining_start - duration, remaining_length];
-        }
-        
-        var have_remain_to_retuen = (remaining_start + remaining_length) >= duration;
-        
-        var new_length;
-        if (have_remain_to_retuen) {
-            new_length = duration - remaining_start;
-            remaining_length -= new_length;
-        } else {
-            new_length = remaining_length;
-            remaining_length = 0;
-        }
-        
-        var new_fragment = this.clone();
-        new_fragment.start     = this.start + remaining_start * this.pitch * 0.01;
-        new_fragment._duration = new_length * this.pitch * 0.01;
-        new_fragment.reverse   = false;
-        return [new_fragment, 0, remaining_length];
-    };
-
-    Fragment.prototype.clone = function() {
-        var new_instance = new Fragment();
-        new_instance.buffer     = this.buffer;
-        new_instance.samplerate = this.samplerate;
-        new_instance.start     = this.start;
-        new_instance._duration = this._duration;
-        new_instance.reverse   = this.reverse;
-        new_instance.pitch     = this.pitch;
-        new_instance.stretch   = this.stretch;
-        new_instance.pan       = this.pan;
-        return new_instance;
-    };
-    Scissor.Fragment = Fragment;
-    
-    
-    function TapeStream(tape, samplerate) {
-        this.tape = tape;
-        this.fragments  = tape.fragments;
-        this.samplerate = samplerate || 44100;
-        
-        this.isEnded = false;
-        this.buffer  = null;
-        this.bufferIndex = 0;
-        this.bufferIndexIncr  = 0;
-        this.bufferBeginIndex = 0;
-        this.bufferEndIndex   = 0;
-        this.fragment      = null;
-        this.fragmentIndex = 0;
-        this.panL = 0.7071067811865475;
-        this.panR = 0.7071067811865475;
-    }
-    Scissor.TapeStream = TapeStream;
-    
-    TapeStream.prototype.reset = function() {
-        this.isEnded = false;
-        this.buffer  = null;
-        this.bufferIndex = 0;
-        this.bufferIndexIncr  = 0;
-        this.bufferBeginIndex = 0;
-        this.bufferEndIndex   = 0;
-        this.fragment      = null;
-        this.fragmentIndex = 0;
-        this.panL = 0.7071067811865475;
-        this.panR = 0.7071067811865475;
-        this.isLooped = false;
-        return this;
-    };
-    
-    TapeStream.prototype.fetch = function(n) {
-        var cellL = new Float32Array(n);
-        var cellR = new Float32Array(n);
-        var fragments     = this.fragments;
-        
-        if (fragments.length === 0) {
-            return [cellL, cellR];
-        }
-        
-        var samplerate  = this.samplerate * 100;
-        var buffer      = this.buffer;
-        var bufferIndex = this.bufferIndex;
-        var bufferIndexIncr = this.bufferIndexIncr;
-        var bufferBeginIndex = this.bufferBeginIndex;
-        var bufferEndIndex   = this.bufferEndIndex;
-        var fragment      = this.fragment;
-        var fragmentIndex = this.fragmentIndex;
-        var panL = this.panL;
-        var panR = this.panR;
-        
-        for (var i = 0; i < n; i++) {
-            while (!buffer ||
-                   bufferIndex < bufferBeginIndex || bufferIndex >= bufferEndIndex) {
-                if (!fragment || fragmentIndex < fragments.length) {
-                    fragment = fragments[fragmentIndex++];
-                    buffer   = fragment.buffer;
-                    bufferIndexIncr = fragment.samplerate / samplerate * fragment.pitch;
-                    bufferBeginIndex = fragment.start * fragment.samplerate;
-                    bufferEndIndex   = bufferBeginIndex + fragment.original_duration() * fragment.samplerate;
-                    
-                    panL = Math.cos(0.005 * Math.PI * fragment.pan);
-                    panR = Math.sin(0.005 * Math.PI * fragment.pan);
-                    
-                    if (fragment.reverse) {
-                        bufferIndexIncr *= -1;
-                        bufferIndex = bufferEndIndex + bufferIndexIncr;
-                    } else {
-                        bufferIndex = bufferBeginIndex;
-                    }
-                } else {
-                    if (this.isLooped) {
-                        buffer  = null;
-                        bufferIndex = 0;
-                        bufferIndexIncr  = 0;
-                        bufferBeginIndex = 0;
-                        bufferEndIndex   = 0;
-                        fragment      = null;
-                        fragmentIndex = 0;
-                    } else {
-                        this.isEnded = true;
-                        buffer   = DummyBuffer;
-                        bufferIndexIncr = 0;
-                        bufferIndex = 0;
-                        break;
-                    }
-                }
-            }
-            cellL[i] = buffer[bufferIndex|0] * panL;
-            cellR[i] = buffer[bufferIndex|0] * panR;
-            bufferIndex += bufferIndexIncr;
-        }
-        this.buffer      = buffer;
-        this.bufferIndex = bufferIndex;
-        this.bufferIndexIncr  = bufferIndexIncr;
-        this.bufferBeginIndex = bufferBeginIndex;
-        this.bufferEndIndex   = bufferEndIndex;
-        this.fragment      = fragment;
-        this.fragmentIndex = fragmentIndex;
-        this.panL = panL;
-        this.panR = panR;
-        
-        return [cellL, cellR];
-    };
-    
-    timbre.modules.scissor = {
-        Scissor: Scissor,
-        join   : Scissor.join,
-        silence: Scissor.silence
-    };
     
 })();
 (function() {
@@ -8831,153 +9134,6 @@
     };
     
     fn.register("*", TimesNode);
-    
-})();
-(function() {
-    "use strict";
-    
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
-    
-    function WaveNode(_args) {
-        timbre.Object.call(this, _args);
-        fn.listener(this);
-        fn.fixAR(this);
-        
-        this._.samples    = 0;
-        this._.writeIndex = 0;
-        
-        this._.plotFlush = true;
-        
-        this.once("init", oninit);
-    }
-    fn.extend(WaveNode);
-    
-    var oninit = function() {
-        if (!this._.buffer) {
-            this.size = 1024;
-        }
-        if (!this._.interval) {
-            this.interval = 1000;
-        }
-    };
-    
-    var $ = WaveNode.prototype;
-    
-    Object.defineProperties($, {
-        size: {
-            set: function(value) {
-                var _ = this._;
-                if (!_.buffer) {
-                    if (typeof value === "number") {
-                        var n = (value < 64) ? 64 : (value > 2048) ? 2048 : value;
-                        _.buffer = new Float32Array(n);
-                        if (_.reservedinterval) {
-                            this.interval = _.reservedinterval;
-                            _.reservedinterval = null;
-                        }
-                    }
-                }
-            },
-            get: function() {
-                return this._.buffer.length;
-            }
-        },
-        interval: {
-            set: function(value) {
-                var _ = this._;
-                if (typeof value === "string") {
-                    value = timevalue(value);
-                }
-                if (typeof value === "number" && value > 0) {
-                    if (!_.buffer) {
-                        _.reservedinterval = value;
-                    } else {
-                        _.interval    = value;
-                        _.samplesIncr = value * 0.001 * timbre.samplerate / _.buffer.length;
-                        if (_.samplesIncr < 1) {
-                            _.samplesIncr = 1;
-                        }
-                    }
-                }
-            },
-            get: function() {
-                return this._.interval;
-            }
-        }
-    });
-    
-    $.bang = function() {
-        var _ = this._;
-        var buffer = _.buffer;
-        
-        for (var i = buffer.length; i--; ) {
-            buffer[i] = 0;
-        }
-        _.samples    = 0;
-        _.writeIndex = 0;
-        this._.emit("bang");
-        return this;
-    };
-    
-    $.process = function(tickID) {
-        var _ = this._;
-        var cell = this.cell;
-
-        if (this.tickID !== tickID) {
-            this.tickID = tickID;
-            
-            fn.inputSignalAR(this);
-            
-            var i, imax = cell.length;
-            var samples     = _.samples;
-            var samplesIncr = _.samplesIncr;
-            var buffer      = _.buffer;
-            var writeIndex  = _.writeIndex;
-            var emit = false;
-            var mul = _.mul, add = _.add;
-            var mask = buffer.length - 1;
-            
-            for (i = 0; i < imax; ++i) {
-                if (samples <= 0) {
-                    buffer[writeIndex++] = cell[i];
-                    writeIndex &= mask;
-                    emit = _.plotFlush = true;
-                    samples += samplesIncr;
-                }
-                cell[i] = cell[i] * mul + add;
-                --samples;
-            }
-            _.samples    = samples;
-            _.writeIndex = writeIndex;
-            
-            if (emit) {
-                this._.emit("wave");
-            }
-        }
-        
-        return cell;
-    };
-    
-    var super_plot = timbre.Object.prototype.plot;
-    
-    $.plot = function(opts) {
-        var _ = this._;
-        if (_.plotFlush) {
-            var buffer = _.buffer;
-            var mask   = buffer.length - 1;
-            var data   = new Float32Array(buffer.length);
-            var j = _.writeIndex;
-            for (var i = 0, imax = buffer.length; i < imax; i++) {
-                data[i] = buffer[++j & mask];
-            }
-            _.plotData  = data;
-            _.plotFlush = null;
-        }
-        return super_plot.call(this, opts);
-    };
-    
-    fn.register("wave", WaveNode);
     
 })();
 (function() {
