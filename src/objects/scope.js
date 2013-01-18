@@ -4,7 +4,7 @@
     var fn = timbre.fn;
     var timevalue = timbre.timevalue;
     
-    function WaveNode(_args) {
+    function ScopeNode(_args) {
         timbre.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
@@ -16,7 +16,7 @@
         
         this.once("init", oninit);
     }
-    fn.extend(WaveNode);
+    fn.extend(ScopeNode);
     
     var oninit = function() {
         if (!this._.buffer) {
@@ -27,7 +27,7 @@
         }
     };
     
-    var $ = WaveNode.prototype;
+    var $ = ScopeNode.prototype;
     
     Object.defineProperties($, {
         size: {
@@ -117,7 +117,7 @@
             _.writeIndex = writeIndex;
             
             if (emit) {
-                this._.emit("wave");
+                this._.emit("scope");
             }
         }
         
@@ -142,6 +142,6 @@
         return super_plot.call(this, opts);
     };
     
-    fn.register("wave", WaveNode);
+    fn.register("scope", ScopeNode);
     
 })();
