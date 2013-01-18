@@ -4,6 +4,7 @@
     var fn = timbre.fn;
     var timevalue = timbre.timevalue;
     var Envelope  = timbre.modules.Envelope;
+    var isDictionary = fn.isDictionary;
     
     function EnvNode(_args) {
         timbre.Object.call(this, _args);
@@ -193,10 +194,6 @@
     };
     fn.register("env", EnvNode);
     
-    
-    var isDictionary = function(x) {
-        return (typeof x === "object" && x.constructor === Object);
-    };
     
     function envValue(opts, min, def, name1, name2, func) {
         var x = def;

@@ -327,6 +327,8 @@
         }
     };
     
+    fn.isDictionary = isDictionary;
+    
     var __nop = function() {
         return this;
     };

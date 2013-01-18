@@ -198,7 +198,7 @@
     
     var env_desc = {
         set: function(value) {
-            if (typeof value === "object" && value.constructor === Object) {
+            if (fn.isDictionary(value)) {
                 if (typeof value.type === "string") {
                     this._.env = value;
                 }
