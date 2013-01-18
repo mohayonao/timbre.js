@@ -19,8 +19,14 @@
         _.samplerate  = 44100;
         _.phase = 0;
         _.phaseIncr = 0;
+        
+        this.on("play", onplay);
     }
     fn.extend(BufferNode);
+
+    var onplay = function(value) {
+        this._.isEnded = !value;
+    };
     
     var $ = BufferNode.prototype;
     
@@ -163,6 +169,7 @@
                 buffer    : _.buffer.subarray(begin, end),
                 samplerate: _.samplerate
             });
+            instance._.isEnded = false;
         }
         instance.isLooped   = this.isLooped;
         instance.isReversed = this.isReversed;
