@@ -67,6 +67,7 @@
         if (this.loopNode !== null) {
             new_instance.setLoopNode(this.loopNode + 1);
         }
+        new_instance.step = this.step;
         return new_instance;
     };
     $.setTable = function(value) {

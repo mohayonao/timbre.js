@@ -56,6 +56,12 @@
             }
         }
     });
+
+    $.clone = function() {
+        var instance = new EnvNode([]);
+        instance._.env = this._.env.clone();
+        return instance;
+    };
     
     $.reset = function() {
         this._.env.reset();
