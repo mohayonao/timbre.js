@@ -1,0 +1,101 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>T(&quot;osc&quot;)</title><link rel="stylesheet" href="/timbre.js/misc/css/codemirror.css" type="text/css"><link rel="stylesheet" href="/timbre.js/misc/css/common.css" type="text/css"><link rel="shortcut icon" href="/timbre.js/favicon.ico"><script src="/timbre.js/timbre.dev.js">   </script></head><body><div class="container"><div class="row"><div id="sidebar"><h1>timbre.js</h1><div id="index"><div id="list"><h2>Download</h2><ul><li><a href="/timbre.js/timbre.js">timbre.js</a></li><li><a href="/timbre.js/timbre.dev.js">timbre.dev.js</a></li></ul><h2>Documents</h2><ul><li><a href="./">Introduction</a></li><li><a href="./GettingStarted.html">Getting Started</a></li><li><a href="./PragmaSynth.html">Pragmatic Synth</a></li><li><a href="./RecordingMode.html">Recording Mode</a></li><li><a href="./CustomObject.html">Custom Object</a></li><li><a href="./ForDevelopers.html">For Developers</a></li><li><a href="./timevalue.html">timevalue</a></li></ul><h2>Examples</h2><ul><li><a href="./beatbox.html">BeatBox</a></li><li><a href="./chord.html">Chords Work</a></li><li><a href="./satie.html">Gymnopedie</a></li><li><a href="./khoomii.html">Khoomii</a></li><li><a href="./reich.html">Reich</a></li></ul><h2>References</h2><ul><li><a href="./BaseObject.html">Base Object</a></li><li><a href="./Number.html">Number</a></li><li><a href="./Array.html">Array</a></li><li><a href="./Function.html">Function</a></li><li><a href="./Boolean.html">Boolean</a></li><li><a href="./Object.html">Object</a></li><li><a href="./SynthDef.html">SynthDef</a></li><li><a href="./soundbuffer.html">SoundBuffer</a></li><li><a href="./times.html">*</a></li><li><a href="./plus.html">+</a></li><li><a href="./audio.html">audio</a></li><li><a href="./biquad.html">biquad</a></li><li><a href="./buffer.html">buffer</a></li><li><a href="./clip.html">clip</a></li><li><a href="./cosc.html">cosc</a></li><li><a href="./delay.html">delay</a></li><li><a href="./distortion.html">distortion</a></li><li><a href="./env.html">env</a></li><li><a href="./fft.html">fft</a></li><li><a href="./fnoise.html">fnoise</a></li><li><a href="./gate.html">gate</a></li><li><a href="./ifft.html">ifft</a></li><li><a href="./interval.html">interval</a></li><li><a href="./keyboard.html">keyboard</a></li><li><a href="./map.html">map</a></li><li><a href="./midicps.html">midicps</a></li><li><a href="./midiratio.html">midiratio</a></li><li><a href="./mml.html">mml</a></li><li><a href="./mouse.html">mouse</a></li><li><a href="./ndict.html">ndict</a></li><li><a href="./noise.html">noise</a></li><li><a href="./osc.html">osc</a></li><li><a href="./OscGen.html">OscGen</a></li><li><a href="./panner.html">pan</a></li><li><a href="./param.html">param</a></li><li><a href="./pink.html">pink</a></li><li><a href="./pluck.html">pluck</a></li><li><a href="./PluckGen.html">PluckGen</a></li><li><a href="./rec.html">rec</a></li><li><a href="./schedule.html">schedule</a></li><li><a href="./scope.html">scope</a></li><li><a href="./selector.html">selector</a></li><li><a href="./spectrum.html">spectrum</a></li><li><a href="./tape.html">tape</a></li><li><a href="./timeout.html">timeout</a></li><li><a href="./zmap.html">zmap</a></li></ul></div></div><hr><div id="footer"><a href="/timbre.js/">English</a><a href="/timbre.js/ja/">日本語</a></div></div><div id="main"><h1>T(&quot;osc&quot;)</h1>
+<p><span class="label ar">AR/KR</span> Interpolating wavetable oscillator
+
+</p>
+<h2>Description</h2>
+<p>基本的な波形を出力します。
+
+</p>
+<div class="codemirror" lang="timbre" source="T(&quot;osc&quot;, {wave:&quot;sin&quot;, freq:880}).play();"></div>
+<h2>Properties</h2>
+<ul>
+<li><code>wave</code> <em>(String or Function or Float32Array)</em><ul>
+<li>波形を設定します。詳細は <strong>Wave Functions</strong> の項目を参照してください</li>
+</ul>
+</li>
+<li><code>freq</code> <em>(T-Object or timevalue)</em><ul>
+<li>周波数を設定します。</li>
+</ul>
+</li>
+</ul>
+<h2>Note</h2>
+<ul>
+<li>入力オブジェクトが指定されている場合はそれらを合成した後、オシレーターの値で積算します。以下の例では 440Hzのサイン波に 1秒ごとに on/off するパルス波を入力しています。</li>
+</ul>
+<div class="codemirror" lang="timbre" source="T(&quot;sin&quot;, {freq:440, mul:0.5}, T(&quot;+pulse&quot;, {freq:&quot;1sec&quot;})).play();"></div>
+<h2>Wave Functions</h2>
+<p><code>wave</code> プロパティで様々な波形を選択/作成することができます。
+
+</p>
+<canvas id="wave" style="width:240px;height:80px"></canvas>
+<p>まず基本の波形として <strong>サイン波</strong>、<strong>のこぎり波</strong>、<strong>三角波</strong>、<strong>矩形波</strong>、<strong>ファミコン三角波</strong> を選択できます。これらは良く使われるので <code>T(&quot;sin&quot;)</code> のように直接生成することもできます。
+
+</p>
+<div class="codemirror" lang="timbre" source="var osc = T(&quot;osc&quot;, {mul:0.25}).play();
+var canvas = window.getCanvasById(&quot;wave&quot;);
+
+T(&quot;interval&quot;, {interval:1000}, function(count) {
+    var wave = [&quot;sin&quot;, &quot;saw&quot;, &quot;tri&quot;, &quot;pulse&quot;, &quot;fami&quot;][count % 5];
+    osc.wave = wave;
+    osc.plot({target:canvas});    
+}).start();"></div>
+<hr>
+<canvas id="wave-width" style="width:240px;height:80px"></canvas>
+<p><code>基本波形名(整数)</code> と書くことで波形のデューティー比を指定できます。以下の例では矩形波を基本にデューティー比を変更することで音色を変更しています。
+
+</p>
+<div class="codemirror" lang="timbre" source="var osc = T(&quot;osc&quot;, {mul:0.15}).play();
+var canvas = window.getCanvasById(&quot;wave-width&quot;);
+
+T(&quot;interval&quot;, {interval:1000}, function(count) {
+    var wave = &quot;pulse(&quot; + ((count % 19) * 5 + 5) + &quot;)&quot;;
+    osc.wave = wave;
+    osc.plot({target:canvas});    
+}).start();"></div>
+<hr>
+<canvas id="wave-plus" style="width:240px;height:80px"></canvas>
+<p><code>+基本波形名</code> と書くことで波形の形の範囲を 0-1 に矯正できます。<code>T(&quot;+sin&quot;)</code> のように生成した場合は自動的に Control Rateとなります。これはトレモロなどに使うときに便利です。
+
+</p>
+<div class="codemirror" lang="timbre" source="var canvas = window.getCanvasById(&quot;wave-plus&quot;);
+
+T(&quot;osc&quot;, {wave:&quot;+sin&quot;}).plot({target:canvas});"></div>
+<canvas id="wave-minus" style="width:240px;height:80px"></canvas>
+<p><code>-基本波形名</code> と書くことで波形の上下を反転することができます。
+
+</p>
+<div class="codemirror" lang="timbre" source="var canvas = window.getCanvasById(&quot;wave-minus&quot;);
+
+T(&quot;osc&quot;, {wave:&quot;saw&quot;}).plot({target:canvas, width:120});
+T(&quot;osc&quot;, {wave:&quot;-saw&quot;}).plot({target:canvas, width:120, x:120, background:&quot;#ededed&quot;});"></div>
+<hr>
+<h3>SiON記法</h3>
+<p><a href="http://mmltalks.appspot.com/document/siopm_mml_ref_05.html">SiON</a> のテーブル定義の書き方で波形を作成します。
+
+</p>
+<canvas id="wave-wavc" style="width:240px;height:80px"></canvas>
+<p><code>wavc(0FFFFFFF)</code> と書くことで基音より整数倍のサイン波を合成した波形を作ることができます。値は下位から 4ビット単位で設定します。
+
+
+</p>
+<div class="codemirror" lang="timbre" source="var canvas = window.getCanvasById(&quot;wave-wavc&quot;);
+
+T(&quot;osc&quot;, {wave:&quot;wavc(0200080f)&quot;, mul:0.15}).plot({target:canvas}).play();"></div>
+<hr>
+<canvas id="wave-wavb" style="width:240px;height:80px"></canvas>
+<p><code>wavb(00112233..)</code> と書くことで波形を 16進数で定義できます。
+
+</p>
+<div class="codemirror" lang="timbre" source="var canvas = window.getCanvasById(&quot;wave-wavb&quot;);
+
+var src = &quot;wavb(36454d4b41362f303639332309efd9cc362f220df2d9c8c3c6cbccc6bab0aeb7)&quot;;
+T(&quot;osc&quot;, {wave:src, mul:0.15}).plot({target:canvas}).play();"></div>
+<hr>
+<h2>See Also</h2>
+<ul>
+<li><a href="./OscGen.html"><code>T(&quot;OscGen&quot;)</code></a></li>
+</ul>
+<h2>Source</h2>
+<p><a href="https://github.com/mohayonao/timbre.js/blob/master/src/objects/osc.js">https://github.com/mohayonao/timbre.js/blob/master/src/objects/osc.js</a>
+</p>
+</div></div></div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/requestAnimationFrame.js"></script><script src="/timbre.js/misc/js/common.js"></script><script>sc.use("prototype");</script></body></html>
