@@ -22,7 +22,7 @@
             set: function(value) {
                 if (typeof value === "number") {
                     var env = this._.env;
-                    env.setTable([value]);
+                    env.setTable([value, [value, 0]]);
                     env.reset();
                     env.status = Envelope.StatusGate;
                 }
