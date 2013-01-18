@@ -24,6 +24,7 @@
         });
         
         instance.load = load;
+        instance.loadthis = loadthis;
         
         if (params) {
             instance.once("init", function() {
@@ -83,6 +84,11 @@
         new modules.Decoder().decode(src, onloadedmetadata, onloadeddata);
         
         return dfd.promise();
+    };
+
+    var loadthis = function() {
+        load.apply(this, arguments);
+        return this;
     };
     
 })();
