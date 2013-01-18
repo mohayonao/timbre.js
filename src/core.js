@@ -796,7 +796,6 @@
         
         $.set = function(key, value) {
             var x, desc, meta = this._.meta;
-            
             switch (typeof key) {
             case "string":
                 switch (meta[key]) {
@@ -813,8 +812,10 @@
                         if (desc) {
                             if (typeof desc.value === "function") {
                                 meta[key] = "function";
+                                this[key](value);
                             } else if (desc.get || desc.set) {
                                 meta[key] = "property";
+                                this[key] = value;
                             }
                         }
                         x = Object.getPrototypeOf(x);

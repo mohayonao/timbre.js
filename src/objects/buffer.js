@@ -194,9 +194,9 @@
         return this;
     };
     
-    $.bang = function() {
+    $.bang = function(value) {
         this._.phase   = 0;
-        this._.isEnded = false;
+        this._.isEnded = (value === false);
         this._.emit("bang");
         return this;
     };
