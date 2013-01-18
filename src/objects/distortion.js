@@ -8,8 +8,8 @@
         fn.fixAR(this);
         
         var _ = this._;
-        _.pre  = timbre(-60);
-        _.post = timbre( 18);
+        _.pre  = timbre( 60);
+        _.post = timbre(-18);
         _.samplerate = timbre.samplerate;
         _.x1 = _.x2 = _.y1 = _.y2 = 0;
         _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
@@ -58,13 +58,13 @@
             fn.inputSignalAR(this);
             
             var changed = false;
-
-            var preGain = _.pre.process(tickID)[0];
+            
+            var preGain = -_.pre.process(tickID)[0];
             if (_.prevPreGain !== preGain) {
                 _.prevPreGain = preGain;
                 changed = true;
             }
-            var postGain = _.post.process(tickID)[0];
+            var postGain = -_.post.process(tickID)[0];
             if (_.prevPostGain !== postGain) {
                 _.prevPostGain = postGain;
                 changed = true;
