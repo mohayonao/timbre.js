@@ -16,8 +16,10 @@ $(function() {
     };
     
     timbre.on("play", function() {
-        $(current.button).text("Pause");
-        $(".CodeMirror", current.container).css("border-color", "#DF81A2");
+        if (current) {
+            $(current.button).text("Pause");
+            $(".CodeMirror", current.container).css("border-color", "#DF81A2");
+        }
     }).on("pause", onreset).on("reset", onreset).amp = 0.6;
     
     function playCode(code) {
