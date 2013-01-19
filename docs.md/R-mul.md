@@ -20,4 +20,4 @@ var synth = T("*", osc, param).play();
 ```
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/times.js
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/mul.js
