@@ -18,7 +18,7 @@ var audio = T("audio", {loop:true}).load(src, function(res) {
 ## Properties ##
 - `type` _(String)_
   - **Filter Types** を参照してください
-- `freq`, `cutoff` _(T-Object or timevalue)_
+- `freq`, `cutoff` _(T-Object)_
   - カットオフ周波数
 - `Q` _(T-Object)_
   - Q

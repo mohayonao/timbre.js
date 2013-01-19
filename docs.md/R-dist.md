@@ -27,4 +27,4 @@ var audio = T("audio", {loop:true}).load(src, function(res) {
 `T("dist")`
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/distortion.js
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/dist.js

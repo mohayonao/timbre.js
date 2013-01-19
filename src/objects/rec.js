@@ -147,6 +147,7 @@
         });
     };
     
-    fn.register("rec", RecNode);
+    fn.register("record", RecNode);
+    fn.alias("rec", "record");
     
 })();

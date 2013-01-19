@@ -49,4 +49,4 @@ T("lpf", {cutoff:cutoff}, chord).play();
 ```
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/plus.js
+https://github.com/mohayonao/timbre.js/blob/master/src/objects/add.js

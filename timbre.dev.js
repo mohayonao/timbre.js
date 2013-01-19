@@ -14,7 +14,7 @@
     var STATUS_PLAY = 1;
     var STATUS_REC  = 2;
     
-    var _ver = "13.01.18";
+    var _ver = "13.01.18a";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -4300,6 +4300,64 @@
 })();
 (function() {
     "use strict";
+    
+    var fn = timbre.fn;
+    
+    function PlusNode(_args) {
+        timbre.Object.call(this, _args);
+    }
+    fn.extend(PlusNode);
+    
+    var $ = PlusNode.prototype;
+    
+    $.process = function(tickID) {
+        var cell = this.cell;
+        var _ = this._;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+            
+            var inputs = this.inputs;
+            var mul = _.mul, add = _.add;
+            var i, imax = inputs.length;
+            var j, jmax = cell.length;
+            var tmp;
+            
+            for (j = jmax; j--; ) {
+                cell[j] = 0;
+            }
+            
+            if (_.ar) { // audio-rate
+                for (i = 0; i < imax; ++i) {
+                    tmp = inputs[i].process(tickID);
+                    for (j = jmax; j--; ) {
+                        cell[j] += tmp[j];
+                    }
+                }
+                if (mul !== 1 || add !== 0) {
+                    for (j = jmax; j--; ) {
+                        cell[j] = cell[j] * mul + add;
+                    }
+                }
+            } else {    // control-rate
+                tmp = 0;
+                for (i = 0; i < imax; ++i) {
+                    tmp += inputs[i].process(tickID)[0];
+                }
+                tmp = tmp * mul + add;
+                for (j = jmax; j--; ) {
+                    cell[j] = tmp;
+                }
+            }
+        }
+        return cell;
+    };
+    
+    fn.register("+", PlusNode);
+    
+})();
+(function() {
+    "use strict";
 
     var fn = timbre.fn;
     var modules = timbre.modules;
@@ -7051,6 +7109,65 @@
     
     var fn = timbre.fn;
     
+    function TimesNode(_args) {
+        timbre.Object.call(this, _args);
+    }
+    fn.extend(TimesNode);
+    
+    var $ = TimesNode.prototype;
+    
+    $.process = function(tickID) {
+        var cell = this.cell;
+        var _ = this._;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+            
+            var inputs = this.inputs;
+            var mul = _.mul, add = _.add;
+            var i, imax = inputs.length;
+            var j, jmax = cell.length;
+            var tmp;
+            
+            for (j = jmax; j--; ) {
+                cell[j] = 1;
+            }
+            
+            if (_.ar) { // audio-rate
+                for (i = 0; i < imax; ++i) {
+                    tmp = inputs[i].process(tickID);
+                    for (j = jmax; j--; ) {
+                        cell[j] *= tmp[j];
+                    }
+                }
+                if (mul !== 1 || add !== 0) {
+                    for (j = jmax; j--; ) {
+                        cell[j] = cell[j] * mul + add;
+                    }
+                }
+            } else {    // control-rate
+                tmp = 1;
+                for (i = 0; i < imax; ++i) {
+                    tmp *= inputs[i].process(tickID)[0];
+                }
+                tmp = tmp * mul + add;
+                for (j = jmax; j--; ) {
+                    cell[j] = tmp;
+                }
+            }
+        }
+        
+        return cell;
+    };
+    
+    fn.register("*", TimesNode);
+    
+})();
+(function() {
+    "use strict";
+    
+    var fn = timbre.fn;
+    
     function NDictNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixKR(this);
@@ -7813,64 +7930,6 @@
     "use strict";
     
     var fn = timbre.fn;
-    
-    function PlusNode(_args) {
-        timbre.Object.call(this, _args);
-    }
-    fn.extend(PlusNode);
-    
-    var $ = PlusNode.prototype;
-    
-    $.process = function(tickID) {
-        var cell = this.cell;
-        var _ = this._;
-        
-        if (this.tickID !== tickID) {
-            this.tickID = tickID;
-            
-            var inputs = this.inputs;
-            var mul = _.mul, add = _.add;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var tmp;
-            
-            for (j = jmax; j--; ) {
-                cell[j] = 0;
-            }
-            
-            if (_.ar) { // audio-rate
-                for (i = 0; i < imax; ++i) {
-                    tmp = inputs[i].process(tickID);
-                    for (j = jmax; j--; ) {
-                        cell[j] += tmp[j];
-                    }
-                }
-                if (mul !== 1 || add !== 0) {
-                    for (j = jmax; j--; ) {
-                        cell[j] = cell[j] * mul + add;
-                    }
-                }
-            } else {    // control-rate
-                tmp = 0;
-                for (i = 0; i < imax; ++i) {
-                    tmp += inputs[i].process(tickID)[0];
-                }
-                tmp = tmp * mul + add;
-                for (j = jmax; j--; ) {
-                    cell[j] = tmp;
-                }
-            }
-        }
-        return cell;
-    };
-    
-    fn.register("+", PlusNode);
-    
-})();
-(function() {
-    "use strict";
-    
-    var fn = timbre.fn;
     var timevalue = timbre.timevalue;
     
     var STATUS_WAIT = 0;
@@ -8016,7 +8075,8 @@
         });
     };
     
-    fn.register("rec", RecNode);
+    fn.register("record", RecNode);
+    fn.alias("rec", "record");
     
 })();
 (function() {
@@ -9075,65 +9135,6 @@
     };
     
     fn.register("timeout", TimeoutNode);
-    
-})();
-(function() {
-    "use strict";
-    
-    var fn = timbre.fn;
-    
-    function TimesNode(_args) {
-        timbre.Object.call(this, _args);
-    }
-    fn.extend(TimesNode);
-    
-    var $ = TimesNode.prototype;
-    
-    $.process = function(tickID) {
-        var cell = this.cell;
-        var _ = this._;
-        
-        if (this.tickID !== tickID) {
-            this.tickID = tickID;
-            
-            var inputs = this.inputs;
-            var mul = _.mul, add = _.add;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var tmp;
-            
-            for (j = jmax; j--; ) {
-                cell[j] = 1;
-            }
-            
-            if (_.ar) { // audio-rate
-                for (i = 0; i < imax; ++i) {
-                    tmp = inputs[i].process(tickID);
-                    for (j = jmax; j--; ) {
-                        cell[j] *= tmp[j];
-                    }
-                }
-                if (mul !== 1 || add !== 0) {
-                    for (j = jmax; j--; ) {
-                        cell[j] = cell[j] * mul + add;
-                    }
-                }
-            } else {    // control-rate
-                tmp = 1;
-                for (i = 0; i < imax; ++i) {
-                    tmp *= inputs[i].process(tickID)[0];
-                }
-                tmp = tmp * mul + add;
-                for (j = jmax; j--; ) {
-                    cell[j] = tmp;
-                }
-            }
-        }
-        
-        return cell;
-    };
-    
-    fn.register("*", TimesNode);
     
 })();
 (function() {
