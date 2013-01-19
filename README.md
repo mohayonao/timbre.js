@@ -8,11 +8,11 @@ new version, now under development
 [English](http://mohayonao.github.com/timbre.js/) | [日本語](http://mohayonao.github.com/timbre.js/ja/)
 
 ### Examples ###
-- [BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html)
-- [Chords Work](http://mohayonao.github.com/timbre.js/chord.html)
-- [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html)
-- [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html)
-- [Reich](http://mohayonao.github.com/timbre.js/reich.html)
+* [BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html)
+* [Chords Work](http://mohayonao.github.com/timbre.js/chord.html)
+* [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html)
+* [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html)
+* [Reich](http://mohayonao.github.com/timbre.js/reich.html)
 
 ### System Requirements ###
 
@@ -41,5 +41,5 @@ MIT
 
 ### ChangeLog ###
 
-- **13.01.18a** (268.71KB)
-new version (beta)
+**13.01.18a** (268.71KB)
+* new version (beta)
