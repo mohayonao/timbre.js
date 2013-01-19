@@ -7,8 +7,10 @@ DST_DIR = path.normalize "#{__dirname}/../"
 # build source code
 build_timbre = (opts={})->
 
-    version = fs.readFileSync "#{DST_DIR}version.md", 'utf-8'
-    version = version.split('\n')[0].trim()
+    version = do ->
+        for line in fs.readFileSync("#{DST_DIR}README.md", 'utf-8').split('\n')
+            if (m = /\*\*(\d\d\.\d\d.\d\d\w*)\*\*/.exec line) != null then return m[1]
+        return null
 
     from = (dirpath)->
         list = fs.readdirSync dirpath
