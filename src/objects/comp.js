@@ -127,5 +127,6 @@
     };
     
     fn.register("comp", CompressorNode);
+    fn.alias("compressor", "comp");
     
 })();
