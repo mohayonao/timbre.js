@@ -27,7 +27,7 @@
   var tapes = tape.split(32);
 
   tapes = tapes.map(function(t) {
-    return t.loop(1);
+    return t.loop(4);
   });
 
   tape = timbre.modules.Scissor.join(tapes);
