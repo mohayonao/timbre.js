@@ -5,12 +5,8 @@
     var modules = timbre.modules;
     
     fn.register("audio", function(_args) {
-        var params;
-        if (fn.isDictionary(_args[0])) {
-            params = _args.shift();
-        }
-        
-        var instance = timbre.apply(null, ["buffer"].concat(_args));
+        var BufferNode = fn.getClass("buffer");
+        var instance = new BufferNode(_args);
         
         instance._.isLoaded = false;
         instance._.isEnded  = true;
@@ -23,14 +19,8 @@
             }
         });
         
-        instance.load = load;
+        instance.load     = load;
         instance.loadthis = loadthis;
-        
-        if (params) {
-            instance.once("init", function() {
-                instance.set(params);
-            });
-        }
         
         return instance;
     });
@@ -85,7 +75,7 @@
         
         return dfd.promise();
     };
-
+    
     var loadthis = function() {
         load.apply(this, arguments);
         return this;

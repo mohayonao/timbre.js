@@ -228,7 +228,7 @@
         
         opts.table = [ZERO, [lv, a], [ZERO, r]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("adsr", function(_args) {
@@ -246,7 +246,7 @@
         opts.table = [ZERO, [lv, a], [s, d], [ZERO, r]];
         opts.releaseNode = 3;
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("asr", function(_args) {
@@ -262,7 +262,7 @@
         opts.table = [ZERO, [s, a], [ZERO, r]];
         opts.releaseNode = 2;
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("dadsr", function(_args) {
@@ -281,7 +281,7 @@
         opts.table = [ZERO, [ZERO, dl], [lv, a], [s, d], [ZERO, r]];
         opts.releaseNode = 4;
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("linen", function(_args) {
@@ -297,7 +297,7 @@
         
         opts.table = [ZERO, [lv, a], [lv, s], [ZERO, r]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("env.tri", function(_args) {
@@ -312,7 +312,7 @@
         dur *= 0.5;
         opts.table = [ZERO, [lv, dur], [ZERO, dur]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("env.cutoff", function(_args) {
@@ -326,7 +326,7 @@
         
         opts.table = [lv, [ZERO, r]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
 })();
