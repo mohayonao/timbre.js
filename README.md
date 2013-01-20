@@ -39,6 +39,10 @@ $ npm install timbre
 MIT
 
 ### ChangeLog ###
+**13.01.20** (294.83KB)
+* add `T("adshr")`, `T("ahdsfr")`
+* add `T("comp")`
+* add `T("phaseshift")`
 
 **13.01.18a** (268.71KB)
 * new version (beta)
