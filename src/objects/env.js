@@ -249,6 +249,24 @@
         return new EnvNode(_args);
     });
     
+    fn.register("adshr", function(_args) {
+        if (!isDictionary(_args[0])) {
+            _args.unshift({});
+        }
+        
+        var opts = _args[0];
+        var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
+        var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
+        var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
+        var h  = envValue(opts,   10,  500, "h" , "holdTime"    , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "decayTime"   , timevalue);
+        var lv = envValue(opts, ZERO,    1, "lv", "level"       );
+        
+        opts.table = [ZERO, [lv, a], [s, d], [s, h], [ZERO, r]];
+        
+        return new EnvNode(_args);
+    });
+    
     fn.register("asr", function(_args) {
         if (!isDictionary(_args[0])) {
             _args.unshift({});
@@ -272,7 +290,7 @@
         
         var opts = _args[0];
         var dl = envValue(opts,   10,  100, "dl", "delayTime"   , timevalue);
-        var a  = envValue(opts,   10,   10, "a" , "attackTime"  );
+        var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
         var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
         var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
         var r  = envValue(opts,   10, 1000, "r" , "relaseTime"  , timevalue);
@@ -280,6 +298,26 @@
         
         opts.table = [ZERO, [ZERO, dl], [lv, a], [s, d], [ZERO, r]];
         opts.releaseNode = 4;
+        
+        return new EnvNode(_args);
+    });
+    
+    fn.register("ahdsfr", function(_args) {
+        if (!isDictionary(_args[0])) {
+            _args.unshift({});
+        }
+        
+        var opts = _args[0];
+        var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
+        var h  = envValue(opts,   10,   10, "h" , "holdTime"    , timevalue);
+        var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
+        var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
+        var f  = envValue(opts,   10, 5000, "f" , "fadeTime"    , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "relaseTime"  , timevalue);
+        var lv = envValue(opts, ZERO,    1, "lv", "level"       );
+        
+        opts.table = [ZERO, [lv, a], [lv, h], [s, d], [ZERO, f], [ZERO, r]];
+        opts.releaseNode = 5;
         
         return new EnvNode(_args);
     });

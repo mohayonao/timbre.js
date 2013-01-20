@@ -20,18 +20,18 @@ var table = [440, [880, 500], [660, 250]];
 var env   = T("env", {table:table}).bang();
 var synth = T("saw", {freq:env, mul:0.25}).play();
 
-var count = 0;
-setInterval(function() {
-    if (++count === 3) {
+var i = T("interval", {interval:1000}, function(count) {
+    if (count === 3) {
         synth.pause();
+        i.stop();
     }
     env.bang();
-}, 1000);
+}).start();
 ```
 
 (canvas env-release w:240 h:80)
 
-`releaseNode` プロパティを指定すると、 `release()` メソッドをトリガとするまで持続するエンベロープを作成できます。以下の例では 3番目の要素をリリースノードとすることで直前の値 0.6 まで遷移した後、持続して `release()` がトリガされてから 1秒かけて 0 に遷移するエンベロープを動作させています。
+`releaseNode` プロパティを指定すると、 `release()` メソッドをトリガするまで持続するエンベロープを作成できます。以下の例では 3番目の要素をリリースノードとすることで直前の値 0.6 まで遷移した後、持続して `release()` がトリガされてから 1秒かけて 0 に遷移するエンベロープを動作させています。
 
 ```timbre
 var table = [0, [1, 100], [0.6, 100], [0, 1000]];
@@ -43,9 +43,10 @@ var env   = T("env", {table:table, releaseNode:3}, synth).on("ended", function()
 var canvas = window.getCanvasById("env-release");
 env.plot({target:canvas});
 
-setTimeout(function() {
+var t = T("timeout", {timeout:2000}, function() {
     env.release();
-}, 2000);
+    t.stop();
+}).start();
 ```
 
 (canvas env-loop w:240 h:80)
@@ -60,9 +61,10 @@ var synth = T("tri", {freq:env, mul:0.25}).play();
 var canvas = window.getCanvasById("env-loop");
 env.plot({target:canvas});
 
-setTimeout(function() {
+var t = T("timeout", {timeout:2000}, function() {
     synth.pause();
-}, 2000);
+    t.stop();
+}).start();
 ```
 
 ## Properties ##
@@ -106,9 +108,10 @@ env.append(T("pulse", {mul:0.25})).on("ended", function() {
     this.pause();
 }).bang().play();
 
-setTimeout(function() {
+var t = T("timeout", {timeout:2000}, function() {
     env.release();
-}, 2000);
+    t.stop();
+}).start();
 ```
 
 
@@ -152,9 +155,31 @@ var env = T("adsr", {a:100,d:250,s:0.6,r:500}, T("sin")).on("ended", function() 
 var canvas = window.getCanvasById("env-adsr");
 env.plot({target:canvas, width:240, height:80});
 
-setTimeout(function() {
+var t = T("timeout", {timeout:1500}, function() {
     env.release();
-}, 1500);
+    t.stop();
+}).start();
+```
+
+### T("adshr") ###
+(canvas env-adshr w:240 h:80) 
+
+`T("adshr")` はADSHRタイプのエンベロープを作ります。
+
+- a, attackTime : 10
+- d, decayTime : 300
+- s, sustainLevel : 0.5
+- h, holdTime: 500
+- r, releaseTime : 1000
+- lv, totalLevel : 1
+
+```timbre
+var env = T("adshr", {a:100,d:250,s:0.6,r:500}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
+
+var canvas = window.getCanvasById("env-adshr");
+env.plot({target:canvas, width:240, height:80});
 ```
 
 ### T("asr") ###
@@ -175,15 +200,16 @@ var env = T("asr", {a:100,s:0.8,r:500}, T("sin")).on("ended", function() {
 var canvas = window.getCanvasById("env-asr");
 env.plot({target:canvas, width:240, height:80});
 
-setTimeout(function() {
+var t = T("timeout", {timeout:1500}, function() {
     env.release();
-}, 1500);
+    t.stop();
+}).start();
 ```
 
 ### T("dadsr") ###
 (canvas env-dadsr w:240 h:80) 
 
-`T("dadsr")` は delayありADSRタイプの持続エンベロープを作ります。
+`T("dadsr")` は DADSRタイプの持続エンベロープを作ります。
 
 - dl, delayTime : 100
 - a, attackTime : 10
@@ -199,9 +225,37 @@ var env = T("dadsr", {dl:500,r:500}, T("sin")).on("ended", function() {
 var canvas = window.getCanvasById("env-dadsr");
 env.plot({target:canvas, width:240, height:80});
 
-setTimeout(function() {
+var t = T("timeout", {timeout:1500}, function() {
     env.release();
-}, 1500);
+    t.stop();
+}).start();
+```
+
+### T("ahdsfr") ###
+(canvas env-ahdsfr w:240 h:80) 
+
+`T("ahdsfr")` は AHDSFRタイプの持続エンベロープを作ります。
+
+- a, attackTime : 10
+- h, holdTime : 10
+- d, decayTime : 300
+- s, sustainLevel : 0.5
+- f, fadeTime : 5000
+- r, releaseTime : 1000
+- lv, totalLevel : 1
+
+```timbre
+var env = T("ahdsfr", {a:100, h:50, s:0.8, f:5000, r:500}, T("sin")).on("ended", function() {
+    this.pause();
+}).bang().play();
+
+var canvas = window.getCanvasById("env-ahdsfr");
+env.plot({target:canvas, width:240, height:80});
+
+var t = T("timeout", {timeout:1500}, function() {
+    env.release();
+    t.stop();
+}).start();
 ```
 
 ### T("linen") ###
