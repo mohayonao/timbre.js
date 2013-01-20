@@ -7,7 +7,7 @@ T("buffer")
 
 ```timbre
 T("audio", {load:"/timbre.js/misc/audio/amen.wav"}).on("ended", function() {
-    this.pause();
+  this.pause();
 }).play();
 ```
 

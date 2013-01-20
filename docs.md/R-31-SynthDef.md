@@ -9,17 +9,17 @@ T("SynthDef")
 var synth = T("SynthDef").play();
 
 synth.def = function(opts) {
-    var osc1, osc2, env;
-    osc1 = T("saw", {freq:opts.freq         , mul:0.25});
-    osc2 = T("saw", {freq:opts.freq * 1.6818, mul:0.20});
-    env  = T("linen", {s:450, r:250, lv:0.5}, osc1, osc2);
-    return env.on("ended", opts.doneAction).bang();
+  var osc1, osc2, env;
+  osc1 = T("saw", {freq:opts.freq         , mul:0.25});
+  osc2 = T("saw", {freq:opts.freq * 1.6818, mul:0.20});
+  env  = T("linen", {s:450, r:250, lv:0.5}, osc1, osc2);
+  return env.on("ended", opts.doneAction).bang();
 };
 
 T("interval", {interval:500}, function(count) {
-    var noteNum  = 69 + [0, 2, 4, 5, 7, 9, 11, 12][count % 8];
-    var velocity = 64 + (count % 64);
-    synth.noteOn(noteNum, velocity);
+  var noteNum  = 69 + [0, 2, 4, 5, 7, 9, 11, 12][count % 8];
+  var velocity = 64 + (count % 64);
+  synth.noteOn(noteNum, velocity);
 }).start();
 ```
 

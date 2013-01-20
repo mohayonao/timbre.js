@@ -11,7 +11,7 @@ var bool = T(false);
 T("*", T("sin", {mul:0.5}), bool).play();
 
 T("interval", {interval:500}, function() {
-    bool.value = !bool.value;
+  bool.value = !bool.value;
 }).start();
 ```
 

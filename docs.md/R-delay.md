@@ -1,5 +1,5 @@
 T("delay")
-==============
+==========
 {ar} Delay signal
 
 
@@ -7,9 +7,9 @@ T("delay")
 var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";
 
 var audio = T("audio", {loop:true}).load(src, function(res) {
-    
-    var d = T("delay", {time:"80ms", fb:0.4, wet:0.25}, this).play();
-    
+  
+  T("delay", {time:"80ms", fb:0.4, wet:0.25}, this).play();
+  
 });
 ```
 

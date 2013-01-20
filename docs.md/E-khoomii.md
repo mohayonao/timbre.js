@@ -3,15 +3,15 @@ Khoomii
 
 ```timbre
 var formants = {
-    a:[700, 1200, 2900],
-    i:[300, 2700, 2700],
-    u:[390, 1200, 2500],
-    e:[450, 1750, 2750],
-    o:[460,  880, 2800]
+  a:[700, 1200, 2900],
+  i:[300, 2700, 2700],
+  u:[390, 1200, 2500],
+  e:[450, 1750, 2750],
+  o:[460,  880, 2800]
 }, freq, synth, f1, f2, f3;
 
-freq  = 174.61412048339844;
-freq  = T("+", freq, T("sin", {freq:3, mul:0.8}).kr()).kr();
+freq = 174.61412048339844;
+freq = T("+", freq, T("sin", {freq:3, mul:0.8}).kr()).kr();
 
 synth = T("saw", {freq:freq});
 
@@ -23,9 +23,9 @@ synth = T("+", f1, f2, f3);
 T("bpf", {freq:3200, Q:0.5}, synth).play();
 
 T("interval", {interval:250}, function() {
-    var f = formants["aiueo"[(Math.random()*5)|0]];
-    f1.freq.linTo(f[0], 150);
-    f2.freq.linTo(f[1], 150);
-    f3.freq.linTo(f[2], 150);
+  var f = formants["aiueo"[(Math.random()*5)|0]];
+  f1.freq.linTo(f[0], 150);
+  f2.freq.linTo(f[1], 150);
+  f3.freq.linTo(f[2], 150);
 }).start();
 ```

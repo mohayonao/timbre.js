@@ -19,16 +19,16 @@ var synth = T("OscGen", {wave:"saw", mul:0.25}).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        var freq = midicps.at(midi);
-        synth.noteOnWithFreq(freq, 100);
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    var freq = midicps.at(midi);
+    synth.noteOnWithFreq(freq, 100);
+  }
 }).on("keyup", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        synth.noteOff(midi, 100);
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    synth.noteOff(midi, 100);
+  }
 }).start();
 ```
 
@@ -47,10 +47,10 @@ var VCO = T("saw", {freq:880, mul:0.2}).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        VCO.freq.value = midicps.at(midi);
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    VCO.freq.value = midicps.at(midi);
+  }
 }).start();
 ```
 
@@ -67,10 +67,10 @@ var VCO = T("saw", {freq:LFO, mul:0.2}).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        LFO.add = midicps.at(midi);
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    LFO.add = midicps.at(midi);
+  }
 }).start();
 ```
 
@@ -85,10 +85,10 @@ var VCO   = T("saw"  , {freq:glide, mul:0.2}).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        glide.linTo(midicps.at(midi), "100ms");
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    glide.linTo(midicps.at(midi), "100ms");
+  }
 }).start();
 ```
 
@@ -108,10 +108,7 @@ var VCO = T("saw", {freq:EG, mul:0}).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        EG.bang();
-    }
+  EG.bang();
 }).start();
 ```
 
@@ -126,10 +123,10 @@ var VCF = T("lpf", {cutoff:1600, Q:10}, VCO).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        VCO.freq.value = midicps.at(midi);
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    VCO.freq.value = midicps.at(midi);
+  }
 }).start();
 ```
 
@@ -149,11 +146,11 @@ var VCF = T("lpf", {cutoff:cutoff, Q:10}, VCO).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        VCO.freq.value = midicps.at(midi);
-        cutoff.bang();
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    VCO.freq.value = midicps.at(midi);
+    cutoff.bang();
+  }
 }).start();
 ```
 
@@ -172,13 +169,13 @@ var VCF = T("lpf", {cutoff:cutoff, Q:20}, VCO).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        var freq = midicps.at(midi);
-        VCO.freq.value   = freq;
-        cutoff.add.value = freq * 2;
-        cutoff.bang();
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    var freq = midicps.at(midi);
+    VCO.freq.value   = freq;
+    cutoff.add.value = freq * 2;
+    cutoff.bang();
+  }
 }).start();
 ```
 
@@ -197,16 +194,16 @@ var EG  = T("adsr", {a:100, d:1500, s:0.75, r:500}, VCO).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        VCO.freq.value = midicps.at(midi);
-        EG.bang();
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    VCO.freq.value = midicps.at(midi);
+    EG.bang();
+  }
 }).on("keyup", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        EG.release();
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    EG.release();
+  }
 }).start();
 ```
 
@@ -223,10 +220,10 @@ var synth = T("*", VCO, EG).play();
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        VCO.freq.value = midicps.at(midi);
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    VCO.freq.value = midicps.at(midi);
+  }
 }).start();
 ```
 
@@ -238,27 +235,27 @@ T("keyboard").on("keydown", function(e) {
 var synth = T("SynthDef").play();
 
 synth.def = function(opts) {
-    var VCO = T("saw", {freq:opts.freq});
-
-    var cutoff = T("env", {table:[8000, [opts.freq, 500]]}).bang();
-    var VCF    = T("lpf", {cutoff:cutoff, Q:5}, VCO);
-
-    var EG  = T("adsr", {a:150, d:500, s:0.45, r:1500, lv:0.6});
-    var VCA = EG.append(VCF).bang();
-    
-    return VCA;
+  var VCO = T("saw", {freq:opts.freq});
+  
+  var cutoff = T("env", {table:[8000, [opts.freq, 500]]}).bang();
+  var VCF    = T("lpf", {cutoff:cutoff, Q:5}, VCO);
+  
+  var EG  = T("adsr", {a:150, d:500, s:0.45, r:1500, lv:0.6});
+  var VCA = EG.append(VCF).bang();
+  
+  return VCA;
 };
 
 var keydict = T("ndict.key");
 T("keyboard").on("keydown", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        synth.noteOn(midi);
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    synth.noteOn(midi);
+  }
 }).on("keyup", function(e) {
-    var midi = keydict.at(e.keyCode);
-    if (midi) {
-        synth.noteOff(midi);
-    }
+  var midi = keydict.at(e.keyCode);
+  if (midi) {
+    synth.noteOff(midi);
+  }
 }).start();
 ```

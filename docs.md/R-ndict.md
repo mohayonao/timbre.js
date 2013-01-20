@@ -12,7 +12,7 @@ dict = T("ndict", {dict:dict});
 T("tri", {freq:dict, mul:0.25}).play();
 
 T("interval", {interval:500}, function(count) {
-    dict.index = count % 4;
+  dict.index = count % 4;
 }).start();
 ```
 

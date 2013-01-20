@@ -10,7 +10,7 @@ var src = window.getDraggedFile() || "/timbre.js/misc/audio/amen.wav";
 
 T("audio", {loop:true}).load(src, function(res) {
     
-    T("biquad", {type:"lowpass", freq:800, Q:10}, this).play();
+  T("biquad", {type:"lowpass", freq:800, Q:10}, this).play();
     
 });
 ```
@@ -47,7 +47,7 @@ A [lowpass filter](http://en.wikipedia.org/wiki/Low-pass_filter) allows frequenc
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-    T("lowpass", {cutoff:1200}, this).plot({target:lowpass, lineWidth:2}).play();
+  T("lowpass", {cutoff:1200}, this).plot({target:lowpass, lineWidth:2}).play();
 });
 ```
 
@@ -68,7 +68,7 @@ A [highpass filter](http://en.wikipedia.org/wiki/High-pass_filter) is the opposi
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-    T("highpass", {cutoff:4800}, this).plot({target:highpass, lineWidth:2}).play();
+  T("highpass", {cutoff:4800}, this).plot({target:highpass, lineWidth:2}).play();
 });
 ```
 
@@ -89,7 +89,7 @@ A [bandpass filter](http://en.wikipedia.org/wiki/Band-pass_filter) allows a rang
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-    T("bandpass", {freq:2400, band:5}, this).plot({target:bandpass, lineWidth:2}).play();
+  T("bandpass", {freq:2400, band:5}, this).plot({target:bandpass, lineWidth:2}).play();
 });
 ```
 
@@ -110,7 +110,7 @@ The lowshelf filter allows all frequencies through, but adds a boost (or attenua
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-    T("lowshelf", {freq:800, gain:18}, this).plot({target:lowshelf, lineWidth:2}).play();
+  T("lowshelf", {freq:800, gain:18}, this).plot({target:lowshelf, lineWidth:2}).play();
 });
 ```
 
@@ -129,7 +129,7 @@ The highshelf filter is the opposite of the lowshelf filter and allows all frequ
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-    T("highshelf", {freq:6400, gain:24}, this).plot({target:highshelf, lineWidth:2}).play();
+  T("highshelf", {freq:6400, gain:24}, this).plot({target:highshelf, lineWidth:2}).play();
 });
 ```
 
@@ -148,7 +148,7 @@ The peaking filter allows all frequencies through, but adds a boost (or attenuat
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-    T("peaking", {freq:1800, band:0.1, gain:12}, this).plot({target:peaking, lineWidth:2}).play();
+  T("peaking", {freq:1800, band:0.1, gain:12}, this).plot({target:peaking, lineWidth:2}).play();
 });
 ```
 
@@ -167,7 +167,7 @@ The notch filter (also known as a [band-stop or band-rejection filter](http://en
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-    T("notch", {freq:4800, Q:2}, this).plot({target:notch, lineWidth:2}).play();
+  T("notch", {freq:4800, Q:2}, this).plot({target:notch, lineWidth:2}).play();
 });
 ```
 
@@ -188,7 +188,7 @@ An [allpass filter](http://en.wikipedia.org/wiki/All-pass_filter#Digital_Impleme
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-    T("allpass", {freq:2400, gain:6}, this).plot({target:allpass, lineWidth:2}).play();
+  T("allpass", {freq:2400, gain:6}, this).plot({target:allpass, lineWidth:2}).play();
 });
 ```
 

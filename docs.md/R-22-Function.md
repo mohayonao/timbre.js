@@ -11,7 +11,7 @@ T(Function)
 
 ```timbre
 var func = T(function(count) {
-    return 440 * Math.pow(2, (count % 12) * 1/12);
+  return 440 * Math.pow(2, (count % 12) * 1/12);
 });
 
 var sine = T("sin", {freq:func}).play();
@@ -35,7 +35,7 @@ T("interval", {interval:100}, func).start();
 
 ```timbre
 var func = function(x, y, z) {
-    alert(x + y + z);
+  alert(x + y + z);
 };
 
 T(func, {args:["world", "!!"]}).bang("hello, ");
