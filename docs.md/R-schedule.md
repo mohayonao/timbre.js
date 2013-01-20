@@ -11,12 +11,12 @@ var sched = T("schedule");
 
 var func = [];
 for (var i = 0; i < 21; i += 3) {
-    var time = ((Math.random() * 8)|0) * 100 + 800;
-    func[i] = function(i, time) {
-        synth.noteOn(69 - 7 + i, 60);
-        sched.sched(time, func[i]);
-    }.bind(null, i, time);
+  var time = ((Math.random() * 8)|0) * 100 + 800;
+  func[i] = function(i, time) {
+    synth.noteOn(69 - 7 + i, 60);
     sched.sched(time, func[i]);
+  }.bind(null, i, time);
+  sched.sched(time, func[i]);
 }
 sched.start();
 

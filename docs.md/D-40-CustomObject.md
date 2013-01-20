@@ -10,29 +10,29 @@ Customize timbre.js
 
 ```timbre
 (function() {
-    "use strict";
-    
-    function CustomObject(_args) {
-        timbre.Object.call(this, _args);
+  "use strict";
+  
+  function CustomObject(_args) {
+    timbre.Object.call(this, _args);
+  }
+  timbre.fn.extend(CustomObject);
+  
+  CustomObject.prototype.process = function(tickID) {
+    if (this.tickID !== tickID) {
+      this.tickID = tickID;
+      
+      timbre.fn.inputSignalAR(this);
+            
+      for (var i = 0; i < this.cell.length; i++) {
+        this.cell[i] = this.cell[i] * this.cell[i];
+      }
+      
+      timbre.fn.outputSignalAR(this);
     }
-    timbre.fn.extend(CustomObject);
-    
-    CustomObject.prototype.process = function(tickID) {
-        if (this.tickID !== tickID) {
-            this.tickID = tickID;
-            
-            timbre.fn.inputSignalAR(this);
-            
-            for (var i = 0; i < this.cell.length; i++) {
-                this.cell[i] = this.cell[i] * this.cell[i];
-            }
-            
-            timbre.fn.outputSignalAR(this);
-        }
-        return this.cell;
-    };
-    
-    timbre.fn.register("custom-object", CustomObject);
+    return this.cell;
+  };
+  
+  timbre.fn.register("custom-object", CustomObject);
 })();
  
 T("custom-object", 
@@ -64,10 +64,10 @@ T("custom-object",
 
 ```js
 function CustomObject(_args) {
-    timbre.Object.call(this, _args);
-    
-    this._.private1 =  0;
-    this._.private2 = 10;
+  timbre.Object.call(this, _args);
+  
+  this._.private1 =  0;
+  this._.private2 = 10;
 }
 ```
 
@@ -76,12 +76,12 @@ function CustomObject(_args) {
 ```js
 Object.defineProperties(CustomObject.prototype, {
   property: {
-      set: function(value) {
-          this._.property = timbre(value);
-      },
-      get: function() {
-          return this._.property;
-      }
+    set: function(value) {
+      this._.property = timbre(value);
+    },
+    get: function() {
+      return this._.property;
+    }
   }
 });
 
@@ -98,8 +98,8 @@ like this.
 ```js
 class CustomObject extends timbre.Object
   constructor: (_args)->
-      @super _args
+    @super _args
       
   process: (tickID)->
-      @cell
+    @cell
 ```

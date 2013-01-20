@@ -23,8 +23,7 @@ var freq  = T("param", {value:440}).setAt(880, "BPM120 L2");
 
 T("tri", {freq:freq, mul:0.5}).play();
 
-var canvas = window.getCanvasById("setAt");
-freq.plot({target:canvas});
+freq.plot({target:setAt});
 ```
 
 ### linTo ###
@@ -36,8 +35,7 @@ var freq  = T("param", {value:440}).linTo(880, "BPM120 L2");
 
 T("tri", {freq:freq, mul:0.5}).play();
 
-var canvas = window.getCanvasById("linTo");
-freq.plot({target:canvas});
+freq.plot({target:linTo});
 ```
 
 ### expTo ###
@@ -49,8 +47,7 @@ var freq  = T("param", {value:440}).expTo(880, "BPM120 L2");
 
 T("tri", {freq:freq, mul:0.5}).play();
 
-var canvas = window.getCanvasById("expTo");
-freq.plot({target:canvas});
+freq.plot({target:expTo});
 ```
 
 ### sinTo ###
@@ -62,8 +59,7 @@ var freq  = T("param", {value:440}).sinTo(880, "BPM120 L2");
 
 T("tri", {freq:freq, mul:0.5}).play();
 
-var canvas = window.getCanvasById("sinTo");
-freq.plot({target:canvas});
+freq.plot({target:sinTo});
 ```
 
 ### welTo ###
@@ -75,8 +71,7 @@ var freq  = T("param", {value:440}).welTo(880, "BPM120 L2");
 
 T("tri", {freq:freq, mul:0.5}).play();
 
-var canvas = window.getCanvasById("welTo");
-freq.plot({target:canvas});
+freq.plot({target:welTo});
 ```
 
 ### sqrTo ###
@@ -88,8 +83,7 @@ var freq  = T("param", {value:440}).sqrTo(880, "BPM120 L2");
 
 T("tri", {freq:freq, mul:0.5}).play();
 
-var canvas = window.getCanvasById("sqrTo");
-freq.plot({target:canvas});
+freq.plot({target:sqrTo});
 ```
 
 ### cubTo ###
@@ -101,8 +95,7 @@ var freq  = T("param", {value:440}).cubTo(880, "BPM120 L2");
 
 T("tri", {freq:freq, mul:0.5}).play();
 
-var canvas = window.getCanvasById("cubTo");
-freq.plot({target:canvas});
+freq.plot({target:cubTo});
 ```
 
 ### to ###
@@ -118,8 +111,7 @@ var freq  = T("param", {value:440}).to(880, "BPM120 L2", -4);
 
 T("tri", {freq:freq, mul:0.5}).play();
 
-var canvas = window.getCanvasById("to");
-freq.plot({target:canvas});
+freq.plot({target:to});
 ```
 
 ### cancel ##

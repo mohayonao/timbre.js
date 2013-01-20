@@ -1,20 +1,18 @@
 (function() {
     "use strict";
     
-    function Biquad(opts) {
-        opts = opts || {};
-        
-        this.samplerate = opts.samplerate || 44100;
+    function Biquad(samplerate) {
+        this.samplerate = samplerate || 44100;
         this.frequency = 340;
-        this.Q = 1;
-        this.gain = 0;
+        this.Q         = 1;
+        this.gain      = 0;
         
         this.x1 = this.x2 = this.y1 = this.y2 = 0;
         this.b0 = this.b1 = this.b2 = this.a1 = this.a2 = 0;
         
-        this.setType(setParams[opts.type] ? opts.type : "LPF");
+        this.setType("lpf");
     }
-
+    
     var $ = Biquad.prototype;
     
     $.process = function(cell) {

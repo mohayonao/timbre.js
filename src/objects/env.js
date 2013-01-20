@@ -228,7 +228,7 @@
         
         opts.table = [ZERO, [lv, a], [ZERO, r]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("adsr", function(_args) {
@@ -246,7 +246,25 @@
         opts.table = [ZERO, [lv, a], [s, d], [ZERO, r]];
         opts.releaseNode = 3;
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
+    });
+    
+    fn.register("adshr", function(_args) {
+        if (!isDictionary(_args[0])) {
+            _args.unshift({});
+        }
+        
+        var opts = _args[0];
+        var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
+        var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
+        var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
+        var h  = envValue(opts,   10,  500, "h" , "holdTime"    , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "decayTime"   , timevalue);
+        var lv = envValue(opts, ZERO,    1, "lv", "level"       );
+        
+        opts.table = [ZERO, [lv, a], [s, d], [s, h], [ZERO, r]];
+        
+        return new EnvNode(_args);
     });
     
     fn.register("asr", function(_args) {
@@ -262,7 +280,7 @@
         opts.table = [ZERO, [s, a], [ZERO, r]];
         opts.releaseNode = 2;
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("dadsr", function(_args) {
@@ -272,7 +290,7 @@
         
         var opts = _args[0];
         var dl = envValue(opts,   10,  100, "dl", "delayTime"   , timevalue);
-        var a  = envValue(opts,   10,   10, "a" , "attackTime"  );
+        var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
         var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
         var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
         var r  = envValue(opts,   10, 1000, "r" , "relaseTime"  , timevalue);
@@ -281,7 +299,27 @@
         opts.table = [ZERO, [ZERO, dl], [lv, a], [s, d], [ZERO, r]];
         opts.releaseNode = 4;
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
+    });
+    
+    fn.register("ahdsfr", function(_args) {
+        if (!isDictionary(_args[0])) {
+            _args.unshift({});
+        }
+        
+        var opts = _args[0];
+        var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
+        var h  = envValue(opts,   10,   10, "h" , "holdTime"    , timevalue);
+        var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
+        var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
+        var f  = envValue(opts,   10, 5000, "f" , "fadeTime"    , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "relaseTime"  , timevalue);
+        var lv = envValue(opts, ZERO,    1, "lv", "level"       );
+        
+        opts.table = [ZERO, [lv, a], [lv, h], [s, d], [ZERO, f], [ZERO, r]];
+        opts.releaseNode = 5;
+        
+        return new EnvNode(_args);
     });
     
     fn.register("linen", function(_args) {
@@ -297,7 +335,7 @@
         
         opts.table = [ZERO, [lv, a], [lv, s], [ZERO, r]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("env.tri", function(_args) {
@@ -312,7 +350,7 @@
         dur *= 0.5;
         opts.table = [ZERO, [lv, dur], [ZERO, dur]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("env.cutoff", function(_args) {
@@ -326,7 +364,7 @@
         
         opts.table = [lv, [ZERO, r]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
 })();

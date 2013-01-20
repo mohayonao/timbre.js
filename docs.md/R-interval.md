@@ -8,7 +8,7 @@ T("interval")
 
 ```timbre
 var freqs = T(function(count) {
-    return [220, 440, 660, 880][count % 4];
+  return [220, 440, 660, 880][count % 4];
 });
 
 var osc = T("sin", {freq:freqs, mul:0.5});

@@ -4,7 +4,7 @@ Gymnopedie
 ```timbre
 var mml, env, gen;
 
-env = {type:"adsr", d:2000, s:0, r:800};
+env = T("adsr", {d:2000, s:0, r:800});
 gen = T("OscGen", {wave:"tri(25)", env:env, mul:0.2, poly:8});
 
 var synth = T("delay", {time:"BPM60 L16", fb:0.8, wet:0.25}, gen).play();
@@ -22,7 +22,7 @@ mml += "e<b0<e0g2>> e<a0<d0f0a2>> e<a0<c0f2>> e<<c0e0a2>> e<a0<c0f0a2>>";
 mml += "eb0<a0<d>e0b0<d0g>> a0<g2.> d0a0<d2.>";
 
 T("mml", {mml:mml}, gen).on("ended", function() {
-    this.stop();
+  this.stop();
 }).start();
 
 
@@ -39,7 +39,7 @@ mml += "g2. f2.> b<cf edc edc>";
 mml += "f2. c0e0a0<c2.> d0f0a0<d2.";
 
 T("mml", {mml:mml}, gen).on("ended", function() {
-    this.stop();
-    synth.pause();
+  this.stop();
+  synth.pause();
 }).start();
 ```

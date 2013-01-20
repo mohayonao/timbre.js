@@ -20,35 +20,35 @@ var table = [440, [880, 500], [660, 250]];
 var env   = T("env", {table:table}).bang();
 var synth = T("saw", {freq:env, mul:0.25}).play();
 
-var count = 0;
-setInterval(function() {
-    if (++count === 3) {
-        synth.pause();
-    }
-    env.bang();
-}, 1000);
+var i = T("interval", {interval:1000}, function(count) {
+  if (count === 3) {
+    synth.pause();
+    i.stop();
+  }
+  env.bang();
+}).start();
 ```
 
-(canvas env-release w:240 h:80)
+(canvas releaseNode w:240 h:80)
 
-`releaseNode` プロパティを指定すると、 `release()` メソッドをトリガとするまで持続するエンベロープを作成できます。以下の例では 3番目の要素をリリースノードとすることで直前の値 0.6 まで遷移した後、持続して `release()` がトリガされてから 1秒かけて 0 に遷移するエンベロープを動作させています。
+`releaseNode` プロパティを指定すると、 `release()` メソッドをトリガするまで持続するエンベロープを作成できます。以下の例では 3番目の要素をリリースノードとすることで直前の値 0.6 まで遷移した後、持続して `release()` がトリガされてから 1秒かけて 0 に遷移するエンベロープを動作させています。
 
 ```timbre
 var table = [0, [1, 100], [0.6, 100], [0, 1000]];
 var synth = T("saw", {mul:0.25});
 var env   = T("env", {table:table, releaseNode:3}, synth).on("ended", function() {
-    this.pause();
+  this.pause();
 }).bang().play();
 
-var canvas = window.getCanvasById("env-release");
-env.plot({target:canvas});
+env.plot({target:releaseNode});
 
-setTimeout(function() {
-    env.release();
-}, 2000);
+var t = T("timeout", {timeout:2000}, function() {
+  env.release();
+  t.stop();
+}).start();
 ```
 
-(canvas env-loop w:240 h:80)
+(canvas loopNode w:240 h:80)
 
 `loopNode` プロパティを指定すると、エンベロープの末尾まで到達した後、リリースノード以降を繰り返すエンベロープを作成できます。以下の例では 1番目の要素をループノードとすることで周期的に変化するエンベロープを作成して、オシレーターの周波数の入力とすることでビブラートを行っています。`releaseNode` と合わせて使用した場合、ループノードとリリースノードの間でループします。
 
@@ -57,12 +57,12 @@ var table = [440, [460, 50], [430, 150]];
 var env   = T("env", {table:table, loopNode:1}).bang();
 var synth = T("tri", {freq:env, mul:0.25}).play();
 
-var canvas = window.getCanvasById("env-loop");
-env.plot({target:canvas});
+env.plot({target:loopNode});
 
-setTimeout(function() {
-    synth.pause();
-}, 2000);
+var t = T("timeout", {timeout:2000}, function() {
+  synth.pause();
+  t.stop();
+}).start();
 ```
 
 ## Properties ##
@@ -87,7 +87,7 @@ setTimeout(function() {
 
 ## Tips ##
 
-(canvas env-plot w:240 h:80)
+(canvas plot w:240 h:80)
 
 - カーブの種類は `"lin"` か `"exp"` を指定できます。
 - `curve` プロパティでデフォルトのカーブの種類を設定できます。
@@ -99,16 +99,16 @@ var table = [0, [0.8, "BPM120 L8"], [0.4, "BPM120 L16"],
                 [0.5, 80], [0.4, 80], [0, "BPM120 L4", "lin"]];
 var env = T("env", {table:table, loopNode:3, releaseNode:5, curve:"exp"});
 
-var canvas = window.getCanvasById("env-plot");
-env.plot({target:canvas});
+env.plot({target:plot});
 
 env.append(T("pulse", {mul:0.25})).on("ended", function() {
     this.pause();
 }).bang().play();
 
-setTimeout(function() {
-    env.release();
-}, 2000);
+var t = T("timeout", {timeout:2000}, function() {
+  env.release();
+  t.stop();
+}).start();
 ```
 
 
@@ -116,7 +116,7 @@ setTimeout(function() {
 `T("env")` クラスには便利なコンストラクタが用意されています。それらを使えば、最小限のパラメータでエンベロープテーブルを作成することができます。
 
 ### T("perc") ###
-(canvas env-perc w:240 h:80)
+(canvas perc w:240 h:80)
 
 `T("perc")` はパーカッシブなエンベロープを作ります。
 
@@ -126,15 +126,14 @@ setTimeout(function() {
 
 ```timbre
 var env = T("perc", {d:500}, T("sin")).on("ended", function() {
-    this.pause();
+  this.pause();
 }).bang().play();
 
-var canvas = window.getCanvasById("env-perc");
-env.plot({target:canvas});
+env.plot({target:perc});
 ```
 
 ### T("adsr") ###
-(canvas env-adsr w:240 h:80) 
+(canvas adsr w:240 h:80) 
 
 `T("adsr")` はADSRタイプの持続エンベロープを作ります。
 
@@ -146,19 +145,39 @@ env.plot({target:canvas});
 
 ```timbre
 var env = T("adsr", {a:100,d:250,s:0.6,r:500}, T("sin")).on("ended", function() {
-    this.pause();
+  this.pause();
 }).bang().play();
 
-var canvas = window.getCanvasById("env-adsr");
-env.plot({target:canvas, width:240, height:80});
+env.plot({target:adsr});
 
-setTimeout(function() {
-    env.release();
-}, 1500);
+var t = T("timeout", {timeout:1500}, function() {
+  env.release();
+  t.stop();
+}).start();
+```
+
+### T("adshr") ###
+(canvas adshr w:240 h:80) 
+
+`T("adshr")` はADSHRタイプのエンベロープを作ります。
+
+- a, attackTime : 10
+- d, decayTime : 300
+- s, sustainLevel : 0.5
+- h, holdTime: 500
+- r, releaseTime : 1000
+- lv, totalLevel : 1
+
+```timbre
+var env = T("adshr", {a:100,d:250,s:0.6,r:500}, T("sin")).on("ended", function() {
+  this.pause();
+}).bang().play();
+
+env.plot({target:adshr});
 ```
 
 ### T("asr") ###
-(canvas env-asr w:240 h:80) 
+(canvas asr w:240 h:80) 
 
 `T("asr")` はASRタイプの持続エンベロープを作ります。
 
@@ -169,21 +188,21 @@ setTimeout(function() {
 
 ```timbre
 var env = T("asr", {a:100,s:0.8,r:500}, T("sin")).on("ended", function() {
-    this.pause();
+  this.pause();
 }).bang().play();
 
-var canvas = window.getCanvasById("env-asr");
-env.plot({target:canvas, width:240, height:80});
+env.plot({target:asr});
 
-setTimeout(function() {
-    env.release();
-}, 1500);
+var t = T("timeout", {timeout:1500}, function() {
+  env.release();
+  t.stop();
+}).start();
 ```
 
 ### T("dadsr") ###
-(canvas env-dadsr w:240 h:80) 
+(canvas dadsr w:240 h:80) 
 
-`T("dadsr")` は delayありADSRタイプの持続エンベロープを作ります。
+`T("dadsr")` は DADSRタイプの持続エンベロープを作ります。
 
 - dl, delayTime : 100
 - a, attackTime : 10
@@ -193,19 +212,45 @@ setTimeout(function() {
 
 ```timbre
 var env = T("dadsr", {dl:500,r:500}, T("sin")).on("ended", function() {
-    this.pause();
+  this.pause();
 }).bang().play();
 
-var canvas = window.getCanvasById("env-dadsr");
-env.plot({target:canvas, width:240, height:80});
+env.plot({target:dadsr});
 
-setTimeout(function() {
-    env.release();
-}, 1500);
+var t = T("timeout", {timeout:1500}, function() {
+  env.release();
+  t.stop();
+}).start();
+```
+
+### T("ahdsfr") ###
+(canvas ahdsfr w:240 h:80) 
+
+`T("ahdsfr")` は AHDSFRタイプの持続エンベロープを作ります。
+
+- a, attackTime : 10
+- h, holdTime : 10
+- d, decayTime : 300
+- s, sustainLevel : 0.5
+- f, fadeTime : 5000
+- r, releaseTime : 1000
+- lv, totalLevel : 1
+
+```timbre
+var env = T("ahdsfr", {a:100, h:150, s:0.8, f:5000, r:500}, T("sin")).on("ended", function() {
+  this.pause();
+}).bang().play();
+
+env.plot({target:ahdsfr});
+
+var t = T("timeout", {timeout:1500}, function() {
+  env.release();
+  t.stop();
+}).start();
 ```
 
 ### T("linen") ###
-(canvas env-linen w:240 h:80) 
+(canvas linen w:240 h:80) 
 
 `T("linen")` は台形エンベロープを作ります。
 
@@ -216,15 +261,14 @@ setTimeout(function() {
 
 ```timbre
 var env = T("linen", {a:200, lv:0.8}, T("sin")).on("ended", function() {
-    this.pause();
+  this.pause();
 }).bang().play();
 
-var canvas = window.getCanvasById("env-linen");
-env.plot({target:canvas, width:240, height:80});
+env.plot({target:linen});
 ```
 
 ### T("env.tri") ###
-(canvas env-tri w:240 h:80) 
+(canvas env_tri w:240 h:80) 
 
 `T("env.tri")` は三角エンベロープを作ります。
 
@@ -233,15 +277,14 @@ env.plot({target:canvas, width:240, height:80});
 
 ```timbre
 var env = T("env.tri", {dur:1500}, T("sin")).on("ended", function() {
-    this.pause();
+  this.pause();
 }).bang().play();
 
-var canvas = window.getCanvasById("env-tri");
-env.plot({target:canvas, width:240, height:80});
+env.plot({target:env_tri});
 ```
 
 ### T("env.cutoff") ###
-(canvas env-cutoff w:240 h:80) 
+(canvas env_cutoff w:240 h:80) 
 
 `T("env.cutoff")` はカットオフエンベロープを作ります。
 
@@ -250,11 +293,10 @@ env.plot({target:canvas, width:240, height:80});
 
 ```timbre
 var env = T("env.cutoff", {r:"BPM120 4.0.0"}, T("sin")).on("ended", function() {
-    this.pause();
+  this.pause();
 }).bang().play();
 
-var canvas = window.getCanvasById("env-cutoff");
-env.plot({target:canvas, width:240, height:80});
+env.plot({target:env_cutoff});
 ```
 
 ## Source ##

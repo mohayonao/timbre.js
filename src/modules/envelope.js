@@ -106,8 +106,10 @@
         this.status = StatusWait;
     };
     $.release = function() {
-        this._counter = 0;
-        this.status = StatusRelease;
+        if (this.releaseNode !== null) {
+            this._counter = 0;
+            this.status = StatusRelease;
+        }
     };
     $.getInfo = function(sustainTime) {
         var table = this._table;
@@ -121,7 +123,11 @@
                 loopBeginTime = totalDuration;
             }
             if (this.releaseNode === i) {
-                totalDuration += sustainTime;
+                if (totalDuration < sustainTime) {
+                    totalDuration += sustainTime;
+                } else {
+                    totalDuration  = sustainTime;
+                }
                 releaseBeginTime = totalDuration;
             }
             

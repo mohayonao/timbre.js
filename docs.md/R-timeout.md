@@ -9,8 +9,8 @@ T("timeout")
 var osc = T("sin", {freq:880, mul:0.5}).play();
 
 T("timeout", {timeout:1000}).on("ended", function() {
-    osc.pause();
-    this.stop();
+  osc.pause();
+  this.stop();
 }).start();
 ```
 

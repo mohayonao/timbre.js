@@ -11,7 +11,7 @@ var audio = T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav");
 var gate  = T("gate", audio);
 
 T("interval", {interval:2000}, function(count) {
-    gate.selected = count % 2;
+  gate.selected = count % 2;
 }).start();
 
 T("dist" , {pre:32, post:-20}, gate.at(0)).play();

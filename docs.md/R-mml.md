@@ -22,9 +22,9 @@ var env = T("asr", {a:20, r:150, lv:0.8}, osc);
 T("delay", {time:250, fb:0.75, wet:0.4}, env).play();
 
 T("mml", {mml:"o7 q2 l8 $ e>a<c>a< r2"}, osc, env).on("mml", function(type, opts) {
-    if (type === "noteOn") {
-        osc.freq.midi = opts.noteNum;
-    }
+  if (type === "noteOn") {
+    osc.freq.midi = opts.noteNum;
+  }
 }).start();
 ```
 
@@ -49,8 +49,8 @@ var mml = "l8 c4c+d d+4ef f+4gg+ a4a+b <c>bb-aa-gg-fee-dd-c2.";
 var gen = T("OscGen", {wave:"saw", env:{type:"perc"}, mul:0.25}).play();
 
 T("mml", {mml:mml}, gen).on("ended", function() {
-    gen.pause();
-    this.stop();
+  gen.pause();
+  this.stop();
 }).start();
 ```
 
@@ -62,8 +62,8 @@ var mml = "l2 g0<c0e> f0g0<d> e0g0<c1";
 var gen = T("OscGen", {wave:"sin(10)", env:{type:"adsr"}, mul:0.2}).play();
 
 T("mml", {mml:mml}, gen).on("ended", function() {
-    gen.pause();
-    this.stop();
+  gen.pause();
+  this.stop();
 }).start();
 ```
 
@@ -76,8 +76,8 @@ var mml = "l16 o2 [ a r aa ]16";
 var gen = T("OscGen", {wave:"pulse", env:{type:"adsr", r:150}, mul:0.25}).play();
 
 T("mml", {mml:mml}, gen).on("ended", function() {
-    gen.pause();
-    this.stop();
+  gen.pause();
+  this.stop();
 }).start();
 ```
 
@@ -90,8 +90,8 @@ var mml = "l8 cc ee ff g&g ee dd c2";
 var gen = T("OscGen", {wave:"pulse", env:{type:"adsr", d:500}, mul:0.25}).play();
 
 T("mml", {mml:mml}, gen).on("ended", function() {
-    gen.pause();
-    this.stop();
+  gen.pause();
+  this.stop();
 }).start();
 ```
 
@@ -122,8 +122,8 @@ var mml = "$ cf+d+f";
 var gen = T("OscGen", {wave:"saw", env:{type:"adsr", d:500}, mul:0.25}).play();
 
 T("mml", {mml:mml}, gen).on("ended", function() {
-    gen.pause();
-    this.stop();
+  gen.pause();
+  this.stop();
 }).start();
 ```
 

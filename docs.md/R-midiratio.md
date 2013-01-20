@@ -12,7 +12,7 @@ var freq = T("*", 440, midiratio).kr();
 T("tri", {freq:freq, mul:0.25}).play();
 
 T("interval", {interval:500}, function(count) {
-    midiratio.midi = count % 12;
+  midiratio.midi = count % 12;
 }).start();
 ```
 

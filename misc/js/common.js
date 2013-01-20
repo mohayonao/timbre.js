@@ -52,12 +52,10 @@ $(function() {
         }
     });
     
-    window.getCanvasById = function(name) {
-        var canvas = document.getElementById(name);
-        canvas.width  = $(canvas).width();
-        canvas.height = $(canvas).height();
-        return canvas;
-    }
+    $("canvas").each(function(i, e) {
+        e.width  = $(e).width();
+        e.height = $(e).height();
+    });
     
     window.animate = function(fn, fps) {
         var lastTime = 0;

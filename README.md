@@ -1,25 +1,24 @@
 timbre.js
 =========
 
-new version, now under development
+JavaScript library for objective sound programming
+
+
+_new version, now under development_
 
 
 ### Project Page ###
 [English](http://mohayonao.github.com/timbre.js/) | [日本語](http://mohayonao.github.com/timbre.js/ja/)
 
 ### Examples ###
-- [BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html)
-- [Chords Work](http://mohayonao.github.com/timbre.js/chord.html)
-- [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html)
-- [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html)
-- [Reich](http://mohayonao.github.com/timbre.js/reich.html)
+[BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html) | [Chords Work](http://mohayonao.github.com/timbre.js/chord.html) | [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html) | [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html) | [Reich](http://mohayonao.github.com/timbre.js/reich.html)
 
 ### System Requirements ###
 
 * Chrome 14.0- (Web Audio API)
 * Safari 6.0- (Web Audio API)
 * Firefox 4.0- (Audio Data API)
-* node.js (0.8-)
+* node.js 0.8-
 
 ### Installation ###
 
@@ -40,6 +39,10 @@ $ npm install timbre
 MIT
 
 ### ChangeLog ###
+**13.01.20** (294.83KB)
+* add `T("adshr")`, `T("ahdsfr")`
+* add `T("comp")`
+* add `T("phaseshift")`
 
-- **13.01.18a** (268.71KB)
-new version (beta)
+**13.01.18a** (268.71KB)
+* new version (beta)

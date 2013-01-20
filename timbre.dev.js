@@ -14,7 +14,7 @@
     var STATUS_PLAY = 1;
     var STATUS_REC  = 2;
     
-    var _ver = "13.01.18a";
+    var _ver = "13.01.20";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -1932,20 +1932,18 @@
 (function() {
     "use strict";
     
-    function Biquad(opts) {
-        opts = opts || {};
-        
-        this.samplerate = opts.samplerate || 44100;
+    function Biquad(samplerate) {
+        this.samplerate = samplerate || 44100;
         this.frequency = 340;
-        this.Q = 1;
-        this.gain = 0;
+        this.Q         = 1;
+        this.gain      = 0;
         
         this.x1 = this.x2 = this.y1 = this.y2 = 0;
         this.b0 = this.b1 = this.b2 = this.a1 = this.a2 = 0;
         
-        this.setType(setParams[opts.type] ? opts.type : "LPF");
+        this.setType("lpf");
     }
-
+    
     var $ = Biquad.prototype;
     
     $.process = function(cell) {
@@ -2224,6 +2222,453 @@
     setParams.apf = setParams.allpass;
     
     timbre.modules.Biquad = Biquad;
+    
+})();
+(function() {
+    "use strict";
+    
+    var MaxPreDelayFrames     = 1024;
+    var MaxPreDelayFramesMask = MaxPreDelayFrames - 1;
+    var DefaultPreDelayFrames = 256;
+    var kSpacingDb = 5;
+    
+    function Compressor(samplerate) {
+        this.samplerate = samplerate || 44100;
+        this.lastPreDelayFrames = 0;
+        this.preDelayReadIndex  = 0;
+        this.preDelayWriteIndex = DefaultPreDelayFrames;
+        this.ratio       = -1;
+        this.slope       = -1;
+        this.linearThreshold = -1;
+        this.dbThreshold = -1;
+        this.dbKnee      = -1;
+        this.kneeThreshold    = -1;
+        this.kneeThresholdDb  = -1;
+        this.ykneeThresholdDb = -1;
+        this.K = -1;
+        
+        this.attackTime  = 0.003;
+        this.releaseTime = 0.25;
+        
+        this.preDelayTime = 0.006;
+        this.dbPostGain   = 0;
+        this.effectBlend  = 1;
+        this.releaseZone1 = 0.09;
+        this.releaseZone2 = 0.16;
+        this.releaseZone3 = 0.42;
+        this.releaseZone4 = 0.98;
+        
+        // Initializes most member variables
+        
+        this.detectorAverage = 0;
+        this.compressorGain  = 1;
+        this.meteringGain    = 1;
+        
+        // Predelay section.
+        this.preDelayBuffer = new Float32Array(MaxPreDelayFrames);
+        
+        this.preDelayReadIndex = 0;
+        this.preDelayWriteIndex = DefaultPreDelayFrames;
+        
+        this.maxAttackCompressionDiffDb = -1; // uninitialized state
+        
+        this.meteringReleaseK = 1 - Math.exp(-1 / (this.samplerate * 0.325));
+    }
+    
+    var $ = Compressor.prototype;
+    
+    $.setPreDelayTime = function(preDelayTime) {
+        // Re-configure look-ahead section pre-delay if delay time has changed.
+        var preDelayFrames = preDelayTime * this.samplerate;
+        if (preDelayFrames > MaxPreDelayFrames - 1) {
+            preDelayFrames = MaxPreDelayFrames - 1;
+        }
+        if (this.lastPreDelayFrames !== preDelayFrames) {
+            this.lastPreDelayFrames = preDelayFrames;
+            for (var i = this.preDelayBuffer.length; i--; ) {
+                this.preDelayBuffer[i] = 0;
+            }
+            this.preDelayReadIndex = 0;
+            this.preDelayWriteIndex = preDelayFrames;
+        }
+    };
+    
+    // Exponential curve for the knee.
+    // It is 1st derivative matched at m_linearThreshold and asymptotically approaches the value m_linearThreshold + 1 / k.
+    $.kneeCurve = function(x, k) {
+    // Linear up to threshold.
+        if (x < this.linearThreshold) {
+            return x;
+        }
+        return this.linearThreshold + (1 - Math.exp(-k * (x - this.linearThreshold))) / k;
+    };
+    
+    // Full compression curve with constant ratio after knee.
+    $.saturate = function(x, k) {
+        var y;
+        
+        if (x < this.kneeThreshold) {
+            y = this.kneeCurve(x, k);
+        } else {
+            // Constant ratio after knee.
+            // var xDb = linearToDecibels(x);
+            var xDb = (x) ? 20 * Math.log(x) * Math.LOG10E : -1000;
+            
+            var yDb = this.ykneeThresholdDb + this.slope * (xDb - this.kneeThresholdDb);
+            
+            // y = decibelsToLinear(yDb);
+            y = Math.pow(10, 0.05 * yDb);
+        }
+        
+        return y;
+    };
+    
+    // Approximate 1st derivative with input and output expressed in dB.
+    // This slope is equal to the inverse of the compression "ratio".
+    // In other words, a compression ratio of 20 would be a slope of 1/20.
+    $.slopeAt = function(x, k) {
+        if (x < this.linearThreshold) {
+            return 1;
+        }
+        var x2 = x * 1.001;
+        
+        // var xDb  = linearToDecibels(x);
+        var xDb  = (x ) ? 20 * Math.log(x ) * Math.LOG10E : -1000;
+        // var xDb2 = linearToDecibels(x2);
+        var x2Db = (x2) ? 20 * Math.log(x2) * Math.LOG10E : -1000;
+        
+        var y  = this.kneeCurve(x , k);
+        var y2 = this.kneeCurve(x2, k);
+        
+        // var yDb  = linearToDecibels(y);
+        var yDb  = (y ) ? 20 * Math.log(y ) * Math.LOG10E : -1000;
+        // var yDb2 = linearToDecibels(y2);
+        var y2Db = (y2) ? 20 * Math.log(y2) * Math.LOG10E : -1000;
+        
+        var m = (y2Db - yDb) / (x2Db - xDb);
+        
+        return m;
+    };
+    
+    $.kAtSlope = function(desiredSlope) {
+        var xDb = this.dbThreshold + this.dbKnee;
+        // var x = decibelsToLinear(xDb);
+        var x = Math.pow(10, 0.05 * xDb);
+        
+        // Approximate k given initial values.
+        var minK = 0.1;
+        var maxK = 10000;
+        var k = 5;
+        
+        for (var i = 0; i < 15; ++i) {
+            // A high value for k will more quickly asymptotically approach a slope of 0.
+            var slope = this.slopeAt(x, k);
+            
+            if (slope < desiredSlope) {
+                // k is too high.
+                maxK = k;
+            } else {
+                // k is too low.
+                minK = k;
+            }
+            
+            // Re-calculate based on geometric mean.
+            k = Math.sqrt(minK * maxK);
+        }
+        
+        return k;
+    };
+    
+    $.updateStaticCurveParameters = function(dbThreshold, dbKnee, ratio) {
+        if (dbThreshold !== this.dbThreshold || dbKnee !== this.dbKnee || ratio !== this.ratio) {
+            this.dbThreshold     = dbThreshold;
+            // this.linearThreshold = decibelsToLinear(dbThreshold);
+            this.linearThreshold = Math.pow(10, 0.05 * dbThreshold);
+            this.dbKnee          = dbKnee;
+            
+            this.ratio = ratio;
+            this.slope = 1 / this.ratio;
+            
+            var k = this.kAtSlope(1 / this.ratio);
+            
+            this.kneeThresholdDb = dbThreshold + dbKnee;
+            // this.kneeThreshold = decibelsToLinear(this.kneeThresholdDb);
+            this.kneeThreshold = Math.pow(10, 0.05 * this.kneeThresholdDb);
+            
+            var y = this.kneeCurve(this.kneeThreshold, k);
+            // this.ykneeThresholdDb = linearToDecibels(y);
+            this.ykneeThresholdDb = (y) ? 20 * Math.log(y ) * Math.LOG10E : -1000;
+            
+            this.K = k;
+        }
+        return this.K;
+    };
+    
+    $.process = function(source, destination, dbThreshold, dbKnee, ratio) {
+        var samplerate = this.samplerate;
+        var dryMix = 1 - this.effectBlend;
+        var wetMix = this.effectBlend;
+        
+        var k = this.updateStaticCurveParameters(dbThreshold, dbKnee, ratio);
+        
+        // Makeup gain.
+        var fullRangeGain = this.saturate(1, k);
+        var fullRangeMakeupGain = 1 / fullRangeGain;
+        
+        // Empirical/perceptual tuning.
+        fullRangeMakeupGain = Math.pow(fullRangeMakeupGain, 0.6);
+        
+        // var masterLinearGain = decibelsToLinear(this.dbPostGain) * fullRangeMakeupGain;
+        var masterLinearGain = Math.pow(10, 0.05 * this.dbPostGain) * fullRangeMakeupGain;
+        
+        // Attack parameters.
+        var attackTime = Math.max(0.001, this.attackTime);
+        var attackFrames = attackTime * samplerate;
+        
+        // Release parameters.
+        var releaseFrames = samplerate * this.releaseTime;
+        
+        // Detector release time.
+        var satReleaseTime = 0.0025;
+        var satReleaseFrames = satReleaseTime * samplerate;
+        
+        // Create a smooth function which passes through four points.
+        
+        // Polynomial of the form
+        // y = a + b*x + c*x^2 + d*x^3 + e*x^4;
+        
+        var y1 = releaseFrames * this.releaseZone1;
+        var y2 = releaseFrames * this.releaseZone2;
+        var y3 = releaseFrames * this.releaseZone3;
+        var y4 = releaseFrames * this.releaseZone4;
+        
+        // All of these coefficients were derived for 4th order polynomial curve fitting where the y values
+        // match the evenly spaced x values as follows: (y1 : x == 0, y2 : x == 1, y3 : x == 2, y4 : x == 3)
+        var kA = 0.9999999999999998*y1 + 1.8432219684323923e-16*y2 - 1.9373394351676423e-16*y3 + 8.824516011816245e-18*y4;
+        var kB = -1.5788320352845888*y1 + 2.3305837032074286*y2 - 0.9141194204840429*y3 + 0.1623677525612032*y4;
+        var kC = 0.5334142869106424*y1 - 1.272736789213631*y2 + 0.9258856042207512*y3 - 0.18656310191776226*y4;
+        var kD = 0.08783463138207234*y1 - 0.1694162967925622*y2 + 0.08588057951595272*y3 - 0.00429891410546283*y4;
+        var kE = -0.042416883008123074*y1 + 0.1115693827987602*y2 - 0.09764676325265872*y3 + 0.028494263462021576*y4;
+        
+        // x ranges from 0 -> 3       0    1    2   3
+        //                           -15  -10  -5   0db
+        
+        // y calculates adaptive release frames depending on the amount of compression.
+        
+        this.setPreDelayTime(this.preDelayTime);
+        
+        var nDivisionFrames = 64;
+        
+        var nDivisions = source.length / nDivisionFrames;
+        
+        var frameIndex = 0;
+        for (var i = 0; i < nDivisions; ++i) {
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Calculate desired gain
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            
+            // Fix gremlins.
+            /*
+            if (isNaN(this.detectorAverage)) {
+                this.detectorAverage = 1;
+            }
+            if (this.detectorAverage === Infinity) {
+                console.log("Infinity");
+            }
+            */
+            var desiredGain = this.detectorAverage;
+            
+            // Pre-warp so we get desiredGain after sin() warp below.
+            var scaledDesiredGain = Math.asin(desiredGain) / (0.5 * Math.PI);
+            
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Deal with envelopes
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            
+            // envelopeRate is the rate we slew from current compressor level to the desired level.
+            // The exact rate depends on if we're attacking or releasing and by how much.
+            var envelopeRate;
+            
+            var isReleasing = scaledDesiredGain > this.compressorGain;
+            
+            // compressionDiffDb is the difference between current compression level and the desired level.
+            var x = this.compressorGain / scaledDesiredGain;
+            
+            // var compressionDiffDb = -linearToDecibels(x);
+            var compressionDiffDb = (x) ? 20 * Math.log(x) * Math.LOG10E : -1000;
+            
+            if (isReleasing) {
+                // Release mode - compressionDiffDb should be negative dB
+                this.maxAttackCompressionDiffDb = -1;
+                
+                // Fix gremlins.
+                /*
+                if (isNaN(compressionDiffDb)) {
+                    compressionDiffDb = -1;
+                }
+                if (compressionDiffDb === Infinity) {
+                    compressionDiffDb = -1;
+                }
+                */
+                
+                // Adaptive release - higher compression (lower compressionDiffDb)  releases faster.
+                
+                // Contain within range: -12 -> 0 then scale to go from 0 -> 3
+                x = compressionDiffDb;
+                x = Math.max(-12.0, x);
+                x = Math.min(0.0, x);
+                x = 0.25 * (x + 12);
+                
+                // Compute adaptive release curve using 4th order polynomial.
+                // Normal values for the polynomial coefficients would create a monotonically increasing function.
+                var x2 = x * x;
+                var x3 = x2 * x;
+                var x4 = x2 * x2;
+                var _releaseFrames = kA + kB * x + kC * x2 + kD * x3 + kE * x4;
+                
+                var _dbPerFrame = kSpacingDb / _releaseFrames;
+                
+                // envelopeRate = decibelsToLinear(_dbPerFrame);
+                envelopeRate = Math.pow(10, 0.05 * _dbPerFrame);
+            } else {
+                // Attack mode - compressionDiffDb should be positive dB
+                
+                // Fix gremlins.
+                /*
+                if (isNaN(compressionDiffDb)) {
+                    compressionDiffDb = 1;
+                }
+                if (compressionDiffDb === Infinity) {
+                    compressionDiffDb = 1;
+                }
+                */
+                // As long as we're still in attack mode, use a rate based off
+                // the largest compressionDiffDb we've encountered so far.
+                if (this.maxAttackCompressionDiffDb === -1 || this.maxAttackCompressionDiffDb < compressionDiffDb) {
+                    this.maxAttackCompressionDiffDb = compressionDiffDb;
+                }
+                
+                var effAttenDiffDb = Math.max(0.5, this.maxAttackCompressionDiffDb);
+                
+                x = 0.25 / effAttenDiffDb;
+                envelopeRate = 1 - Math.pow(x, 1 / attackFrames);
+            }
+            
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Inner loop - calculate shaped power average - apply compression.
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            var preDelayReadIndex = this.preDelayReadIndex;
+            var preDelayWriteIndex = this.preDelayWriteIndex;
+            var detectorAverage = this.detectorAverage;
+            var compressorGain = this.compressorGain;
+            
+            var loopFrames = nDivisionFrames;
+            while (loopFrames--) {
+                var compressorInput = 0;
+                
+                // Predelay signal, computing compression amount from un-delayed version.
+                var delayBuffer = this.preDelayBuffer;
+                var undelayedSource = source[frameIndex];
+                delayBuffer[preDelayWriteIndex] = undelayedSource;
+                
+                var absUndelayedSource = undelayedSource > 0 ? undelayedSource : -undelayedSource;
+                if (compressorInput < absUndelayedSource) {
+                    compressorInput = absUndelayedSource;
+                }
+                
+                // Calculate shaped power on undelayed input.
+
+                var scaledInput = compressorInput;
+                var absInput = scaledInput > 0 ? scaledInput : -scaledInput;
+                
+                // Put through shaping curve.
+                // This is linear up to the threshold, then enters a "knee" portion followed by the "ratio" portion.
+                // The transition from the threshold to the knee is smooth (1st derivative matched).
+                // The transition from the knee to the ratio portion is smooth (1st derivative matched).
+                var shapedInput = this.saturate(absInput, k);
+                
+                var attenuation = absInput <= 0.0001 ? 1 : shapedInput / absInput;
+                
+                var attenuationDb = (attenuation) ? -20 * Math.log(attenuation) * Math.LOG10E : 1000;
+                attenuationDb = Math.max(2.0, attenuationDb);
+                
+                var dbPerFrame = attenuationDb / satReleaseFrames;
+                
+                // var satReleaseRate = decibelsToLinear(dbPerFrame) - 1;
+                var satReleaseRate = Math.pow(10, 0.05 * dbPerFrame) - 1;
+                
+                var isRelease = (attenuation > detectorAverage);
+                var rate = isRelease ? satReleaseRate : 1;
+                
+                detectorAverage += (attenuation - detectorAverage) * rate;
+                detectorAverage = Math.min(1.0, detectorAverage);
+                
+                // Fix gremlins.
+                /*
+                if (isNaN(detectorAverage)) {
+                    detectorAverage = 1;
+                }
+                if (detectorAverage === Infinity) {
+                    detectorAverage = 1;
+                }
+                */
+                // Exponential approach to desired gain.
+                if (envelopeRate < 1) {
+                    // Attack - reduce gain to desired.
+                    compressorGain += (scaledDesiredGain - compressorGain) * envelopeRate;
+                } else {
+                    // Release - exponentially increase gain to 1.0
+                    compressorGain *= envelopeRate;
+                    compressorGain = Math.min(1.0, compressorGain);
+                }
+                
+                // Warp pre-compression gain to smooth out sharp exponential transition points.
+                var postWarpCompressorGain = Math.sin(0.5 * Math.PI * compressorGain);
+                
+                // Calculate total gain using master gain and effect blend.
+                var totalGain = dryMix + wetMix * masterLinearGain * postWarpCompressorGain;
+                
+                // Calculate metering.
+                var dbRealGain = 20 * Math.log(postWarpCompressorGain) * Math.LOG10E;
+                if (dbRealGain < this.meteringGain)  {
+                    this.meteringGain = dbRealGain;
+                } else {
+                    this.meteringGain += (dbRealGain - this.meteringGain) * this.meteringReleaseK;
+                }
+                // Apply final gain.
+                delayBuffer = this.preDelayBuffer;
+                destination[frameIndex] = delayBuffer[preDelayReadIndex] * totalGain;
+                
+                frameIndex++;
+                preDelayReadIndex  = (preDelayReadIndex  + 1) & MaxPreDelayFramesMask;
+                preDelayWriteIndex = (preDelayWriteIndex + 1) & MaxPreDelayFramesMask;
+            }
+            
+            // Locals back to member variables.
+            this.preDelayReadIndex = preDelayReadIndex;
+            this.preDelayWriteIndex = preDelayWriteIndex;
+            this.detectorAverage = (detectorAverage < 1e-6) ? 1e-6 : detectorAverage;
+            this.compressorGain  = (compressorGain  < 1e-6) ? 1e-6 : compressorGain;
+        }
+    };
+    
+    $.reset = function() {
+        this.detectorAverage = 0;
+        this.compressorGain = 1;
+        this.meteringGain = 1;
+        
+        // Predelay section.
+        for (var i = this.preDelayBuffer.length; i--; ) {
+            this.preDelayBuffer[i] = 0;
+        }
+        
+        this.preDelayReadIndex = 0;
+        this.preDelayWriteIndex = DefaultPreDelayFrames;
+        
+        this.maxAttackCompressionDiffDb = -1; // uninitialized state
+    };
+    
+    timbre.modules.Compressor = Compressor;
     
 })();
 (function() {
@@ -2846,8 +3291,10 @@
         this.status = StatusWait;
     };
     $.release = function() {
-        this._counter = 0;
-        this.status = StatusRelease;
+        if (this.releaseNode !== null) {
+            this._counter = 0;
+            this.status = StatusRelease;
+        }
     };
     $.getInfo = function(sustainTime) {
         var table = this._table;
@@ -2861,7 +3308,11 @@
                 loopBeginTime = totalDuration;
             }
             if (this.releaseNode === i) {
-                totalDuration += sustainTime;
+                if (totalDuration < sustainTime) {
+                    totalDuration += sustainTime;
+                } else {
+                    totalDuration  = sustainTime;
+                }
                 releaseBeginTime = totalDuration;
             }
             
@@ -4363,12 +4814,8 @@
     var modules = timbre.modules;
     
     fn.register("audio", function(_args) {
-        var params;
-        if (fn.isDictionary(_args[0])) {
-            params = _args.shift();
-        }
-        
-        var instance = timbre.apply(null, ["buffer"].concat(_args));
+        var BufferNode = fn.getClass("buffer");
+        var instance = new BufferNode(_args);
         
         instance._.isLoaded = false;
         instance._.isEnded  = true;
@@ -4381,14 +4828,8 @@
             }
         });
         
-        instance.load = load;
+        instance.load     = load;
         instance.loadthis = loadthis;
-        
-        if (params) {
-            instance.once("init", function() {
-                instance.set(params);
-            });
-        }
         
         return instance;
     });
@@ -4443,7 +4884,7 @@
         
         return dfd.promise();
     };
-
+    
     var loadthis = function() {
         load.apply(this, arguments);
         return this;
@@ -4462,9 +4903,9 @@
         fn.fixAR(this);
         
         var _ = this._;
-        _.biquad = new Biquad({samplerate:timbre.samplerate});
+        _.biquad = new Biquad(timbre.samplerate);
         _.freq = timbre(340);
-        _.Q    = timbre(1);
+        _.band = timbre(1);
         _.gain = timbre(0);
         
         _.plotRange = [0, 1.2];
@@ -4503,12 +4944,20 @@
                 return this._.freq;
             }
         },
-        Q: {
+        band: {
             set: function(value) {
-                this._.Q = timbre(value);
+                this._.band = timbre(value);
             },
             get: function() {
-                return this._.Q;
+                return this._.band;
+            }
+        },
+        Q: {
+            set: function(value) {
+                this._.band = timbre(value);
+            },
+            get: function() {
+                return this._.band;
             }
         },
         gain: {
@@ -4537,9 +4986,9 @@
                 _.prevFreq = freq;
                 changed = true;
             }
-            var Q = _.Q.process(tickID)[0];
-            if (_.prevQ !== Q) {
-                _.prevQ = Q;
+            var band = _.band.process(tickID)[0];
+            if (_.prevband !== band) {
+                _.prevband = band;
                 changed = true;
             }
             var gain = _.gain.process(tickID)[0];
@@ -4548,7 +4997,7 @@
                 changed = true;
             }
             if (changed) {
-                _.biquad.setParams(freq, Q, gain);
+                _.biquad.setParams(freq, band, gain);
                 _.plotFlush = true;
             }
             
@@ -4565,8 +5014,9 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var biquad = new Biquad({type:this.type,samplerate:timbre.samplerate});
-            biquad.setParams(this.freq.valueOf(), this.Q.valueOf(), this.gain.valueOf());
+            var biquad = new Biquad(timbre.samplerate);
+            biquad.setType(this.type);
+            biquad.setParams(this.freq.valueOf(), this.band.valueOf(), this.gain.valueOf());
             
             var impluse = new Float32Array(256);
             impluse[0] = 1;
@@ -4579,8 +5029,6 @@
         }
         return super_plot.call(this, opts);
     };
-    
-    
     
     fn.register("biquad", BiquadNode);
     
@@ -5008,6 +5456,138 @@
     };
     
     fn.register("clip", ClipNode);
+    
+})();
+(function() {
+    "use strict";
+    
+    var fn = timbre.fn;
+    var timevalue  = timbre.timevalue;
+    var Compressor = timbre.modules.Compressor;
+    
+    function CompressorNode(_args) {
+        timbre.Object.call(this, _args);
+        fn.fixAR(this);
+        
+        var _ = this._;
+        _.thresh = timbre(-24);
+        _.knee   = timbre(30);
+        _.ratio  = timbre(12);
+        _.postGain  =   6;
+        _.attack    =   3;
+        _.release   = 250;
+        _.reduction =   0;
+        
+        _.comp = new Compressor(timbre.samplerate);
+        _.comp.dbPostGain  = _.postGain;
+        _.comp.attackTime  = _.attack  * 0.001;
+        _.comp.releaseTime = _.release * 0.001;
+    }
+    fn.extend(CompressorNode);
+    
+    var $ = CompressorNode.prototype;
+    
+    Object.defineProperties($, {
+        thresh: {
+            set: function(value) {
+                this._.thresh = timbre(value);
+            },
+            get: function() {
+                return this._.thresh;
+            }
+        },
+        knee: {
+            set: function(value) {
+                this._.kne = timbre(value);
+            },
+            get: function() {
+                return this._.knee;
+            }
+        },
+        ratio: {
+            set: function(value) {
+                this._.ratio = timbre(value);
+            },
+            get: function() {
+                return this._.ratio;
+            }
+        },
+        postGain: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    this._.postGain = value;
+                    this._.comp.dbPostGain = value;
+                }
+            },
+            get: function() {
+                return this._.postGain;
+            }
+        },
+        attack: {
+            set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                }
+                if (typeof value === "number") {
+                    value = (value < 0) ? 0 : (1000 < value) ? 1000 : value;
+                    this._.attack = value;
+                    this._.comp.attackTime = value * 0.001;
+                }
+            },
+            get: function() {
+                return this._.attack;
+            }
+        },
+        release: {
+            set: function(value) {
+                if (typeof value === "string") {
+                    value = timevalue(value);
+                    if (value <= 0) {
+                        value = 0;
+                    }
+                }
+                if (typeof value === "number") {
+                    value = (value < 0) ? 0 : (1000 < value) ? 1000 : value;
+                    this._.release = value;
+                    this._.comp.releaseTime = value * 0.001;
+                }
+            },
+            get: function() {
+                return this._.release;
+            }
+        },
+        reduction: {
+            get: function() {
+                return this._.reduction;
+            }
+        }
+    });
+    
+    $.process = function(tickID) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+            
+            fn.inputSignalAR(this);
+            
+            var thresh = _.thresh.process(tickID)[0];
+            var knee   = _.knee.process(tickID)[0];
+            var ratio  = _.ratio.process(tickID)[0];
+            
+            _.comp.process(cell, cell, thresh, knee, ratio);
+            
+            _.reduction = _.comp.meteringGain;
+            
+            fn.outputSignalAR(this);
+        }
+        
+        return cell;
+    };
+    
+    fn.register("comp", CompressorNode);
+    fn.alias("compressor", "comp");
     
 })();
 (function() {
@@ -5607,7 +6187,7 @@
         
         opts.table = [ZERO, [lv, a], [ZERO, r]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("adsr", function(_args) {
@@ -5625,7 +6205,25 @@
         opts.table = [ZERO, [lv, a], [s, d], [ZERO, r]];
         opts.releaseNode = 3;
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
+    });
+    
+    fn.register("adshr", function(_args) {
+        if (!isDictionary(_args[0])) {
+            _args.unshift({});
+        }
+        
+        var opts = _args[0];
+        var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
+        var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
+        var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
+        var h  = envValue(opts,   10,  500, "h" , "holdTime"    , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "decayTime"   , timevalue);
+        var lv = envValue(opts, ZERO,    1, "lv", "level"       );
+        
+        opts.table = [ZERO, [lv, a], [s, d], [s, h], [ZERO, r]];
+        
+        return new EnvNode(_args);
     });
     
     fn.register("asr", function(_args) {
@@ -5641,7 +6239,7 @@
         opts.table = [ZERO, [s, a], [ZERO, r]];
         opts.releaseNode = 2;
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("dadsr", function(_args) {
@@ -5651,7 +6249,7 @@
         
         var opts = _args[0];
         var dl = envValue(opts,   10,  100, "dl", "delayTime"   , timevalue);
-        var a  = envValue(opts,   10,   10, "a" , "attackTime"  );
+        var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
         var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
         var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
         var r  = envValue(opts,   10, 1000, "r" , "relaseTime"  , timevalue);
@@ -5660,7 +6258,27 @@
         opts.table = [ZERO, [ZERO, dl], [lv, a], [s, d], [ZERO, r]];
         opts.releaseNode = 4;
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
+    });
+    
+    fn.register("ahdsfr", function(_args) {
+        if (!isDictionary(_args[0])) {
+            _args.unshift({});
+        }
+        
+        var opts = _args[0];
+        var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
+        var h  = envValue(opts,   10,   10, "h" , "holdTime"    , timevalue);
+        var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
+        var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
+        var f  = envValue(opts,   10, 5000, "f" , "fadeTime"    , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "relaseTime"  , timevalue);
+        var lv = envValue(opts, ZERO,    1, "lv", "level"       );
+        
+        opts.table = [ZERO, [lv, a], [lv, h], [s, d], [ZERO, f], [ZERO, r]];
+        opts.releaseNode = 5;
+        
+        return new EnvNode(_args);
     });
     
     fn.register("linen", function(_args) {
@@ -5676,7 +6294,7 @@
         
         opts.table = [ZERO, [lv, a], [lv, s], [ZERO, r]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("env.tri", function(_args) {
@@ -5691,7 +6309,7 @@
         dur *= 0.5;
         opts.table = [ZERO, [lv, dur], [ZERO, dur]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
     fn.register("env.cutoff", function(_args) {
@@ -5705,7 +6323,7 @@
         
         opts.table = [lv, [ZERO, r]];
         
-        return timbre.apply(null, ["env"].concat(_args));
+        return new EnvNode(_args);
     });
     
 })();
@@ -7781,6 +8399,104 @@
     };
 
     fn.register("param", ParamNode);
+    
+})();
+(function() {
+    "use strict";
+    
+    var fn  = timbre.fn;
+    var Biquad = timbre.modules.Biquad;
+
+    function PhaseShiftNode(_args) {
+        timbre.Object.call(this, _args);
+        fn.fixAR(this);
+        
+        var _ = this._;
+        _.buffer = new Float32Array(timbre.cellsize);
+        _.freq   = timbre("sin", {freq:1, add:1000, mul:250}).kr();
+        _.Q      = timbre(1);
+        _.allpass  = [];
+        
+        this.steps = 2;
+    }
+    fn.extend(PhaseShiftNode);
+    
+    var $ = PhaseShiftNode.prototype;
+    
+    Object.defineProperties($, {
+        freq: {
+            set: function(value) {
+                this._.freq = value;
+            },
+            get: function() {
+                return this._.freq;
+            }
+        },
+        Q: {
+            set: function(value) {
+                this._.Q = timbre(value);
+            },
+            get: function() {
+                return this._.Q;
+            }
+        },
+        steps: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    value |= 0;
+                    if (value === 2 || value === 4 || value === 8 || value === 12) {
+                        var allpass = this._.allpass;
+                        if (allpass.length < value) {
+                            for (var i = allpass.length; i < value; ++i) {
+                                allpass[i] = new Biquad(timbre.samplerate);
+                                allpass[i].setType("allpass");
+                            }
+                        }
+                    }
+                    this._.steps = value;
+                }
+            },
+            get: function() {
+                return this._.steps;
+            }
+        }
+    });
+
+    $.process = function(tickID) {
+        var _ = this._;
+        var cell = this.cell;
+        
+        if (this.tickID !== tickID) {
+            this.tickID = tickID;
+            
+            fn.inputSignalAR(this);
+            
+            var freq  = _.freq.process(tickID)[0];
+            var Q     = _.Q.process(tickID)[0];
+            var steps = _.steps;
+            var i;
+            
+            _.buffer.set(cell);
+            
+            for (i = steps; i--; ) {
+                _.allpass[i].setParams(freq, Q, 0);
+                _.allpass[i].process(_.buffer);
+                i--;
+                _.allpass[i].setParams(freq, Q, 0);
+                _.allpass[i].process(_.buffer);
+            }
+            
+            for (i = cell.length; i--; ) {
+                cell[i] = (cell[i] + _.buffer[i]) * 0.5;
+            }
+            
+            fn.outputSignalAR(this);
+        }
+        
+        return cell;
+    };
+    
+    fn.register("phaseshift", PhaseShiftNode);
     
 })();
 (function() {

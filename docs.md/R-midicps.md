@@ -11,7 +11,7 @@ var midicps = T("midicps");
 T("tri", {freq:midicps, mul:0.25}).play();
 
 T("interval", {interval:500}, function(count) {
-    midicps.midi = 69 + (count % 12);
+  midicps.midi = 69 + (count % 12);
 }).start();
 ```
 

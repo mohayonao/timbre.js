@@ -4,7 +4,7 @@ T("noise")
 
 ## Description ##
 
-(canvas noise w:240 h:80)
+(canvas canvas w:240 h:80)
 
 ###### en ######
 `T("noise")` generates white noise.
@@ -15,10 +15,9 @@ T("noise")
 ```timbre
 var noise = T("noise", {mul:0.15}).play();
 
-var canvas = window.getCanvasById("noise");
 var fft = T("spectrum", {size:512, interval:100}, noise).on("fft", function() {
 
-    fft.plot({target:canvas});
+  fft.plot({target:canvas});
 
 }).listen(noise);
 ```
