@@ -10,9 +10,9 @@
         fn.fixAR(this);
         
         var _ = this._;
-        _.biquad = new Biquad({samplerate:timbre.samplerate});
+        _.biquad = new Biquad(timbre.samplerate);
         _.freq = timbre(340);
-        _.Q    = timbre(1);
+        _.band = timbre(1);
         _.gain = timbre(0);
         
         _.plotRange = [0, 1.2];
@@ -51,12 +51,20 @@
                 return this._.freq;
             }
         },
-        Q: {
+        band: {
             set: function(value) {
-                this._.Q = timbre(value);
+                this._.band = timbre(value);
             },
             get: function() {
-                return this._.Q;
+                return this._.band;
+            }
+        },
+        Q: {
+            set: function(value) {
+                this._.band = timbre(value);
+            },
+            get: function() {
+                return this._.band;
             }
         },
         gain: {
@@ -85,9 +93,9 @@
                 _.prevFreq = freq;
                 changed = true;
             }
-            var Q = _.Q.process(tickID)[0];
-            if (_.prevQ !== Q) {
-                _.prevQ = Q;
+            var band = _.band.process(tickID)[0];
+            if (_.prevband !== band) {
+                _.prevband = band;
                 changed = true;
             }
             var gain = _.gain.process(tickID)[0];
@@ -96,7 +104,7 @@
                 changed = true;
             }
             if (changed) {
-                _.biquad.setParams(freq, Q, gain);
+                _.biquad.setParams(freq, band, gain);
                 _.plotFlush = true;
             }
             
@@ -113,8 +121,9 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var biquad = new Biquad({type:this.type,samplerate:timbre.samplerate});
-            biquad.setParams(this.freq.valueOf(), this.Q.valueOf(), this.gain.valueOf());
+            var biquad = new Biquad(timbre.samplerate);
+            biquad.setType(this.type);
+            biquad.setParams(this.freq.valueOf(), this.band.valueOf(), this.gain.valueOf());
             
             var impluse = new Float32Array(256);
             impluse[0] = 1;
@@ -127,8 +136,6 @@
         }
         return super_plot.call(this, opts);
     };
-    
-    
     
     fn.register("biquad", BiquadNode);
     
