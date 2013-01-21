@@ -52,7 +52,7 @@
                 return this._.ratio;
             }
         },
-        postGain: {
+        gain: {
             set: function(value) {
                 if (typeof value === "number") {
                     this._.postGain = value;

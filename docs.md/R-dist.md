@@ -1,5 +1,5 @@
-T("distortion")
-===============
+T("dist")
+=========
 {ar} Distortion
 
 ## Description ##
@@ -22,9 +22,6 @@ var audio = T("audio", {loop:true}).load(src, function(res) {
   - デフォルト値は **-18** dB
 - `cutoff` _(Number)_
   - ハイカット周波数. 0 のときOFF. デフォルト値は **0**
-  
-## Alias ##
-`T("dist")`
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/dist.js
