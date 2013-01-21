@@ -20,8 +20,8 @@ var audio = T("audio", {loop:true}).load(src, function(res) {
   - A decibel value representing the range above the threshold where the curve smoothly transitions to the "ratio" portion. Its default value is **30**, with a nominal range of 0 to 40.
 - `ratio` _(T-Object)_
   - The amount of dB change in input for a 1 dB change in output. Its default value is **12**, with a nominal range of 1 to 20.
-- `postGain` _(Number)_
-  - Its default value is **6**.
+- `gain` _(Number)_
+  - Makeup gain. Its default value is **6**.
 - `attack` _(Number)_
   - The amount of time (in msec) to reduce the gain by 10dB. Its default value is **3**, with a nominal range of 0 to 1000.
 - `release` _(Number)_
