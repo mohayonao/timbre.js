@@ -39,6 +39,9 @@ $ npm install timbre
 MIT
 
 ### ChangeLog ###
+**13.01.20a** (294.82KB)
+* rename a propery name: `T("comp").postGain` to `T("comp").gain`
+
 **13.01.20** (294.83KB)
 * add `T("adshr")`, `T("ahdsfr")`
 * add `T("comp")`
