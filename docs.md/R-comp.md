@@ -1,14 +1,13 @@
-T("compressor")
-===============
+T("comp")
+=========
 {ar} Dynamic compressor
-
 
 ```timbre
 var src = window.getDraggedFile() || "/timbre.js/misc/audio/drum.wav";
 
 var audio = T("audio", {loop:true}).load(src, function(res) {
     
-  T("comp", {thre:-48, knee:30, ratio:24, postGain:18}, this).play();
+  T("comp", {thre:-48, knee:30, ratio:24, gain:18}, this).play();
     
 });
 ```
@@ -28,9 +27,6 @@ var audio = T("audio", {loop:true}).load(src, function(res) {
   - The amount of time (in msec) to increase the gain by 10dB. Its default value is **250**, with a nominal range of 0 to 1000.
 - `wet` _(Number)_
   - Its default value is **1**, with a nominal range of 0 to 1.
-  
-## Alias ##
-- `T("comp")`
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/comp.js
