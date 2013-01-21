@@ -20,7 +20,7 @@ T("audio", {loop:true}).load(src, function(res) {
   - The filter types are briefly described below.
 - `freq`, `cutoff` _(T-Object)_
   - **350Hz**, with a nominal range of 10 to the Nyquist frequency (half the sample-rate).
-- `Q`, `band` _(T-Object)_
+- `res`, `Q`, `band` _(T-Object)_
   - **1**, with a nominal range of 0.0001 to 1000.
 - `gain` _(T-Object)_
   - **0**, with a nominal range of -40 to 40.
@@ -40,14 +40,12 @@ A [lowpass filter](http://en.wikipedia.org/wiki/Low-pass_filter) allows frequenc
 
 - `cutoff` _(T-Object)_
   - The cutoff frequency
-- `Q` _(T-Object)_
+- `res` _(T-Object)_
   - Controls how peaked the response will be at the cutoff frequency.
-- `gain` _(T-Object)_
-  - Not used in this filter type
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-  T("lowpass", {cutoff:1200}, this).plot({target:lowpass, lineWidth:2}).play();
+  T("lowpass", {cutoff:1200, res:2}, this).plot({target:lowpass, lineWidth:2}).play();
 });
 ```
 
@@ -61,14 +59,12 @@ A [highpass filter](http://en.wikipedia.org/wiki/High-pass_filter) is the opposi
 
 - `cutoff` _(T-Object)_
   - The cutoff frequency below which the frequencies are attenuated
-- `Q` _(T-Object)_
+- `res` _(T-Object)_
   - Controls how peaked the response will be at the cutoff frequency.
-- `gain` _(T-Object)_
-  - Not used in this filter type
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-  T("highpass", {cutoff:4800}, this).plot({target:highpass, lineWidth:2}).play();
+  T("highpass", {cutoff:4800, res:2}, this).plot({target:highpass, lineWidth:2}).play();
 });
 ```
 
@@ -82,14 +78,14 @@ A [bandpass filter](http://en.wikipedia.org/wiki/Band-pass_filter) allows a rang
 
 - `freq` _(T-Object)_
   - The center of the frequency band
-- `band` _(T-Object)_
+- `Q` _(T-Object)_
   - Controls the width of the band.
 - `gain` _(T-Object)_
   - Not used in this filter type
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-  T("bandpass", {freq:2400, band:5}, this).plot({target:bandpass, lineWidth:2}).play();
+  T("bandpass", {freq:2400, Q:5}, this).plot({target:bandpass, lineWidth:2}).play();
 });
 ```
 
@@ -103,8 +99,6 @@ The lowshelf filter allows all frequencies through, but adds a boost (or attenua
 
 - `freq` _(T-Object)_
   - The upper limit of the frequences where the boost (or attenuation) is applied.
-- `band` _(T-Object)_
-  - Not used in this filter type.
 - `gain` _(T-Object)_
   - The boost, in dB, to be applied. If the value is negative, the frequencies are attenuated.
 
@@ -122,8 +116,6 @@ The highshelf filter is the opposite of the lowshelf filter and allows all frequ
 
 - `freq` _(T-Object)_
   - The lower limit of the frequences where the boost (or attenuation) is applied.
-- `band` _(T-Object)_
-  - Not used in this filter type.
 - `gain` _(T-Object)_
   - The boost, in dB, to be applied. If the value is negative, the frequencies are attenuated.
 
@@ -141,14 +133,14 @@ The peaking filter allows all frequencies through, but adds a boost (or attenuat
 
 - `freq` _(T-Object)_
   - The center frequency of where the boost is applied.
-- `band` _(T-Object)_
+- `Q` _(T-Object)_
   - Controls the width of the band of frequencies that are boosted. A large value implies a narrow width.
 - `gain` _(T-Object)_
   - The boost, in dB, to be applied. If the value is negative, the frequencies are attenuated.
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-  T("peaking", {freq:1800, band:0.1, gain:12}, this).plot({target:peaking, lineWidth:2}).play();
+  T("peaking", {freq:1800, Q:2, gain:6}, this).plot({target:peaking, lineWidth:2}).play();
 });
 ```
 
@@ -160,10 +152,8 @@ The notch filter (also known as a [band-stop or band-rejection filter](http://en
 
 - `freq` _(T-Object)_
   - The center frequency of where the notch is applied.
-- `band` _(T-Object)_
+- `Q` _(T-Object)_
   - Controls the width of the band of frequencies that are attenuated. A large value implies a narrow width.
-- `gain` _(T-Object)_
-  - Not used in this filter type.
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
@@ -181,14 +171,12 @@ An [allpass filter](http://en.wikipedia.org/wiki/All-pass_filter#Digital_Impleme
 
 - `freq` _(T-Object)_
   - The frequency where the center of the phase transition occurs. 
-- `band` _(T-Object)_
+- `Q` _(T-Object)_
   - Controls how sharp the phase transition is at the center frequency. A larger value implies a sharper transition and a larger group delay.
-- `gain` _(T-Object)_
-  - Not used in this filter type.
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav", function(res) {
-  T("allpass", {freq:2400, gain:6}, this).plot({target:allpass, lineWidth:2}).play();
+  T("allpass", {freq:2400, Q:6}, this).plot({target:allpass, lineWidth:2}).play();
 });
 ```
 
