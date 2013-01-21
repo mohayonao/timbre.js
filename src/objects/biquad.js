@@ -15,8 +15,30 @@
         _.band = timbre(1);
         _.gain = timbre(0);
         
-        _.plotRange = [0, 1.2];
+        _.plotRange = [-18, 18];
         _.plotFlush = true;
+        _.plotBefore = function(context, x, y, width, height) {
+            context.lineWidth = 1;
+            context.strokeStyle = "rgb(232, 232, 232)";
+            var w = width / 4;
+            for (var i = 1; i < 4; i++) {
+                context.beginPath();
+                var _x = ((x + (i * w))|0) + 0.5;
+                context.moveTo(_x, y);
+                context.lineTo(_x, y + height);
+                context.stroke();
+            }
+            context.strokeStyle = "rgb(192, 192, 192)";
+            var h = height / 6;
+            for (var i = 1; i < 6; i++) {
+                context.beginPath();
+                var _y = ((y + (i * h))|0) + 0.5;
+                context.moveTo(x, _y);
+                context.lineTo(x + width, _y);
+                context.stroke();
+            }
+        };
+        
     }
     fn.extend(BiquadNode);
     
@@ -51,7 +73,7 @@
                 return this._.freq;
             }
         },
-        band: {
+        res: {
             set: function(value) {
                 this._.band = timbre(value);
             },
@@ -60,6 +82,14 @@
             }
         },
         Q: {
+            set: function(value) {
+                this._.band = timbre(value);
+            },
+            get: function() {
+                return this._.band;
+            }
+        },
+        band: {
             set: function(value) {
                 this._.band = timbre(value);
             },
@@ -130,8 +160,28 @@
             
             biquad.process(impluse);
             fft.forward(impluse);
+
+            var size = 512;
+            var data = new Float32Array(size);
+            var nyquist  = timbre.samplerate * 0.5;
+            var spectrum = fft.spectrum;
+            var i, j, f, index, delta, x0, x1, xx;
+            for (i = 0; i < size; ++i) {
+                f = nyquist * Math.pow(size, (i - size) / size);
+                j = f / (nyquist / spectrum.length);
+                index = j|0;
+                delta = j - index;
+                if (index === 0) {
+                    x1 = x0 = xx = spectrum[index];
+                } else {
+                    x0 = spectrum[index - 1];
+                    x1 = spectrum[index];
+                    xx = ((1.0 - delta) * x0 + delta * x1);
+                }
+                data[i] = Math.log(xx) * Math.LOG10E * 20;
+            }
             
-            this._.plotData  = fft.spectrum;
+            this._.plotData  = data;
             this._.plotFlush = null;
         }
         return super_plot.call(this, opts);

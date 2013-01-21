@@ -16,7 +16,7 @@
         this._.writeIndex  = 0;
         
         this._.plotFlush = true;
-        this._.plotRange = [0, 0.5];
+        this._.plotRange = [0, 1];
         this._.plotBarStyle = true;
         
         this.once("init", oninit);
@@ -170,20 +170,28 @@
         if (this._.plotFlush) {
             var fft = this._.fft;
             
+            var size     = 64;
             var spectrum = fft.spectrum;
-            var step     = fft.length >> 6;
+            var step     = spectrum.length / size;
             var istep    = 1 / step;
-            var data    = new Float32Array(spectrum.length * istep);
+            var data    = new Float32Array(size);
             var i, imax = spectrum.length;
             var j, jmax = step;
             
-            var v, k = 0;
+            var v, x, k = 0, peak = 0;
             for (i = 0; i < imax; i += step) {
                 v = 0;
                 for (j = 0; j < jmax; ++j) {
                     v += spectrum[i + j];
                 }
-                data[k++] = v * istep;
+                x = v * istep;
+                data[k++] = x;
+                if (peak < x) {
+                    peak = x;
+                }
+            }
+            for (i = data.length; i--; ) {
+                data[i] /= peak;
             }
             
             this._.plotData  = data;

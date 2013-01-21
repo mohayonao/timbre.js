@@ -85,24 +85,20 @@
         }
         
         if (!this.noSpectrum) {
+            var bSi = 2 / _buffer.length;
             var spectrum = this.spectrum;
             var rval, ival, mag;
-            var max = 0;
+            var peak = 0;
             for (i = n; i--; ) {
                 rval = real[i];
                 ival = imag[i];
-                mag  = n * Math.sqrt(rval * rval + ival * ival);
+                mag  = bSi = Math.sqrt(rval * rval + ival * ival);
                 spectrum[i] = mag;
-                if (max < mag) {
-                    max = mag;
+                if (peak < mag) {
+                    peak = mag;
                 }
             }
-            if (max > 0) {
-                max = 1 / max;
-                for (i = n; i--; ) {
-                    spectrum[i] *= max;
-                }
-            }
+            this.peak = peak;
         }
         
         return {real:real, imag:imag};
