@@ -4,6 +4,7 @@
     var fn  = timbre.fn;
     var FFT = timbre.modules.FFT;
     var Biquad = timbre.modules.Biquad;
+    var PLOT_LOW_FREQ = 20;
     
     function BiquadNode(_args) {
         timbre.Object.call(this, _args);
@@ -15,32 +16,40 @@
         _.band = timbre(1);
         _.gain = timbre(0);
         
-        _.plotRange = [-18, 18];
-        _.plotFlush = true;
-        _.plotBefore = function(context, x, y, width, height) {
-            context.lineWidth = 1;
-            context.strokeStyle = "rgb(232, 232, 232)";
-            var w = width / 4;
-            for (var i = 1; i < 4; i++) {
+        _.plotBefore = plotBefore;
+        _.plotRange  = [-18, 18];
+        _.plotFlush  = true;
+    }
+    fn.extend(BiquadNode);
+
+    var plotBefore = function(context, x, y, width, height) {
+        context.lineWidth = 1;
+        context.strokeStyle = "rgb(192, 192, 192)";
+        var nyquist = timbre.samplerate * 0.5;
+        for (var i = 1; i <= 10; ++i) {
+            for (var j = 1; j <= 4; j++) {
+                var f = i * Math.pow(10, j);
+                if (f <= PLOT_LOW_FREQ || nyquist <= f) {
+                    continue;
+                }
                 context.beginPath();
-                var _x = ((x + (i * w))|0) + 0.5;
+                var _x = (Math.log(f/PLOT_LOW_FREQ)) / (Math.log(nyquist/PLOT_LOW_FREQ));
+                _x = ((_x * width + x)|0) + 0.5;
                 context.moveTo(_x, y);
                 context.lineTo(_x, y + height);
                 context.stroke();
             }
-            context.strokeStyle = "rgb(192, 192, 192)";
-            var h = height / 6;
-            for (var i = 1; i < 6; i++) {
-                context.beginPath();
-                var _y = ((y + (i * h))|0) + 0.5;
-                context.moveTo(x, _y);
-                context.lineTo(x + width, _y);
-                context.stroke();
-            }
-        };
+        }
         
-    }
-    fn.extend(BiquadNode);
+        var h = height / 6;
+        for (i = 1; i < 6; i++) {
+            context.beginPath();
+            var _y = ((y + (i * h))|0) + 0.5;
+            context.moveTo(x, _y);
+            context.lineTo(x + width, _y);
+            context.stroke();
+        }
+    };
     
     var $ = BiquadNode.prototype;
     
@@ -146,7 +155,7 @@
         return cell;
     };
     
-    var fft = new FFT(256);
+    var fft = new FFT(2048);
     var super_plot = timbre.Object.prototype.plot;
     
     $.plot = function(opts) {
@@ -155,7 +164,7 @@
             biquad.setType(this.type);
             biquad.setParams(this.freq.valueOf(), this.band.valueOf(), this.gain.valueOf());
             
-            var impluse = new Float32Array(256);
+            var impluse = new Float32Array(fft.length);
             impluse[0] = 1;
             
             biquad.process(impluse);
@@ -167,7 +176,7 @@
             var spectrum = fft.spectrum;
             var i, j, f, index, delta, x0, x1, xx;
             for (i = 0; i < size; ++i) {
-                f = nyquist * Math.pow(size, (i - size) / size);
+                f = Math.pow(nyquist / PLOT_LOW_FREQ, i / size) * PLOT_LOW_FREQ;
                 j = f / (nyquist / spectrum.length);
                 index = j|0;
                 delta = j - index;
@@ -180,7 +189,6 @@
                 }
                 data[i] = Math.log(xx) * Math.LOG10E * 20;
             }
-            
             this._.plotData  = data;
             this._.plotFlush = null;
         }
