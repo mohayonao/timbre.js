@@ -14,14 +14,12 @@
         _.knee   = timbre(30);
         _.ratio  = timbre(12);
         _.postGain  =   6;
-        _.attack    =   3;
-        _.release   = 250;
         _.reduction =   0;
         
         _.comp = new Compressor(timbre.samplerate);
         _.comp.dbPostGain  = _.postGain;
-        _.comp.attackTime  = _.attack  * 0.001;
-        _.comp.releaseTime = _.release * 0.001;
+        _.comp.setAttackTime(0.003);
+        _.comp.setReleaseTime(0.25);
     }
     fn.extend(CompressorNode);
     
@@ -71,11 +69,11 @@
                 if (typeof value === "number") {
                     value = (value < 0) ? 0 : (1000 < value) ? 1000 : value;
                     this._.attack = value;
-                    this._.comp.attackTime = value * 0.001;
+                    this._.comp.setAttackTime(value * 0.001);
                 }
             },
             get: function() {
-                return this._.attack;
+                return this._.comp.attackTime;
             }
         },
         release: {
@@ -115,8 +113,14 @@
             var thresh = _.thresh.process(tickID)[0];
             var knee   = _.knee.process(tickID)[0];
             var ratio  = _.ratio.process(tickID)[0];
+            if (_.prevThresh !== thresh || _.prevKnee !== knee || _.prevRatio !== ratio) {
+                _.prevThresh = thresh;
+                _.prevKnee   = knee;
+                _.prevRatio  = ratio;
+                _.comp.setParams(thresh, knee, ratio);
+            }
             
-            _.comp.process(cell, cell, thresh, knee, ratio);
+            _.comp.process(cell);
             
             _.reduction = _.comp.meteringGain;
             

@@ -47,9 +47,52 @@
         this.maxAttackCompressionDiffDb = -1; // uninitialized state
         
         this.meteringReleaseK = 1 - Math.exp(-1 / (this.samplerate * 0.325));
+        
+        this.setAttackTime(this.attackTime);
+        this.setReleaseTime(this.releaseTime);
+        this.setParams(-24, 30, 12);
     }
     
     var $ = Compressor.prototype;
+
+    $.setAttackTime = function(value) {
+        // Attack parameters.
+        this.attackTime = Math.max(0.001, value);
+        this._attackFrames = this.attackTime * this.samplerate;
+    };
+
+    $.setReleaseTime = function(value) {
+        // Release parameters.
+        this.releaseTime = Math.max(0.001, value);
+        var releaseFrames = this.releaseTime * this.samplerate;
+        
+        // Detector release time.
+        var satReleaseTime = 0.0025;
+        this._satReleaseFrames = satReleaseTime * this.samplerate;
+        
+        // Create a smooth function which passes through four points.
+        
+        // Polynomial of the form
+        // y = a + b*x + c*x^2 + d*x^3 + e*x^4;
+        
+        var y1 = releaseFrames * this.releaseZone1;
+        var y2 = releaseFrames * this.releaseZone2;
+        var y3 = releaseFrames * this.releaseZone3;
+        var y4 = releaseFrames * this.releaseZone4;
+        
+        // All of these coefficients were derived for 4th order polynomial curve fitting where the y values
+        // match the evenly spaced x values as follows: (y1 : x == 0, y2 : x == 1, y3 : x == 2, y4 : x == 3)
+        this._kA = 0.9999999999999998*y1 + 1.8432219684323923e-16*y2 - 1.9373394351676423e-16*y3 + 8.824516011816245e-18*y4;
+        this._kB = -1.5788320352845888*y1 + 2.3305837032074286*y2 - 0.9141194204840429*y3 + 0.1623677525612032*y4;
+        this._kC = 0.5334142869106424*y1 - 1.272736789213631*y2 + 0.9258856042207512*y3 - 0.18656310191776226*y4;
+        this._kD = 0.08783463138207234*y1 - 0.1694162967925622*y2 + 0.08588057951595272*y3 - 0.00429891410546283*y4;
+        this._kE = -0.042416883008123074*y1 + 0.1115693827987602*y2 - 0.09764676325265872*y3 + 0.028494263462021576*y4;
+        
+        // x ranges from 0 -> 3       0    1    2   3
+        //                           -15  -10  -5   0db
+        
+        // y calculates adaptive release frames depending on the amount of compression.
+    };
     
     $.setPreDelayTime = function(preDelayTime) {
         // Re-configure look-ahead section pre-delay if delay time has changed.
@@ -65,6 +108,19 @@
             this.preDelayReadIndex = 0;
             this.preDelayWriteIndex = preDelayFrames;
         }
+    };
+
+    $.setParams = function(dbThreshold, dbKnee, ratio) {
+        this._k = this.updateStaticCurveParameters(dbThreshold, dbKnee, ratio);
+        
+        // Makeup gain.
+        var fullRangeGain = this.saturate(1, this._k);
+        var fullRangeMakeupGain = 1 / fullRangeGain;
+
+        // Empirical/perceptual tuning.
+        fullRangeMakeupGain = Math.pow(fullRangeMakeupGain, 0.6);
+
+        this._masterLinearGain = Math.pow(10, 0.05 * this.dbPostGain) * fullRangeMakeupGain;
     };
     
     // Exponential curve for the knee.
@@ -154,110 +210,62 @@
     };
     
     $.updateStaticCurveParameters = function(dbThreshold, dbKnee, ratio) {
-        if (dbThreshold !== this.dbThreshold || dbKnee !== this.dbKnee || ratio !== this.ratio) {
-            this.dbThreshold     = dbThreshold;
-            // this.linearThreshold = decibelsToLinear(dbThreshold);
-            this.linearThreshold = Math.pow(10, 0.05 * dbThreshold);
-            this.dbKnee          = dbKnee;
-            
-            this.ratio = ratio;
-            this.slope = 1 / this.ratio;
-            
-            var k = this.kAtSlope(1 / this.ratio);
-            
-            this.kneeThresholdDb = dbThreshold + dbKnee;
-            // this.kneeThreshold = decibelsToLinear(this.kneeThresholdDb);
-            this.kneeThreshold = Math.pow(10, 0.05 * this.kneeThresholdDb);
-            
-            var y = this.kneeCurve(this.kneeThreshold, k);
-            // this.ykneeThresholdDb = linearToDecibels(y);
-            this.ykneeThresholdDb = (y) ? 20 * Math.log(y ) * Math.LOG10E : -1000;
-            
-            this.K = k;
-        }
+        this.dbThreshold     = dbThreshold;
+        // this.linearThreshold = decibelsToLinear(dbThreshold);
+        this.linearThreshold = Math.pow(10, 0.05 * dbThreshold);
+        this.dbKnee          = dbKnee;
+        
+        this.ratio = ratio;
+        this.slope = 1 / this.ratio;
+        
+        var k = this.kAtSlope(1 / this.ratio);
+        
+        this.kneeThresholdDb = dbThreshold + dbKnee;
+        // this.kneeThreshold = decibelsToLinear(this.kneeThresholdDb);
+        this.kneeThreshold = Math.pow(10, 0.05 * this.kneeThresholdDb);
+        
+        var y = this.kneeCurve(this.kneeThreshold, k);
+        // this.ykneeThresholdDb = linearToDecibels(y);
+        this.ykneeThresholdDb = (y) ? 20 * Math.log(y ) * Math.LOG10E : -1000;
+        
+        this.K = k;
+
         return this.K;
     };
     
-    $.process = function(source, destination, dbThreshold, dbKnee, ratio) {
-        var samplerate = this.samplerate;
+    $.process = function(cell) {
         var dryMix = 1 - this.effectBlend;
         var wetMix = this.effectBlend;
         
-        var k = this.updateStaticCurveParameters(dbThreshold, dbKnee, ratio);
+        var k = this._k;
+        var masterLinearGain = this._masterLinearGain;
         
-        // Makeup gain.
-        var fullRangeGain = this.saturate(1, k);
-        var fullRangeMakeupGain = 1 / fullRangeGain;
+        var satReleaseFrames = this._satReleaseFrame;
+        var kA = this._kA;
+        var kB = this._kB;
+        var kC = this._kC;
+        var kD = this._kD;
+        var kE = this._kE;
         
-        // Empirical/perceptual tuning.
-        fullRangeMakeupGain = Math.pow(fullRangeMakeupGain, 0.6);
-        
-        // var masterLinearGain = decibelsToLinear(this.dbPostGain) * fullRangeMakeupGain;
-        var masterLinearGain = Math.pow(10, 0.05 * this.dbPostGain) * fullRangeMakeupGain;
-        
-        // Attack parameters.
-        var attackTime = Math.max(0.001, this.attackTime);
-        var attackFrames = attackTime * samplerate;
-        
-        // Release parameters.
-        var releaseFrames = samplerate * this.releaseTime;
-        
-        // Detector release time.
-        var satReleaseTime = 0.0025;
-        var satReleaseFrames = satReleaseTime * samplerate;
-        
-        // Create a smooth function which passes through four points.
-        
-        // Polynomial of the form
-        // y = a + b*x + c*x^2 + d*x^3 + e*x^4;
-        
-        var y1 = releaseFrames * this.releaseZone1;
-        var y2 = releaseFrames * this.releaseZone2;
-        var y3 = releaseFrames * this.releaseZone3;
-        var y4 = releaseFrames * this.releaseZone4;
-        
-        // All of these coefficients were derived for 4th order polynomial curve fitting where the y values
-        // match the evenly spaced x values as follows: (y1 : x == 0, y2 : x == 1, y3 : x == 2, y4 : x == 3)
-        var kA = 0.9999999999999998*y1 + 1.8432219684323923e-16*y2 - 1.9373394351676423e-16*y3 + 8.824516011816245e-18*y4;
-        var kB = -1.5788320352845888*y1 + 2.3305837032074286*y2 - 0.9141194204840429*y3 + 0.1623677525612032*y4;
-        var kC = 0.5334142869106424*y1 - 1.272736789213631*y2 + 0.9258856042207512*y3 - 0.18656310191776226*y4;
-        var kD = 0.08783463138207234*y1 - 0.1694162967925622*y2 + 0.08588057951595272*y3 - 0.00429891410546283*y4;
-        var kE = -0.042416883008123074*y1 + 0.1115693827987602*y2 - 0.09764676325265872*y3 + 0.028494263462021576*y4;
-        
-        // x ranges from 0 -> 3       0    1    2   3
-        //                           -15  -10  -5   0db
-        
-        // y calculates adaptive release frames depending on the amount of compression.
-        
-        this.setPreDelayTime(this.preDelayTime);
+        // this.setPreDelayTime(this.preDelayTime);
         
         var nDivisionFrames = 64;
         
-        var nDivisions = source.length / nDivisionFrames;
+        var nDivisions = cell.length / nDivisionFrames;
         
         var frameIndex = 0;
         for (var i = 0; i < nDivisions; ++i) {
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Calculate desired gain
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            
-            // Fix gremlins.
-            /*
-            if (isNaN(this.detectorAverage)) {
-                this.detectorAverage = 1;
-            }
-            if (this.detectorAverage === Infinity) {
-                console.log("Infinity");
-            }
-            */
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             var desiredGain = this.detectorAverage;
             
             // Pre-warp so we get desiredGain after sin() warp below.
             var scaledDesiredGain = Math.asin(desiredGain) / (0.5 * Math.PI);
             
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Deal with envelopes
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             
             // envelopeRate is the rate we slew from current compressor level to the desired level.
             // The exact rate depends on if we're attacking or releasing and by how much.
@@ -274,16 +282,6 @@
             if (isReleasing) {
                 // Release mode - compressionDiffDb should be negative dB
                 this.maxAttackCompressionDiffDb = -1;
-                
-                // Fix gremlins.
-                /*
-                if (isNaN(compressionDiffDb)) {
-                    compressionDiffDb = -1;
-                }
-                if (compressionDiffDb === Infinity) {
-                    compressionDiffDb = -1;
-                }
-                */
                 
                 // Adaptive release - higher compression (lower compressionDiffDb)  releases faster.
                 
@@ -307,15 +305,6 @@
             } else {
                 // Attack mode - compressionDiffDb should be positive dB
                 
-                // Fix gremlins.
-                /*
-                if (isNaN(compressionDiffDb)) {
-                    compressionDiffDb = 1;
-                }
-                if (compressionDiffDb === Infinity) {
-                    compressionDiffDb = 1;
-                }
-                */
                 // As long as we're still in attack mode, use a rate based off
                 // the largest compressionDiffDb we've encountered so far.
                 if (this.maxAttackCompressionDiffDb === -1 || this.maxAttackCompressionDiffDb < compressionDiffDb) {
@@ -325,12 +314,12 @@
                 var effAttenDiffDb = Math.max(0.5, this.maxAttackCompressionDiffDb);
                 
                 x = 0.25 / effAttenDiffDb;
-                envelopeRate = 1 - Math.pow(x, 1 / attackFrames);
+                envelopeRate = 1 - Math.pow(x, 1 / this._attackFrames);
             }
             
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Inner loop - calculate shaped power average - apply compression.
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             var preDelayReadIndex = this.preDelayReadIndex;
             var preDelayWriteIndex = this.preDelayWriteIndex;
             var detectorAverage = this.detectorAverage;
@@ -342,7 +331,7 @@
                 
                 // Predelay signal, computing compression amount from un-delayed version.
                 var delayBuffer = this.preDelayBuffer;
-                var undelayedSource = source[frameIndex];
+                var undelayedSource = cell[frameIndex];
                 delayBuffer[preDelayWriteIndex] = undelayedSource;
                 
                 var absUndelayedSource = undelayedSource > 0 ? undelayedSource : -undelayedSource;
@@ -377,15 +366,6 @@
                 detectorAverage += (attenuation - detectorAverage) * rate;
                 detectorAverage = Math.min(1.0, detectorAverage);
                 
-                // Fix gremlins.
-                /*
-                if (isNaN(detectorAverage)) {
-                    detectorAverage = 1;
-                }
-                if (detectorAverage === Infinity) {
-                    detectorAverage = 1;
-                }
-                */
                 // Exponential approach to desired gain.
                 if (envelopeRate < 1) {
                     // Attack - reduce gain to desired.
@@ -411,7 +391,7 @@
                 }
                 // Apply final gain.
                 delayBuffer = this.preDelayBuffer;
-                destination[frameIndex] = delayBuffer[preDelayReadIndex] * totalGain;
+                cell[frameIndex] = delayBuffer[preDelayReadIndex] * totalGain;
                 
                 frameIndex++;
                 preDelayReadIndex  = (preDelayReadIndex  + 1) & MaxPreDelayFramesMask;
