@@ -1440,14 +1440,14 @@
             this.listeners = [];
             this.events.on("addObject", function() {
                 if (this.status === STATUS_NONE) {
-                    if (this.inlets.length > 0 || this.timers.length > 0) {
+                    if (this.inlets.length > 0 || this.timers.length > 0 || this.listeners.length > 0) {
                         this.play();
                     }
                 }
             });
             this.events.on("removeObject", function() {
                 if (this.status === STATUS_PLAY) {
-                    if (this.inlets.length === 0 && this.timers.length === 0) {
+                    if (this.inlets.length === 0 && this.timers.length === 0 && this.listeners.length === 0) {
                         this.pause();
                     }
                 }
@@ -1717,6 +1717,8 @@
         ImplClass = function(sys) {
             var context = new webkitAudioContext();
             var bufSrc, jsNode;
+            
+            fn._audioContext = context;
             
             this.maxSamplerate     = context.sampleRate;
             this.defaultSamplerate = context.sampleRate;
