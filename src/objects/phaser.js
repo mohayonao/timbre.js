@@ -4,7 +4,7 @@
     var fn  = timbre.fn;
     var Biquad = timbre.modules.Biquad;
 
-    function PhaseShiftNode(_args) {
+    function PhaserNode(_args) {
         timbre.Object.call(this, _args);
         fn.fixAR(this);
         
@@ -16,9 +16,9 @@
         
         this.steps = 2;
     }
-    fn.extend(PhaseShiftNode);
+    fn.extend(PhaserNode);
     
-    var $ = PhaseShiftNode.prototype;
+    var $ = PhaserNode.prototype;
     
     Object.defineProperties($, {
         freq: {
@@ -92,7 +92,8 @@
         
         return cell;
     };
-    
-    fn.register("phaseshift", PhaseShiftNode);
+
+    fn.register("phaser", PhaserNode);
+    fn.alias("phaseshift", "phaser");
     
 })();
