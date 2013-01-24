@@ -204,18 +204,34 @@
     $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
+
+        if (_.isEnded && !_.buffer) {
+            return cell;
+        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            if (!_.isEnded && _.buffer) {
+            var buffer = _.buffer;
+            var phase  = _.phase;
+            var mul = _.mul, add = _.add;
+            var i, imax = cell.length;
+            
+            if (this.inputs.length) {
+                fn.inputSignalAR(this);
+                var t, sr = _.samplerate * 0.001;
+                for (i = 0; i < imax; ++i) {
+                    t = cell[i];
+                    phase = t * sr;
+                    cell[i] = (buffer[phase|0] || 0) * mul + add;
+                }
+                _.phase = phase;
+                _.currentTime = t;
+            } else {
                 var pitch  = _.pitch.process(tickID)[0];
-                var buffer = _.buffer;
-                var phase  = _.phase;
                 var phaseIncr = _.phaseIncr * pitch;
-                var mul = _.mul, add = _.add;
                 
-                for (var i = 0, imax = cell.length; i < imax; ++i) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = (buffer[phase|0] || 0) * mul + add;
                     phase += phaseIncr;
                 }
