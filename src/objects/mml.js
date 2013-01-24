@@ -64,6 +64,11 @@
             get: function() {
                 return this._.currentTime;
             }
+        },
+        isEnded: {
+            get: function() {
+                return this._.isEnded;
+            }
         }
     });
     
