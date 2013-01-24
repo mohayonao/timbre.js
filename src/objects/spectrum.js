@@ -158,7 +158,7 @@
             _.writeIndex = writeIndex;
             
             if (emit) {
-                this._.emit("fft");
+                this._.emit("data");
             }
         }
         return cell;

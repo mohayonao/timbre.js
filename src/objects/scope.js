@@ -117,7 +117,7 @@
             _.writeIndex = writeIndex;
             
             if (emit) {
-                this._.emit("scope");
+                this._.emit("data");
             }
         }
         

@@ -15,7 +15,7 @@ T("pink")
 ```timbre
 var noise = T("pink", {mul:0.15}).play();
 
-var fft = T("spectrum", {size:512, interval:100}, noise).on("fft", function() {
+var fft = T("spectrum", {size:512, interval:100}, noise).on("data", function() {
 
   fft.plot({target:canvas});
 
