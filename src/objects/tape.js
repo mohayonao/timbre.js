@@ -38,9 +38,6 @@
             }
         },
         isLooped: {
-            set: function(value) {
-                this.loop(value);
-            },
             get: function() {
                 return this._.isLooped;
             }

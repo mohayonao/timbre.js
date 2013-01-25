@@ -72,17 +72,11 @@
             }
         },
         isLooped: {
-            set: function(value) {
-                this.loop(value);
-            },
             get: function() {
                 return this._.isLooped;
             }
         },
         isReversed: {
-            set: function(value) {
-                this.reverse(value);
-            },
             get: function() {
                 return this._.isReversed;
             }
