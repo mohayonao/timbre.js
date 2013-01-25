@@ -1,5 +1,6 @@
 fs     = require 'fs'
 path   = require 'path'
+gzip   = require 'gzip'
 jade   = require 'jade'
 marked = require 'marked'
 
@@ -22,17 +23,25 @@ class DocFile
         fs.readFileSync(path, 'utf-8').split('\n')[0]
 
 class HTMLBuilder
-    constructor: (dirpath)->
+    constructor: (@dirpath)->
         @files = do =>
-            unless fs.existsSync dirpath then return {}
+            unless fs.existsSync @dirpath then return {}
 
             map = {}
-            for filename in fs.readdirSync dirpath
-                doc = new DocFile("#{dirpath}/#{filename}")
+            for filename in fs.readdirSync @dirpath
+                doc = new DocFile("#{@dirpath}/#{filename}")
                 if doc.error or (doc.dev and not isDev) then continue
                 doc.url = "./#{doc.name}.html"
                 map[doc.name] = doc
             map
+
+        filepath = path.normalize("#{@dirpath}/../timbre.dev.js")
+        source = fs.readFileSync filepath, 'utf-8'
+        @devsize = source.length
+        for line in source.split('\n')
+            if (m = /var _ver = "([\w.]+)";/.exec line)
+                @version = m[1]
+                break
 
     build: (name)->
         doc = @files[name]
@@ -46,13 +55,23 @@ class HTMLBuilder
         html = lang_process  html
         html = insert_canvas html
         html = insert_label  html
-        jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
+        html = jade.compile(fs.readFileSync("#{__dirname}/common.jade"))
             lang: doc.lang, title: doc.title, main: html
+            version: @version
             indexes:indexes, categories:[
                 {key:'D', caption:'Documents' }
                 {key:'E', caption:'Examples'  }
                 {key:'R', caption:'References'}
+                {key:'X', caption:'Extra objects'}
             ]
+        if name is 'index'
+            html = html.replace '${VERSION}', @version
+            html = html.replace '${DEVSIZE}', (@devsize / 1024).toFixed 2
+            filepath = path.normalize "#{@dirpath}/../timbre.js"
+            if fs.existsSync filepath
+                source = fs.readFileSync filepath, 'utf-8'
+                html = html.replace '${MINSIZE}', (source.length / 1024).toFixed 2
+        html
 
     get  : (name)-> @files[name]
     names: -> Object.keys(@files)
