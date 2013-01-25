@@ -226,10 +226,11 @@
         return timbre;
     };
     
-    timbre.removeListener = function(type, listener) {
+    timbre.off = function(type, listener) {
         _sys.removeListener(type, listener);
         return timbre;
     };
+    timbre.removeListener = timbre.off;
     
     timbre.removeAllListeners = function(type) {
         _sys.removeAllListeners(type);
@@ -780,11 +781,11 @@
             return this;
         };
         
-        $.removeListener = function(type, listener) {
+        $.off = $.removeListener = function(type, listener) {
             this._.events.removeListener(type, listener);
             return this;
         };
-
+        
         $.removeAllListeners = function(type) {
             this._.events.removeAllListeners(type);
             return this;
