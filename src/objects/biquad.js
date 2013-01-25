@@ -147,7 +147,9 @@
                 _.plotFlush = true;
             }
             
-            _.biquad.process(cell);
+            if (!_.bypassed) {
+                _.biquad.process(cell);
+            }
             
             fn.outputSignalAR(this);
         }

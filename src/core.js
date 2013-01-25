@@ -647,6 +647,7 @@
             this._.mul = 1;
             this._.add = 0;
             this._.dac = null;
+            this._.bypassed = false;
             this._.meta = {};
         }
         
@@ -702,6 +703,11 @@
                 },
                 get: function() {
                     return this._.dac;
+                }
+            },
+            isBypassed: {
+                get: function() {
+                    return this._.bypassed;
                 }
             }
         });
@@ -845,6 +851,11 @@
         
         $.process = function() {
             return this.cell;
+        };
+        
+        $.bypass = function(value) {
+            this._.bypassed = !!value;
+            return this;
         };
         
         $.play = function() {

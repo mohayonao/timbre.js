@@ -70,22 +70,18 @@
             
             fn.inputSignalAR(this);
             
-            var changed = false;
-            var feedback = _.fb.process(tickID)[0];
-            if (_.prevFeedback !== feedback) {
-                _.prevFeedback = feedback;
-                changed = true;
-            }
+            var fb  = _.fb.process(tickID)[0];
             var wet = _.wet.process(tickID)[0];
-            if (_.prevWet !== wet) {
+
+            if (_.prevFb !== fb || _.prevWet !== wet) {
+                _.prevFb  = fb;
                 _.prevWet = wet;
-                changed = true;
-            }
-            if (changed) {
-                _.delay.setParams({feedback:feedback, wet:wet});
+                _.delay.setParams({feedback:fb, wet:wet});
             }
             
-            _.delay.process(cell, true);
+            if (!_.bypassed) {
+                _.delay.process(cell, true);
+            }
             
             fn.outputSignalAR(this);
         }

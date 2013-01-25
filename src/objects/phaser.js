@@ -68,23 +68,25 @@
             
             fn.inputSignalAR(this);
             
-            var freq  = _.freq.process(tickID)[0];
-            var Q     = _.Q.process(tickID)[0];
-            var steps = _.steps;
-            var i;
-            
-            _.buffer.set(cell);
-            
-            for (i = steps; i--; ) {
-                _.allpass[i].setParams(freq, Q, 0);
-                _.allpass[i].process(_.buffer);
-                i--;
-                _.allpass[i].setParams(freq, Q, 0);
-                _.allpass[i].process(_.buffer);
-            }
-            
-            for (i = cell.length; i--; ) {
-                cell[i] = (cell[i] + _.buffer[i]) * 0.5;
+            if (!_.bypassed) {
+                var freq  = _.freq.process(tickID)[0];
+                var Q     = _.Q.process(tickID)[0];
+                var steps = _.steps;
+                var i;
+                
+                _.buffer.set(cell);
+                
+                for (i = steps; i--; ) {
+                    _.allpass[i].setParams(freq, Q, 0);
+                    _.allpass[i].process(_.buffer);
+                    i--;
+                    _.allpass[i].setParams(freq, Q, 0);
+                    _.allpass[i].process(_.buffer);
+                }
+                
+                for (i = cell.length; i--; ) {
+                    cell[i] = (cell[i] + _.buffer[i]) * 0.5;
+                }
             }
             
             fn.outputSignalAR(this);

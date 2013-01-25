@@ -93,7 +93,9 @@
             
             fn.inputSignalAR(this);
             
-            _.chorus.process(cell);
+            if (!_.bypassed) {
+                _.chorus.process(cell);
+            }
             
             fn.outputSignalAR(this);
         }

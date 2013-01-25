@@ -120,9 +120,10 @@
                 _.comp.setParams(thresh, knee, ratio);
             }
             
-            _.comp.process(cell);
-            
-            _.reduction = _.comp.meteringGain;
+            if (!_.bypassed) {
+                _.comp.process(cell);
+                _.reduction = _.comp.meteringGain;
+            }
             
             fn.outputSignalAR(this);
         }

@@ -122,11 +122,13 @@
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
-            
-            var biquads = _.biquads;
-            for (var i = 0, imax = biquads.length; i < imax; ++i) {
-                if (biquads[i]) {
-                    biquads[i].process(cell);
+
+            if (!_.bypassed) {
+                var biquads = _.biquads;
+                for (var i = 0, imax = biquads.length; i < imax; ++i) {
+                    if (biquads[i]) {
+                        biquads[i].process(cell);
+                    }
                 }
             }
             
