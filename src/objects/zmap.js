@@ -5,12 +5,13 @@
     
     function ZMapNode(_args) {
         timbre.Object.call(this, _args);
-        fn.fixKR(this);
-        
-        this._.inMin  = 0;
-        this._.inMax  = 1;
-        this._.outMin = 0;
-        this._.outMax = 1;
+
+        var _ = this._;
+        _.inMin  = 0;
+        _.inMax  = 1;
+        _.outMin = 0;
+        _.outMax = 1;
+        _.ar     = false;
         
         this.once("init", oninit);
     }
@@ -87,25 +88,27 @@
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
-            var inputs  = this.inputs;
-            var i, imax = inputs.length;
-            var j, jmax = cell.length;
-            var x;
-            
-            x = 0;
-            for (i = 0; i < imax; ++i) {
-                x += inputs[i].process(tickID)[0];
-            }
 
             var inMin  = _.inMin, inMax   = _.inMax;
             var outMin = _.outMin, outMax = _.outMax;
             var warp   = _.warp;
             
-            x = warp(x, inMin, inMax, outMin, outMax) * _.mul + _.add;
+            var len = this.input.length;
+            var mul = _.mul, add = _.add;
+            var i, imax = cell.length;
             
-            for (j = jmax; j--; ) {
-                cell[j] = x;
+            if (_.ar && len) {
+                fn.inputSignalAR(this);
+                for (i = imax; i--; ) {
+                    cell[i] = warp(cell[i], inMin, inMax, outMin, outMax) * mul + add;
+                }
+                fn.outputSignalAR(this);
+            } else {
+                var input = (this.inputs.length) ? fn.inputSignalKR(this) : 0;
+                var value = warp(input, inMin, inMax, outMin, outMax) * mul + add;
+                for (i = imax; i--; ) {
+                    cell[i] = value;
+                }
             }
         }
         

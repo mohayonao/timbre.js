@@ -6,14 +6,20 @@
     
     function ParamNode(_args) {
         timbre.Object.call(this, _args);
-        fn.fixKR(this);
         
         var _ = this._;
         _.env = new Envelope(timbre.samplerate);
         _.env.step = this.cell.length;
         _.curve = "lin";
+        _.ar    = false;
+        
+        this.on("ar", onar);
     }
     fn.extend(ParamNode);
+    
+    var onar = function(value) {
+        this._.env.step = (value) ? 1 : this.cell.length;
+    };
     
     var $ = ParamNode.prototype;
 
@@ -136,14 +142,24 @@
                     cell[i] = 1;
                 }
             }
-            
-            var value = _.env.next();
-            
-            for (i = imax; i--; ) {
-                cell[i] = (cell[i] * value) * mul + add;
+
+            var value, emit = null;
+            if (_.ar) {
+                for (i = 0; i < imax; ++i) {
+                    value = _.env.next();
+                    cell[i] = (cell[i] * value) * mul + add;
+                    if (emit === null) {
+                        emit = _.env.emit;
+                    }
+                }
+            } else {
+                value = _.env.next();
+                for (i = imax; i--; ) {
+                    cell[i] = (cell[i] * value) * mul + add;
+                }
+                emit = _.env.emit;
             }
             
-            var emit = _.env.emit;
             if (emit) {
                 if (emit === "ended") {
                     fn.nextTick(onended.bind(this));

@@ -7,8 +7,9 @@
         timbre.Object.call(this, _args);
         var _ = this._;
         _.input  = 0;
-        _.output = 0;
+        _.value = 0;
         _.prev   = null;
+        _.ar     = false;
         _.map    = defaultFunction;
     }
     fn.extend(MapNode);
@@ -58,18 +59,30 @@
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
+
+            var len = this.input.length;
+            var i, imax = cell.length;
             
-            var input = (this.inputs.length) ? fn.inputSignalKR(this) : _.input;
-            
-            if (_.map && _.prev !== input) {
-                _.prev = input;
-                _.output = _.map(input);
-            }
-            
-            var output = _.output * _.mul + _.add;
-            
-            for (var i = cell.length; i--; ) {
-                cell[i] = output;
+            if (_.ar && len) {
+                fn.inputSignalAR(this);
+                var map = _.map;
+                if (map) {
+                    for (i = imax; i--; ) {
+                        cell[i] = map(cell[i]);
+                    }
+                }
+                _.value = cell[imax-1];
+                fn.outputSignalAR(this);
+            } else {
+                var input = len ? fn.inputSignalKR(this) : _.input;
+                if (_.map && _.prev !== input) {
+                    _.prev = input;
+                    _.value = _.map(input);
+                }
+                var value = _.value * _.mul + _.add;
+                for (i = imax; i--; ) {
+                    cell[i] = value;
+                }
             }
         }
         
