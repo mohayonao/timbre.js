@@ -94,7 +94,7 @@
             
             _.isEnded = false;
             
-            if (list.length >= _.poly) {
+            if (list.length > _.poly) {
                 _.remGen(list[0]);
             }
         }
