@@ -38,6 +38,31 @@
         }
     });
     
+    $.listen = function() {
+        var _impl = impl[timbre.env];
+        if (_impl) {
+            _impl.listen.call(this);
+        }
+    };
+    
+    $.unlisten = function() {
+        var _impl = impl[timbre.env];
+        if (_impl) {
+            _impl.unlisten.call(this);
+        }
+        var i;
+        var cell = this.cell;
+        var L = this.L, R = this.R;
+        for (i = cell.length; i--; ) {
+            cell[i] = L[i] = R[i] = 0;
+        }
+        var _ = this._;
+        var bufferL = _.bufferL, bufferR = _.bufferR;
+        for (i = bufferL.length; i--; ) {
+            bufferL[i] = bufferR[i] = 0;
+        }
+    };
+    
     $.process = function(tickID) {
         var cell = this.cell;
         var _ = this._;
@@ -69,20 +94,6 @@
         
         return cell;
     };
-
-    var onpause = function() {
-        var i;
-        var cell = this.cell;
-        var L = this.L, R = this.R;
-        for (i = cell.length; i--; ) {
-            cell[i] = L[i] = R[i] = 0;
-        }
-        var _ = this._;
-        var bufferL = _.bufferL, bufferR = _.bufferR;
-        for (i = bufferL.length; i--; ) {
-            bufferL[i] = bufferR[i] = 0;
-        }
-    };
     
     var impl = {};
     impl.webkit = {
@@ -92,17 +103,10 @@
             if (src instanceof HTMLMediaElement) {
                 var context = fn._audioContext;
                 _.src = context.createMediaElementSource(src);
-                _.onplay  = impl.webkit.onplay .bind(this);
-                _.onpause = impl.webkit.onpause.bind(this);
-                src.addEventListener("play" , _.onplay);
-                src.addEventListener("pause", _.onpause);
-                if (src.played.length) {
-                    _.onplay();
-                }
             }
             /*global HTMLMediaElement:false */
         },
-        onplay: function() {
+        listen: function() {
             var _ = this._;
             var context = fn._audioContext;
             _.gain = context.createGainNode();
@@ -113,7 +117,7 @@
             _.node.connect(_.gain);
             _.gain.connect(context.destination);
         },
-        onpause: function() {
+        unlisten: function() {
             var _ = this._;
             if (_.src) {
                 _.src.disconnect();
@@ -124,7 +128,6 @@
             if (_.node) {
                 _.node.disconnect();
             }
-            onpause.call(this);
         }
     };
     var onaudioprocess = function(e) {
@@ -150,17 +153,10 @@
             if (src instanceof HTMLAudioElement) {
                 _.src = src;
                 _.istep = timbre.samplerate / src.mozSampleRate;
-                _.onplay  = impl.moz.onplay .bind(this);
-                _.onpause = impl.moz.onpause.bind(this);
-                src.addEventListener("play" , _.onplay);
-                src.addEventListener("pause", _.onpause);
-                if (src.played.length) {
-                    _.onplay();
-                }
             }
             /*global HTMLAudioElement:false */
         },
-        onplay: function() {
+        listen: function() {
             var _ = this._;
             var o0 = _.bufferL;
             var o1 = _.bufferR;
@@ -212,13 +208,12 @@
             }
             _.src.addEventListener("MozAudioAvailable", _.func);
         },
-        onpause: function() {
+        unlisten: function() {
             var _ = this._;
             if (_.func) {
                 _.src.removeEventListener("MozAudioAvailable", _.func);
                 _.func = null;
             }
-            onpause.call(this);
         }
     };
     
