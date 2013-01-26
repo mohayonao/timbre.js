@@ -669,6 +669,11 @@
                     return !this._.ar;
                 }
             },
+            isBypassed: {
+                get: function() {
+                    return this._.bypassed;
+                }
+            },
             mul: {
                 set: function(value) {
                     if (typeof value === "number") {
@@ -703,11 +708,6 @@
                 },
                 get: function() {
                     return this._.dac;
-                }
-            },
-            isBypassed: {
-                get: function() {
-                    return this._.bypassed;
                 }
             }
         });
@@ -853,8 +853,8 @@
             return this.cell;
         };
         
-        $.bypass = function(value) {
-            this._.bypassed = !!value;
+        $.bypass = function() {
+            this._.bypassed = (arguments.length === 0) ? true : !!arguments[0];
             return this;
         };
         
@@ -890,26 +890,30 @@
             return this;
         };
         
-        $.ar = function(value) {
-            if (value === false) {
-                this.kr(true);
-            } else {
+        $.start = $.stop = $.listen = $.unlisten = function() {
+            return this;
+        };
+        
+        $.ar = function() {
+            if ((arguments.length === 0) ? true : !!arguments[0]) {
                 if (!this._.kronly) {
                     this._.ar = true;
                     this._.emit("ar", true);
                 }
+            } else {
+                this.kr(true);
             }
             return this;
         };
         
-        $.kr = function(value) {
-            if (value === false) {
-                this.ar(true);
-            } else {
+        $.kr = function() {
+            if ((arguments.length === 0) ? true : !!arguments[0]) {
                 if (!this._.aronly) {
                     this._.ar = false;
                     this._.emit("ar", false);
                 }
+            } else {
+                this.ar(true);
             }
             return this;
         };
