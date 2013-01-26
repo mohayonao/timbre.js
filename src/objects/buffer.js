@@ -51,7 +51,7 @@
                 _.duration  = _.buffer.length * 1000 / _.samplerate;
                 _.currentTime = 0;
                 _.plotFlush = true;
-                this.isReversed = _.isReversed;
+                this.reverse(_.isReversed);
             }
         }
     };
@@ -122,8 +122,8 @@
                 samplerate: _.samplerate
             });
         }
-        instance.isLooped   = this.isLooped;
-        instance.isReversed = this.isReversed;
+        instance.loop(_.isLooped);
+        instance.reverse(_.isReversed);
         
         return instance;
     };
@@ -157,8 +157,8 @@
             });
             instance._.isEnded = false;
         }
-        instance.isLooped   = this.isLooped;
-        instance.isReversed = this.isReversed;
+        instance.loop(_.isLooped);
+        instance.reverse(_.isReversed);
         
         return instance;
     };
