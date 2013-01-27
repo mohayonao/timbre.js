@@ -10,7 +10,7 @@
         timbre.Object.call(this, _args);
         var _ = this._;
         _.env = new Envelope(timbre.samplerate);
-        _.env.step = this.cell.length;
+        _.env.setStep(this.cell.length);
         _.ar = false;
         _.plotFlush = true;
         this.on("ar", onar);
@@ -18,7 +18,7 @@
     fn.extend(EnvNode);
     
     var onar = function(value) {
-        this._.env.step = (value) ? 1 : this.cell.length;
+        this._.env.setStep((value) ? 1 : this.cell.length);
     };
     
     var $ = EnvNode.prototype;
@@ -159,7 +159,7 @@
             var i, imax;
             
             samples /= data.length;
-            env.step = samples;
+            env.setStep(samples);
             env.status = Envelope.StatusGate;
             for (i = 0, imax = data.length; i < imax; ++i) {
                 data[i] = env.next();
