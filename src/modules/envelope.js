@@ -1,11 +1,8 @@
 (function() {
     "use strict";
     
-    var timevalue = timbre.timevalue;
-    
     function Envelope(samplerate) {
         this.samplerate = samplerate || 44100;
-        this.table  = [];
         this.value  = ZERO;
         this.status = StatusWait;
         this.curve  = "linear";
@@ -16,10 +13,10 @@
         
         this._envValue = new EnvelopeValue(samplerate);
         
+        this._table  = [];
         this._initValue  = ZERO;
         this._curveValue = 0;
         this._defaultCurveType = CurveTypeLin;
-        this._table   = [];
         this._index   = 0;
         this._counter = 0;
     }
@@ -55,7 +52,8 @@
     
     $.clone = function() {
         var new_instance = new Envelope(this.samplerate);
-        new_instance.setTable(this.table);
+        new_instance._table = this._table;
+        new_instance._initValue = this._initValue;
         new_instance.setCurve(this.curve);
         if (this.releaseNode !== null) {
             new_instance.setReleaseNode(this.releaseNode + 1);
@@ -64,14 +62,16 @@
             new_instance.setLoopNode(this.loopNode + 1);
         }
         new_instance.setStep(this.step);
+        new_instance.reset();
         return new_instance;
     };
     $.setTable = function(value) {
-        if (Array.isArray(value)) {
-            this.table = value;
-            this._buildTable(value);
-            this.value = this._envValue.value = this._initValue;
-        }
+        this._initValue = value[0];
+        this._table = value.slice(1);
+        this.value = this._envValue.value = this._initValue;
+        this._index   = 0;
+        this._counter = 0;
+        this.status = StatusWait;
     };
     $.setCurve = function(value) {
         if (typeof value === "number")  {
@@ -145,15 +145,17 @@
             isEndlessLoop   : isEndlessLoop
         };
     };
-    $.next = function() {
+
+    $.calcStatus = function() {
         var status  = this.status;
-        var index   = this._index;
         var table   = this._table;
+        var index   = this._index;
+        var counter = this._counter;
+        
         var curveValue = this._curveValue;
         var defaultCurveType = this._defaultCurveType;
         var loopNode    = this.loopNode;
         var releaseNode = this.releaseNode;
-        var counter = this._counter;
         var envValue = this._envValue;
         var items, endValue, time, curveType, emit = null;
         
@@ -175,7 +177,7 @@
                     emit      = "ended";
                     continue;
                 } else if (status === StatusGate && index === releaseNode) {
-                    if (this.loopNode !== null && loopNode < releaseNode) {
+                    if (loopNode !== null && loopNode < releaseNode) {
                         index = loopNode;
                         continue;
                     }
@@ -206,54 +208,41 @@
             break;
         }
         
-        if (status & 1) {
-            this.value  = envValue.next() || ZERO;
-        }
         this.status = status;
         this.emit   = emit;
         this._index = index;
-        this._counter = counter - 1;
+        this._counter = counter;
         
+        return status;
+    };
+    
+    $.next = function() {
+        if (this.calcStatus() & 1) {
+            this.value  = this._envValue.next() || ZERO;
+        }
+        this._counter -= 1;
         return this.value;
     };
-    $._buildTable = function(list) {
-        if (list.length === 0) {
-            this._initValue = ZERO;
-            this._table     = [];
-            return;
-        }
+    
+    $.process = function(cell) {
+        var envValue = this._envValue;
+        var i, imax = cell.length;
         
-        this._initValue = list[0] || ZERO;
-        this._table     = [];
-        
-        var table = this._table;
-        var value, time, curveType, curveValue;
-        for (var i = 1, imax = list.length; i < imax; ++i) {
-            value = list[i][0] || ZERO;
-            time  = list[i][1];
-            curveType = list[i][2];
-            
-            if (typeof time !== "number") {
-                if (typeof time === "string") {
-                    time = timevalue(time);
-                } else {
-                    time = 10;
-                }
+        if (this.calcStatus() & 1) {
+            for (i = 0; i < imax; ++i) {
+                cell[i] = envValue.next() || ZERO;
             }
-            if (time < 10) {
-                time = 10;
+        } else {
+            var value = this.value || ZERO;
+            for (i = 0; i < imax; ++i) {
+                cell[i] = value;
             }
-            
-            if (typeof curveType === "number") {
-                curveValue = curveType;
-                curveType  = CurveTypeCurve;
-            } else {
-                curveType  = CurveTypeDict[curveType] || null;
-                curveValue = 0;
-            }
-            table.push([value, time, curveType, curveValue]);
         }
+        this.value = cell[imax-1];
+        
+        this._counter -= cell.length;
     };
+    
     
     function EnvelopeValue(samplerate) {
         this.samplerate = samplerate;

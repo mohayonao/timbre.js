@@ -11,6 +11,7 @@
         var _ = this._;
         _.env = new Envelope(timbre.samplerate);
         _.env.setStep(this.cell.length);
+        _.tmp = new Float32Array(this.cell.length);
         _.ar = false;
         _.plotFlush = true;
         this.on("ar", onar);
@@ -27,7 +28,7 @@
         table: {
             set: function(value) {
                 if (Array.isArray(value)) {
-                    this._.env.setTable(value);
+                    setTable.call(this, value);
                     this._.plotFlush = true;
                 }
             },
@@ -107,16 +108,15 @@
                     cell[i] = 1;
                 }
             }
-
+            
             var value, emit = null;
             if (_.ar) {
-                for (i = 0; i < imax; ++i) {
-                    value = _.env.next();
-                    cell[i] = (cell[i] * value) * mul + add;
-                    if (emit === null) {
-                        emit = _.env.emit;
-                    }
+                var tmp = _.tmp;
+                _.env.process(tmp);
+                for (i = imax; i--; ) {
+                    cell[i] = (cell[i] * tmp[i]) * mul + add;
                 }
+                emit = _.env.emit;
             } else {
                 value = _.env.next();
                 for (i = imax; i--; ) {
@@ -127,7 +127,7 @@
             
             if (emit) {
                 if (emit === "ended") {
-                    fn.nextTick(onended.bind(this));
+                    fn.nextTick(fn.onended.bind(null, this, 0));
                 } else {
                     this._.emit(emit, _.value);
                 }
@@ -136,9 +136,40 @@
         
         return cell;
     };
-    
-    var onended = function() {
-        fn.onended(this, 0);
+
+    var setTable = function(list) {
+        var env = this._.env;
+        
+        var table = [list[0] || ZERO];
+        
+        var value, time, curveType, curveValue;
+        for (var i = 1, imax = list.length; i < imax; ++i) {
+            value = list[i][0] || ZERO;
+            time  = list[i][1];
+            curveType = list[i][2];
+            
+            if (typeof time !== "number") {
+                if (typeof time === "string") {
+                    time = timevalue(time);
+                } else {
+                    time = 10;
+                }
+            }
+            if (time < 10) {
+                time = 10;
+            }
+            
+            if (typeof curveType === "number") {
+                curveValue = curveType;
+                curveType  = Envelope.CurveTypeCurve;
+            } else {
+                curveType  = Envelope.CurveTypeDict[curveType] || null;
+                curveValue = 0;
+            }
+            table.push([value, time, curveType, curveValue]);
+        }
+        
+        env.setTable(table);
     };
     
     var super_plot = timbre.Object.prototype.plot;
