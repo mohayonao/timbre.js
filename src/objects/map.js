@@ -60,7 +60,7 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
-            var len = this.input.length;
+            var len = this.inputs.length;
             var i, imax = cell.length;
             
             if (_.ar && len) {

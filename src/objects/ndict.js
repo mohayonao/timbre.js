@@ -72,7 +72,7 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
-            var len = this.input.length;
+            var len = this.inputs.length;
             var index, value;
             var dict = _.dict, defaultValue = _.defaultValue;
             var mul = _.mul, add = _.add;

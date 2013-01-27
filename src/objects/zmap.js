@@ -93,7 +93,7 @@
             var outMin = _.outMin, outMax = _.outMax;
             var warp   = _.warp;
             
-            var len = this.input.length;
+            var len = this.inputs.length;
             var mul = _.mul, add = _.add;
             var i, imax = cell.length;
             
