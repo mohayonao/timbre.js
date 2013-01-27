@@ -52,7 +52,7 @@
         }
         var i;
         var cell = this.cell;
-        var L = this.L, R = this.R;
+        var L = this.cellL, R = this.cellR;
         for (i = cell.length; i--; ) {
             cell[i] = L[i] = R[i] = 0;
         }
@@ -79,7 +79,7 @@
             var i, imax = cell.length;
             
             if (_.totalWrite > _.totalRead + cell.length) {
-                var L = this.L, R = this.R;
+                var L = this.cellL, R = this.cellR;
                 var readIndex = _.readIndex;
                 for (i = 0; i < imax; ++i, ++readIndex) {
                     L[i] = bufferL[readIndex];

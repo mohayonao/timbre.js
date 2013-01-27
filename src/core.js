@@ -1317,8 +1317,8 @@
                     tmp = inputs[i];
                     tmp.process(tickID);
                     if (tmp.isStereo) {
-                        tmpL = tmp.L;
-                        tmpR = tmp.R;
+                        tmpL = tmp.cellL;
+                        tmpR = tmp.cellR;
                     } else {
                         tmpL = tmpR = tmp.cell;
                     }
