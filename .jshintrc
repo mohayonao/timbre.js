@@ -12,5 +12,5 @@
     
     "browser" : true,
     "node"    : true,
-    "predef"  : ["timbre","webkitAudioContext","URL","File"]
+    "predef"  : ["timbre"]
 }

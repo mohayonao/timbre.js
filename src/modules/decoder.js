@@ -149,7 +149,7 @@
     
     Decoder.webkit_decode = (function() {
         if (typeof webkitAudioContext !== "undefined") {
-            var ctx = new webkitAudioContext();
+            var ctx = timbre._audioContext;
             var _decode = function(data, onloadedmetadata, onloadeddata) {
                 var samplerate, duration, buffer;
                 if (typeof data === "string") {
@@ -176,6 +176,7 @@
             };
             
             return function(src, onloadedmetadata, onloadeddata) {
+                /*global File:true */
                 if (src instanceof File) {
                     var reader = new FileReader();
                     reader.onload = function(e) {
@@ -188,6 +189,7 @@
                         _decode(data, onloadedmetadata, onloadeddata);
                     });
                 }
+                /*global File:false */
             };
         }
     })();

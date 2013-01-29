@@ -1749,6 +1749,7 @@
     
     // player (borrowed from pico.js)
     var ImplClass = null;
+    /*global webkitAudioContext:true */
     if (typeof webkitAudioContext !== "undefined") {
         ImplClass = function(sys) {
             var context = new webkitAudioContext();
@@ -1823,12 +1824,14 @@
     } else if (typeof Audio === "function" &&
                typeof (new Audio()).mozSetup === "function") {
         ImplClass = function(sys) {
+            /*global URL:true */
             var timer = (function() {
                 var source = "var t=0;onmessage=function(e){if(t)t=clearInterval(t),0;if(typeof e.data=='number'&&e.data>0)t=setInterval(function(){postMessage(0);},e.data);};";
                 var blob = new Blob([source], {type:"text/javascript"});
                 var path = URL.createObjectURL(blob);
                 return new Worker(path);
             })();
+            /*global URL:false */
 
             this.maxSamplerate     = 48000;
             this.defaultSamplerate = 44100;
@@ -1882,6 +1885,7 @@
             this.pause = __nop;
         };
     }
+    /*global webkitAudioContext:false */
     
     _sys = new SoundSystem().bind(ImplClass);
     
