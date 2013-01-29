@@ -1,18 +1,18 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
     
     function ScheduleNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.timer(this);
         fn.fixKR(this);
         
         var _ = this._;
         _.queue = [];
         _.currentTime     = 0;
-        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
         _.maxRemain = 1000;
     }
     fn.extend(ScheduleNode);
@@ -77,7 +77,7 @@
                     break;
                 }
             }
-            queue.splice(i + 1, 0, [time, timbre(item)]);
+            queue.splice(i + 1, 0, [time, T(item)]);
         }
         return this;
     };
@@ -132,4 +132,4 @@
     fn.register("schedule", ScheduleNode);
     fn.alias("sche", "schedule");
     
-})();
+})(timbre);

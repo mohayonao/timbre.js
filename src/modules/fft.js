@@ -1,4 +1,4 @@
-(function() {
+(function(T) {
     "use strict";
     
     function FFT(n) {
@@ -234,6 +234,6 @@
         };
     }());
     
-    timbre.modules.FFT = FFT;
+    T.modules.FFT = FFT;
     
-})();
+})(timbre);

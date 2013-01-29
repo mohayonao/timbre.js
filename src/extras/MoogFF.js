@@ -29,20 +29,20 @@
    SuperCollider/server/plugins/FilterUGens.cpp
 */
 
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function MoogFFNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.freq = timbre(100);
-        _.gain = timbre(2);
+        _.freq = T(100);
+        _.gain = T(2);
         
-        _.sr = timbre.samplerate;
+        _.sr = T.samplerate;
         _.t  = 1 / _.sr;
         _.b0 = _.a1 = _.wcD = 0;
         _.s1 = _.s2 = _.s3 = _.s4 = 0;
@@ -54,7 +54,7 @@
     Object.defineProperties($, {
         freq: {
             set: function(value) {
-                this._.freq = timbre(value);
+                this._.freq = T(value);
             },
             get: function() {
                 return this._.freq;
@@ -62,7 +62,7 @@
         },
         gain: {
             set: function(value) {
-                this._.gain = timbre(value);
+                this._.gain = T(value);
             },
             get: function() {
                 return this._.gain;
@@ -147,4 +147,4 @@
     
     fn.register("MoogFF", MoogFFNode);
     
-})();
+})(timbre);

@@ -1,22 +1,22 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue  = timbre.timevalue;
-    var Compressor = timbre.modules.Compressor;
+    var fn = T.fn;
+    var timevalue  = T.timevalue;
+    var Compressor = T.modules.Compressor;
     
     function CompressorNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.thresh = timbre(-24);
-        _.knee   = timbre(30);
-        _.ratio  = timbre(12);
+        _.thresh = T(-24);
+        _.knee   = T(30);
+        _.ratio  = T(12);
         _.postGain  =   6;
         _.reduction =   0;
         
-        _.comp = new Compressor(timbre.samplerate);
+        _.comp = new Compressor(T.samplerate);
         _.comp.dbPostGain  = _.postGain;
         _.comp.setAttackTime(0.003);
         _.comp.setReleaseTime(0.25);
@@ -28,7 +28,7 @@
     Object.defineProperties($, {
         thresh: {
             set: function(value) {
-                this._.thresh = timbre(value);
+                this._.thresh = T(value);
             },
             get: function() {
                 return this._.thresh;
@@ -36,7 +36,7 @@
         },
         knee: {
             set: function(value) {
-                this._.kne = timbre(value);
+                this._.kne = T(value);
             },
             get: function() {
                 return this._.knee;
@@ -44,7 +44,7 @@
         },
         ratio: {
             set: function(value) {
-                this._.ratio = timbre(value);
+                this._.ratio = T(value);
             },
             get: function() {
                 return this._.ratio;
@@ -134,4 +134,4 @@
     fn.register("comp", CompressorNode);
     fn.alias("compressor", "comp");
     
-})();
+})(timbre);

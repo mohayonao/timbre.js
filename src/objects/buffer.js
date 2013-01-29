@@ -1,20 +1,20 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function BufferNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.pitch      = timbre(1);
+        _.pitch      = T(1);
         _.buffer     = new Float32Array(0);
         _.isLooped   = false;
         _.isReversed = false;
         _.duration    = 0;
         _.currentTime = 0;
-        _.currentTimeIncr = this.cell.length * 1000 / timbre.samplerate;
+        _.currentTimeIncr = this.cell.length * 1000 / T.samplerate;
         _.samplerate  = 44100;
         _.phase = 0;
         _.phaseIncr = 0;
@@ -47,7 +47,7 @@
                 }
                 _.buffer = buffer;
                 _.phase     = 0;
-                _.phaseIncr = _.samplerate / timbre.samplerate;
+                _.phaseIncr = _.samplerate / T.samplerate;
                 _.duration  = _.buffer.length * 1000 / _.samplerate;
                 _.currentTime = 0;
                 _.plotFlush = true;
@@ -65,7 +65,7 @@
         },
         pitch: {
             set: function(value) {
-                this._.pitch = timbre(value);
+                this._.pitch = T(value);
             },
             get: function() {
                 return this._.pitch;
@@ -114,7 +114,7 @@
 
     $.clone = function() {
         var _ = this._;
-        var instance = timbre("buffer");
+        var instance = T("buffer");
         
         if (_.buffer) {
             setBuffer.call(instance, {
@@ -130,7 +130,7 @@
     
     $.slice = function(begin, end) {
         var _ = this._;
-        var instance = timbre(_.originkey);
+        var instance = T(_.originkey);
         
         var isReversed = _.isReversed;
         if (typeof begin === "number" ){
@@ -265,7 +265,7 @@
         fn.onended(this, 0);
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         var _ = this._;
@@ -285,4 +285,4 @@
     
     fn.register("buffer", BufferNode);
     
-})();
+})(timbre);

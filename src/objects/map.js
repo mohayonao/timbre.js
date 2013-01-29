@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function MapNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         var _ = this._;
         _.input  = 0;
         _.value = 0;
@@ -91,4 +91,4 @@
     
     fn.register("map", MapNode);
     
-})();
+})(timbre);

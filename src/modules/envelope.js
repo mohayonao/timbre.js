@@ -1,4 +1,4 @@
-(function() {
+(function(T) {
     "use strict";
     
     function Envelope(samplerate) {
@@ -376,7 +376,7 @@
     
     EnvelopeValue.prototype.next = NextFunctions[CurveTypeSet];
     
-    timbre.modules.Envelope      = Envelope;
-    timbre.modules.EnvelopeValue = EnvelopeValue;
+    T.modules.Envelope      = Envelope;
+    T.modules.EnvelopeValue = EnvelopeValue;
     
-})();
+})(timbre);

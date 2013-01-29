@@ -1,16 +1,16 @@
-(function() {
+(function(T) {
     "use strict";
     
-    if (timbre.env !== "webkit") {
+    if (T.env !== "webkit") {
         return;
     }
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     var context = fn._audioContext;
     var BUFFERSIZE = 1024;
     
     function WebAudioAPINode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
@@ -225,4 +225,4 @@
         fn.register("WebAudioAPI:send", WebAudioAPISendNode);
     })();
     
-})();
+})(timbre);

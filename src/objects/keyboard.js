@@ -1,11 +1,11 @@
-(function() {
+(function(T) {
     "use strict";
 
-    if (timbre.envtype !== "browser") {
+    if (T.envtype !== "browser") {
         return;
     }
 
-    var fn = timbre.fn;
+    var fn = T.fn;
     var instance = null;
 
     function KeyboardListener(_args) {
@@ -14,7 +14,7 @@
         }
         instance = this;
         
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
 
         fn.fixKR(this);
     }
@@ -86,4 +86,4 @@
     
     fn.register("keyboard", KeyboardListener);
     
-})();
+})(timbre);

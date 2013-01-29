@@ -1,15 +1,15 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function PannerNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.stereo(this);
         fn.fixAR(this);
         
         var _ = this._;
-        _.value = timbre(0);
+        _.value = T(0);
         _.panL = 0.5;
         _.panR = 0.5;
     }
@@ -20,7 +20,7 @@
     Object.defineProperties($, {
         value: {
             set: function(value) {
-                this._.value = timbre(value);
+                this._.value = T(value);
             },
             get: function() {
                 return this._.value;
@@ -80,4 +80,4 @@
     
     fn.register("pan", PannerNode);
     
-})();
+})(timbre);

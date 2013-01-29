@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function NDictNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         
         var _ = this._;
         _.defaultValue = 0;
@@ -153,5 +153,4 @@
         return instance;
     });
     
-})();
-
+})(timbre);

@@ -1,11 +1,11 @@
-(function() {
+(function(T) {
     "use strict";
     
-    if (timbre.envtype !== "browser") {
+    if (T.envtype !== "browser") {
         return;
     }
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     var instance = null;
     
     function MouseListener(_args) {
@@ -14,7 +14,7 @@
         }
         instance = this;
         
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.stereo(this);
         
         this.X = this.L;
@@ -75,13 +75,13 @@
     
     
     function MouseXY(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         if (!instance) {
             instance = new MouseListener([]);
         }
         fn.fixKR(this);
     }
-    fn.extend(MouseXY, timbre.Object);
+    fn.extend(MouseXY);
     
     Object.defineProperties(MouseXY.prototype, {
         min: {
@@ -158,7 +158,7 @@
         _.delta = 1;
         _.curveName = "lin";
         
-        _.map = timbre("map", {map:Curves.lin.bind(_)}, instance.X);
+        _.map = T("map", {map:Curves.lin.bind(_)}, instance.X);
         
         self.cell = _.map.cell;
         
@@ -173,9 +173,9 @@
         _.delta = 1;
         _.curveName = "lin";
         
-        _.map = timbre("map", {map:Curves.lin.bind(_)}, instance.Y);
+        _.map = T("map", {map:Curves.lin.bind(_)}, instance.Y);
         
         self.cell = _.map.cell;
         return self;
     });
-})();
+})(timbre);

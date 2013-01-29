@@ -1,11 +1,11 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
     
     function ScopeNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
         
@@ -59,7 +59,7 @@
                         _.reservedinterval = value;
                     } else {
                         _.interval    = value;
-                        _.samplesIncr = value * 0.001 * timbre.samplerate / _.buffer.length;
+                        _.samplesIncr = value * 0.001 * T.samplerate / _.buffer.length;
                         if (_.samplesIncr < 1) {
                             _.samplesIncr = 1;
                         }
@@ -124,7 +124,7 @@
         return cell;
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         var _ = this._;
@@ -144,4 +144,4 @@
     
     fn.register("scope", ScopeNode);
     
-})();
+})(timbre);

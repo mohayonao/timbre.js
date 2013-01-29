@@ -1,12 +1,12 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
-    var FFT = timbre.modules.FFT;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
+    var FFT = T.modules.FFT;
     
     function SpectrumNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
         
@@ -78,10 +78,10 @@
                         _.reservedinterval = value;
                     } else {
                         _.interval = value;
-                        _.samplesIncr = (value * 0.001 * timbre.samplerate);
+                        _.samplesIncr = (value * 0.001 * T.samplerate);
                         if (_.samplesIncr < _.buffer.length) {
                             _.samplesIncr = _.buffer.length;
-                            _.interval = _.samplesIncr * 1000 / timbre.samplerate;
+                            _.interval = _.samplesIncr * 1000 / T.samplerate;
                         }
                     }
                 }
@@ -164,7 +164,7 @@
         return cell;
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
@@ -202,4 +202,4 @@
     
     fn.register("spectrum", SpectrumNode);
 
-})();
+})(timbre);

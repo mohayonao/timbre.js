@@ -1,4 +1,4 @@
-(function() {
+(function(T) {
     "use strict";
     
     var MaxPreDelayFrames     = 1024;
@@ -422,6 +422,6 @@
         this.maxAttackCompressionDiffDb = -1; // uninitialized state
     };
     
-    timbre.modules.Compressor = Compressor;
+    T.modules.Compressor = Compressor;
     
-})();
+})(timbre);

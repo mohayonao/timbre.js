@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function MML(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.timer(this);
         fn.fixKR(this);
         
@@ -15,7 +15,7 @@
         _.index    = 0;
         _.queue    = [];
         _.currentTime     = 0;
-        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
         _.queueTime = 0;
         _.segnoIndex  = -1;
         _.loopStack   = [];
@@ -404,4 +404,4 @@
     
     fn.register("mml", MML);
     
-})();
+})(timbre);

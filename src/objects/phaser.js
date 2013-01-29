@@ -1,17 +1,17 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn  = timbre.fn;
-    var Biquad = timbre.modules.Biquad;
+    var fn  = T.fn;
+    var Biquad = T.modules.Biquad;
 
     function PhaserNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.buffer = new Float32Array(timbre.cellsize);
-        _.freq   = timbre("sin", {freq:1, add:1000, mul:250}).kr();
-        _.Q      = timbre(1);
+        _.buffer = new Float32Array(T.cellsize);
+        _.freq   = T("sin", {freq:1, add:1000, mul:250}).kr();
+        _.Q      = T(1);
         _.allpass  = [];
         
         this.steps = 2;
@@ -31,7 +31,7 @@
         },
         Q: {
             set: function(value) {
-                this._.Q = timbre(value);
+                this._.Q = T(value);
             },
             get: function() {
                 return this._.Q;
@@ -45,7 +45,7 @@
                         var allpass = this._.allpass;
                         if (allpass.length < value) {
                             for (var i = allpass.length; i < value; ++i) {
-                                allpass[i] = new Biquad(timbre.samplerate);
+                                allpass[i] = new Biquad(T.samplerate);
                                 allpass[i].setType("allpass");
                             }
                         }
@@ -98,4 +98,4 @@
     fn.register("phaser", PhaserNode);
     fn.alias("phaseshift", "phaser");
     
-})();
+})(timbre);

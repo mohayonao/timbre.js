@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function PluckNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         
         this._.freq   = 440;
         this._.buffer = null;
@@ -34,7 +34,7 @@
     $.bang = function() {
         var _ = this._;
         var freq   = _.freq;
-        var size   = (timbre.samplerate / freq + 0.5)|0;
+        var size   = (T.samplerate / freq + 0.5)|0;
         var buffer = _.buffer = new Float32Array(size << 1);
         for (var i = size; i--; ) {
             buffer[i] = Math.random() * 2 - 1;
@@ -82,4 +82,4 @@
     
     fn.register("pluck", PluckNode);
     
-})();
+})(timbre);

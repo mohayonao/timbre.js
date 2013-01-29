@@ -1,14 +1,14 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn  = timbre.fn;
-    var Chorus = timbre.modules.Chorus;
+    var fn  = T.fn;
+    var Chorus = T.modules.Chorus;
     
     function ChorusNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
 
-        var chorus = new Chorus(timbre.samplerate);
+        var chorus = new Chorus(T.samplerate);
         chorus.setDelayTime(20);
         chorus.setRate(4);
         chorus.depth = 20;
@@ -53,7 +53,7 @@
             set: function(value) {
                 if (typeof value === "number") {
                     if (0 <= value && value <= 100) {
-                        value *= timbre.samplerate / 44100;
+                        value *= T.samplerate / 44100;
                         this._.chorus.depth = value;
                     }
                 }
@@ -76,7 +76,7 @@
         },
         wet: {
             set: function(value) {
-                this._.wet = timbre(value);
+                this._.wet = T(value);
             },
             get: function() {
                 return this._.wet;
@@ -105,4 +105,4 @@
     
     fn.register("chorus", ChorusNode);
     
-})();
+})(timbre);

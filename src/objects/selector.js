@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
 
-    var fn = timbre.fn;
+    var fn = T.fn;
 
     function SelectorNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         
         this._.selected   = 0;
         this._.background = false;
@@ -67,4 +67,4 @@
     
     fn.register("selector", SelectorNode);
     
-})();
+})(timbre);

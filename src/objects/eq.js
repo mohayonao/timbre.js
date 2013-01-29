@@ -1,16 +1,16 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var FFT = timbre.modules.FFT;
-    var Biquad = timbre.modules.Biquad;
+    var fn = T.fn;
+    var FFT = T.modules.FFT;
+    var Biquad = T.modules.Biquad;
     var PLOT_LOW_FREQ = 20;
     var PARAM_NAMES = {
         hpf:0, lf:1, lmf:2, mf:3, hmf:4, hf:5, lpf:6
     };
     
     function EQNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
 
         var _ = this._;
@@ -25,7 +25,7 @@
     var plotBefore = function(context, x, y, width, height) {
         context.lineWidth = 1;
         context.strokeStyle = "rgb(192, 192, 192)";
-        var nyquist = timbre.samplerate * 0.5;
+        var nyquist = T.samplerate * 0.5;
         for (var i = 1; i <= 10; ++i) {
             for (var j = 1; j <= 4; j++) {
                 var f = i * Math.pow(10, j);
@@ -84,7 +84,7 @@
                 }
                 var biquad = _.biquads[index];
                 if (!biquad) {
-                    biquad = _.biquads[index] = new Biquad(timbre.samplerate);
+                    biquad = _.biquads[index] = new Biquad(T.samplerate);
                     switch (index) {
                     case 0:
                         biquad.setType("highpass");
@@ -139,7 +139,7 @@
     };
 
     var fft = new FFT(2048);
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
@@ -149,7 +149,7 @@
             for (var i = 0, imax = _.biquads.length; i < imax; ++i) {
                 var params = this.getParams(i);
                 if (params) {
-                    var biquad = new Biquad(timbre.samplerate);
+                    var biquad = new Biquad(T.samplerate);
                     if (i === 0) {
                         biquad.setType("highpass");
                     } else if (i === imax - 1) {
@@ -166,7 +166,7 @@
             
             var size = 512;
             var data = new Float32Array(size);
-            var nyquist  = timbre.samplerate * 0.5;
+            var nyquist  = T.samplerate * 0.5;
             var spectrum = fft.spectrum;
             var j, f, index, delta, x0, x1, xx;
             for (i = 0; i < size; ++i) {
@@ -191,4 +191,4 @@
     
     fn.register("eq", EQNode);
     
-})();
+})(timbre);

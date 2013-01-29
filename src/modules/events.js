@@ -1,4 +1,4 @@
-(function() {
+(function(T) {
     "use strict";
     
     var isArray = Array.isArray;
@@ -47,14 +47,14 @@
             args = slice.call(arguments, 1);
             var listeners = handler.slice();
             for (var i = 0, imax = listeners.length; i < imax; ++i) {
-                if (listeners[i] instanceof timbre.Object) {
+                if (listeners[i] instanceof T.Object) {
                     listeners[i].bang.apply(listeners[i], args);
                 } else {
                     listeners[i].apply(this.context, args);
                 }
             }
             return true;
-        } else if (handler instanceof timbre.Object) {
+        } else if (handler instanceof T.Object) {
             args = slice.call(arguments, 1);
             handler.bang.apply(handler, args);
         } else {
@@ -63,7 +63,7 @@
     };
     
     $.addListener = function(type, listener) {
-        if (typeof listener !== "function" && !(listener instanceof timbre.Object)) {
+        if (typeof listener !== "function" && !(listener instanceof T.Object)) {
             throw new Error("addListener takes instances of Function or timbre.Object");
         }
         var _ = this._;
@@ -96,7 +96,7 @@
                 self.removeListener(type, g);
                 listener.apply(self.context, arguments);
             };
-        } else if (listener instanceof timbre.Object) {
+        } else if (listener instanceof T.Object) {
             g = function () {
                 self.removeListener(type, g);
                 listener.bang.apply(listener, arguments);
@@ -112,7 +112,7 @@
     };
     
     $.removeListener = function(type, listener) {
-        if (typeof listener !== "function" && !(listener instanceof timbre.Object)) {
+        if (typeof listener !== "function" && !(listener instanceof T.Object)) {
             throw new Error("removeListener takes instances of Function or timbre.Object");
         }
         var _ = this._;
@@ -200,7 +200,7 @@
         return a;
     };
     
-    timbre.modules.EventEmitter = EventEmitter;
-    timbre.modules.ready.done("events");
+    T.modules.EventEmitter = EventEmitter;
+    T.modules.ready.done("events");
     
-})();
+})(timbre);

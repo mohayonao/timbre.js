@@ -1,20 +1,20 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn  = timbre.fn;
-    var FFT = timbre.modules.FFT;
-    var Biquad = timbre.modules.Biquad;
+    var fn  = T.fn;
+    var FFT = T.modules.FFT;
+    var Biquad = T.modules.Biquad;
     var PLOT_LOW_FREQ = 20;
     
     function BiquadNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.biquad = new Biquad(timbre.samplerate);
-        _.freq = timbre(340);
-        _.band = timbre(1);
-        _.gain = timbre(0);
+        _.biquad = new Biquad(T.samplerate);
+        _.freq = T(340);
+        _.band = T(1);
+        _.gain = T(0);
         
         _.plotBefore = plotBefore;
         _.plotRange  = [-18, 18];
@@ -25,7 +25,7 @@
     var plotBefore = function(context, x, y, width, height) {
         context.lineWidth = 1;
         context.strokeStyle = "rgb(192, 192, 192)";
-        var nyquist = timbre.samplerate * 0.5;
+        var nyquist = T.samplerate * 0.5;
         for (var i = 1; i <= 10; ++i) {
             for (var j = 1; j <= 4; j++) {
                 var f = i * Math.pow(10, j);
@@ -68,7 +68,7 @@
         },
         freq: {
             set: function(value) {
-                this._.freq = timbre(value);
+                this._.freq = T(value);
             },
             get: function() {
                 return this._.freq;
@@ -76,7 +76,7 @@
         },
         cutoff: {
             set: function(value) {
-                this._.freq = timbre(value);
+                this._.freq = T(value);
             },
             get: function() {
                 return this._.freq;
@@ -84,7 +84,7 @@
         },
         res: {
             set: function(value) {
-                this._.band = timbre(value);
+                this._.band = T(value);
             },
             get: function() {
                 return this._.band;
@@ -92,7 +92,7 @@
         },
         Q: {
             set: function(value) {
-                this._.band = timbre(value);
+                this._.band = T(value);
             },
             get: function() {
                 return this._.band;
@@ -100,7 +100,7 @@
         },
         band: {
             set: function(value) {
-                this._.band = timbre(value);
+                this._.band = T(value);
             },
             get: function() {
                 return this._.band;
@@ -108,7 +108,7 @@
         },
         gain: {
             set: function(value) {
-                this._.gain = timbre(value);
+                this._.gain = T(value);
             },
             get: function() {
                 return this._.gain;
@@ -158,11 +158,11 @@
     };
     
     var fft = new FFT(2048);
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var biquad = new Biquad(timbre.samplerate);
+            var biquad = new Biquad(T.samplerate);
             biquad.setType(this.type);
             biquad.setParams(this.freq.valueOf(), this.band.valueOf(), this.gain.valueOf());
             
@@ -174,7 +174,7 @@
 
             var size = 512;
             var data = new Float32Array(size);
-            var nyquist  = timbre.samplerate * 0.5;
+            var nyquist  = T.samplerate * 0.5;
             var spectrum = fft.spectrum;
             var i, j, f, index, delta, x0, x1, xx;
             for (i = 0; i < size; ++i) {
@@ -231,4 +231,4 @@
     fn.alias("brf", "notch");
     fn.alias("apf", "allpass");
 
-})();
+})(timbre);

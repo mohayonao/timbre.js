@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function ZMapNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
 
         var _ = this._;
         _.inMin  = 0;
@@ -167,4 +167,4 @@
     
     fn.register("zmap", ZMapNode);
     
-})();
+})(timbre);

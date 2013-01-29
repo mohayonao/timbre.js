@@ -1,4 +1,4 @@
-(function() {
+(function(T) {
     "use strict";
     
     function Oscillator(samplerate) {
@@ -403,6 +403,6 @@
         }
     };
     
-    timbre.modules.Oscillator = Oscillator;
+    T.modules.Oscillator = Oscillator;
     
-})();
+})(timbre);

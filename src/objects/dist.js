@@ -1,16 +1,16 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function DistNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.pre  = timbre( 60);
-        _.post = timbre(-18);
-        _.samplerate = timbre.samplerate;
+        _.pre  = T( 60);
+        _.post = T(-18);
+        _.samplerate = T.samplerate;
         _.x1 = _.x2 = _.y1 = _.y2 = 0;
         _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
         _.cutoff = 0;
@@ -32,7 +32,7 @@
         },
         pre: {
             set: function(value) {
-                this._.pre = timbre(value);
+                this._.pre = T(value);
             },
             get: function() {
                 return this._.pre;
@@ -40,7 +40,7 @@
         },
         post: {
             set: function(value) {
-                this._.post = timbre(value);
+                this._.post = T(value);
             },
             get: function() {
                 return this._.post;
@@ -149,4 +149,4 @@
     fn.register("distortion", DistNode);
     fn.alias("dist", "distortion");
     
-})();
+})(timbre);

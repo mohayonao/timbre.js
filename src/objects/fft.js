@@ -1,11 +1,11 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn  = timbre.fn;
-    var FFT = timbre.modules.FFT;
+    var fn  = T.fn;
+    var FFT = T.modules.FFT;
     
     function FFTNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.listener(this);
         fn.stereo(this);
         fn.fixAR(this);
@@ -13,9 +13,9 @@
         this.real = this.L;
         this.imag = this.R;
         
-        this._.fft = new FFT(timbre.cellsize * 2);
+        this._.fft = new FFT(T.cellsize * 2);
         this._.fftCell  = new Float32Array(this._.fft.length);
-        this._.prevCell = new Float32Array(timbre.cellsize);
+        this._.prevCell = new Float32Array(T.cellsize);
         
         this._.plotFlush = true;
         this._.plotRange = [0, 1];
@@ -70,7 +70,7 @@
         return cell;
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
@@ -108,4 +108,4 @@
     
     fn.register("fft", FFTNode);
     
-})();
+})(timbre);

@@ -1,4 +1,4 @@
-(function() {
+(function(T) {
     "use strict";
     
     function Decoder() {}
@@ -20,9 +20,9 @@
         }
         onloadedmetadata(false);
     };
-    timbre.modules.Decoder = Decoder;
+    T.modules.Decoder = Decoder;
     
-    if (timbre.envtype === "browser") {
+    if (T.envtype === "browser") {
         Decoder.getBinaryWithPath = function(path, callback) {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", path, true);
@@ -149,7 +149,7 @@
     
     Decoder.webkit_decode = (function() {
         if (typeof webkitAudioContext !== "undefined") {
-            var ctx = timbre._audioContext;
+            var ctx = T._audioContext;
             var _decode = function(data, onloadedmetadata, onloadeddata) {
                 var samplerate, duration, buffer;
                 if (typeof data === "string") {
@@ -238,4 +238,4 @@
             };
         }
     })();
-})();
+})(timbre);

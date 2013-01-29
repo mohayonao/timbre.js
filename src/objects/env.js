@@ -1,15 +1,15 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
-    var Envelope  = timbre.modules.Envelope;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
+    var Envelope  = T.modules.Envelope;
     var isDictionary = fn.isDictionary;
     
     function EnvNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         var _ = this._;
-        _.env = new Envelope(timbre.samplerate);
+        _.env = new Envelope(T.samplerate);
         _.env.setStep(this.cell.length);
         _.tmp = new Float32Array(this.cell.length);
         _.ar = false;
@@ -172,7 +172,7 @@
         env.setTable(table);
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
@@ -186,7 +186,7 @@
             var duration = 0;
             var durationIncr = totalDuration / data.length;
             var isReleased   = false;
-            var samples = (totalDuration * 0.001 * timbre.samplerate)|0;
+            var samples = (totalDuration * 0.001 * T.samplerate)|0;
             var i, imax;
             
             samples /= data.length;
@@ -413,4 +413,4 @@
         return new EnvNode(_args);
     });
     
-})();
+})(timbre);

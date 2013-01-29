@@ -1,17 +1,17 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
     
     function TimeoutNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.timer(this);
         fn.fixKR(this);
         
         var _ = this._;
         _.currentTime = 0;
-        _.currentTimeIncr = timbre.cellsize * 1000 / timbre.samplerate;
+        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
         _.samplesMax = 0;
         _.samples    = 0;
         _.isEnded = true;
@@ -50,7 +50,7 @@
                 }
                 if (typeof value === "number" && value >= 0) {
                     _.timeout = value;
-                    _.samplesMax = (timbre.samplerate * (value * 0.001))|0;
+                    _.samplesMax = (T.samplerate * (value * 0.001))|0;
                     _.samples = _.samplesMax;
                     _.isEnded = false;
                 }
@@ -104,4 +104,4 @@
     
     fn.register("timeout", TimeoutNode);
     
-})();
+})(timbre);

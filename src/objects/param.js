@@ -1,17 +1,17 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
-    var Envelope      = timbre.modules.Envelope;
-    var EnvelopeValue = timbre.modules.EnvelopeValue;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
+    var Envelope      = T.modules.Envelope;
+    var EnvelopeValue = T.modules.EnvelopeValue;
     
     function ParamNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         
         var _ = this._;
         _.value = 0;
-        _.env = new EnvelopeValue(timbre.samplerate);
+        _.env = new EnvelopeValue(T.samplerate);
         _.env.step = this.cell.length;
         _.curve   = "lin";
         _.counter = 0;
@@ -156,7 +156,7 @@
         return cell;
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         var _ = this._;
@@ -189,4 +189,4 @@
 
     fn.register("param", ParamNode);
     
-})();
+})(timbre);

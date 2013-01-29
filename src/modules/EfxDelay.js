@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
     function EfxDelay(opts) {
-        var bits = Math.ceil(Math.log(timbre.samplerate * 1.5) * Math.LOG2E);
+        var bits = Math.ceil(Math.log(T.samplerate * 1.5) * Math.LOG2E);
         
-        this.cell = new Float32Array(timbre.cellsize);
+        this.cell = new Float32Array(T.cellsize);
         
         this.time = 125;
         this.feedback  = 0.25;
@@ -14,7 +14,7 @@
         this.wet    = 0.45;
         
         this.readIndex  = 0;
-        this.writeIndex = (this.time / 1000 * timbre.samplerate)|0;
+        this.writeIndex = (this.time / 1000 * T.samplerate)|0;
         
         if (opts) {
             this.setParams(opts);
@@ -26,7 +26,7 @@
     $.setParams = function(opts) {
         if (opts.time) {
             this.time = opts.time;
-            this.writeIndex = this.readIndex + ((this.time * 0.001 * timbre.samplerate)|0);
+            this.writeIndex = this.readIndex + ((this.time * 0.001 * T.samplerate)|0);
         }
         if (opts.feedback) {
             this.feedback = opts.feedback;
@@ -71,6 +71,6 @@
         return cell;
     };
     
-    timbre.modules.EfxDelay = EfxDelay;
+    T.modules.EfxDelay = EfxDelay;
     
-})();
+})(timbre);

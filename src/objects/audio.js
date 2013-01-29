@@ -1,8 +1,8 @@
-(function() {
+(function(T) {
     "use strict";
 
-    var fn = timbre.fn;
-    var modules = timbre.modules;
+    var fn = T.fn;
+    var modules = T.modules;
     
     fn.register("audio", function(_args) {
         var BufferNode = fn.getClass("buffer");
@@ -50,7 +50,7 @@
                 _.samplerate = result.samplerate;
                 _.buffer     = result.buffer;
                 _.phase      = 0;
-                _.phaseIncr  = result.samplerate / timbre.samplerate;
+                _.phaseIncr  = result.samplerate / T.samplerate;
                 _.duration   = result.duration * 1000;
                 _.isEnded    = false;
                 _.currentTime = 0;
@@ -81,4 +81,4 @@
         return this;
     };
     
-})();
+})(timbre);

@@ -1,16 +1,16 @@
-(function() {
+(function(T) {
     "use strict";
 
-    if (timbre.envtype !== "browser") {
+    if (T.envtype !== "browser") {
         return;
     }
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     var BUFFER_SIZE = 4096;
     var BUFFER_MASK = BUFFER_SIZE - 1;
     
     function MediaStreamNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         fn.stereo(this);
         
@@ -30,7 +30,7 @@
     Object.defineProperties($, {
         src: {
             set: function(value) {
-                var _impl = impl[timbre.env];
+                var _impl = impl[T.env];
                 if (_impl) {
                     _impl.set.call(this, value);
                 }
@@ -39,14 +39,14 @@
     });
     
     $.listen = function() {
-        var _impl = impl[timbre.env];
+        var _impl = impl[T.env];
         if (_impl) {
             _impl.listen.call(this);
         }
     };
     
     $.unlisten = function() {
-        var _impl = impl[timbre.env];
+        var _impl = impl[T.env];
         if (_impl) {
             _impl.unlisten.call(this);
         }
@@ -152,7 +152,7 @@
             /*global HTMLAudioElement:true */
             if (src instanceof HTMLAudioElement) {
                 _.src = src;
-                _.istep = timbre.samplerate / src.mozSampleRate;
+                _.istep = T.samplerate / src.mozSampleRate;
             }
             /*global HTMLAudioElement:false */
         },
@@ -219,4 +219,4 @@
     
     fn.register("mediastream", MediaStreamNode);
     
-})();
+})(timbre);

@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function MulNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
     }
     fn.extend(MulNode);
     
@@ -57,4 +57,4 @@
     
     fn.register("*", MulNode);
     
-})();
+})(timbre);

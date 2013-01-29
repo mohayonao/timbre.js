@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function ClipNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         
         var _ = this._;
         _.min = -0.8;
@@ -112,4 +112,4 @@
     
     fn.register("clip", ClipNode);
     
-})();
+})(timbre);

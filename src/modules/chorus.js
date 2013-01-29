@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
     function Chorus(samplerate) {
         this.samplerate = samplerate;
         
-        var bits = Math.round(Math.log(timbre.samplerate * 0.1) * Math.LOG2E);
+        var bits = Math.round(Math.log(samplerate * 0.1) * Math.LOG2E);
         this.buffer = new Float32Array(1 << bits);
         
         this.wave       = null;
@@ -56,7 +56,7 @@
     
     $.setDelayTime = function(delayTime) {
         this.delayTime = delayTime;
-        var readIndex = this.writeIndex - ((delayTime * timbre.samplerate * 0.001)|0);
+        var readIndex = this.writeIndex - ((delayTime * this.samplerate * 0.001)|0);
         while (readIndex < 0) {
             readIndex += this.buffer.length;
         }
@@ -106,6 +106,6 @@
         return cell;
     };
     
-    timbre.modules.Chorus = Chorus;
+    T.modules.Chorus = Chorus;
     
-})();
+})(timbre);

@@ -1,17 +1,17 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue  = timbre.timevalue;
-    var Oscillator = timbre.modules.Oscillator;
+    var fn = T.fn;
+    var timevalue  = T.timevalue;
+    var Oscillator = T.modules.Oscillator;
     
     function OscNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         
         var _ = this._;
-        _.freq  = timbre(440);
-        _.phase = timbre(0);
-        _.osc = new Oscillator(timbre.samplerate);
+        _.freq  = T(440);
+        _.phase = T(0);
+        _.osc = new Oscillator(T.samplerate);
         _.tmp = new Float32Array(this.cell.length);
         _.osc.step = this.cell.length;
         
@@ -51,7 +51,7 @@
                         value = 1000 / value;
                     }
                 }
-                this._.freq = timbre(value);
+                this._.freq = T(value);
             },
             get: function() {
                 return this._.freq;
@@ -59,7 +59,7 @@
         },
         phase: {
             set: function(value) {
-                this._.phase = timbre(value);
+                this._.phase = T(value);
             },
             get: function() {
                 return this._.phase;
@@ -133,7 +133,7 @@
     };
 
     var plotBefore;
-    if (timbre.envtype === "browser") {
+    if (T.envtype === "browser") {
         plotBefore = function(context, offset_x, offset_y, width, height) {
             var y = (height >> 1) + 0.5;
             context.strokeStyle = "#ccc";
@@ -183,4 +183,4 @@
     
     fn.alias("square", "pulse");
     
-})();
+})(timbre);
