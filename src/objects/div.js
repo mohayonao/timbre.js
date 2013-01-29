@@ -3,12 +3,12 @@
     
     var fn = timbre.fn;
     
-    function MulNode(_args) {
+    function DivNode(_args) {
         timbre.Object.call(this, _args);
     }
-    fn.extend(MulNode);
+    fn.extend(DivNode);
     
-    var $ = MulNode.prototype;
+    var $ = DivNode.prototype;
     
     $.process = function(tickID) {
         var cell = this.cell;
@@ -20,7 +20,7 @@
             var inputs = this.inputs;
             var i, imax = inputs.length;
             var j, jmax = cell.length;
-            var tmp;
+            var tmp, div;
             
             if (_.ar) {
                 if (inputs.length > 0) {
@@ -29,7 +29,8 @@
                     for (i = 1; i < imax; ++i) {
                         tmp = inputs[i].process(tickID);
                         for (j = jmax; j--; ) {
-                            cell[j] *= tmp[j];
+                            div = tmp[j];
+                            cell[j] = (div === 0) ? 0 : cell[j] / div;
                         }
                     }
                 } else {
@@ -42,7 +43,8 @@
                 if (inputs.length > 0) {
                     tmp = inputs[0].process(tickID)[0];
                     for (i = 1; i < imax; ++i) {
-                        tmp *= inputs[i].process(tickID)[0];
+                        div = inputs[i].process(tickID)[0];
+                        tmp = (div === 0) ? 0 : tmp / div;
                     }
                 } else {
                     tmp = 0;
@@ -55,6 +57,6 @@
         return cell;
     };
     
-    fn.register("*", MulNode);
+    fn.register("/", DivNode);
     
 })();

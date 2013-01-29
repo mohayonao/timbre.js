@@ -554,7 +554,7 @@
         object._.emit("ended");
     };
     fn.onended = __onended;
-
+    
     var __inputSignalAR = function(object) {
         var cell   = object.cell;
         var inputs = object.inputs;
@@ -563,13 +563,22 @@
         var tickID = object.tickID;
         var tmp;
         
-        for (j = jmax; j--; ) {
-            cell[j] = 0;
+        for (j = jmax; j; ) {
+            j -= 8;
+            cell[j] = cell[j+1] = cell[j+2] = cell[j+3] = cell[j+4] = cell[j+5] = cell[j+6] = cell[j+7] = 0;
         }
         for (i = 0; i < imax; ++i) {
             tmp = inputs[i].process(tickID);
-            for (j = jmax; j--; ) {
-                cell[j] += tmp[j];
+            for (j = jmax; j; ) {
+                j -= 8;
+                cell[j  ] += tmp[j  ];
+                cell[j+1] += tmp[j+1];
+                cell[j+2] += tmp[j+2];
+                cell[j+3] += tmp[j+3];
+                cell[j+4] += tmp[j+4];
+                cell[j+5] += tmp[j+5];
+                cell[j+6] += tmp[j+6];
+                cell[j+7] += tmp[j+7];
             }
         }
     };
@@ -588,10 +597,20 @@
     fn.inputSignalKR = __inputSignalKR;
     
     var __outputSignalAR = function(object) {
-        var cell = object.cell;
         var mul = object._.mul, add = object._.add;
-        for (var i = cell.length; i--; ) {
-            cell[i] = cell[i] * mul + add;
+        if (mul !== 1 || add !== 0) {
+            var cell = object.cell;
+            for (var i = cell.length; i; ) {
+                i -= 8;
+                cell[i  ] = cell[i  ] * mul + add;
+                cell[i+1] = cell[i+1] * mul + add;
+                cell[i+2] = cell[i+2] * mul + add;
+                cell[i+3] = cell[i+3] * mul + add;
+                cell[i+4] = cell[i+4] * mul + add;
+                cell[i+5] = cell[i+5] * mul + add;
+                cell[i+6] = cell[i+6] * mul + add;
+                cell[i+7] = cell[i+7] * mul + add;
+            }
         }
     };
     fn.outputSignalAR = __outputSignalAR;
@@ -599,9 +618,10 @@
     var __outputSignalKR = function(object) {
         var cell = object.cell;
         var mul = object._.mul, add = object._.add;
-        var value = cell[0] * mul * add;
-        for (var i = cell.length; i--; ) {
-            cell[i] = value;
+        var value = cell[0] * mul + add;
+        for (var i = cell.length; i; ) {
+            i -= 8;
+            cell[i] = cell[i+1] = cell[i+2] = cell[i+3] = cell[i+4] = cell[i+5] = cell[i+6] = cell[i+7] = value;
         }
     };
     fn.outputSignalKR = __outputSignalKR;
