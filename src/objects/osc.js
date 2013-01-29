@@ -9,7 +9,8 @@
         timbre.Object.call(this, _args);
         
         var _ = this._;
-        _.freq = timbre(440);
+        _.freq  = timbre(440);
+        _.phase = timbre(0);
         _.osc = new Oscillator(timbre.samplerate);
         _.tmp = new Float32Array(this.cell.length);
         _.osc.step = this.cell.length;
@@ -55,6 +56,14 @@
             get: function() {
                 return this._.freq;
             }
+        },
+        phase: {
+            set: function(value) {
+                this._.phase = timbre(value);
+            },
+            get: function() {
+                return this._.phase;
+            }
         }
     });
     
@@ -63,7 +72,7 @@
         this._.emit("bang");
         return this;
     };
-
+    
     $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
@@ -83,28 +92,40 @@
             }
             
             var osc   = _.osc;
-            var  freq = _.freq;
-            var _freq = _.freq.process(tickID);
+            var  freq  = _.freq;
+            var _freq  = _.freq.process(tickID);
+            var phase  = _.phase;
+            var _phase = _.phase.process(tickID);
             
-            if (_.ar) { // audio-rate
+            if (_.ar) {
                 var tmp  = _.tmp;
                 if (freq.isAr) {
-                    osc.processWithFreqArray(tmp, _freq);
-                } else { // _.freq.isKr
+                    if (phase.isAr) {
+                        osc.processWithFreqAndPhaseArray(tmp, _freq, _phase);
+                    } else {
+                        osc.phase = _phase[0];
+                        osc.processWithFreqArray(tmp, _freq);
+                    }
+                } else {
                     osc.frequency = _freq[0];
-                    osc.process(tmp);
+                    if (phase.isAr) {
+                        osc.processWithPhaseArray(tmp, _phase);
+                    } else {
+                        osc.phase = _phase[0];
+                        osc.process(tmp);
+                    }
                 }
                 for (i = imax; i--; ) {
-                    cell[i] = cell[i] * tmp[i];
+                    cell[i] *= tmp[i];
                 }
-            } else {    // control-rate
+            } else {
                 osc.frequency = _freq[0];
+                osc.phase     = _phase[0];
                 var value = osc.next();
                 for (i = imax; i--; ) {
                     cell[i] *= value;
                 }
             }
-            
             fn.outputSignalAR(this);
         }
         

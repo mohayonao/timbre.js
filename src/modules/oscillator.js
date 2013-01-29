@@ -8,8 +8,9 @@
         this.step = 1;
         this.frequency = 0;
         this.value = 0;
+        this.phase = 0;
         
-        this._phase = 0;
+        this._x = 0;
         this._coeff = TABLE_SIZE / this.samplerate;
     }
     
@@ -48,61 +49,107 @@
     };
     
     $.reset = function() {
-        this._phase = 0;
+        this._x = 0;
     };
     
     $.next = function() {
         var wave  = this.wave;
-        var phase = this._phase;
+        var x = this._x;
         var coeff = this._coeff;
-        var index = phase|0;
+        var index = (x + this.phase * TABLE_SIZE)|0;
         this.value = wave[index & TABLE_MASK];
-        phase += this.frequency * coeff * this.step;
-        while (phase > TABLE_SIZE) {
-            phase -= TABLE_SIZE;
+        x += this.frequency * coeff * this.step;
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
         }
-        this._phase = phase;
+        this._x = x;
         return this.value;
     };
     
     $.process = function(cell) {
         var wave  = this.wave;
-        var phase = this._phase;
+        var _phase = this.phase * TABLE_SIZE;
+        var phase, x = this._x;
         var index, delta, x0, x1, dx = this.frequency * this._coeff;
         for (var i = 0, imax = this.step; i < imax; ++i) {
+            phase = x + _phase;
             index = phase|0;
             delta = phase - index;
             x0 = wave[index & TABLE_MASK];
             x1 = wave[(index+1) & TABLE_MASK];
             cell[i] = ((1.0 - delta) * x0 + delta * x1);
-            phase += dx;
+            x += dx;
         }
-        while (phase > TABLE_SIZE) {
-            phase -= TABLE_SIZE;
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
         }
-        this._phase = phase;
+        this._x = x;
         this.value = cell[cell.length - 1];
     };
     
     $.processWithFreqArray = function(cell, freqs) {
         var wave  = this.wave;
-        var phase = this._phase;
+        var _phase = this.phase * TABLE_SIZE;
+        var phase, x = this._x;
         var coeff = this._coeff;
         var index, delta, x0, x1;
         for (var i = 0, imax = this.step; i < imax; ++i) {
+            phase = x + _phase;
             index = phase|0;
             delta = phase - index;
             x0 = wave[index & TABLE_MASK];
             x1 = wave[(index+1) & TABLE_MASK];
             cell[i] = ((1.0 - delta) * x0 + delta * x1);
-            phase += freqs[i] * coeff;
+            x += freqs[i] * coeff;
         }
-        while (phase > TABLE_SIZE) {
-            phase -= TABLE_SIZE;
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
         }
-        this._phase = phase;
+        this._x = x;
         this.value = cell[cell.length - 1];
     };
+    
+    $.processWithPhaseArray = function(cell, phases) {
+        var wave  = this.wave;
+        var phase, x = this._x;
+        var index, delta, x0, x1, dx = this.frequency * this._coeff;
+        for (var i = 0, imax = this.step; i < imax; ++i) {
+            phase = x + phases[i] * TABLE_SIZE;
+            index = phase|0;
+            delta = phase - index;
+            x0 = wave[(index  ) & TABLE_MASK];
+            x1 = wave[(index+1) & TABLE_MASK];
+            cell[i] = ((1 - delta) * x0 + delta * x1);
+            x += dx;
+        }
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
+        }
+        this._x = x;
+        this.value = cell[cell.length - 1];
+    };
+    
+    $.processWithFreqAndPhaseArray = function(cell, freqs, phases) {
+        var wave  = this.wave;
+        var phase, x = this._x;
+        var coeff = this._coeff;
+        var index, delta, x0, x1;
+        for (var i = 0, imax = this.step; i < imax; ++i) {
+            phase = x + phases[i] * TABLE_SIZE;
+            index = phase|0;
+            delta = phase - index;
+            x0 = wave[index & TABLE_MASK];
+            x1 = wave[(index+1) & TABLE_MASK];
+            cell[i] = ((1.0 - delta) * x0 + delta * x1);
+            x += freqs[i] * coeff;
+        }
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
+        }
+        this._x = x;
+        this.value = cell[cell.length - 1];
+    };
+    
     
     function waveshape(sign, name, shape, width) {
         var wave = Wavetables[name];
