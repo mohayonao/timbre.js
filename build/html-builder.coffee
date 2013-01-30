@@ -160,6 +160,7 @@ class HTMLBuilder
         src = src.replace /{deferred}/ig, '<span class="label deferred">DEFERRED</span>'
         src = src.replace /{listener}/ig, '<span class="label listener">LISTENER</span>'
         src = src.replace /{timer}/ig   , '<span class="label timer">TIMER</span>'
+        src = src.replace /{stereo}/ig  , '<span class="label stereo">STEREO</span>'
         src = src.replace /{kr}/ig   , '<span class="label kr">KR</span>'
         src = src.replace /{ar}/ig   , '<span class="label ar">AR</span>'
         src = src.replace /{arkr}/ig   , '<span class="label ar">AR/KR</span>'
