@@ -13,7 +13,7 @@
         chorus.setRate(4);
         chorus.depth = 20;
         chorus.feedback = 0.2;
-        chorus.wet = 0.5;
+        chorus.mix = 0.33;
         this._.chorus = chorus;
     }
     fn.extend(ChorusNode);
@@ -74,12 +74,12 @@
                 return this._.chorus.feedback;
             }
         },
-        wet: {
+        mix: {
             set: function(value) {
-                this._.wet = T(value);
+                this._.mix = T(value);
             },
             get: function() {
-                return this._.wet;
+                return this._.mix;
             }
         }
     });
