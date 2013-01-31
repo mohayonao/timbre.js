@@ -278,9 +278,13 @@
             grow = (endValue - value) / counter;
             break;
         case CurveTypeExp:
-            grow = Math.pow(
-                endValue / value, 1 / counter
-            );
+            if (value !== 0) {
+                grow = Math.pow(
+                    endValue / value, 1 / counter
+                );
+            } else {
+                grow = 0;
+            }
             break;
         case CurveTypeSin:
             w = Math.PI / counter;
