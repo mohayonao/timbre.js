@@ -1,16 +1,25 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>T(&quot;biquad&quot;)</title><link rel="stylesheet" href="/timbre.js/misc/css/codemirror.css" type="text/css"><link rel="stylesheet" href="/timbre.js/misc/css/common.css" type="text/css"><link rel="shortcut icon" href="/timbre.js/favicon.ico"><script src="/timbre.js/timbre.dev.js">   </script></head><body><div class="container"><div class="row"><div id="sidebar"><h1>timbre.js</h1><div id="index"><div id="list"><h2>Download</h2><ul><li><a href="/timbre.js/timbre.js">timbre.js</a></li><li><a href="/timbre.js/timbre.dev.js">timbre.dev.js</a></li></ul><h2>Documents</h2><ul><li><a href="./">Introduction</a></li><li><a href="./GettingStarted.html">Getting Started</a></li><li><a href="./PragmaSynth.html">Pragmatic Synth</a></li><li><a href="./RecordingMode.html">Recording Mode</a></li><li><a href="./CustomObject.html">Custom Object</a></li><li><a href="./ForDevelopers.html">For Developers</a></li><li><a href="./timevalue.html">timevalue</a></li></ul><h2>Examples</h2><ul><li><a href="./beatbox.html">BeatBox</a></li><li><a href="./chord.html">Chords Work</a></li><li><a href="./satie.html">Gymnopedie</a></li><li><a href="./khoomii.html">Khoomii</a></li><li><a href="./reich.html">Reich</a></li></ul><h2>References</h2><ul><li><a href="./BaseObject.html">Base Object</a></li><li><a href="./Number.html">Number</a></li><li><a href="./Array.html">Array</a></li><li><a href="./Function.html">Function</a></li><li><a href="./Boolean.html">Boolean</a></li><li><a href="./Object.html">Object</a></li><li><a href="./SynthDef.html">SynthDef</a></li><li><a href="./soundbuffer.html">SoundBuffer</a></li><li><a href="./mul.html">*</a></li><li><a href="./add.html">+</a></li><li><a href="./audio.html">audio</a></li><li><a href="./biquad.html">biquad</a></li><li><a href="./buffer.html">buffer</a></li><li><a href="./clip.html">clip</a></li><li><a href="./comp.html">comp</a></li><li><a href="./cosc.html">cosc</a></li><li><a href="./delay.html">delay</a></li><li><a href="./dist.html">dist</a></li><li><a href="./env.html">env</a></li><li><a href="./fft.html">fft</a></li><li><a href="./fnoise.html">fnoise</a></li><li><a href="./gate.html">gate</a></li><li><a href="./ifft.html">ifft</a></li><li><a href="./interval.html">interval</a></li><li><a href="./keyboard.html">keyboard</a></li><li><a href="./map.html">map</a></li><li><a href="./midicps.html">midicps</a></li><li><a href="./midiratio.html">midiratio</a></li><li><a href="./mml.html">mml</a></li><li><a href="./mouse.html">mouse</a></li><li><a href="./ndict.html">ndict</a></li><li><a href="./noise.html">noise</a></li><li><a href="./osc.html">osc</a></li><li><a href="./OscGen.html">OscGen</a></li><li><a href="./panner.html">pan</a></li><li><a href="./param.html">param</a></li><li><a href="./phaseshift.html">phaseshift</a></li><li><a href="./pink.html">pink</a></li><li><a href="./pluck.html">pluck</a></li><li><a href="./PluckGen.html">PluckGen</a></li><li><a href="./rec.html">record</a></li><li><a href="./schedule.html">schedule</a></li><li><a href="./scope.html">scope</a></li><li><a href="./selector.html">selector</a></li><li><a href="./spectrum.html">spectrum</a></li><li><a href="./tape.html">tape</a></li><li><a href="./timeout.html">timeout</a></li><li><a href="./zmap.html">zmap</a></li></ul></div></div><hr><div id="footer"><a href="/timbre.js/">English</a><a href="/timbre.js/ja/">日本語</a></div></div><div id="main"><h1>T(&quot;biquad&quot;)</h1>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>T(&quot;biquad&quot;)</title><link rel="stylesheet" href="/timbre.js/misc/css/codemirror.css" type="text/css"><link rel="stylesheet" href="/timbre.js/misc/css/common.css" type="text/css"><link rel="shortcut icon" href="/timbre.js/favicon.ico"><script src="/timbre.js/timbre.dev.js"></script><script>var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-21613416-10']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script></head><body><div class="container"><div class="row"><div id="sidebar"><h1>timbre.js</h1><div id="index"><div id="list"><h2>Download (v13.02.01)</h2><ul><li><a href="/timbre.js/timbre.js">timbre.js</a></li><li><a href="/timbre.js/timbre.dev.js">timbre.dev.js</a></li></ul><h2>Documents</h2><ul><li><a href="./">Introduction</a></li><li><a href="./GettingStarted.html">Getting Started</a></li><li><a href="./PragmaSynth.html">Pragmatic Synth</a></li><li><a href="./RecordingMode.html">Recording Mode</a></li><li><a href="./CustomObject.html">Custom Object</a></li><li><a href="./ForDevelopers.html">For Developers</a></li><li><a href="./timevalue.html">timevalue</a></li></ul><h2>Examples</h2><ul><li><a href="./beatbox.html">BeatBox</a></li><li><a href="./chord.html">Chords Work</a></li><li><a href="./satie.html">Gymnopedie</a></li><li><a href="./khoomii.html">Khoomii</a></li><li><a href="./reich.html">Reich</a></li></ul><h2>References</h2><ul><li><a href="./BaseObject.html">Base Object</a></li><li><a href="./Number.html">Number</a></li><li><a href="./Array.html">Array</a></li><li><a href="./Function.html">Function</a></li><li><a href="./Boolean.html">Boolean</a></li><li><a href="./Object.html">Object</a></li><li><a href="./SynthDef.html">SynthDef</a></li><li><a href="./soundbuffer.html">SoundBuffer</a></li><li><a href="./mul.html">*</a></li><li><a href="./add.html">+</a></li><li><a href="./subtract.html">-</a></li><li><a href="./div.html">/</a></li><li><a href="./audio.html">audio</a></li><li><a href="./biquad.html">biquad</a></li><li><a href="./buffer.html">buffer</a></li><li><a href="./chorus.html">chorus</a></li><li><a href="./clip.html">clip</a></li><li><a href="./comp.html">comp</a></li><li><a href="./cosc.html">cosc</a></li><li><a href="./delay.html">delay</a></li><li><a href="./dist.html">dist</a></li><li><a href="./env.html">env</a></li><li><a href="./eq.html">eq</a></li><li><a href="./fft.html">fft</a></li><li><a href="./fnoise.html">fnoise</a></li><li><a href="./gate.html">gate</a></li><li><a href="./ifft.html">ifft</a></li><li><a href="./interval.html">interval</a></li><li><a href="./keyboard.html">keyboard</a></li><li><a href="./map.html">map</a></li><li><a href="./max.html">max</a></li><li><a href="./mediastream.html">mediastream</a></li><li><a href="./midicps.html">midicps</a></li><li><a href="./midiratio.html">midiratio</a></li><li><a href="./min.html">min</a></li><li><a href="./mml.html">mml</a></li><li><a href="./mouse.html">mouse</a></li><li><a href="./ndict.html">ndict</a></li><li><a href="./noise.html">noise</a></li><li><a href="./osc.html">osc</a></li><li><a href="./OscGen.html">OscGen</a></li><li><a href="./panner.html">pan</a></li><li><a href="./param.html">param</a></li><li><a href="./phaser.html">phaser</a></li><li><a href="./pink.html">pink</a></li><li><a href="./pluck.html">pluck</a></li><li><a href="./PluckGen.html">PluckGen</a></li><li><a href="./rec.html">record</a></li><li><a href="./reverb.html">reverb</a></li><li><a href="./schedule.html">schedule</a></li><li><a href="./scope.html">scope</a></li><li><a href="./selector.html">selector</a></li><li><a href="./spectrum.html">spectrum</a></li><li><a href="./tape.html">tape</a></li><li><a href="./timeout.html">timeout</a></li><li><a href="./zmap.html">zmap</a></li></ul><h2>Extra objects</h2><ul><li><a href="./MoogFF.html">MoogFF</a></li><li><a href="./webaudioapi.html">WebAudioAPI</a></li></ul></div></div><hr><div id="footer"><a href="/timbre.js/">English</a><a href="/timbre.js/ja/">日本語</a></div></div><div id="main"><h1>T(&quot;biquad&quot;)</h1>
 <p><span class="label ar">AR</span> Biquad Filter
 
 </p>
 <h2>Description</h2>
-<p>Biquad Filter
+<p><code>T(&quot;biquad&quot;)</code> is implements a two-pole, two-zero filter.
 
 </p>
 <div class="codemirror" lang="timbre" source="var src = window.getDraggedFile() || &quot;/timbre.js/misc/audio/amen.wav&quot;;
 
 T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 
-  T(&quot;biquad&quot;, {type:&quot;lowpass&quot;, freq:800, Q:10}, this).play();
+  var biquad = T(&quot;biquad&quot;, {type:&quot;lowpass&quot;, freq:800, Q:10}, this).play();
 
 });"></div>
 <h2>Properties</h2>
@@ -20,15 +29,15 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </ul>
 </li>
 <li><code>freq</code>, <code>cutoff</code> <em>(T-Object)</em><ul>
-<li><strong>350Hz</strong>, with a nominal range of 10 to the Nyquist frequency (half the sample-rate).</li>
+<li>cutoff frequency (default: 350Hz, range 10 .. the Nyquist frequency)</li>
 </ul>
 </li>
-<li><code>Q</code>, <code>band</code> <em>(T-Object)</em><ul>
-<li><strong>1</strong>, with a nominal range of 0.0001 to 1000.</li>
+<li><code>res</code>, <code>Q</code>, <code>band</code> <em>(T-Object)</em><ul>
+<li>resonance (default: 1, range: 0.0001 .. 1000)</li>
 </ul>
 </li>
 <li><code>gain</code> <em>(T-Object)</em><ul>
-<li><strong>0</strong>, with a nominal range of -40 to 40.</li>
+<li>gain (default: 0db, range -40 .. 40)</li>
 </ul>
 </li>
 </ul>
@@ -53,17 +62,13 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 <li>The cutoff frequency</li>
 </ul>
 </li>
-<li><code>Q</code> <em>(T-Object)</em><ul>
+<li><code>res</code> <em>(T-Object)</em><ul>
 <li>Controls how peaked the response will be at the cutoff frequency.</li>
-</ul>
-</li>
-<li><code>gain</code> <em>(T-Object)</em><ul>
-<li>Not used in this filter type</li>
 </ul>
 </li>
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
-  T(&quot;lowpass&quot;, {cutoff:1200}, this).plot({target:lowpass, lineWidth:2}).play();
+  T(&quot;lowpass&quot;, {cutoff:1200, res:2}, this).plot({target:lowpass, lineWidth:2}).play();
 });"></div>
 <p>alias: <code>lpf</code>
 
@@ -78,17 +83,13 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 <li>The cutoff frequency below which the frequencies are attenuated</li>
 </ul>
 </li>
-<li><code>Q</code> <em>(T-Object)</em><ul>
+<li><code>res</code> <em>(T-Object)</em><ul>
 <li>Controls how peaked the response will be at the cutoff frequency.</li>
-</ul>
-</li>
-<li><code>gain</code> <em>(T-Object)</em><ul>
-<li>Not used in this filter type</li>
 </ul>
 </li>
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
-  T(&quot;highpass&quot;, {cutoff:4800}, this).plot({target:highpass, lineWidth:2}).play();
+  T(&quot;highpass&quot;, {cutoff:4800, res:2}, this).plot({target:highpass, lineWidth:2}).play();
 });"></div>
 <p>alias: <code>hpf</code>
 
@@ -103,7 +104,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 <li>The center of the frequency band</li>
 </ul>
 </li>
-<li><code>band</code> <em>(T-Object)</em><ul>
+<li><code>Q</code> <em>(T-Object)</em><ul>
 <li>Controls the width of the band.</li>
 </ul>
 </li>
@@ -113,7 +114,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </li>
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
-  T(&quot;bandpass&quot;, {freq:2400, band:5}, this).plot({target:bandpass, lineWidth:2}).play();
+  T(&quot;bandpass&quot;, {freq:2400, Q:5}, this).plot({target:bandpass, lineWidth:2}).play();
 });"></div>
 <p>alias: <code>bpf</code>
 
@@ -126,10 +127,6 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 <ul>
 <li><code>freq</code> <em>(T-Object)</em><ul>
 <li>The upper limit of the frequences where the boost (or attenuation) is applied.</li>
-</ul>
-</li>
-<li><code>band</code> <em>(T-Object)</em><ul>
-<li>Not used in this filter type.</li>
 </ul>
 </li>
 <li><code>gain</code> <em>(T-Object)</em><ul>
@@ -150,10 +147,6 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 <li>The lower limit of the frequences where the boost (or attenuation) is applied.</li>
 </ul>
 </li>
-<li><code>band</code> <em>(T-Object)</em><ul>
-<li>Not used in this filter type.</li>
-</ul>
-</li>
 <li><code>gain</code> <em>(T-Object)</em><ul>
 <li>The boost, in dB, to be applied. If the value is negative, the frequencies are attenuated.</li>
 </ul>
@@ -172,7 +165,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 <li>The center frequency of where the boost is applied.</li>
 </ul>
 </li>
-<li><code>band</code> <em>(T-Object)</em><ul>
+<li><code>Q</code> <em>(T-Object)</em><ul>
 <li>Controls the width of the band of frequencies that are boosted. A large value implies a narrow width.</li>
 </ul>
 </li>
@@ -182,7 +175,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </li>
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
-  T(&quot;peaking&quot;, {freq:1800, band:0.1, gain:12}, this).plot({target:peaking, lineWidth:2}).play();
+  T(&quot;peaking&quot;, {freq:1800, Q:2, gain:6}, this).plot({target:peaking, lineWidth:2}).play();
 });"></div>
 <h3>Notch Filter</h3>
 <p>The notch filter (also known as a <a href="http://en.wikipedia.org/wiki/Band-stop_filter">band-stop or band-rejection filter</a>) is the opposite of a bandpass filter.
@@ -194,12 +187,8 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 <li>The center frequency of where the notch is applied.</li>
 </ul>
 </li>
-<li><code>band</code> <em>(T-Object)</em><ul>
+<li><code>Q</code> <em>(T-Object)</em><ul>
 <li>Controls the width of the band of frequencies that are attenuated. A large value implies a narrow width.</li>
-</ul>
-</li>
-<li><code>gain</code> <em>(T-Object)</em><ul>
-<li>Not used in this filter type.</li>
 </ul>
 </li>
 </ul>
@@ -219,17 +208,13 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 <li>The frequency where the center of the phase transition occurs. </li>
 </ul>
 </li>
-<li><code>band</code> <em>(T-Object)</em><ul>
+<li><code>Q</code> <em>(T-Object)</em><ul>
 <li>Controls how sharp the phase transition is at the center frequency. A larger value implies a sharper transition and a larger group delay.</li>
-</ul>
-</li>
-<li><code>gain</code> <em>(T-Object)</em><ul>
-<li>Not used in this filter type.</li>
 </ul>
 </li>
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
-  T(&quot;allpass&quot;, {freq:2400, gain:6}, this).plot({target:allpass, lineWidth:2}).play();
+  T(&quot;allpass&quot;, {freq:2400, Q:6}, this).plot({target:allpass, lineWidth:2}).play();
 });"></div>
 <p>alias: <code>apf</code>
 
@@ -237,4 +222,5 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 <h2>Source</h2>
 <p><a href="https://github.com/mohayonao/timbre.js/blob/master/src/objects/biquad.js">https://github.com/mohayonao/timbre.js/blob/master/src/objects/biquad.js</a>
 </p>
-</div></div></div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/requestAnimationFrame.js"></script><script src="/timbre.js/misc/js/common.js"></script><script>sc.use("prototype");</script></body></html>
+</div></div></div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script>sc.use("prototype");
+window.pico = {};</script><script src="/timbre.js/libs/PicoFlashPlayer.js"></script><script src="/timbre.js/misc/js/requestAnimationFrame.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>
