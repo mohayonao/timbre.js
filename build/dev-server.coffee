@@ -22,6 +22,7 @@ app.get /^\/timbre\.js\/timbre(?:\.(dev|debug))?.js$/, (req, res)->
 app.get '/timbre.js/*', (req, res)->
     filename = req.url.replace '/timbre.js/', ''
     filepath = path.normalize "#{__dirname}/../#{filename}"
+    filepath = filepath.replace /\?\d+/, ''
     res.sendfile filepath
 
 app.get /\/test\/(\w*)(?:\.js)?$/, (req, res)->
