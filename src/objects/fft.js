@@ -1,11 +1,11 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn  = timbre.fn;
-    var FFT = timbre.modules.FFT;
+    var fn  = T.fn;
+    var FFT = T.modules.FFT;
     
     function FFTNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.listener(this);
         fn.stereo(this);
         fn.fixAR(this);
@@ -13,12 +13,12 @@
         this.real = this.L;
         this.imag = this.R;
         
-        this._.fft = new FFT(timbre.cellsize * 2);
+        this._.fft = new FFT(T.cellsize * 2);
         this._.fftCell  = new Float32Array(this._.fft.length);
-        this._.prevCell = new Float32Array(timbre.cellsize);
+        this._.prevCell = new Float32Array(T.cellsize);
         
         this._.plotFlush = true;
-        this._.plotRange = [0, 0.5];
+        this._.plotRange = [0, 1];
         this._.plotBarStyle = true;
     }
     fn.extend(FFTNode);
@@ -70,26 +70,34 @@
         return cell;
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
             var fft = this._.fft;
-            
+
+            var size     = 64;
             var spectrum = fft.spectrum;
-            var step     = fft.length >> 6;
+            var step     = spectrum.length / size;
             var istep    = 1 / step;
-            var data    = new Float32Array(spectrum.length * istep);
+            var data    = new Float32Array(size);
             var i, imax = spectrum.length;
             var j, jmax = step;
-            
-            var v, k = 0;
+
+            var v, x, k = 0, peak = 0;
             for (i = 0; i < imax; i += step) {
                 v = 0;
                 for (j = 0; j < jmax; ++j) {
                     v += spectrum[i + j];
                 }
-                data[k++] = v * istep;
+                x = v * istep;
+                data[k++] = x;
+                if (peak < x) {
+                    peak = x;
+                }
+            }
+            for (i = data.length; i--; ) {
+                data[i] /= peak;
             }
             
             this._.plotData  = data;
@@ -100,4 +108,4 @@
     
     fn.register("fft", FFTNode);
     
-})();
+})(timbre);

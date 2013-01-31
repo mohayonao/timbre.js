@@ -1,20 +1,26 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
-    var Envelope  = timbre.modules.Envelope;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
+    var Envelope  = T.modules.Envelope;
     var isDictionary = fn.isDictionary;
     
     function EnvNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         var _ = this._;
-        _.env = new Envelope(timbre.samplerate);
-        _.env.step = this.cell.length;
-        _.kr = true;
+        _.env = new Envelope(T.samplerate);
+        _.env.setStep(this.cell.length);
+        _.tmp = new Float32Array(this.cell.length);
+        _.ar = false;
         _.plotFlush = true;
+        this.on("ar", onar);
     }
     fn.extend(EnvNode);
+    
+    var onar = function(value) {
+        this._.env.setStep((value) ? 1 : this.cell.length);
+    };
     
     var $ = EnvNode.prototype;
     
@@ -22,7 +28,7 @@
         table: {
             set: function(value) {
                 if (Array.isArray(value)) {
-                    this._.env.setTable(value);
+                    setTable.call(this, value);
                     this._.plotFlush = true;
                 }
             },
@@ -103,16 +109,25 @@
                 }
             }
             
-            var value = _.env.next();
-            
-            for (i = imax; i--; ) {
-                cell[i] = (cell[i] * value) * mul + add;
+            var value, emit = null;
+            if (_.ar) {
+                var tmp = _.tmp;
+                _.env.process(tmp);
+                for (i = imax; i--; ) {
+                    cell[i] = (cell[i] * tmp[i]) * mul + add;
+                }
+                emit = _.env.emit;
+            } else {
+                value = _.env.next();
+                for (i = imax; i--; ) {
+                    cell[i] = (cell[i] * value) * mul + add;
+                }
+                emit = _.env.emit;
             }
             
-            var emit = _.env.emit;
             if (emit) {
                 if (emit === "ended") {
-                    fn.nextTick(onended.bind(this));
+                    fn.nextTick(fn.onended.bind(null, this, 0));
                 } else {
                     this._.emit(emit, _.value);
                 }
@@ -121,12 +136,43 @@
         
         return cell;
     };
-    
-    var onended = function() {
-        fn.onended(this, 0);
+
+    var setTable = function(list) {
+        var env = this._.env;
+        
+        var table = [list[0] || ZERO];
+        
+        var value, time, curveType, curveValue;
+        for (var i = 1, imax = list.length; i < imax; ++i) {
+            value = list[i][0] || ZERO;
+            time  = list[i][1];
+            curveType = list[i][2];
+            
+            if (typeof time !== "number") {
+                if (typeof time === "string") {
+                    time = timevalue(time);
+                } else {
+                    time = 10;
+                }
+            }
+            if (time < 10) {
+                time = 10;
+            }
+            
+            if (typeof curveType === "number") {
+                curveValue = curveType;
+                curveType  = Envelope.CurveTypeCurve;
+            } else {
+                curveType  = Envelope.CurveTypeDict[curveType] || null;
+                curveValue = 0;
+            }
+            table.push([value, time, curveType, curveValue]);
+        }
+        
+        env.setTable(table);
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
@@ -140,11 +186,11 @@
             var duration = 0;
             var durationIncr = totalDuration / data.length;
             var isReleased   = false;
-            var samples = (totalDuration * 0.001 * timbre.samplerate)|0;
+            var samples = (totalDuration * 0.001 * T.samplerate)|0;
             var i, imax;
             
             samples /= data.length;
-            env.step = samples;
+            env.setStep(samples);
             env.status = Envelope.StatusGate;
             for (i = 0, imax = data.length; i < imax; ++i) {
                 data[i] = env.next();
@@ -367,4 +413,4 @@
         return new EnvNode(_args);
     });
     
-})();
+})(timbre);

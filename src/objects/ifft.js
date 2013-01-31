@@ -1,15 +1,15 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn  = timbre.fn;
-    var FFT = timbre.modules.FFT;
+    var fn  = T.fn;
+    var FFT = T.modules.FFT;
     
     function IFFTNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
 
         var _ = this._;
-        _.fft = new FFT(timbre.cellsize * 2);
+        _.fft = new FFT(T.cellsize * 2);
         _.fftCell    = new Float32Array(this._.fft.length);
         _.realBuffer = new Float32Array(this._.fft.length);
         _.imagBuffer = new Float32Array(this._.fft.length);
@@ -21,7 +21,7 @@
     Object.defineProperties($, {
         real: {
             set: function(value) {
-                this._.real = timbre(value);
+                this._.real = T(value);
             },
             get: function() {
                 return this._.real;
@@ -29,7 +29,7 @@
         },
         imag: {
             set: function(value) {
-                this._.imag = timbre(value);
+                this._.imag = T(value);
             },
             get: function() {
                 return this._.imag;
@@ -64,4 +64,4 @@
     
     fn.register("ifft", IFFTNode);
 
-})();
+})(timbre);

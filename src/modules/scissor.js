@@ -1,4 +1,4 @@
-(function() {
+(function(T) {
     "use strict";
     
     var DummyBuffer = new Float32Array(60);
@@ -381,6 +381,6 @@
         return [cellL, cellR];
     };
     
-    timbre.modules.Scissor = Scissor;
+    T.modules.Scissor = Scissor;
     
-})();
+})(timbre);

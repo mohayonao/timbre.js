@@ -7,7 +7,7 @@ var mml, env, gen;
 env = T("adsr", {d:2000, s:0, r:800});
 gen = T("OscGen", {wave:"tri(25)", env:env, mul:0.2, poly:8});
 
-var synth = T("delay", {time:"BPM60 L16", fb:0.8, wet:0.25}, gen).play();
+var synth = T("delay", {time:"BPM60 L16", fb:0.8, mix:0.25}, gen).play();
 
 
 mml = "t60 l4 q2 o3"

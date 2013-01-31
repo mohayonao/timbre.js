@@ -1,17 +1,17 @@
-(function() {
+(function(T) {
     "use strict";
 
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
-    var EfxDelay  = timbre.modules.EfxDelay;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
+    var EfxDelay  = T.modules.EfxDelay;
     
     function DelayNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.fb    = timbre(0);
-        _.wet   = timbre(1);
+        _.fb    = T(0.2);
+        _.mix   = 0.33;
         _.delay = new EfxDelay();
         
         this.once("init", oninit);
@@ -45,18 +45,32 @@
         },
         fb: {
             set: function(value) {
-                this._.fb = timbre(value);
+                this._.fb = T(value);
             },
             get: function() {
                 return this._.fb;
             }
         },
-        wet: {
+        mix: {
             set: function(value) {
-                this._.wet = timbre(value);
+                if (typeof value === "number") {
+                    value = (value > 1) ? 1 : (value < 0) ? 0 : value;
+                    this._.mix = value;
+                }
             },
             get: function() {
-                return this._.wet;
+                return this._.mix;
+            }
+        },
+        wet: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    value = (value > 1) ? 1 : (value < 0) ? 0 : value;
+                    this._.mix = value;
+                }
+            },
+            get: function() {
+                return this._.mix;
             }
         }
     });
@@ -70,22 +84,18 @@
             
             fn.inputSignalAR(this);
             
-            var changed = false;
-            var feedback = _.fb.process(tickID)[0];
-            if (_.prevFeedback !== feedback) {
-                _.prevFeedback = feedback;
-                changed = true;
-            }
-            var wet = _.wet.process(tickID)[0];
-            if (_.prevWet !== wet) {
-                _.prevWet = wet;
-                changed = true;
-            }
-            if (changed) {
-                _.delay.setParams({feedback:feedback, wet:wet});
+            var fb  = _.fb.process(tickID)[0];
+            var mix = _.mix;
+            
+            if (_.prevFb !== fb || _.prevMix !== mix) {
+                _.prevFb  = fb;
+                _.prevMix = mix;
+                _.delay.setParams({feedback:fb, wet:mix});
             }
             
-            _.delay.process(cell, true);
+            if (!_.bypassed) {
+                _.delay.process(cell, true);
+            }
             
             fn.outputSignalAR(this);
         }
@@ -95,4 +105,4 @@
     
     fn.register("delay", DelayNode);
     
-})();
+})(timbre);

@@ -1,6 +1,6 @@
 T("midicps")
 ============
-{kr} Convert MIDI note to cycles per second
+{krar} Convert MIDI note to cycles per second
 
 ## Description ##
 入力オブジェクト値の合計をMIDIノート番号として周波数に変換します。

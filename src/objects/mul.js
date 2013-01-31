@@ -1,14 +1,14 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
-    function TimesNode(_args) {
-        timbre.Object.call(this, _args);
+    function MulNode(_args) {
+        T.Object.call(this, _args);
     }
-    fn.extend(TimesNode);
+    fn.extend(MulNode);
     
-    var $ = TimesNode.prototype;
+    var $ = MulNode.prototype;
     
     $.process = function(tickID) {
         var cell = this.cell;
@@ -18,42 +18,43 @@
             this.tickID = tickID;
             
             var inputs = this.inputs;
-            var mul = _.mul, add = _.add;
             var i, imax = inputs.length;
             var j, jmax = cell.length;
             var tmp;
             
-            for (j = jmax; j--; ) {
-                cell[j] = 1;
-            }
-            
-            if (_.ar) { // audio-rate
-                for (i = 0; i < imax; ++i) {
-                    tmp = inputs[i].process(tickID);
+            if (_.ar) {
+                if (inputs.length > 0) {
+                    tmp = inputs[0].process(tickID);
+                    cell.set(tmp);
+                    for (i = 1; i < imax; ++i) {
+                        tmp = inputs[i].process(tickID);
+                        for (j = jmax; j--; ) {
+                            cell[j] *= tmp[j];
+                        }
+                    }
+                } else {
                     for (j = jmax; j--; ) {
-                        cell[j] *= tmp[j];
+                        cell[j] = 0;
                     }
                 }
-                if (mul !== 1 || add !== 0) {
-                    for (j = jmax; j--; ) {
-                        cell[j] = cell[j] * mul + add;
+                fn.outputSignalAR(this);
+            } else {
+                if (inputs.length > 0) {
+                    tmp = inputs[0].process(tickID)[0];
+                    for (i = 1; i < imax; ++i) {
+                        tmp *= inputs[i].process(tickID)[0];
                     }
+                } else {
+                    tmp = 0;
                 }
-            } else {    // control-rate
-                tmp = 1;
-                for (i = 0; i < imax; ++i) {
-                    tmp *= inputs[i].process(tickID)[0];
-                }
-                tmp = tmp * mul + add;
-                for (j = jmax; j--; ) {
-                    cell[j] = tmp;
-                }
+                cell[0] = tmp;
+                fn.outputSignalKR(this);
             }
         }
         
         return cell;
     };
     
-    fn.register("*", TimesNode);
+    fn.register("*", MulNode);
     
-})();
+})(timbre);

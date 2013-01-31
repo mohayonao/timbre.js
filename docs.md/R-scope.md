@@ -9,7 +9,7 @@ T("scope")
 ```timbre
 var audio = T("audio", {load:"/timbre.js/misc/audio/guitar.wav", loop:true}).play();
 
-T("scope", {interval:200}).on("scope", function() {
+T("scope", {interval:200}).on("data", function() {
   this.plot({target:canvas});
 }).listen(audio);
 ```

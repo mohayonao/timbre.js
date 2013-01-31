@@ -1,6 +1,6 @@
 T("midiratio")
 ==============
-{kr} Convert an interval in semitones to a ratio
+{krar} Convert an interval in semitones to a ratio
 
 ## Description ##
 入力オブジェクト値の合計をMIDIノート番号として比率に変換します。

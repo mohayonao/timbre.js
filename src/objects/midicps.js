@@ -1,15 +1,16 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function MidiCpsNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         var _ = this._;
         _.midi = 0;
         _.value = 0;
         _.prev  = null;
         _.a4    = 440;
+        _.ar    = false;
     }
     fn.extend(MidiCpsNode);
     
@@ -56,18 +57,28 @@
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
-            var midi = (this.inputs.length) ? fn.inputSignalKR(this) : _.midi;
-            
-            if (_.prev !== midi) {
-                _.prev = midi;
-                _.value = _.a4 * Math.pow(2, (midi - 69) / 12);
-            }
-            
-            var value = _.value * _.mul + _.add;
-            
-            for (var i = cell.length; i--; ) {
-                cell[i] = value;
+
+            var len = this.inputs.length;
+            var i, imax = cell.length;
+
+            if (_.ar && len) {
+                fn.inputSignalAR(this);
+                var a4 = _.a4;
+                for (i = imax; i--; ) {
+                    cell[i] = a4 * Math.pow(2, (cell[i] - 69) / 12);
+                }
+                _.value = cell[imax-1];
+                fn.outputSignalAR(this);
+            } else {
+                var input = (this.inputs.length) ? fn.inputSignalKR(this) : _.midi;
+                if (_.prev !== input) {
+                    _.prev = input;
+                    _.value = _.a4 * Math.pow(2, (input - 69) / 12);
+                }
+                var value = _.value * _.mul + _.add;
+                for (i = imax; i--; ) {
+                    cell[i] = value;
+                }
             }
         }
         
@@ -76,4 +87,4 @@
     
     fn.register("midicps", MidiCpsNode);
     
-})();
+})(timbre);

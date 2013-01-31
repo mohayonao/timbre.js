@@ -1,16 +1,16 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function NDictNode(_args) {
-        timbre.Object.call(this, _args);
-        fn.fixKR(this);
+        T.Object.call(this, _args);
         
         var _ = this._;
         _.defaultValue = 0;
         _.index = 0;
         _.dict  = {};
+        _.ar    = false;
     }
     fn.extend(NDictNode);
     
@@ -71,18 +71,37 @@
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
+
+            var len = this.inputs.length;
+            var index, value;
+            var dict = _.dict, defaultValue = _.defaultValue;
+            var mul = _.mul, add = _.add;
+            var i, imax = cell.length;
             
-            var index = (this.inputs.length) ? fn.inputSignalKR(this) : _.index;
-            
-            if (index < 0) {
-                index = (index - 0.5)|0;
+            if (_.ar && len) {
+                
+                fn.inputSignalAR(this);
+                for (i = imax; i--; ) {
+                    index = cell[i];
+                    if (index < 0) {
+                        index = (index - 0.5)|0;
+                    } else {
+                        index = (index + 0.5)|0;
+                    }
+                    cell[i] = (dict[index] || defaultValue) * mul + add;
+                }
+                fn.outputSignalAR(this);
             } else {
-                index = (index + 0.5)|0;
-            }
-            var value = (_.dict[index] || _.defaultValue) * _.mul + _.add;
-            
-            for (var i = cell.length; i--; ) {
-                cell[i] = value;
+                index = (this.inputs.length) ? fn.inputSignalKR(this) : _.index;
+                if (index < 0) {
+                    index = (index - 0.5)|0;
+                } else {
+                    index = (index + 0.5)|0;
+                }
+                value = (dict[index] || defaultValue) * mul + add;
+                for (i = imax; i--; ) {
+                    cell[i] = value;
+                }
             }
         }
         
@@ -134,5 +153,4 @@
         return instance;
     });
     
-})();
-
+})(timbre);

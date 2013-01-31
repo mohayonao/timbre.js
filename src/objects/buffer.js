@@ -1,20 +1,20 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function BufferNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.pitch      = timbre(1);
+        _.pitch      = T(1);
         _.buffer     = new Float32Array(0);
         _.isLooped   = false;
         _.isReversed = false;
         _.duration    = 0;
         _.currentTime = 0;
-        _.currentTimeIncr = this.cell.length * 1000 / timbre.samplerate;
+        _.currentTimeIncr = this.cell.length * 1000 / T.samplerate;
         _.samplerate  = 44100;
         _.phase = 0;
         _.phaseIncr = 0;
@@ -47,11 +47,11 @@
                 }
                 _.buffer = buffer;
                 _.phase     = 0;
-                _.phaseIncr = _.samplerate / timbre.samplerate;
+                _.phaseIncr = _.samplerate / T.samplerate;
                 _.duration  = _.buffer.length * 1000 / _.samplerate;
                 _.currentTime = 0;
                 _.plotFlush = true;
-                this.isReversed = _.isReversed;
+                this.reverse(_.isReversed);
             }
         }
     };
@@ -65,24 +65,18 @@
         },
         pitch: {
             set: function(value) {
-                this._.pitch = timbre(value);
+                this._.pitch = T(value);
             },
             get: function() {
                 return this._.pitch;
             }
         },
         isLooped: {
-            set: function(value) {
-                this.loop(value);
-            },
             get: function() {
                 return this._.isLooped;
             }
         },
         isReversed: {
-            set: function(value) {
-                this.reverse(value);
-            },
             get: function() {
                 return this._.isReversed;
             }
@@ -120,7 +114,7 @@
 
     $.clone = function() {
         var _ = this._;
-        var instance = timbre("buffer");
+        var instance = T("buffer");
         
         if (_.buffer) {
             setBuffer.call(instance, {
@@ -128,15 +122,15 @@
                 samplerate: _.samplerate
             });
         }
-        instance.isLooped   = this.isLooped;
-        instance.isReversed = this.isReversed;
+        instance.loop(_.isLooped);
+        instance.reverse(_.isReversed);
         
         return instance;
     };
     
     $.slice = function(begin, end) {
         var _ = this._;
-        var instance = timbre(_.originkey);
+        var instance = T(_.originkey);
         
         var isReversed = _.isReversed;
         if (typeof begin === "number" ){
@@ -163,8 +157,8 @@
             });
             instance._.isEnded = false;
         }
-        instance.isLooped   = this.isLooped;
-        instance.isReversed = this.isReversed;
+        instance.loop(_.isLooped);
+        instance.reverse(_.isReversed);
         
         return instance;
     };
@@ -204,18 +198,34 @@
     $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
+
+        if (_.isEnded && !_.buffer) {
+            return cell;
+        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            if (!_.isEnded && _.buffer) {
+            var buffer = _.buffer;
+            var phase  = _.phase;
+            var mul = _.mul, add = _.add;
+            var i, imax = cell.length;
+            
+            if (this.inputs.length) {
+                fn.inputSignalAR(this);
+                var t, sr = _.samplerate * 0.001;
+                for (i = 0; i < imax; ++i) {
+                    t = cell[i];
+                    phase = t * sr;
+                    cell[i] = (buffer[phase|0] || 0) * mul + add;
+                }
+                _.phase = phase;
+                _.currentTime = t;
+            } else {
                 var pitch  = _.pitch.process(tickID)[0];
-                var buffer = _.buffer;
-                var phase  = _.phase;
                 var phaseIncr = _.phaseIncr * pitch;
-                var mul = _.mul, add = _.add;
                 
-                for (var i = 0, imax = cell.length; i < imax; ++i) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = (buffer[phase|0] || 0) * mul + add;
                     phase += phaseIncr;
                 }
@@ -255,7 +265,7 @@
         fn.onended(this, 0);
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         var _ = this._;
@@ -275,4 +285,4 @@
     
     fn.register("buffer", BufferNode);
     
-})();
+})(timbre);

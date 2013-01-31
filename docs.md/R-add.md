@@ -3,9 +3,11 @@ T("+")
 {arkr} Add signals
 
 ## Description ##
-それぞれのインプットの信号を加算して出力します。
-
-以下の例では 3つのサイン波を加算して和音を出力しています。
+###### en ######
+`T("+")` is a signal add operator that outputs a signal which is the sum of the all inputs signals.
+###### ja ######
+`T("+")` はそれぞれのインプットの信号を加算して出力します。
+###### -- ######
 
 ```timbre
 T("+", T("sin", {freq:523.35, mul:0.25}),
@@ -14,8 +16,11 @@ T("+", T("sin", {freq:523.35, mul:0.25}),
 ```
 
 ## Note ##
-
-timbre.js のほとんどのオブジェクトは複数の入力を加算してから処理を行ないます。たとえば上記のような和音にフィルターをかけたい場合は以下の二通りの書きかたが出来ます。
+###### en ######
+Any **T-Object** automatically uses the sum of all signals received in that inputs. Thus, the `T("+")` object is necessary only to show signal addition explicitly, or to add an offset to a signal.
+###### ja ######
+timbre.js のほとんどのオブジェクトは複数の入力を加算してから処理を行ないます。
+###### -- ######
 
 ```timbre
 var chord = T("+", T("saw", {freq:523.35, mul:0.25}),
@@ -26,6 +31,12 @@ var cutoff = T("sin", {freq:"250ms", mul:800, add:1600}).kr();
 T("lpf", {cutoff:cutoff}, chord).play();
 ```
 
+###### en ######
+The below example are the same as the above example.
+###### ja ######
+以下のコードは上のコードと同じ動きをします。
+###### -- ######
+
 ```timbre
 var cutoff = T("sin", {freq:"250ms", mul:800, add:1600}).kr();
 
@@ -34,18 +45,6 @@ T("lpf", {cutoff:cutoff},
   T("saw", {freq:659.25, mul:0.25}),
   T("saw", {freq:783.99, mul:0.25})
 ).play();
-```
-
-
-`T("+")` は明示的に加算を示したい場合や加算後に積算など簡単な演算を行い場合に有効です。
-
-```timbre
-var chord = T("+", T("saw", {freq:523.35}),
-                   T("saw", {freq:659.25}),
-                   T("saw", {freq:783.99})).set({mul:0.25});
-var cutoff = T("sin", {freq:"250ms", mul:800, add:1600}).kr();
-
-T("lpf", {cutoff:cutoff}, chord).play();
 ```
 
 ## Source ##

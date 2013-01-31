@@ -1,51 +1,69 @@
 timbre.js
 =========
-
 JavaScript library for objective sound programming
 
+Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (formally: Timbre Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web. 
 
-_new version, now under development_
-
-
-### Project Page ###
+## Project Page ##
 [English](http://mohayonao.github.com/timbre.js/) | [日本語](http://mohayonao.github.com/timbre.js/ja/)
 
-### Examples ###
+## Examples ##
 [BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html) | [Chords Work](http://mohayonao.github.com/timbre.js/chord.html) | [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html) | [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html) | [Reich](http://mohayonao.github.com/timbre.js/reich.html)
 
-### System Requirements ###
+## Supports ##
+Timbre.js runs on a modern browser or node.js.
 
-* Chrome 14.0- (Web Audio API)
-* Safari 6.0- (Web Audio API)
-* Firefox 4.0- (Audio Data API)
-* node.js 0.8-
+![Chrome 14.0-](http://mohayonao.github.com/timbre.js/misc/img/chrome.png)
+![Safari 6.0-](http://mohayonao.github.com/timbre.js/misc/img/safari.png)
+![Firefox 4.0-](http://mohayonao.github.com/timbre.js/misc/img/firefox.png)
+![node.js 0.8-](http://mohayonao.github.com/timbre.js/misc/img/nodejs.png)
 
-### Installation ###
-
-Download the [minified library](http://mohayonao.github.com/timbre.js/timbre.js) and include it in your html.
+## Installation ##
+### browser
+Include the `timbre.js` file. It will install itself as `timbre`, `T` under the global namespace.
 
 ```html
 <script src="timbre.js"></script>
+<script>
+  T("sin", {freq:880, mul:0.5}).play();
+</script>
 ```
 
-If you want to use node.js, simply compile and install `timbre` using `npm`:
+### node.js
+Install via npm: `npm install timbre`, you can require it as a standard node module.
 
-```bash
-$ npm install timbre
+```js
+var T = require("timbre");
+
+T("sin", {freq:880, mul:0.5}).play();
 ```
 
-### License ###
+## License ##
 
 MIT
 
-### ChangeLog ###
+## ChangeLog ##
+**13.02.01**
+* Added: `T("reverb")`
+* Added: `T("chorus")`
+* Added: `T("eq")`
+* Added: `T("mediastream")`
+* Added: `T("-")`, `T("/")`, `T("min")`, `T("max")`
+* Added: `T("WebAudioAPI:recv")`, `T("WebAudioAPI:send")` at extras
+* Added: `T("MoogFF")` at extras
+* Renamed: `T("phaseshift")` to `T("phaser")`
+* Renamed: event names `scope`, `fft` to `data` (`T("scope")`, `T("spectrum")`)
+* Fixed: `T("osc").phase`, `T("osc").fb`
+* Fixed: `T("biquad").plot()`
+* Fixed: `T("mml").isEnded`
+
 **13.01.20a** (294.82KB)
-* rename a propery name: `T("comp").postGain` to `T("comp").gain`
+* Renamed: `T("comp").postGain` to `T("comp").gain`
 
 **13.01.20** (294.83KB)
-* add `T("adshr")`, `T("ahdsfr")`
-* add `T("comp")`
-* add `T("phaseshift")`
+* Added: `T("adshr")`, `T("ahdsfr")`
+* Added: `T("comp")`
+* Added: `T("phaseshift")`
 
 **13.01.18a** (268.71KB)
 * new version (beta)

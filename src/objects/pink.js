@@ -1,14 +1,14 @@
-(function() {
+(function(T) {
     "use strict";
     
     // Voss algorithm
     // http://www.firstpr.com.au/dsp/pink-noise/
     
     var MAX_KEY = 31;
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function PinkNoiseNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var whites = new Uint8Array(5);
@@ -55,4 +55,4 @@
     
     fn.register("pink", PinkNoiseNode);
     
-})();
+})(timbre);

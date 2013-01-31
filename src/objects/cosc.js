@@ -1,17 +1,17 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var Oscillator = timbre.modules.Oscillator;
+    var fn = T.fn;
+    var Oscillator = T.modules.Oscillator;
     
     function COscNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.freq = timbre(440);
-        _.osc1 = new Oscillator(timbre.samplerate);
-        _.osc2 = new Oscillator(timbre.samplerate);
+        _.freq = T(440);
+        _.osc1 = new Oscillator(T.samplerate);
+        _.osc2 = new Oscillator(T.samplerate);
         _.osc1.step = this.cell.length;
         _.osc2.step = this.cell.length;
         _.tmp = new Float32Array(this.cell.length);
@@ -41,7 +41,7 @@
         },
         freq: {
             set: function(value) {
-                this._.freq = timbre(value);
+                this._.freq = T(value);
             },
             get: function() {
                 return this._.freq;
@@ -97,4 +97,4 @@
     
     fn.register("cosc", COscNode);
     
-})();
+})(timbre);

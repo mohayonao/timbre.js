@@ -1,12 +1,12 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var ChannelObject = timbre.ChannelObject;
+    var fn = T.fn;
+    var ChannelObject = T.ChannelObject;
     var empty;
     
     function GateNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         this._.selected = 0;
@@ -67,4 +67,4 @@
     
     fn.register("gate", GateNode);
     
-})();
+})(timbre);

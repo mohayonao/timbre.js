@@ -1,13 +1,13 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function PicoBinder(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.stereo(this);
     }
-    fn.extend(PicoBinder, timbre.Object);
+    fn.extend(PicoBinder, T.Object);
     
     var $ = PicoBinder.prototype;
     
@@ -45,12 +45,12 @@
     };
     
     var pico;
-    if (timbre.envtype === "browser") {
+    if (T.envtype === "browser") {
         if (!window.pico) {
             window.pico = {};
         }
         pico = window.pico;
-    } else if(timbre.envtype === "node") {
+    } else if(T.envtype === "node") {
         if (!global.pico) {
             global.pico = {};
         }
@@ -61,34 +61,34 @@
         Object.defineProperties(pico, {
             env: {
                 get: function() {
-                    return timbre.env;
+                    return T.env;
                 }
             },
             samplerate: {
                 get: function() {
-                    return timbre.samplerate;
+                    return T.samplerate;
                 }
             },
             channels: {
                 get: function() {
-                    return timbre.channels;
+                    return T.channels;
                 }
             },
             cellsize: {
                 get: function() {
-                    return timbre.cellsize;
+                    return T.cellsize;
                 }
             },
             isPlaying: {
                 get: function() {
-                    return timbre.isPlaying;
+                    return T.isPlaying;
                 }
             },
             DelayNode: {
-                value: timbre.modules.EfxDelay
+                value: T.modules.EfxDelay
             }
         });
         
         fn.register("pico.js", PicoBinder);
     }
-})();
+})(timbre);

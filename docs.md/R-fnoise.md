@@ -6,7 +6,11 @@ T("fnoise")
 
 (canvas canvas w:240 h:80)
 
+###### en ######
+`T("fnoise")` is a frequency noise generator.
+###### ja ######
 周期的ノイズを出力します。
+###### -- ######
 
 ```timbre
 var freqs = T(function(count) {
@@ -15,7 +19,7 @@ var freqs = T(function(count) {
 
 var noise = T("fnoise", {freq:freqs, mul:0.15}).play();
 
-var fft = T("spectrum", {size:512, interval:100}, noise).on("fft", function() {
+var fft = T("spectrum", {size:512, interval:100}, noise).on("data", function() {
 
   fft.plot({target:canvas});
 

@@ -9,8 +9,9 @@
     "unused"  : true,
     "strict"  : true,
 	"trailing": true,
+	"newcap"  : false,
     
     "browser" : true,
     "node"    : true,
-    "predef"  : ["timbre","webkitAudioContext","URL","File"]
+    "predef"  : ["timbre"]
 }

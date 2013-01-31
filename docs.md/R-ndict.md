@@ -1,6 +1,6 @@
 T("ndict")
 ==========
-{kr} 
+{krar} 
 
 ## Description ##
 数値を別の数値に変換します。

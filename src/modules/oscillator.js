@@ -1,4 +1,4 @@
-(function() {
+(function(T) {
     "use strict";
     
     function Oscillator(samplerate) {
@@ -8,9 +8,13 @@
         this.step = 1;
         this.frequency = 0;
         this.value = 0;
+        this.phase = 0;
+        this.feedback = false;
         
-        this._phase = 0;
+        this._x = 0;
+        this._lastouts = 0;
         this._coeff = TABLE_SIZE / this.samplerate;
+        this._radtoinc = TABLE_SIZE / (Math.PI * 2);
     }
     
     var TABLE_SIZE = 1024;
@@ -21,7 +25,7 @@
     $.setWave = function(value) {
         var i, dx, wave = this.wave;
         if (!this.wave) {
-            this.wave = new Float32Array(TABLE_SIZE);
+            this.wave = new Float32Array(TABLE_SIZE + 1);
         }
         if (typeof value === "function") {
             for (i = 0; i < TABLE_SIZE; ++i) {
@@ -45,64 +49,187 @@
                 //--debug
             }
         }
+        this.wave[TABLE_SIZE] = this.wave[0];
     };
     
     $.reset = function() {
-        this._phase = 0;
+        this._x = 0;
     };
     
     $.next = function() {
-        var wave  = this.wave;
-        var phase = this._phase;
-        var coeff = this._coeff;
-        var index = phase|0;
-        this.value = wave[index & TABLE_MASK];
-        phase += this.frequency * coeff * this.step;
-        while (phase > TABLE_SIZE) {
-            phase -= TABLE_SIZE;
+        var x = this._x;
+        var index = (x + this.phase * this._radtoinc)|0;
+        this.value = this.wave[index & TABLE_MASK];
+        x += this.frequency * this._coeff * this.step;
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
         }
-        this._phase = phase;
+        this._x = x;
         return this.value;
     };
     
     $.process = function(cell) {
-        var wave  = this.wave;
-        var phase = this._phase;
-        var index, delta, x0, x1, dx = this.frequency * this._coeff;
-        for (var i = 0, imax = this.step; i < imax; ++i) {
-            index = phase|0;
-            delta = phase - index;
-            x0 = wave[index & TABLE_MASK];
-            x1 = wave[(index+1) & TABLE_MASK];
-            cell[i] = ((1.0 - delta) * x0 + delta * x1);
-            phase += dx;
+        var wave = this.wave;
+        var radtoinc = this._radtoinc;
+        var phase, x = this._x;
+        var index, frac, x0, x1, dx = this.frequency * this._coeff;
+        var i, imax = this.step;
+        
+        if (this.feedback) {
+            var lastouts = this._lastouts;
+            radtoinc *= this.phase;
+            for (i = 0; i < imax; ++i) {
+                phase = x + lastouts * radtoinc;
+                index = phase|0;
+                frac  = phase - index;
+                index = index & TABLE_MASK;
+                x0 = wave[index  ];
+                x1 = wave[index+1];
+                cell[i] = lastouts = x0 + frac * (x1 - x0);
+                x += dx;
+            }
+            this._lastouts = lastouts;
+        } else {
+            var phaseoffset = this.phase * radtoinc;
+            for (i = 0; i < imax; ++i) {
+                phase = x + phaseoffset;
+                index = phase|0;
+                frac  = phase - index;
+                index = index & TABLE_MASK;
+                x0 = wave[index  ];
+                x1 = wave[index+1];
+                cell[i] = x0 + frac * (x1 - x0);
+                x += dx;
+            }
         }
-        while (phase > TABLE_SIZE) {
-            phase -= TABLE_SIZE;
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
         }
-        this._phase = phase;
+        this._x = x;
         this.value = cell[cell.length - 1];
     };
     
     $.processWithFreqArray = function(cell, freqs) {
-        var wave  = this.wave;
-        var phase = this._phase;
-        var coeff = this._coeff;
-        var index, delta, x0, x1;
-        for (var i = 0, imax = this.step; i < imax; ++i) {
-            index = phase|0;
-            delta = phase - index;
-            x0 = wave[index & TABLE_MASK];
-            x1 = wave[(index+1) & TABLE_MASK];
-            cell[i] = ((1.0 - delta) * x0 + delta * x1);
-            phase += freqs[i] * coeff;
+        var wave = this.wave;
+        var radtoinc = this._radtoinc;
+        var phase, x = this._x;
+        var index, frac, x0, x1, dx = this._coeff;
+        var i, imax = this.step;
+        
+        if (this.feedback) {
+            var lastouts = this._lastouts;
+            radtoinc *= this.phase;
+            for (i = 0; i < imax; ++i) {
+                phase = x + lastouts * radtoinc;
+                index = phase|0;
+                frac  = phase - index;
+                index = index & TABLE_MASK;
+                x0 = wave[index  ];
+                x1 = wave[index+1];
+                cell[i] = lastouts = x0 + frac * (x1 - x0);
+                x += freqs[i] * dx;
+            }
+            this._lastouts = lastouts;
+        } else {
+            var phaseoffset = this.phase * this._radtoinc;
+            for (i = 0; i < imax; ++i) {
+                phase = x + phaseoffset;
+                index = phase|0;
+                frac  = phase - index;
+                index = index & TABLE_MASK;
+                x0 = wave[index  ];
+                x1 = wave[index+1];
+                cell[i] = x0 + frac * (x1 - x0);
+                x += freqs[i] * dx;
+            }
         }
-        while (phase > TABLE_SIZE) {
-            phase -= TABLE_SIZE;
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
         }
-        this._phase = phase;
+        this._x = x;
         this.value = cell[cell.length - 1];
     };
+    
+    $.processWithPhaseArray = function(cell, phases) {
+        var wave = this.wave;
+        var radtoinc = this._radtoinc;
+        var phase, x = this._x;
+        var index, frac, x0, x1, dx = this.frequency * this._coeff;
+        var i, imax = this.step;
+
+        if (this.feedback) {
+            var lastouts = this._lastouts;
+            radtoinc *= this.phase;
+            for (i = 0; i < imax; ++i) {
+                phase = x + lastouts * radtoinc;
+                index = phase|0;
+                frac  = phase - index;
+                index = index & TABLE_MASK;
+                x0 = wave[index  ];
+                x1 = wave[index+1];
+                cell[i] = lastouts = x0 + frac * (x1 - x0);
+                x += dx;
+            }
+            this._lastouts = lastouts;
+        } else {
+            for (i = 0; i < imax; ++i) {
+                phase = x + phases[i] * radtoinc;
+                index = phase|0;
+                frac  = phase - index;
+                index = index & TABLE_MASK;
+                x0 = wave[index  ];
+                x1 = wave[index+1];
+                cell[i] = x0 + frac * (x1 - x0);
+                x += dx;
+            }
+        }
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
+        }
+        this._x = x;
+        this.value = cell[cell.length - 1];
+    };
+    
+    $.processWithFreqAndPhaseArray = function(cell, freqs, phases) {
+        var wave = this.wave;
+        var radtoinc = this._radtoinc;
+        var phase, x = this._x;
+        var index, frac, x0, x1, dx = this._coeff;
+        var i, imax = this.step;
+        
+        if (this.feedback) {
+            var lastouts = this._lastouts;
+            radtoinc *= this.phase;
+            for (i = 0; i < imax; ++i) {
+                phase = x + lastouts * radtoinc;
+                index = phase|0;
+                frac  = phase - index;
+                index = index & TABLE_MASK;
+                x0 = wave[index  ];
+                x1 = wave[index+1];
+                cell[i] = lastouts = x0 + frac * (x1 - x0);
+                x += freqs[i] * dx;
+            }
+            this._lastouts = lastouts;
+        } else {
+            for (i = 0; i < imax; ++i) {
+                phase = x + phases[i] * TABLE_SIZE;
+                index = phase|0;
+                frac  = phase - index;
+                index = index & TABLE_MASK;
+                x0 = wave[index  ];
+                x1 = wave[index+1];
+                cell[i] = x0 + frac * (x1 - x0);
+                x += freqs[i] * dx;
+            }
+        }
+        while (x > TABLE_SIZE) {
+            x -= TABLE_SIZE;
+        }
+        this._x = x;
+        this.value = cell[cell.length - 1];
+    };
+    
     
     function waveshape(sign, name, shape, width) {
         var wave = Wavetables[name];
@@ -356,6 +483,6 @@
         }
     };
     
-    timbre.modules.Oscillator = Oscillator;
+    T.modules.Oscillator = Oscillator;
     
-})();
+})(timbre);

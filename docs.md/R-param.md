@@ -1,6 +1,6 @@
 T("param")
 ==========
-{kr} Parameter
+{krar} Parameter
 
 ## Description ##
 

@@ -1,26 +1,26 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
     
     var STATUS_WAIT = 0;
     var STATUS_REC  = 1;
     
     function RecNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
         
         var _ = this._;
         
         _.timeout    = 5000;
-        _.samplerate = timbre.samplerate;
+        _.samplerate = T.samplerate;
         _.status     = STATUS_WAIT;
         _.writeIndex = 0;
         _.writeIndexIncr  = 1;
         _.currentTime     = 0;
-        _.currentTimeIncr = 1000 / timbre.samplerate;
+        _.currentTimeIncr = 1000 / T.samplerate;
     }
     fn.extend(RecNode);
     
@@ -43,7 +43,7 @@
         samplerate: {
             set: function(value) {
                 if (typeof value === "number") {
-                    if (0 < value && value <= timbre.samplerate) {
+                    if (0 < value && value <= T.samplerate) {
                         this._.samplerate = value;
                     }
                 }
@@ -67,7 +67,7 @@
                 _.buffer = new Float32Array(len);
             }
             _.writeIndex = 0;
-            _.writeIndexIncr = _.samplerate / timbre.samplerate;
+            _.writeIndexIncr = _.samplerate / T.samplerate;
             _.currentTime = 0;
             _.status = STATUS_REC;
             _.emit("start");
@@ -150,4 +150,4 @@
     fn.register("record", RecNode);
     fn.alias("rec", "record");
     
-})();
+})(timbre);

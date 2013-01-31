@@ -1,16 +1,17 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue  = timbre.timevalue;
-    var Oscillator = timbre.modules.Oscillator;
+    var fn = T.fn;
+    var timevalue  = T.timevalue;
+    var Oscillator = T.modules.Oscillator;
     
     function OscNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         
         var _ = this._;
-        _.freq = timbre(440);
-        _.osc = new Oscillator(timbre.samplerate);
+        _.freq  = T(440);
+        _.phase = T(0);
+        _.osc = new Oscillator(T.samplerate);
         _.tmp = new Float32Array(this.cell.length);
         _.osc.step = this.cell.length;
         
@@ -50,10 +51,28 @@
                         value = 1000 / value;
                     }
                 }
-                this._.freq = timbre(value);
+                this._.freq = T(value);
             },
             get: function() {
                 return this._.freq;
+            }
+        },
+        phase: {
+            set: function(value) {
+                this._.phase = T(value);
+                this._.osc.feedback = false;
+            },
+            get: function() {
+                return this._.phase;
+            }
+        },
+        fb: {
+            set: function(value) {
+                this._.phase = T(value);
+                this._.osc.feedback = true;
+            },
+            get: function() {
+                return this._.phase;
             }
         }
     });
@@ -63,7 +82,7 @@
         this._.emit("bang");
         return this;
     };
-
+    
     $.process = function(tickID) {
         var _ = this._;
         var cell = this.cell;
@@ -82,29 +101,37 @@
                 }
             }
             
-            var osc   = _.osc;
-            var  freq = _.freq;
-            var _freq = _.freq.process(tickID);
+            var osc = _.osc;
+            var freq  = _.freq.process(tickID);
+            var phase = _.phase.process(tickID);
             
-            if (_.ar) { // audio-rate
+            osc.frequency = freq[0];
+            osc.phase     = phase[0];
+            
+            if (_.ar) {
                 var tmp  = _.tmp;
-                if (freq.isAr) {
-                    osc.processWithFreqArray(tmp, _freq);
-                } else { // _.freq.isKr
-                    osc.frequency = _freq[0];
-                    osc.process(tmp);
+                if (_.freq.isAr) {
+                    if (_.phase.isAr) {
+                        osc.processWithFreqAndPhaseArray(tmp, freq, phase);
+                    } else {
+                        osc.processWithFreqArray(tmp, freq);
+                    }
+                } else {
+                    if (_.phase.isAr) {
+                        osc.processWithPhaseArray(tmp, phase);
+                    } else {
+                        osc.process(tmp);
+                    }
                 }
                 for (i = imax; i--; ) {
-                    cell[i] = cell[i] * tmp[i];
+                    cell[i] *= tmp[i];
                 }
-            } else {    // control-rate
-                osc.frequency = _freq[0];
+            } else {
                 var value = osc.next();
                 for (i = imax; i--; ) {
                     cell[i] *= value;
                 }
             }
-            
             fn.outputSignalAR(this);
         }
         
@@ -112,7 +139,7 @@
     };
 
     var plotBefore;
-    if (timbre.envtype === "browser") {
+    if (T.envtype === "browser") {
         plotBefore = function(context, offset_x, offset_y, width, height) {
             var y = (height >> 1) + 0.5;
             context.strokeStyle = "#ccc";
@@ -162,4 +189,4 @@
     
     fn.alias("square", "pulse");
     
-})();
+})(timbre);

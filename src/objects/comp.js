@@ -1,27 +1,25 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue  = timbre.timevalue;
-    var Compressor = timbre.modules.Compressor;
+    var fn = T.fn;
+    var timevalue  = T.timevalue;
+    var Compressor = T.modules.Compressor;
     
     function CompressorNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.thresh = timbre(-24);
-        _.knee   = timbre(30);
-        _.ratio  = timbre(12);
+        _.thresh = T(-24);
+        _.knee   = T(30);
+        _.ratio  = T(12);
         _.postGain  =   6;
-        _.attack    =   3;
-        _.release   = 250;
         _.reduction =   0;
         
-        _.comp = new Compressor(timbre.samplerate);
+        _.comp = new Compressor(T.samplerate);
         _.comp.dbPostGain  = _.postGain;
-        _.comp.attackTime  = _.attack  * 0.001;
-        _.comp.releaseTime = _.release * 0.001;
+        _.comp.setAttackTime(0.003);
+        _.comp.setReleaseTime(0.25);
     }
     fn.extend(CompressorNode);
     
@@ -30,7 +28,7 @@
     Object.defineProperties($, {
         thresh: {
             set: function(value) {
-                this._.thresh = timbre(value);
+                this._.thresh = T(value);
             },
             get: function() {
                 return this._.thresh;
@@ -38,7 +36,7 @@
         },
         knee: {
             set: function(value) {
-                this._.kne = timbre(value);
+                this._.kne = T(value);
             },
             get: function() {
                 return this._.knee;
@@ -46,7 +44,7 @@
         },
         ratio: {
             set: function(value) {
-                this._.ratio = timbre(value);
+                this._.ratio = T(value);
             },
             get: function() {
                 return this._.ratio;
@@ -71,11 +69,11 @@
                 if (typeof value === "number") {
                     value = (value < 0) ? 0 : (1000 < value) ? 1000 : value;
                     this._.attack = value;
-                    this._.comp.attackTime = value * 0.001;
+                    this._.comp.setAttackTime(value * 0.001);
                 }
             },
             get: function() {
-                return this._.attack;
+                return this._.comp.attackTime;
             }
         },
         release: {
@@ -115,10 +113,17 @@
             var thresh = _.thresh.process(tickID)[0];
             var knee   = _.knee.process(tickID)[0];
             var ratio  = _.ratio.process(tickID)[0];
+            if (_.prevThresh !== thresh || _.prevKnee !== knee || _.prevRatio !== ratio) {
+                _.prevThresh = thresh;
+                _.prevKnee   = knee;
+                _.prevRatio  = ratio;
+                _.comp.setParams(thresh, knee, ratio);
+            }
             
-            _.comp.process(cell, cell, thresh, knee, ratio);
-            
-            _.reduction = _.comp.meteringGain;
+            if (!_.bypassed) {
+                _.comp.process(cell);
+                _.reduction = _.comp.meteringGain;
+            }
             
             fn.outputSignalAR(this);
         }
@@ -129,4 +134,4 @@
     fn.register("comp", CompressorNode);
     fn.alias("compressor", "comp");
     
-})();
+})(timbre);

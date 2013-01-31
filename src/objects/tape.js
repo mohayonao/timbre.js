@@ -1,13 +1,13 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var Scissor    = timbre.modules.Scissor;
+    var fn = T.fn;
+    var Scissor    = T.modules.Scissor;
     var Tape       = Scissor.Tape;
     var TapeStream = Scissor.TapeStream;
     
     function ScissorNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
 
         var _ = this._;
@@ -23,12 +23,12 @@
             set: function(tape) {
                 if (tape instanceof Tape) {
                     this._.tape = tape;
-                    this._.tapeStream = new TapeStream(tape, timbre.samplerate);
+                    this._.tapeStream = new TapeStream(tape, T.samplerate);
                     this._.isEnded = false;
                 } else if (typeof tape === "object") {
                     if (tape.buffer instanceof Float32Array) {
                         this._.tape = new Scissor(tape);
-                        this._.tapeStream = new TapeStream(tape, timbre.samplerate);
+                        this._.tapeStream = new TapeStream(tape, T.samplerate);
                         this._.isEnded = false;
                     }
                 }
@@ -38,9 +38,6 @@
             }
         },
         isLooped: {
-            set: function(value) {
-                this.loop(value);
-            },
             get: function() {
                 return this._.isLooped;
             }
@@ -102,4 +99,4 @@
     
     fn.register("tape", ScissorNode);
     
-})();
+})(timbre);

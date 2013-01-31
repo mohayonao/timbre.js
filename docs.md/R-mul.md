@@ -3,7 +3,6 @@ T("*")
 {arkr} Multiply signals
 
 ## Description ##
-
 ###### en ######
 `T("*")` is a signal multiplier operator that outputs a signal which is the multiplication all input signals.
 ###### ja ######

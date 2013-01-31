@@ -3,60 +3,45 @@ T("timbre.js")
 JavaScript Library for Objective Sound Programming
 
 ## What is timbre.js? ##
+Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (formally: Timbre Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web.
+- - -
+This project is hosted on [GitHub](https://github.com/mohayonao/timbre.js/). You can report bugs and discuss features on the [issues page](https://github.com/mohayonao/timbre.js/issues), or send tweets to [@mohayonao](http://twitter.com/mohayonao). I develop on Mac, mainly for Google Chrome.
+- - -
+This documentation includes many executable and editable sample code, so you can try timbre.js and see how it works, easily.
 
-###### en ######
+## Downloads ##
+Recently released: v**${VERSION}**
 
-  Timbre.js is a JavaScript library for objective sound programming.  
-  This project is hosted on [GitHub](https://github.com/mohayonao/timbre.js/)
-
-###### ja ######
-
-  timbre.js は lisp のような簡潔な記述をアイデアの出発点として [jQuery](http://jquery.com/) や [node.js](http://nodejs.org/) などの先進的なインターフェイスを参考に開発された [SuperCollider](http://supercollider.sourceforge.net/) のようにガリガリ書ける [Max/MSP](http://cycling74.com/) のようなオブジェクト指向サウンドプログラミング用の JavaScript ライブラリです. このプロジェクトは [GitHub](https://github.com/mohayonao/timbre.js/) でホストされています.
-
-###### -- ######
-
+```table
+md:**[Production Version](/timbre.js/timbre.js)**|md: ${MINSIZE}kb, minified ([Source Maps](/timbre.js/timbre.js.map))
+md:**[Development Version](/timbre.js/timbre.dev.js)**|md: ${DEVSIZE}kb, uncompressed
+md:[Edge Version](https://raw.github.com/mohayonao/timbre.js/master/timbre.dev.js)|md: unreleased, current `master`, use at your own risk.
+```
 
 ## Supports ##
-###### en ######
+Timbre.js runs on a modern browser or node.js.
 
-  Timbre.js run on the browser (Chrome, Safari, Firefox) and node.js.
-
-###### ja ######
-
-  timbre.js は Chrome, Safari, Firefox, node.js, オプションとして Opera をサポートします.  
-  開発は主に Mac版Chrome で行っています. バグや仕様上の不備を発見した場合 [twitter](http://twitter.com/mohayonao/) または [GitHub Issues](https://github.com/mohayonao/timbre.js/issues) で報告していただけると非常に助かります.
-
-###### -- ######
+![Chrome 14.0-](/timbre.js/misc/img/chrome.png)
+![Safari 6.0-](/timbre.js/misc/img/safari.png)
+![Firefox 4.0-](/timbre.js/misc/img/firefox.png)
+![node.js 0.8-](/timbre.js/misc/img/nodejs.png)
 
 ## Installation ##
-
-###### en ######
-
-  Download the [minified](/timbre.js/timbre.js) or [development](/timbre.js/timbre.dev.js) and include it in your html.
-
-###### ja ######
-
-  [ミニファイ版](/timbre.js/timbre.js) か [開発版](/timbre.js/timbre.dev.js) をダウンロードして HTML に組み込みます.
-  
-###### -- ######
+### browser
+Include the `timbre.js` file. It will install itself as `timbre`, `T` under the global namespace.
 
 ```html
-<script src="./timbre.js"></script>
+<script src="timbre.js"></script>
+<script>
+  T("sin", {freq:880, mul:0.5}).play();
+</script>
 ```
 
-node.js
+### node.js
+Install via npm: `npm install timbre`, you can require it as a standard node module.
 
-```sh
-npm install timbre
+```js
+var T = require("timbre");
+
+T("sin", {freq:880, mul:0.5}).play();
 ```
-
-###### en ######
-
-  Timbre.js use global variants `timbre` and abbr `T`.
-
-###### ja ######
-
-  timbre.js はグローバル変数 `timbre` と省略形の `T` を使用します.  
-  [チュートリアル](./GettingStarted.html)で実際にコードを試しながら timbre.js の使い方を習得しましょう.
-
-###### -- ######

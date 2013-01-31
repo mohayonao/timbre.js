@@ -1,15 +1,15 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function FNoiseNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.freq = timbre(440);
-        _.samplerate = timbre.samplerate;
+        _.freq = T(440);
+        _.samplerate = T.samplerate;
         _.reg = 0x8000;
         _.shortFlag = false;
         _.phase     = 0;
@@ -30,7 +30,7 @@
         },
         freq: {
             set: function(value) {
-                this._.freq = timbre(value);
+                this._.freq = T(value);
             },
             get: function() {
                 return this._.freq;
@@ -85,4 +85,4 @@
     
     fn.register("fnoise", FNoiseNode);
     
-})();
+})(timbre);

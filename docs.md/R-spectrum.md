@@ -10,7 +10,7 @@ T("spectrum")
 ```timbre
 var saw = T("pink", {mul:0.15}).play();
 
-var fft = T("spectrum", {size:512, interval:100}).on("fft", function() {
+var fft = T("spectrum", {size:512, interval:100}).on("data", function() {
   fft.plot({target:canvas});
 }).listen(saw);
 ```

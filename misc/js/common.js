@@ -1,5 +1,9 @@
 $(function() {
     "use strict";
+
+    if (timbre.env === "nop") {
+        timbre.bind(pico.FlashPlayer, {src:"/timbre.js/libs/PicoFlashPlayer.swf"});
+    }
     
     var nowPlaying, animationId;
     var current;

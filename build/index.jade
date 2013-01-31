@@ -1,9 +1,0 @@
-for items in categories
-  if indexes[items.key] && indexes[items.key].length
-    h2 #{items.caption}
-    ul
-      each o in indexes[items.key]
-        li
-          a(href=o.url) #{o.title}
-          if o.dev
-            span(class="dev") dev

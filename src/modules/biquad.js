@@ -1,4 +1,4 @@
-(function() {
+(function(T) {
     "use strict";
     
     function Biquad(samplerate) {
@@ -290,6 +290,6 @@
     setParams.brf = setParams.notch;
     setParams.apf = setParams.allpass;
     
-    timbre.modules.Biquad = Biquad;
+    T.modules.Biquad = Biquad;
     
-})();
+})(timbre);

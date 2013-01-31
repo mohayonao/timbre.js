@@ -1,10 +1,10 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
+    var fn = T.fn;
     
     function SynthDefNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.fixAR(this);
 
         var _ = this._;
@@ -87,14 +87,14 @@
         
         gen = this._.synthdef.call(this, opts);
         
-        if (gen instanceof timbre.Object) {
+        if (gen instanceof T.Object) {
             gen.noteNum = noteNum;
             list.push(gen);
             dict[noteNum] = opts.gen = gen;
             
             _.isEnded = false;
             
-            if (list.length >= _.poly) {
+            if (list.length > _.poly) {
                 _.remGen(list[0]);
             }
         }
@@ -202,7 +202,7 @@
                 if (typeof value.type === "string") {
                     this._.env = value;
                 }
-            } else if (value instanceof timbre.Object) {
+            } else if (value instanceof T.Object) {
                 this._.env = value;
             }
         },
@@ -231,13 +231,13 @@
             env = _.env || {};
             envtype = env.type || "perc";
             
-            synth = timbre("osc", {wave:_.wave, freq:opts.freq, mul:opts.velocity/128});
-            if (env instanceof timbre.Object) {
+            synth = T("osc", {wave:_.wave, freq:opts.freq, mul:opts.velocity/128});
+            if (env instanceof T.Object) {
                 if (typeof env.clone === "function") {
                     synth = env.clone().append(synth);
                 }
             } else {
-                synth = timbre(envtype, env, synth);
+                synth = T(envtype, env, synth);
             }
             synth.on("ended", opts.doneAction).bang();
             
@@ -268,13 +268,13 @@
             env = _.env || {};
             envtype = env.type || "perc";
             
-            synth = timbre("pluck", {freq:opts.freq, mul:opts.velocity/128}).bang();
-            if (env instanceof timbre.Object) {
+            synth = T("pluck", {freq:opts.freq, mul:opts.velocity/128}).bang();
+            if (env instanceof T.Object) {
                 if (typeof env.clone === "function") {
                     synth = env.clone().append(synth);
                 }
             } else {
-                synth = timbre(envtype, env, synth);
+                synth = T(envtype, env, synth);
             }
             synth.on("ended", opts.doneAction).bang();
             
@@ -294,4 +294,4 @@
         };
     })());
     
-})();
+})(timbre);

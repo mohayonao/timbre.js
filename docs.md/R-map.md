@@ -1,6 +1,6 @@
 T("map")
 =========
-{kr} Mapping
+{krar} Mapping
 
 ## Description ##
 入力値を変換して出力します

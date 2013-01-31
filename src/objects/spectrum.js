@@ -1,12 +1,12 @@
-(function() {
+(function(T) {
     "use strict";
     
-    var fn = timbre.fn;
-    var timevalue = timbre.timevalue;
-    var FFT = timbre.modules.FFT;
+    var fn = T.fn;
+    var timevalue = T.timevalue;
+    var FFT = T.modules.FFT;
     
     function SpectrumNode(_args) {
-        timbre.Object.call(this, _args);
+        T.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
         
@@ -16,7 +16,7 @@
         this._.writeIndex  = 0;
         
         this._.plotFlush = true;
-        this._.plotRange = [0, 0.5];
+        this._.plotRange = [0, 1];
         this._.plotBarStyle = true;
         
         this.once("init", oninit);
@@ -78,10 +78,10 @@
                         _.reservedinterval = value;
                     } else {
                         _.interval = value;
-                        _.samplesIncr = (value * 0.001 * timbre.samplerate);
+                        _.samplesIncr = (value * 0.001 * T.samplerate);
                         if (_.samplesIncr < _.buffer.length) {
                             _.samplesIncr = _.buffer.length;
-                            _.interval = _.samplesIncr * 1000 / timbre.samplerate;
+                            _.interval = _.samplesIncr * 1000 / T.samplerate;
                         }
                     }
                 }
@@ -158,32 +158,40 @@
             _.writeIndex = writeIndex;
             
             if (emit) {
-                this._.emit("fft");
+                this._.emit("data");
             }
         }
         return cell;
     };
     
-    var super_plot = timbre.Object.prototype.plot;
+    var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
             var fft = this._.fft;
             
+            var size     = 64;
             var spectrum = fft.spectrum;
-            var step     = fft.length >> 6;
+            var step     = spectrum.length / size;
             var istep    = 1 / step;
-            var data    = new Float32Array(spectrum.length * istep);
+            var data    = new Float32Array(size);
             var i, imax = spectrum.length;
             var j, jmax = step;
             
-            var v, k = 0;
+            var v, x, k = 0, peak = 0;
             for (i = 0; i < imax; i += step) {
                 v = 0;
                 for (j = 0; j < jmax; ++j) {
                     v += spectrum[i + j];
                 }
-                data[k++] = v * istep;
+                x = v * istep;
+                data[k++] = x;
+                if (peak < x) {
+                    peak = x;
+                }
+            }
+            for (i = data.length; i--; ) {
+                data[i] /= peak;
             }
             
             this._.plotData  = data;
@@ -194,4 +202,4 @@
     
     fn.register("spectrum", SpectrumNode);
 
-})();
+})(timbre);

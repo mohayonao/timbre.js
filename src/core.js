@@ -198,6 +198,11 @@
         _sys.bind(Klass, opts);
         return timbre;
     };
+
+    timbre.setup = function(opts) {
+        _sys.setup(opts);
+        return timbre;
+    };
     
     timbre.play = function() {
         _sys.play();
@@ -226,10 +231,11 @@
         return timbre;
     };
     
-    timbre.removeListener = function(type, listener) {
+    timbre.off = function(type, listener) {
         _sys.removeListener(type, listener);
         return timbre;
     };
+    timbre.removeListener = timbre.off;
     
     timbre.removeAllListeners = function(type) {
         _sys.removeAllListeners(type);
@@ -553,7 +559,7 @@
         object._.emit("ended");
     };
     fn.onended = __onended;
-
+    
     var __inputSignalAR = function(object) {
         var cell   = object.cell;
         var inputs = object.inputs;
@@ -562,13 +568,22 @@
         var tickID = object.tickID;
         var tmp;
         
-        for (j = jmax; j--; ) {
-            cell[j] = 0;
+        for (j = jmax; j; ) {
+            j -= 8;
+            cell[j] = cell[j+1] = cell[j+2] = cell[j+3] = cell[j+4] = cell[j+5] = cell[j+6] = cell[j+7] = 0;
         }
         for (i = 0; i < imax; ++i) {
             tmp = inputs[i].process(tickID);
-            for (j = jmax; j--; ) {
-                cell[j] += tmp[j];
+            for (j = jmax; j; ) {
+                j -= 8;
+                cell[j  ] += tmp[j  ];
+                cell[j+1] += tmp[j+1];
+                cell[j+2] += tmp[j+2];
+                cell[j+3] += tmp[j+3];
+                cell[j+4] += tmp[j+4];
+                cell[j+5] += tmp[j+5];
+                cell[j+6] += tmp[j+6];
+                cell[j+7] += tmp[j+7];
             }
         }
     };
@@ -587,10 +602,20 @@
     fn.inputSignalKR = __inputSignalKR;
     
     var __outputSignalAR = function(object) {
-        var cell = object.cell;
         var mul = object._.mul, add = object._.add;
-        for (var i = cell.length; i--; ) {
-            cell[i] = cell[i] * mul + add;
+        if (mul !== 1 || add !== 0) {
+            var cell = object.cell;
+            for (var i = cell.length; i; ) {
+                i -= 8;
+                cell[i  ] = cell[i  ] * mul + add;
+                cell[i+1] = cell[i+1] * mul + add;
+                cell[i+2] = cell[i+2] * mul + add;
+                cell[i+3] = cell[i+3] * mul + add;
+                cell[i+4] = cell[i+4] * mul + add;
+                cell[i+5] = cell[i+5] * mul + add;
+                cell[i+6] = cell[i+6] * mul + add;
+                cell[i+7] = cell[i+7] * mul + add;
+            }
         }
     };
     fn.outputSignalAR = __outputSignalAR;
@@ -598,9 +623,10 @@
     var __outputSignalKR = function(object) {
         var cell = object.cell;
         var mul = object._.mul, add = object._.add;
-        var value = cell[0] * mul * add;
-        for (var i = cell.length; i--; ) {
-            cell[i] = value;
+        var value = cell[0] * mul + add;
+        for (var i = cell.length; i; ) {
+            i -= 8;
+            cell[i] = cell[i+1] = cell[i+2] = cell[i+3] = cell[i+4] = cell[i+5] = cell[i+6] = cell[i+7] = value;
         }
     };
     fn.outputSignalKR = __outputSignalKR;
@@ -646,6 +672,7 @@
             this._.mul = 1;
             this._.add = 0;
             this._.dac = null;
+            this._.bypassed = false;
             this._.meta = {};
         }
         
@@ -665,6 +692,11 @@
             isKr: {
                 get: function() {
                     return !this._.ar;
+                }
+            },
+            isBypassed: {
+                get: function() {
+                    return this._.bypassed;
                 }
             },
             mul: {
@@ -780,11 +812,11 @@
             return this;
         };
         
-        $.removeListener = function(type, listener) {
+        $.off = $.removeListener = function(type, listener) {
             this._.events.removeListener(type, listener);
             return this;
         };
-
+        
         $.removeAllListeners = function(type) {
             this._.events.removeAllListeners(type);
             return this;
@@ -846,6 +878,11 @@
             return this.cell;
         };
         
+        $.bypass = function() {
+            this._.bypassed = (arguments.length === 0) ? true : !!arguments[0];
+            return this;
+        };
+        
         $.play = function() {
             var dac = this._.dac;
             var emit = false;
@@ -878,26 +915,30 @@
             return this;
         };
         
-        $.ar = function(value) {
-            if (value === false) {
-                this.kr(true);
-            } else {
+        $.start = $.stop = $.listen = $.unlisten = function() {
+            return this;
+        };
+        
+        $.ar = function() {
+            if ((arguments.length === 0) ? true : !!arguments[0]) {
                 if (!this._.kronly) {
                     this._.ar = true;
                     this._.emit("ar", true);
                 }
+            } else {
+                this.kr(true);
             }
             return this;
         };
         
-        $.kr = function(value) {
-            if (value === false) {
-                this.ar(true);
-            } else {
+        $.kr = function() {
+            if ((arguments.length === 0) ? true : !!arguments[0]) {
                 if (!this._.aronly) {
                     this._.ar = false;
                     this._.emit("ar", false);
                 }
+            } else {
+                this.ar(true);
             }
             return this;
         };
@@ -1440,14 +1481,14 @@
             this.listeners = [];
             this.events.on("addObject", function() {
                 if (this.status === STATUS_NONE) {
-                    if (this.inlets.length > 0 || this.timers.length > 0) {
+                    if (this.inlets.length > 0 || this.timers.length > 0 || this.listeners.length > 0) {
                         this.play();
                     }
                 }
             });
             this.events.on("removeObject", function() {
                 if (this.status === STATUS_PLAY) {
-                    if (this.inlets.length === 0 && this.timers.length === 0) {
+                    if (this.inlets.length === 0 && this.timers.length === 0 && this.listeners.length === 0) {
                         this.pause();
                     }
                 }
@@ -1713,10 +1754,13 @@
     
     // player (borrowed from pico.js)
     var ImplClass = null;
+    /*global webkitAudioContext:true */
     if (typeof webkitAudioContext !== "undefined") {
         ImplClass = function(sys) {
             var context = new webkitAudioContext();
             var bufSrc, jsNode;
+            
+            fn._audioContext = context;
             
             this.maxSamplerate     = context.sampleRate;
             this.defaultSamplerate = context.sampleRate;
@@ -1785,12 +1829,14 @@
     } else if (typeof Audio === "function" &&
                typeof (new Audio()).mozSetup === "function") {
         ImplClass = function(sys) {
+            /*global URL:true */
             var timer = (function() {
                 var source = "var t=0;onmessage=function(e){if(t)t=clearInterval(t),0;if(typeof e.data=='number'&&e.data>0)t=setInterval(function(){postMessage(0);},e.data);};";
                 var blob = new Blob([source], {type:"text/javascript"});
                 var path = URL.createObjectURL(blob);
                 return new Worker(path);
             })();
+            /*global URL:false */
 
             this.maxSamplerate     = 48000;
             this.defaultSamplerate = 44100;
@@ -1844,6 +1890,7 @@
             this.pause = __nop;
         };
     }
+    /*global webkitAudioContext:false */
     
     _sys = new SoundSystem().bind(ImplClass);
     
