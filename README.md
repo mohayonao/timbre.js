@@ -42,8 +42,9 @@ T("sin", {freq:880, mul:0.5}).play();
 
 MIT
 
+
 ## ChangeLog ##
-**13.02.01**
+**13.02.01** (335.96KB)
 * Added: `T("reverb")`
 * Added: `T("chorus")`
 * Added: `T("eq")`
@@ -67,3 +68,4 @@ MIT
 
 **13.01.18a** (268.71KB)
 * new version (beta)
+* [Overview of what's new and changed from old timbre.js v12.XX](https://github.com/mohayonao/timbre.js/wiki/Overview-of-what's-new-and-changed-from-old-timbre.js-v12.XX)
