@@ -60,6 +60,16 @@
         phase: {
             set: function(value) {
                 this._.phase = T(value);
+                this._.osc.feedback = false;
+            },
+            get: function() {
+                return this._.phase;
+            }
+        },
+        fb: {
+            set: function(value) {
+                this._.phase = T(value);
+                this._.osc.feedback = true;
             },
             get: function() {
                 return this._.phase;
@@ -91,27 +101,25 @@
                 }
             }
             
-            var osc   = _.osc;
-            var  freq  = _.freq;
-            var _freq  = _.freq.process(tickID);
-            var phase  = _.phase;
-            var _phase = _.phase.process(tickID);
+            var osc = _.osc;
+            var freq  = _.freq.process(tickID);
+            var phase = _.phase.process(tickID);
+            
+            osc.frequency = freq[0];
+            osc.phase     = phase[0];
             
             if (_.ar) {
                 var tmp  = _.tmp;
-                if (freq.isAr) {
-                    if (phase.isAr) {
-                        osc.processWithFreqAndPhaseArray(tmp, _freq, _phase);
+                if (_.freq.isAr) {
+                    if (_.phase.isAr) {
+                        osc.processWithFreqAndPhaseArray(tmp, freq, phase);
                     } else {
-                        osc.phase = _phase[0];
-                        osc.processWithFreqArray(tmp, _freq);
+                        osc.processWithFreqArray(tmp, freq);
                     }
                 } else {
-                    osc.frequency = _freq[0];
-                    if (phase.isAr) {
-                        osc.processWithPhaseArray(tmp, _phase);
+                    if (_.phase.isAr) {
+                        osc.processWithPhaseArray(tmp, phase);
                     } else {
-                        osc.phase = _phase[0];
                         osc.process(tmp);
                     }
                 }
@@ -119,8 +127,6 @@
                     cell[i] *= tmp[i];
                 }
             } else {
-                osc.frequency = _freq[0];
-                osc.phase     = _phase[0];
                 var value = osc.next();
                 for (i = imax; i--; ) {
                     cell[i] *= value;
