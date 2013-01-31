@@ -17,7 +17,7 @@ clear:
 	@rm -f ./*.html
 
 gh-pages: clear
-	@uglifyjs --unsafe -nc -nm -o ./timbre.js ./timbre.dev.js
+	@uglifyjs --unsafe -nc -nm --source-map ./timbre.js.map -o ./timbre.js ./timbre.dev.js
 	@coffee build/html-builder.coffee
 
 .PHONY: test
