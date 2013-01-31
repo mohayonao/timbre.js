@@ -27,20 +27,10 @@
     
     var $ = MediaStreamNode.prototype;
     
-    Object.defineProperties($, {
-        src: {
-            set: function(value) {
-                var _impl = impl[T.env];
-                if (_impl) {
-                    _impl.set.call(this, value);
-                }
-            }
-        }
-    });
-    
-    $.listen = function() {
+    $.listen = function(audio) {
         var _impl = impl[T.env];
         if (_impl) {
+            _impl.set.call(this, audio);
             _impl.listen.call(this);
         }
     };
@@ -77,7 +67,7 @@
             var bufferL = _.bufferL;
             var bufferR = _.bufferR;
             var i, imax = cell.length;
-            
+
             if (_.totalWrite > _.totalRead + cell.length) {
                 var L = this.cellL, R = this.cellR;
                 var readIndex = _.readIndex;
@@ -160,6 +150,7 @@
             var _ = this._;
             var o0 = _.bufferL;
             var o1 = _.bufferR;
+            var prev0 = 0, prev1 = 0;
             if (_.src.mozChannels === 2) {
                 _.x = 0;
                 _.func = function(e) {
@@ -172,8 +163,10 @@
                     for (i = 0; i < imax; i+= 2) {
                         x += istep;
                         while (x > 0) {
-                            o0[writeIndex] = samples[i];
-                            o1[writeIndex] = samples[i+1];
+                            o0[writeIndex] = (samples[i  ] + prev0) * 0.5;
+                            o1[writeIndex] = (samples[i+1] + prev1) * 0.5;;
+                            prev0 = samples[i  ];
+                            prev1 = samples[i+1];
                             writeIndex = (writeIndex + 1) & BUFFER_MASK;
                             ++totalWrite;
                             x -= 1;
