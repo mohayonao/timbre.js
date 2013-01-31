@@ -198,6 +198,11 @@
         _sys.bind(Klass, opts);
         return timbre;
     };
+
+    timbre.setup = function(opts) {
+        _sys.setup(opts);
+        return timbre;
+    };
     
     timbre.play = function() {
         _sys.play();
