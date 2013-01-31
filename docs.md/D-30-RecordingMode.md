@@ -18,7 +18,7 @@ timbre.rec(function(output) {
   
   var synth = gen;
   synth = T("dist" , {pre:60, post:-12}, synth);
-  synth = T("delay", {fb :0.5, wet:0.2}, synth);
+  synth = T("delay", {fb :0.5, mix:0.2}, synth);
   
   output.send(synth);
   

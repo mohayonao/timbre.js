@@ -13,9 +13,9 @@ This documentation includes many executable and editable sample code, so you can
 Recently released: v**${VERSION}**
 
 ```table
-md:**[Production Version](/timbre.js/timbre.js)**|${MINSIZE}kb, minified
-md:**[Development Version](/timbre.js/timbre.dev.js)**|${DEVSIZE}kb, uncompressed
-md:[Edge Version](https://raw.github.com/mohayonao/timbre.js/master/timbre.dev.js)|md:unreleased, current `master`, use at your own risk.
+md:**[Production Version](/timbre.js/timbre.js)**|md: ${MINSIZE}kb, minified ([Source Maps](/timbre.js/timbre.js.map))
+md:**[Development Version](/timbre.js/timbre.dev.js)**|md: ${DEVSIZE}kb, uncompressed
+md:[Edge Version](https://raw.github.com/mohayonao/timbre.js/master/timbre.dev.js)|md: unreleased, current `master`, use at your own risk.
 ```
 
 ## Supports ##
@@ -45,26 +45,3 @@ var T = require("timbre");
 
 T("sin", {freq:880, mul:0.5}).play();
 ```
-
-## Summary of what's new and changed from old timbre.js v12.XX ##
-
-### using named parameters instead of an order of arguments
-
-```js
-// v12.XX
-T("sin", 880, 0.5).play();
-
-// v13.XX
-T("sin", {freq:880, mul:0.5}).play();
-```
-### `.on()` / `.off()` methods have changed
-`.on()` / `.off()` are used for dealing with events like jQuery or node.js.  
-
-```js
-// v13.XX
-T("perc", {r:1000}).on("ended", function() {
-  this.bang();
-}).bang();
-```
-
-You can use `.bypass()` instead of old `.on()` / `.off()`.

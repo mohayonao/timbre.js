@@ -21,17 +21,33 @@ T("interval", {interval:100}, func).start();
 
 ## Properties ##
 - `func` _(Function)_
+###### en ######
+  - A function contained. Its default value is **NOP**.
+###### ja ######  
   - 格納している関数
+###### -- ######
+  
 - `args` _(Array)_
+###### en ######
+  - Arguments given to an `func`
+###### ja ######  
   - 関数に渡す引数
+###### -- ######
 
 ## Methods ##
 - `bang(...)`
+###### en ######
+  - A `func` is performed. When a return value is a numerical value, an own output value is updated. 
+###### js ######
   - 関数を実行します。戻り値が数値の場合は自身の出力値を更新します。
-  
+###### -- ######  
+
 ## Note ##
-- イベントのコールバックにも `T(Function)` オブジェクトを登録することができます
+###### en ######
+- When `bang()` has arguments, the arguments + `.args` property serve as arguments passed to a function.
+###### ja ######
 - `bang()` に引数がある場合,  `bang()` の引数 + `.args` プロパティが関数に渡される引数となります
+###### -- ######
 
 ```timbre
 var func = function(x, y, z) {

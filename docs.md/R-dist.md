@@ -3,7 +3,7 @@ T("dist")
 {ar} Distortion
 
 ## Description ##
-歪みエフェクター。 preGain -> highcut -> postGain と処理します。
+preGain -> highcut -> postGain
 
 ```timbre
 var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";
@@ -17,11 +17,11 @@ var audio = T("audio", {loop:true}).load(src, function(res) {
 
 ## Properties ##
 - `pre` _(T-Object)_
-  - デフォルト値は **60** dB
+  - pre gain (default: 60dB)
 - `post` _(T-Object)_
-  - デフォルト値は **-18** dB
+  - post gain (default:-18dB)
 - `cutoff` _(Number)_
-  - ハイカット周波数. 0 のときOFF. デフォルト値は **0**
+  - high cut frequency (default: 0)
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/dist.js

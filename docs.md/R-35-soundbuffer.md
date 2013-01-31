@@ -1,5 +1,5 @@
 SoundBuffer
-=========
+===========
 SoundBuffer
 
 ###### en ######
@@ -19,7 +19,11 @@ var soundbuffer = {
 
 (canvas canvas w:240 h:80)
 
+###### en ######
+The following example sets `T("buffer").buffer` to the **SoundBuffer** generated from a code, and plays it.
+###### ja ######
 以下の例は独自に生成したサウンドバッファーを `T("buffer")` にセットして再生しています。
+###### -- ######
 
 ```timbre
 var len    = 44100;

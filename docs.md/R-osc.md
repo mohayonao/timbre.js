@@ -11,15 +11,42 @@ T("osc", {wave:"sin", freq:880}).play();
 
 ## Properties ##
 - `wave` _(String or Function or Float32Array)_
-  - 波形を設定します。詳細は **Wave Functions** の項目を参照してください
+  - Wavetable.
 - `freq` _(T-Object or timevalue)_
-  - 周波数を設定します。
+  - Frequency in Hertz.
+- `phase` _(T-Object)_
+  - Phase offset or modulator in radians.
+- `fb` _(T-Object)_
+  - Amplitude of phase feedback in radians.
 
 ## Note ##
 - 入力オブジェクトが指定されている場合はそれらを合成した後、オシレーターの値で積算します。以下の例では 440Hzのサイン波に 1秒ごとに on/off するパルス波を入力しています。
   
 ```timbre
 T("sin", {freq:440, mul:0.5}, T("+pulse", {freq:"1sec"})).play();
+```
+
+## Modulate freq ##
+```timbre
+var xline = T("param", {value:1}).expTo(1000, "9sec");
+var freq  = T("sin", {freq:xline, mul:200, add:800});
+
+T("sin", {freq:freq, mul:0.25}).play();
+```
+
+## Modulate phase ##
+```timbre
+var xline = T("param", {value:1}).expTo(1000, "9sec");
+var phase = T("sin", {freq:xline, mul:2 * Math.PI});
+
+T("sin", {freq:800, phase:phase, mul:0.25}).play();
+```
+
+## Feedback ##
+```timbre
+var xline = T("param", {value:0.01}).expTo(5, "4sec");
+
+T("sin", {freq:800, fb:xline, mul:0.25}).play();
 ```
 
 ## Wave Functions ##

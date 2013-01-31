@@ -1,6 +1,6 @@
 T("MoogFF")
 ===========
-Moog VCF implementation, designed by Federico Fontana (from SuperCollider)
+{ar} Moog VCF implementation, designed by Federico Fontana (from SuperCollider)
 
 ## Installation
 
@@ -17,7 +17,7 @@ A digital implementation of the Moog VCF (filter). _1_ _2_
 ```timbre
 var freqs = [440, 493, 523, 554, 587, 659, 698];
 var vco = T("saw", {freq:T("param"), mul:0.8});
-var vcf = T("MoogFF", {freq:T("param"), gain:2.1}, vco).play();
+var vcf = T("MoogFF", {freq:T("param"), gain:2.1, mul:0.25}, vco).play();
 
 T("interval", {interval:150}, function(count) {
   var f = freqs[(Math.random() * freqs.length)|0] * 0.5;

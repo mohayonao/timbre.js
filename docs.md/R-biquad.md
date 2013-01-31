@@ -3,15 +3,15 @@ T("biquad")
 {ar} Biquad Filter
 
 ## Description ##
-Biquad Filter
+`T("biquad")` is implements a two-pole, two-zero filter.
 
 ```timbre
 var src = window.getDraggedFile() || "/timbre.js/misc/audio/amen.wav";
 
 T("audio", {loop:true}).load(src, function(res) {
     
-  T("biquad", {type:"lowpass", freq:800, Q:10}, this).play();
-    
+  var biquad = T("biquad", {type:"lowpass", freq:800, Q:10}, this).play();
+     
 });
 ```
 
@@ -19,11 +19,11 @@ T("audio", {loop:true}).load(src, function(res) {
 - `type` _(String)_
   - The filter types are briefly described below.
 - `freq`, `cutoff` _(T-Object)_
-  - **350Hz**, with a nominal range of 10 to the Nyquist frequency (half the sample-rate).
+  - cutoff frequency (default: 350Hz, range 10 .. the Nyquist frequency)
 - `res`, `Q`, `band` _(T-Object)_
-  - **1**, with a nominal range of 0.0001 to 1000.
+  - resonance (default: 1, range: 0.0001 .. 1000)
 - `gain` _(T-Object)_
-  - **0**, with a nominal range of -40 to 40.
+  - gain (default: 0db, range -40 .. 40)
 
 ## Methods ##
 - `plot(opts)`

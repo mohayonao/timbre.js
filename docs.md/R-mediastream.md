@@ -14,15 +14,17 @@ HTMLAudioElement (Chromeの場合は HTMLVideoElement も含む) の出力を自
 var audio = document.getElementById("audio");
 audio.volume = 0;
 
-var media = T("mediastream", {src:audio});
+var media = T("mediastream");
 
 T("dist", {pre:24, post:-4}, media).play();
 
+audio.play();
+media.listen(audio);
+
 timbre.once("reset", function() {
   audio.pause();
+  media.unlisten();
 });
-
-audio.play();
 ```
 
 ## Properties ##
