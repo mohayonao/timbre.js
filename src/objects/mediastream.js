@@ -164,7 +164,7 @@
                         x += istep;
                         while (x > 0) {
                             o0[writeIndex] = (samples[i  ] + prev0) * 0.5;
-                            o1[writeIndex] = (samples[i+1] + prev1) * 0.5;;
+                            o1[writeIndex] = (samples[i+1] + prev1) * 0.5;
                             prev0 = samples[i  ];
                             prev1 = samples[i+1];
                             writeIndex = (writeIndex + 1) & BUFFER_MASK;
