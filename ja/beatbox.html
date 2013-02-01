@@ -29,10 +29,13 @@ _gaq.push(['_trackPageview']);
 
   var P2 = sc.series(16);
 
-  var drum = T(&quot;lowshelf&quot;, {freq:110, gain:12, mul:0.6}, BD, SD, HH1, HH2, CYM).play();
-  var gen  = T(&quot;OscGen&quot;, {wave:&quot;sin(15)&quot;, mul:0.25});
+  var drum = T(&quot;lowshelf&quot;, {freq:110, gain:8, mul:0.6}, BD, SD, HH1, HH2, CYM).play();
+  var lead = T(&quot;saw&quot;, {freq:T(&quot;param&quot;)});
+  var vcf  = T(&quot;MoogFF&quot;, {freq:2400, gain:6, mul:0.1}, lead);
+  var env  = T(&quot;perc&quot;, {r:100});
+  var arp  = T(&quot;OscGen&quot;, {wave:&quot;sin(15)&quot;, env:env, mul:0.5});
 
-  T(&quot;delay&quot;, {time:&quot;BPM128 L4&quot;, fb:0.75, mix:0.35}, gen).play();
+  T(&quot;delay&quot;, {time:&quot;BPM128 L4&quot;, fb:0.65, mix:0.35}, vcf, arp).play();
 
   T(&quot;interval&quot;, {interval:&quot;BPM128 L16&quot;}, function(count) {
     var i = count % P1.length;
@@ -46,10 +49,16 @@ _gaq.push(['_trackPageview']);
       P2.wrapSwap(i, j);
     }
 
-    gen.noteOn(scale.wrapAt(P2.foldAt(count)) + 84 - ((i % 2) * 24), 80);
+    var noteNum = scale.wrapAt(P2.wrapAt(count)) + 60;
+    if (i % 2 === 0) {
+      lead.freq.linTo(noteNum.midicps() * 2, &quot;100ms&quot;);
+    }
+    arp.noteOn(noteNum + 24, 60);
   }).start();
 });"></div>
 <p>using: <a href="http://mohayonao.github.com/subcollider.js">subcollider.js</a>
+
 </p>
+<script src="/timbre.js/src/extras/MoogFF.js"></script>
 </div></div></div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script>sc.use("prototype");
 window.pico = {};</script><script src="/timbre.js/libs/PicoFlashPlayer.js"></script><script src="/timbre.js/misc/js/requestAnimationFrame.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>
