@@ -15,8 +15,9 @@ var env  = T("env", {table:[0.2, [1, msec * 48], [0.2, msec * 16]]});
 var gen  = T("OscGen", {wave:"saw", env:env, mul:0.5});
 
 var synth = gen;
-synth = T("+saw", {freq:(msec * 2)+"ms", add:0.5, mul:0.5}, synth);
+synth = T("+saw", {freq:(msec * 2)+"ms", add:0.5, mul:0.85}, synth);
 synth = T("lpf" , {cutoff:800, Q:12}, synth);
+synth = T("reverb", {room:0.95, damp:0.1, mix:0.75}, synth);
 synth.play();
 
 T("interval", {interval:msec * 64}, function() {
