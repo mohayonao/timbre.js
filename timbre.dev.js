@@ -14,7 +14,7 @@
     var STATUS_PLAY = 1;
     var STATUS_REC  = 2;
     
-    var _ver = "13.02.01";
+    var _ver = "13.02.02";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -2960,7 +2960,7 @@
     
     Decoder.webkit_decode = (function() {
         if (typeof webkitAudioContext !== "undefined") {
-            var ctx = T._audioContext;
+            var ctx = T.fn._audioContext;
             var _decode = function(data, onloadedmetadata, onloadeddata) {
                 var samplerate, duration, buffer;
                 if (typeof data === "string") {
