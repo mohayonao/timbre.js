@@ -44,6 +44,9 @@ MIT
 
 
 ## ChangeLog ##
+**13.02.02** (335.97KB)
+* Fixed: decoder for webkit
+
 **13.02.01** (335.96KB)
 * Added: `T("reverb")`
 * Added: `T("chorus")`
