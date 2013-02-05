@@ -1894,6 +1894,7 @@
                     interval = sys.streamsize / sys.samplerate * 1000;
                     written  = -Infinity;
                 } else if (_envmobile) {
+                    interval = sys.streamsize / sys.samplerate * 1000;
                     audio.mozCurrentSampleOffset = function() {
                         return Infinity;
                     };

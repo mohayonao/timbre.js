@@ -44,8 +44,8 @@ MIT
 
 
 ## ChangeLog ##
-**13.02.06** (337.44KB)
-* Fixed: support iOS6.1, Android(Firefox)
+**13.02.06** (337.50KB)
+* Fixed: support iOS6.1
 
 **13.02.02** (335.97KB)
 * Fixed: decoder for webkit
