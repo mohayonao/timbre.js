@@ -24,6 +24,8 @@
     
     if (T.envtype === "browser") {
         Decoder.getBinaryWithPath = function(path, callback) {
+            T.fn.fix_iOS6_1_problem(true);
+            
             var xhr = new XMLHttpRequest();
             xhr.open("GET", path, true);
             xhr.responseType = "arraybuffer";
@@ -33,6 +35,7 @@
                 } else {
                     callback(xhr.status + " " + xhr.statusText);
                 }
+                T.fn.fix_iOS6_1_problem(false);
             };
             xhr.send();
         };
