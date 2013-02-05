@@ -26,6 +26,14 @@
         }
         return "unknown";
     })();
+    var _envmobile = (function() {
+        if (_envtype === "browser") {
+            if (/(iPhone|iPad|iPod|Android)/i.test(navigator.userAgent)) {
+                return true;
+            }
+        }
+        return false;
+    })();
     var _usefunc = {};
     
     var timbre = function() {
@@ -145,6 +153,11 @@
         envtype: {
             get: function() {
                 return _envtype;
+            }
+        },
+        envmobile: {
+            get: function() {
+                return _envmobile;
             }
         },
         env: {
@@ -630,6 +643,10 @@
         }
     };
     fn.outputSignalKR = __outputSignalKR;
+    
+    fn.fix_iOS6_1_problem = function(flag) {
+        _sys.fix_iOS6_1_problem(flag);
+    };
     
     //debug--
     fn.debug = {};
@@ -1600,6 +1617,8 @@
         };
         
         $.rec = function() {
+            fn.fix_iOS6_1_problem(true);
+            
             var dfd = new modules.Deferred(this);
             
             if (this._.deferred) {
@@ -1639,6 +1658,7 @@
             };
             
             inlet_dfd.then(recdone, function() {
+                fn.fix_iOS6_1_problem(false);
                 recdone.call(this, true);
             }.bind(this));
             
@@ -1749,6 +1769,12 @@
             return this.events.listeners(type);
         };
         
+        $.fix_iOS6_1_problem = function(flag) {
+            if (this.impl.fix_iOS6_1_problem) {
+                this.impl.fix_iOS6_1_problem(flag);
+            }
+        };
+        
         return SoundSystem;
     })();
     
@@ -1825,6 +1851,20 @@
                 bufSrc.disconnect();
                 jsNode.disconnect();
             };
+            
+            if (_envmobile) {
+                var n   = 0;
+                var buf = context.createBufferSource();
+                this.fix_iOS6_1_problem = function(flag) {
+                    n += flag ? 1 : -1;
+                    if (n === 1) {
+                        buf.noteOn(0);
+                        buf.connect(context.destination);
+                    } else if (n === 0) {
+                        buf.disconnect();
+                    }
+                };
+            }
         };
     } else if (typeof Audio === "function" &&
                typeof (new Audio()).mozSetup === "function") {
@@ -1837,7 +1877,7 @@
                 return new Worker(path);
             })();
             /*global URL:false */
-
+            
             this.maxSamplerate     = 48000;
             this.defaultSamplerate = 44100;
             this.env = "moz";
@@ -1853,6 +1893,10 @@
                 if (navigator.userAgent.toLowerCase().indexOf("linux") !== -1) {
                     interval = sys.streamsize / sys.samplerate * 1000;
                     written  = -Infinity;
+                } else if (_envmobile) {
+                    audio.mozCurrentSampleOffset = function() {
+                        return Infinity;
+                    };
                 }
                 
                 onaudioprocess = function() {

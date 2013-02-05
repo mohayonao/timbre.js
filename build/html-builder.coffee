@@ -1,6 +1,5 @@
 fs     = require 'fs'
 path   = require 'path'
-gzip   = require 'gzip'
 jade   = require 'jade'
 marked = require 'marked'
 
