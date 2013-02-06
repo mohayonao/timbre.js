@@ -14,8 +14,8 @@
         this.imag = this.R;
         
         this._.fft = new FFT(T.cellsize * 2);
-        this._.fftCell  = new Float32Array(this._.fft.length);
-        this._.prevCell = new Float32Array(T.cellsize);
+        this._.fftCell  = fn.getSignalArray(this._.fft.length);
+        this._.prevCell = fn.getSignalArray(T.cellsize);
         
         this._.plotFlush = true;
         this._.plotRange = [0, 1];

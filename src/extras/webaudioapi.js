@@ -15,7 +15,7 @@
         
         var _ = this._;
         _.mode = "";
-        _.buffer = new Float32Array(BUFFERSIZE << 2);
+        _.buffer = fn.getSignalArray(BUFFERSIZE << 2);
         _.node   = null;
         _.script = context.createJavaScriptNode(BUFFERSIZE, 1, 1);
         _.writeIndex = 0;

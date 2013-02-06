@@ -12,7 +12,7 @@
         _.freq  = T(440);
         _.phase = T(0);
         _.osc = new Oscillator(T.samplerate);
-        _.tmp = new Float32Array(this.cell.length);
+        _.tmp = fn.getSignalArray(this.cell.length);
         _.osc.step = this.cell.length;
         
         this.once("init", oninit);

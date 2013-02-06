@@ -34,6 +34,7 @@
         }
         return false;
     })();
+    var _f64mode = false;
     var _usefunc = {};
     
     var T = function() {
@@ -443,6 +444,15 @@
     };
     fn.nextTick = __nextTick;
     
+    var __getSignalArray = function(size) {
+        if (_f64mode) {
+            return new Float64Array(size);
+        } else {
+            return new Float32Array(size);
+        }
+    };
+    fn.getSignalArray = __getSignalArray;
+    
     var __fixAR = function(object) {
         object._.ar = true;
         object._.aronly = true;
@@ -696,7 +706,7 @@
             }
             
             this.tickID = -1;
-            this.cell   = new Float32Array(_sys.cellsize);
+            this.cell   = __getSignalArray(_sys.cellsize);
             this.inputs = _args.map(timbre);
             
             this._.ar  = true;
@@ -1482,6 +1492,9 @@
                 if (ACCEPT_CELLSIZES.indexOf(params.cellsize) !== -1) {
                     this.cellsize = params.cellsize;
                 }
+                if (typeof params.f64 !== "undefined") {
+                    _f64mode = !!params.f64;
+                }
             }
             return this;
         };
@@ -1501,8 +1514,8 @@
                 this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
                 
                 this.streamsize = this.getAdjustSamples();
-                this.strmL = new Float32Array(this.streamsize);
-                this.strmR = new Float32Array(this.streamsize);
+                this.strmL = __getSignalArray(this.streamsize);
+                this.strmR = __getSignalArray(this.streamsize);
                 
                 this.impl.play();
                 this.events.emit("play");
@@ -1610,10 +1623,10 @@
             
             if (this.status === STATUS_REC) {
                 if (this.recCh === 2) {
-                    this.recBuffers.push(new Float32Array(strmL));
-                    this.recBuffers.push(new Float32Array(strmR));
+                    this.recBuffers.push(__getSignalArray(strmL));
+                    this.recBuffers.push(__getSignalArray(strmR));
                 } else {
-                    var strm = new Float32Array(strmL.length);
+                    var strm = __getSignalArray(strmL.length);
                     for (i = 0, imax = strm.length; i < imax; ++i) {
                         strm[i] = (strmL[i] + strmR[i]) * 0.5;
                     }
@@ -1705,8 +1718,8 @@
             this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
             
             this.streamsize = this.getAdjustSamples();
-            this.strmL = new Float32Array(this.streamsize);
-            this.strmR = new Float32Array(this.streamsize);
+            this.strmL = __getSignalArray(this.streamsize);
+            this.strmR = __getSignalArray(this.streamsize);
             
             this.inlets.push(rec_inlet);
             
@@ -1740,8 +1753,8 @@
             var remaining = bufferLength;
             
             if (this.recCh === 2) {
-                var L = new Float32Array(bufferLength);
-                var R = new Float32Array(bufferLength);
+                var L = __getSignalArray(bufferLength);
+                var R = __getSignalArray(bufferLength);
                 
                 for (i = 0; i < imax; ++i) {
                     L.set(recBuffers[j++], k);
@@ -1761,7 +1774,7 @@
                 };
                 
             } else {
-                var buffer = new Float32Array(bufferLength);
+                var buffer = __getSignalArray(bufferLength);
                 for (i = 0; i < imax; ++i) {
                     buffer.set(recBuffers[j++], k);
                     k += streamsize;

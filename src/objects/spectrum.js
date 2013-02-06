@@ -43,7 +43,7 @@
                     if (typeof value === "number") {
                         var n = (value < 256) ? 256 : (value > 2048) ? 2048 : value;
                         _.fft    = new FFT(n);
-                        _.buffer = new Float32Array(_.fft.length);
+                        _.buffer = fn.getSignalArray(_.fft.length);
                         if (_.reservedwindow) {
                             _.fft.setWindow(_.reservedwindow);
                             _.reservedwindow = null;

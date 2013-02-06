@@ -36,7 +36,7 @@
         this.compressorGain  = 1;
         this.meteringGain    = 1;
 
-        this.preDelayBuffer = new Float32Array(MaxPreDelayFrames);
+        this.preDelayBuffer = T.fn.getSignalArray(MaxPreDelayFrames);
         this.preDelayReadIndex = 0;
         this.preDelayWriteIndex = DefaultPreDelayFrames;
         this.maxAttackCompressionDiffDb = -1;

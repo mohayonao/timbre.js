@@ -29,7 +29,7 @@
         return function() {
             var _ = self._;
             
-            var buffer = new Float32Array(_.buffer.subarray(0, _.writeIndex|0));
+            var buffer = fn.getSignalArray(_.buffer.subarray(0, _.writeIndex|0));
             
             _.status      = STATUS_WAIT;
             _.writeIndex  = 0;
@@ -81,7 +81,7 @@
         if (_.status === STATUS_WAIT) {
             len = (_.timeout * 0.01 * _.samplerate)|0;
             if (!_.buffer || _.buffer.length < len) {
-                _.buffer = new Float32Array(len);
+                _.buffer = fn.getSignalArray(len);
             }
             _.writeIndex = 0;
             _.writeIndexIncr = _.samplerate / T.samplerate;

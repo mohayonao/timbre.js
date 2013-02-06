@@ -14,7 +14,7 @@
         _.osc2 = new Oscillator(T.samplerate);
         _.osc1.step = this.cell.length;
         _.osc2.step = this.cell.length;
-        _.tmp = new Float32Array(this.cell.length);
+        _.tmp = fn.getSignalArray(this.cell.length);
         _.beats = 0.5;
         
         this.once("init", oninit);

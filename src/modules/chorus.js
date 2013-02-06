@@ -6,7 +6,7 @@
         
         var bits = Math.round(Math.log(samplerate * 0.1) * Math.LOG2E);
         this.buffersize = 1 << bits;
-        this.buffer = new Float32Array(this.buffersize + 1);
+        this.buffer = T.fn.getSignalArray(this.buffersize + 1);
         
         this.wave       = null;
         this._wave      = null;

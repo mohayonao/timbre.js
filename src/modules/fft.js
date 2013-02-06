@@ -6,12 +6,12 @@
         n = 1 << Math.ceil(Math.log(n) * Math.LOG2E);
         
         this.length  = n;
-        this.buffer  = new Float32Array(n);
-        this.real    = new Float32Array(n);
-        this.imag    = new Float32Array(n);
-        this._real   = new Float32Array(n);
-        this._imag   = new Float32Array(n);
-        this.spectrum = new Float32Array(n>>1);
+        this.buffer  = T.fn.getSignalArray(n);
+        this.real    = T.fn.getSignalArray(n);
+        this.imag    = T.fn.getSignalArray(n);
+        this._real   = T.fn.getSignalArray(n);
+        this._imag   = T.fn.getSignalArray(n);
+        this.spectrum = T.fn.getSignalArray(n>>1);
         
         var params = FFTParams.get(n);
         this._bitrev   = params.bitrev;
@@ -29,7 +29,7 @@
                 var f = WindowFunctions[name];
                 if (f) {
                     if (!this._window) {
-                        this._window = new Float32Array(this.length);
+                        this._window = T.fn.getSignalArray(this.length);
                     }
                     var w = this._window, n = 0, N = this.length;
                     a = (a < 0) ? 0 : (a > 1) ? 1 : a;
@@ -165,8 +165,8 @@
                     return x;
                 }());
                 var i, imax, k = Math.floor(Math.log(n) / Math.LN2);
-                var sintable = new Float32Array((1<<k)-1);
-                var costable = new Float32Array((1<<k)-1);
+                var sintable = T.fn.getSignalArray((1<<k)-1);
+                var costable = T.fn.getSignalArray((1<<k)-1);
                 var PI2 = Math.PI * 2;
                 
                 for (i = 0, imax = sintable.length; i < imax; ++i) {

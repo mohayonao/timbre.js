@@ -27,7 +27,7 @@
                     this._.tapeStream = new TapeStream(tape, T.samplerate);
                     this._.isEnded = false;
                 } else if (typeof tape === "object") {
-                    if (tape.buffer instanceof Float32Array) {
+                    if (tape.buffer instanceof Float32Array || tape.buffer instanceof Float64Array) {
                         this._.tape = new Scissor(tape);
                         this._.tapeStream = new TapeStream(tape, T.samplerate);
                         this._.isEnded = false;

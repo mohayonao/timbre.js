@@ -9,7 +9,7 @@
         fn.fixAR(this);
         
         var _ = this._;
-        _.buffer = new Float32Array(T.cellsize);
+        _.buffer = fn.getSignalArray(T.cellsize);
         _.freq   = T("sin", {freq:1, add:1000, mul:250}).kr();
         _.Q      = T(1);
         _.allpass  = [];

@@ -47,9 +47,9 @@
         var _ = this._;
         if (typeof value === "object") {
             var buffer, samplerate;
-            if (value instanceof Float32Array) {
+            if (value instanceof Float32Array || value instanceof Float64Array) {
                 buffer = value;
-            } else if (value.buffer instanceof Float32Array) {
+            } else if (value.buffer instanceof Float32Array || value.buffer instanceof Float64Array) {
                 buffer = value.buffer;
                 if (typeof value.samplerate === "number") {
                     samplerate = value.samplerate;

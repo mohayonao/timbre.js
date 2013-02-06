@@ -4,12 +4,12 @@
     function EfxDelay(opts) {
         var bits = Math.ceil(Math.log(T.samplerate * 1.5) * Math.LOG2E);
         
-        this.cell = new Float32Array(T.cellsize);
+        this.cell = T.fn.getSignalArray(T.cellsize);
         
         this.time = 125;
         this.feedback  = 0.25;
         
-        this.buffer = new Float32Array(1 << bits);
+        this.buffer = T.fn.getSignalArray(1 << bits);
         this.mask   = (1 << bits) - 1;
         this.wet    = 0.45;
         
