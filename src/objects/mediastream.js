@@ -16,8 +16,8 @@
         
         var _ = this._;
         _.src = _.func = null;
-        _.bufferL = fn.getSignalArray(BUFFER_SIZE);
-        _.bufferR = fn.getSignalArray(BUFFER_SIZE);
+        _.bufferL = new fn.SignalArray(BUFFER_SIZE);
+        _.bufferR = new fn.SignalArray(BUFFER_SIZE);
         _.readIndex  = 0;
         _.writeIndex = 0;
         _.totalRead  = 0;

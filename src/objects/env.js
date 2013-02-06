@@ -11,7 +11,7 @@
         var _ = this._;
         _.env = new Envelope(T.samplerate);
         _.env.setStep(this.cell.length);
-        _.tmp = fn.getSignalArray(this.cell.length);
+        _.tmp = new fn.SignalArray(this.cell.length);
         _.ar = false;
         _.plotFlush = true;
         _.onended = fn.make_onended(this);

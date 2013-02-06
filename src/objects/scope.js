@@ -36,7 +36,7 @@
                 if (!_.buffer) {
                     if (typeof value === "number") {
                         var n = (value < 64) ? 64 : (value > 2048) ? 2048 : value;
-                        _.buffer = fn.getSignalArray(n);
+                        _.buffer = new fn.SignalArray(n);
                         if (_.reservedinterval) {
                             this.interval = _.reservedinterval;
                             _.reservedinterval = null;

@@ -10,9 +10,9 @@
 
         var _ = this._;
         _.fft = new FFT(T.cellsize * 2);
-        _.fftCell    = fn.getSignalArray(this._.fft.length);
-        _.realBuffer = fn.getSignalArray(this._.fft.length);
-        _.imagBuffer = fn.getSignalArray(this._.fft.length);
+        _.fftCell    = new fn.SignalArray(this._.fft.length);
+        _.realBuffer = new fn.SignalArray(this._.fft.length);
+        _.imagBuffer = new fn.SignalArray(this._.fft.length);
     }
     fn.extend(IFFTNode);
     

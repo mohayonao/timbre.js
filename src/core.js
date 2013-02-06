@@ -132,6 +132,7 @@
     
     var fn      = timbre.fn    = {};
     var modules = timbre.modules = {};
+    fn.SignalArray = Float32Array;
     
     (function() {
         var dict = {};
@@ -444,15 +445,6 @@
     };
     fn.nextTick = __nextTick;
     
-    var __getSignalArray = function(size) {
-        if (_f64mode) {
-            return new Float64Array(size);
-        } else {
-            return new Float32Array(size);
-        }
-    };
-    fn.getSignalArray = __getSignalArray;
-    
     var __fixAR = function(object) {
         object._.ar = true;
         object._.aronly = true;
@@ -706,7 +698,7 @@
             }
             
             this.tickID = -1;
-            this.cell   = __getSignalArray(_sys.cellsize);
+            this.cell   = new fn.SignalArray(_sys.cellsize);
             this.inputs = _args.map(timbre);
             
             this._.ar  = true;
@@ -1494,6 +1486,11 @@
                 }
                 if (typeof params.f64 !== "undefined") {
                     _f64mode = !!params.f64;
+                    if (_f64mode) {
+                        fn.SignalArray = Float64Array;
+                    } else {
+                        fn.SignalArray = Float32Array;
+                    }
                 }
             }
             return this;
@@ -1514,8 +1511,8 @@
                 this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
                 
                 this.streamsize = this.getAdjustSamples();
-                this.strmL = __getSignalArray(this.streamsize);
-                this.strmR = __getSignalArray(this.streamsize);
+                this.strmL = new fn.SignalArray(this.streamsize);
+                this.strmR = new fn.SignalArray(this.streamsize);
                 
                 this.impl.play();
                 this.events.emit("play");
@@ -1623,10 +1620,10 @@
             
             if (this.status === STATUS_REC) {
                 if (this.recCh === 2) {
-                    this.recBuffers.push(__getSignalArray(strmL));
-                    this.recBuffers.push(__getSignalArray(strmR));
+                    this.recBuffers.push(new fn.SignalArray(strmL));
+                    this.recBuffers.push(new fn.SignalArray(strmR));
                 } else {
-                    var strm = __getSignalArray(strmL.length);
+                    var strm = new fn.SignalArray(strmL.length);
                     for (i = 0, imax = strm.length; i < imax; ++i) {
                         strm[i] = (strmL[i] + strmR[i]) * 0.5;
                     }
@@ -1718,8 +1715,8 @@
             this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
             
             this.streamsize = this.getAdjustSamples();
-            this.strmL = __getSignalArray(this.streamsize);
-            this.strmR = __getSignalArray(this.streamsize);
+            this.strmL = new fn.SignalArray(this.streamsize);
+            this.strmR = new fn.SignalArray(this.streamsize);
             
             this.inlets.push(rec_inlet);
             
@@ -1753,8 +1750,8 @@
             var remaining = bufferLength;
             
             if (this.recCh === 2) {
-                var L = __getSignalArray(bufferLength);
-                var R = __getSignalArray(bufferLength);
+                var L = new fn.SignalArray(bufferLength);
+                var R = new fn.SignalArray(bufferLength);
                 
                 for (i = 0; i < imax; ++i) {
                     L.set(recBuffers[j++], k);
@@ -1774,7 +1771,7 @@
                 };
                 
             } else {
-                var buffer = __getSignalArray(bufferLength);
+                var buffer = new fn.SignalArray(bufferLength);
                 for (i = 0; i < imax; ++i) {
                     buffer.set(recBuffers[j++], k);
                     k += streamsize;

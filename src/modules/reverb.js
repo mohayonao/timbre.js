@@ -19,7 +19,7 @@
         this.combout = new Array(imax);
         for (i = 0; i < imax; ++i) {
             this.comb[i]    = new CombFilter(CombParams[i] * k);
-            this.combout[i] = T.fn.getSignalArray(buffersize);
+            this.combout[i] = new T.fn.SignalArray(buffersize);
         }
         
         imax = AllpassParams.length;
@@ -27,7 +27,7 @@
         for (i = 0; i < imax; ++i) {
             this.allpass[i] = new AllpassFilter(AllpassParams[i] * k);
         }
-        this.output = T.fn.getSignalArray(buffersize);
+        this.output = new T.fn.SignalArray(buffersize);
         
         this.damp = 0;
         this.wet  = 0.33;
@@ -80,7 +80,7 @@
     };
     
     function CombFilter(buffersize) {
-        this.buffer = T.fn.getSignalArray(buffersize|0);
+        this.buffer = new T.fn.SignalArray(buffersize|0);
         this.buffersize = this.buffer.length;
         this.bufidx = 0;
         this.feedback =  0;
@@ -118,7 +118,7 @@
     };
 
     function AllpassFilter(buffersize) {
-        this.buffer = T.fn.getSignalArray(buffersize|0);
+        this.buffer = new T.fn.SignalArray(buffersize|0);
         this.buffersize = this.buffer.length;
         this.bufidx = 0;
     }

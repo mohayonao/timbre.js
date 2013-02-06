@@ -35,7 +35,7 @@
         var _ = this._;
         var freq   = _.freq;
         var size   = (T.samplerate / freq + 0.5)|0;
-        var buffer = _.buffer = fn.getSignalArray(size << 1);
+        var buffer = _.buffer = new fn.SignalArray(size << 1);
         for (var i = 0; i < size; ++i) {
             buffer[i] = Math.random() * 2 - 1;
         }
