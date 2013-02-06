@@ -68,6 +68,7 @@
     $.clone = function() {
         var instance = new EnvNode([]);
         instance._.env = this._.env.clone();
+        instance._.ar  = this._.ar;
         return instance;
     };
     
