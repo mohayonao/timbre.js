@@ -13,6 +13,7 @@
         var _ = this._;
         _.isLooped = false;
         _.isEnded  = false;
+        _.onended  = fn.make_onended(this, 0);
     }
     fn.extend(ScissorNode);
     
@@ -86,15 +87,11 @@
             }
             
             if (!_.isEnded && tapeStream.isEnded) {
-                fn.nextTick(onended.bind(this));
+                fn.nextTick(_.onended);
             }
         }
         
         return cell;
-    };
-    
-    var onended = function() {
-        fn.onended(this, 0);
     };
     
     fn.register("tape", ScissorNode);

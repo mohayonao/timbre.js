@@ -9,13 +9,30 @@
     function Promise(object) {
         this.context = object.context;
         this.then = object.then;
-        this.done = object.done.bind(object);
-        this.fail = object.fail.bind(object);
-        this.pipe = object.pipe.bind(object);
-        this.always  = object.always.bind(object);
-        this.promise = object.promise.bind(object);
-        this.isResolved = object.isResolved.bind(object);
-        this.isRejected = object.isRejected.bind(object);
+        this.done = function() {
+            object.done.apply(object, arguments);
+            return this;
+        };
+        this.fail = function() {
+            object.fail.apply(object, arguments);
+            return this;
+        };
+        this.pipe = function() {
+            return object.pipe.apply(object, arguments);
+        };
+        this.always = function() {
+            object.always.apply(object, arguments);
+            return this;
+        };
+        this.promise = function() {
+            return this;
+        };
+        this.isResolved = function() {
+            return object.isResolved();
+        };
+        this.isRejected = function() {
+            return object.isRejected();
+        };
     }
     
     function Deferred(context) {
@@ -104,22 +121,23 @@
         return this.done(done).fail(fail);
     };
     $.pipe = function(done, fail) {
+        var self = this;
         var dfd = new Deferred(this.context);
         
         this.done(function() {
-            var res = done.apply(this.context, arguments);
+            var res = done.apply(self.context, arguments);
             if (isDeferred(res)) {
                 res.then(function() {
                     var args = slice.call(arguments);
                     dfd.resolveWith.apply(dfd, [res].concat(args));
                 });
             } else {
-                dfd.resolveWith(this, res);
+                dfd.resolveWith(self, res);
             }
-        }.bind(this));
+        });
         this.fail(function() {
             if (typeof fail === "function") {
-                var res = fail.apply(this.context, arguments);
+                var res = fail.apply(self.context, arguments);
                 if (isDeferred(res)) {
                     res.fail(function() {
                         var args = slice.call(arguments);
@@ -129,7 +147,7 @@
             } else {
                 dfd.reject.apply(dfd, arguments);
             }
-        }.bind(this));
+        });
         
         return dfd.promise();
     };
@@ -168,11 +186,14 @@
         
         if (length > 1) {
             var resolveResults = new Array(length);
+            var onfailed = function() {
+                deferred.reject();
+            };
             for (; i < length; ++i) {
                 if (resolveValues[i] && isDeferred(resolveValues[i])) {
                     resolveValues[i].promise().done(
                         updateFunc(i, resolveResults)
-                    ).fail(deferred.reject.bind(deferred));
+                    ).fail(onfailed);
                 } else {
                     resolveResults[i] = resolveValues[i];
                     --remaining;

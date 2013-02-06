@@ -14,6 +14,7 @@
         _.tmp = new Float32Array(this.cell.length);
         _.ar = false;
         _.plotFlush = true;
+        _.onended = fn.make_onended(this);
         this.on("ar", onar);
     }
     fn.extend(EnvNode);
@@ -127,7 +128,7 @@
             
             if (emit) {
                 if (emit === "ended") {
-                    fn.nextTick(fn.onended.bind(null, this, 0));
+                    fn.nextTick(_.onended);
                 } else {
                     this._.emit(emit, _.value);
                 }

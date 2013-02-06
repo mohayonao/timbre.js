@@ -16,6 +16,7 @@
         _.curve   = "lin";
         _.counter = 0;
         _.ar = false;
+        _.onended = fn.make_onended(this);
         
         this.on("ar", onar);
     }
@@ -129,7 +130,7 @@
                     } else {
                         env.setNext(env.value, 0, Envelope.CurveTypeSet);
                     }
-                    fn.nextTick(fn.onended.bind(null, this));
+                    fn.nextTick(_.onended);
                 }
                 _.counter = counter;
             }

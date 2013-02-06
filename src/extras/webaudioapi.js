@@ -55,25 +55,27 @@
             
             var _ = this._;
             _.mode = "recv";
-            _.script.onaudioprocess = recv_process.bind(this);
+            _.script.onaudioprocess = make_recv_process(this);
             _.gain = context.createGainNode();
             _.gain.gain.value = 0;
             _.script.connect(_.gain);
         }
         fn.extend(WebAudioAPIRecvNode, WebAudioAPINode);
         
-        var recv_process = function(e) {
-            var _ = this._;
-            var input = e.inputBuffer.getChannelData(0);
-            var buffer = _.buffer;
-            var writeIndex = _.writeIndex;
-            var i, imax = input.length;
-            
-            for (i = 0; i < imax; ++i) {
-                buffer[writeIndex++] = input[i];
-            }
-            _.writeIndex = writeIndex & (buffer.length - 1);
-            _.totalWrite += input.length;
+        var make_recv_process = function(self) {
+            return function(e) {
+                var _ = self._;
+                var input = e.inputBuffer.getChannelData(0);
+                var buffer = _.buffer;
+                var writeIndex = _.writeIndex;
+                var i, imax = input.length;
+                
+                for (i = 0; i < imax; ++i) {
+                    buffer[writeIndex++] = input[i];
+                }
+                _.writeIndex = writeIndex & (buffer.length - 1);
+                _.totalWrite += input.length;
+            };
         };
         
         var $ = WebAudioAPIRecvNode.prototype;
@@ -139,25 +141,27 @@
             
             var _ = this._;
             _.mode = "send";
-            _.script.onaudioprocess = send_process.bind(this);
+            _.script.onaudioprocess = make_send_process(this);
             _.connectIndex = null;
         }
         fn.extend(WebAudioAPISendNode, WebAudioAPINode);
         
-        var send_process = function(e) {
-            var _ = this._;
-            var output = e.outputBuffer.getChannelData(0);
-            var buffer = _.buffer;
-            var readIndex = _.readIndex;
-            var i, imax = output.length;
-            
-            if (_.totalWrite > _.totalRead + output.length) {
-                for (i = 0; i < imax; ++i) {
-                    output[i] = buffer[readIndex++];
+        var make_send_process = function(self) {
+            return function(e) {
+                var _ = self._;
+                var output = e.outputBuffer.getChannelData(0);
+                var buffer = _.buffer;
+                var readIndex = _.readIndex;
+                var i, imax = output.length;
+                
+                if (_.totalWrite > _.totalRead + output.length) {
+                    for (i = 0; i < imax; ++i) {
+                        output[i] = buffer[readIndex++];
+                    }
+                    _.readIndex = readIndex & (buffer.length - 1);
+                    _.totalRead += output.length;
                 }
-                _.readIndex = readIndex & (buffer.length - 1);
-                _.totalRead += output.length;
-            }
+            };
         };
         
         var $ = WebAudioAPISendNode.prototype;

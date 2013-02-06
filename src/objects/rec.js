@@ -21,8 +21,25 @@
         _.writeIndexIncr  = 1;
         _.currentTime     = 0;
         _.currentTimeIncr = 1000 / T.samplerate;
+        _.onended = make_onended(this);
     }
     fn.extend(RecNode);
+    
+    var make_onended = function(self) {
+        return function() {
+            var _ = self._;
+            
+            var buffer = new Float32Array(_.buffer.subarray(0, _.writeIndex|0));
+            
+            _.status      = STATUS_WAIT;
+            _.writeIndex  = 0;
+            _.currentTime = 0;
+            
+            _.emit("ended", {
+                buffer:buffer, samplerate:_.samplerate
+            });
+        };
+    };
     
     var $ = RecNode.prototype;
     
@@ -81,7 +98,7 @@
         if (_.status === STATUS_REC) {
             _.status = STATUS_WAIT;
             _.emit("stop");
-            fn.nextTick(onended.bind(this));
+            fn.nextTick(_.onended);
             this.unlisten();
         }
         return this;
@@ -121,7 +138,7 @@
                     
                     currentTime += currentTimeIncr;
                     if (timeout <= currentTime) {
-                        fn.nextTick(onended.bind(this));
+                        fn.nextTick(_.onended);
                     }
                 }
                 _.writeIndex  = writeIndex;
@@ -132,21 +149,7 @@
         }
         return cell;
     };
-    
-    var onended = function() {
-        var _ = this._;
         
-        var buffer = new Float32Array(_.buffer.subarray(0, _.writeIndex|0));
-        
-        _.status      = STATUS_WAIT;
-        _.writeIndex  = 0;
-        _.currentTime = 0;
-        
-        _.emit("ended", {
-            buffer:buffer, samplerate:_.samplerate
-        });
-    };
-    
     fn.register("record", RecNode);
     fn.alias("rec", "record");
     

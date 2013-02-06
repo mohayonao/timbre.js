@@ -15,6 +15,7 @@
         _.samplesMax = 0;
         _.samples    = 0;
         _.isEnded = true;
+        _.onended = fn.make_onended(this);
         
         this.once("init", oninit);
         this.on("start", onstart);
@@ -34,10 +35,6 @@
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
     });
-    var onended = function() {
-        this._.isEnded = true;
-        this._.emit("ended");
-    };
     
     var $ = TimeoutNode.prototype;
     
@@ -95,7 +92,7 @@
                 for (var i = 0, imax = inputs.length; i < imax; ++i) {
                     inputs[i].bang();
                 }
-                fn.nextTick(onended.bind(this));
+                fn.nextTick(_.onended);
             }
             _.currentTime += _.currentTimeIncr;
         }

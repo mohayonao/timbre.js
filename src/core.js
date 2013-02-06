@@ -36,7 +36,7 @@
     })();
     var _usefunc = {};
     
-    var timbre = function() {
+    var T = function() {
         var args = slice.call(arguments);
         var key  = args[0];
         var instance;
@@ -98,8 +98,11 @@
         instance._.emit("init");
         
         return instance;
-    }.bind(null);
-
+    };
+    var timbre = function() {
+        return T.apply(null, arguments);
+    };
+    
     var __buildMetaData = function(instance) {
         var meta = instance._.meta;
         var names, desc;
@@ -480,76 +483,84 @@
     fn.stereo = __stereo;
     
     var __timer = (function() {
-        var start = function() {
-            _sys.nextTick(onstart.bind(this));
-            return this;
+        var make_onstart = function(self) {
+            return function() {
+                if (_sys.timers.indexOf(self) === -1) {
+                    _sys.timers.push(self);
+                    _sys.events.emit("addObject");
+                    self._.emit("start");
+                }
+            };
         };
-        var onstart = function() {
-            if (_sys.timers.indexOf(this) === -1) {
-                _sys.timers.push(this);
-                _sys.events.emit("addObject");
-                this._.emit("start");
-            }
+        var make_onstop = function(self) {
+            return function() {
+                var i = _sys.timers.indexOf(self);
+                if (i !== -1) {
+                    _sys.timers.splice(i, 1);
+                    self._.emit("stop");
+                    _sys.events.emit("removeObject");
+                }
+            };
         };
-        var stop = function() {
-            _sys.nextTick(onstop.bind(this));
-            return this;
-        };
-        var onstop = function() {
-            var i = _sys.timers.indexOf(this);
-            if (i !== -1) {
-                _sys.timers.splice(i, 1);
-                this._.emit("stop");
-                _sys.events.emit("removeObject");
-            }
-        };
-        return function(object) {
-            object.start = start;
-            object.stop  = stop;
-            return object;
+        return function(self) {
+            var onstart = make_onstart(self);
+            var onstop  = make_onstop(self);
+            self.start = function() {
+                _sys.nextTick(onstart);
+                return self;
+            };
+            self.stop = function() {
+                _sys.nextTick(onstop);
+                return self;
+            };
+            return self;
         };
     })();
     fn.timer = __timer;
 
     var __listener = (function() {
-        var listen = function() {
-            if (arguments.length) {
-                this.append.apply(this, arguments);
-            }
-            if (this.inputs.length) {
-                _sys.nextTick(onlisten.bind(this));
-            }
-            return this;
+        var make_onlisten = function(self) {
+            return function() {
+                if (_sys.listeners.indexOf(self) === -1) {
+                    _sys.listeners.push(self);
+                    _sys.events.emit("addObject");
+                    self._.emit("listen");
+                }
+            };
         };
-        var onlisten = function() {
-            if (_sys.listeners.indexOf(this) === -1) {
-                _sys.listeners.push(this);
-                _sys.events.emit("addObject");
-                this._.emit("listen");
-            }
-        };
-        var unlisten = function() {
-            if (arguments.length) {
-                this.remove.apply(this, arguments);
-            }
-            if (!this.inputs.length) {
-                _sys.nextTick(onunlisten.bind(this));
-            }
-            return this;
-        };
-        var onunlisten = function() {
-            var i = _sys.listeners.indexOf(this);
-            if (i !== -1) {
-                _sys.listeners.splice(i, 1);
-                this._.emit("unlisten");
-                _sys.events.emit("removeObject");
-            }
+        var make_onunlisten = function(self) {
+            return function() {
+                var i = _sys.listeners.indexOf(self);
+                if (i !== -1) {
+                    _sys.listeners.splice(i, 1);
+                    self._.emit("unlisten");
+                    _sys.events.emit("removeObject");
+                }
+            };
         };
         
-        return function(object) {
-            object.listen   = listen;
-            object.unlisten = unlisten;
-            return object;
+        return function(self) {
+            var onlisten = make_onlisten(self);
+            var onunlisten = make_onunlisten(self);
+            self.listen = function() {
+                if (arguments.length) {
+                    self.append.apply(self, arguments);
+                }
+                if (self.inputs.length) {
+                    _sys.nextTick(onlisten);
+                }
+                return self;
+            };
+            self.unlisten = function() {
+                if (arguments.length) {
+                    self.remove.apply(self, arguments);
+                }
+                if (!self.inputs.length) {
+                    _sys.nextTick(onunlisten);
+                }
+                return self;
+            };
+            return self;
         };
     })();
     fn.listener = __listener;
@@ -572,6 +583,27 @@
         object._.emit("ended");
     };
     fn.onended = __onended;
+    
+    var __make_onended = function(self, lastValue) {
+        return function() {
+            if (typeof lastValue === "number") {
+                var cell = self.cell;
+                var cellL, cellR;
+                if (self.isStereo) {
+                    cellL = self.cellL;
+                    cellR = self.cellR;
+                } else {
+                    cellL = cellR = cell;
+                }
+                for (var i = 0, imax = cell.length; i < imax; ++i) {
+                    cellL[i] = cellR[i] = cell[i] = lastValue;
+                }
+            }
+            self._.isEnded = true;
+            self._.emit("ended");
+        };
+    };
+    fn.make_onended = __make_onended;
     
     var __inputSignalAR = function(object) {
         var cell   = object.cell;
@@ -671,9 +703,10 @@
     var TimbreObject = (function() {
         function TimbreObject(_args) {
             this._ = {}; // private members
-            this._.events = new modules.EventEmitter(this);
-            this._.emit   = this._.events.emit.bind(this._.events);
-            
+            var e = this._.events = new modules.EventEmitter(this);
+            this._.emit   = function() {
+                return e.emit.apply(e, arguments);
+            };
             if (isDictionary(_args[0])) {
                 var params = _args.shift();
                 this.once("init", function() {
@@ -1281,12 +1314,38 @@
                 this.inputs.push(object);
             }
             __stereo(this);
-            
-            this._.isPlaying = false;
+
+            var _ = this._;
+            _.isPlaying = false;
+            _.onplay  = make_onplay(this);
+            _.onpause = make_onpause(this);
             
             this.on("append", onappend);
         }
         __extend(SystemInlet);
+
+        var make_onplay = function(self) {
+            return function() {
+                if (_sys.inlets.indexOf(self) === -1) {
+                    _sys.inlets.push(self);
+                    _sys.events.emit("addObject");
+                    self._.isPlaying = true;
+                    self._.emit("play");
+                }
+            };
+        };
+        
+        var make_onpause = function(self) {
+            return function() {
+                var i = _sys.inlets.indexOf(self);
+                if (i !== -1) {
+                    _sys.inlets.splice(i, 1);
+                    self._.isPlaying = false;
+                    self._.emit("pause");
+                    _sys.events.emit("removeObject");
+                }
+            };
+        };
         
         var onappend = function(list) {
             for (var i = 0, imax = list.length; i < imax; ++i) {
@@ -1311,30 +1370,13 @@
         });
         
         $.play = function() {
-            _sys.nextTick(onplay.bind(this));
+            _sys.nextTick(this._.onplay);
             return this;
-        };
-        var onplay = function() {
-            if (_sys.inlets.indexOf(this) === -1) {
-                _sys.inlets.push(this);
-                _sys.events.emit("addObject");
-                this._.isPlaying = true;
-                this._.emit("play");
-            }
         };
         
         $.pause = function() {
-            _sys.nextTick(onpause.bind(this));
+            _sys.nextTick(this._.onpause);
             return this;
-        };
-        var onpause = function() {
-            var i = _sys.inlets.indexOf(this);
-            if (i !== -1) {
-                _sys.inlets.splice(i, 1);
-                this._.isPlaying = false;
-                this._.emit("pause");
-                _sys.events.emit("removeObject");
-            }
         };
         
         $.process = function(tickID) {
@@ -1406,12 +1448,21 @@
             this._.deferred = null;
             this.recStart   = 0;
             this.recBuffers = null;
-            
+            this.delayProcess = make_delayProcess(this);
+
+            var self = this;
             modules.ready("events", function() {
-                this.events = new modules.EventEmitter(this);
-                this.reset();
-            }.bind(this));
+                self.events = new modules.EventEmitter(self);
+                self.reset();
+            });
         }
+
+        var make_delayProcess = function(self) {
+            return function() {
+                self.recStart = +new Date();
+                self.process();
+            };
+        };
         
         var ACCEPT_SAMPLERATES = [
             8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000
@@ -1595,17 +1646,12 @@
                 } else {
                     var now = +new Date();
                     if ((now - this.recStart) > 20) {
-                        setTimeout(delayProcess.bind(this), 10);
+                        setTimeout(this.delayProcess, 10);
                     } else {
                         this.process();
                     }
                 }
             }
-        };
-        
-        var delayProcess = function() {
-            this.recStart = +new Date();
-            this.process();
         };
         
         $.nextTick = function(func) {
@@ -1656,11 +1702,12 @@
                     rec_inlet.append.apply(rec_inlet, arguments);
                 }
             };
-            
+
+            var self = this;
             inlet_dfd.then(recdone, function() {
                 fn.fix_iOS6_1_problem(false);
-                recdone.call(this, true);
-            }.bind(this));
+                recdone.call(self, true);
+            });
             
             this._.deferred.sub = inlet_dfd;
             
@@ -1684,7 +1731,7 @@
             
             func(outlet);
             
-            setTimeout(delayProcess.bind(this), 10);
+            setTimeout(this.delayProcess, 10);
             
             return dfd.promise();
         };

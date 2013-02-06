@@ -110,7 +110,10 @@
             set: function(value) {
                 var _ = this._;
                 if (Curves[value]) {
-                    _.map.map = Curves[value].bind(_);
+                    var f = Curves[value];
+                    _.map.map = function(x) {
+                        return f(_, x);
+                    };
                     _.map.bang();
                     _.curveName = value;
                 }
@@ -132,20 +135,20 @@
     MouseXY.prototype.process = function(tickID) {
         return this._.map.process(tickID);
     };
-
+    
     var Curves = {
-        lin: function(input) {
-            return input * this.delta + this.min;
+        lin: function(_, input) {
+            return input * _.delta + _.min;
         },
-        exp: function(input) {
-            var min = (this.min < 0) ? 1e-6 : this.min;
-            return Math.pow(this.max/min, input) * min;
+        exp: function(_, input) {
+            var min = (_.min < 0) ? 1e-6 : _.min;
+            return Math.pow(_.max/min, input) * min;
         },
-        sqr: function(input) {
-            return (input * input) * this.delta + this.min;
+        sqr: function(_, input) {
+            return (input * input) * _.delta + _.min;
         },
-        cub: function(input) {
-            return (input * input * input) * this.delta + this.min;
+        cub: function(_, input) {
+            return (input * input * input) * _.delta + _.min;
         }
     };
     
@@ -157,8 +160,11 @@
         _.max   = 1;
         _.delta = 1;
         _.curveName = "lin";
-        
-        _.map = T("map", {map:Curves.lin.bind(_)}, instance.X);
+
+        var f = Curves.lin;
+        _.map = T("map", {map:function(x) {
+            return f(_, x);
+        }}, instance.X);
         
         self.cell = _.map.cell;
         
@@ -173,7 +179,10 @@
         _.delta = 1;
         _.curveName = "lin";
         
-        _.map = T("map", {map:Curves.lin.bind(_)}, instance.Y);
+        var f = Curves.lin;
+        _.map = T("map", {map:function(x) {
+            return f(_, x);
+        }}, instance.Y);
         
         self.cell = _.map.cell;
         return self;

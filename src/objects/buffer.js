@@ -18,6 +18,8 @@
         _.samplerate  = 44100;
         _.phase = 0;
         _.phaseIncr = 0;
+        _.onended  = fn.make_onended(this, 0);
+        _.onlooped = make_onlooped(this);
         
         this.on("play", onplay);
     }
@@ -25,6 +27,18 @@
     
     var onplay = function(value) {
         this._.isEnded = (value === false);
+    };
+    
+    var make_onlooped = function(self) {
+        return function() {
+            var _ = self._;
+            if (_.phase >= _.buffer.length) {
+                _.phase = 0;
+            } else if (_.phase < 0) {
+                _.phase = _.buffer.length + _.phaseIncr;
+            }
+            self._.emit("looped");
+        };
     };
     
     var $ = BufferNode.prototype;
@@ -232,15 +246,15 @@
                 
                 if (phase >= buffer.length) {
                     if (_.isLooped) {
-                        fn.nextTick(onlooped.bind(this));
+                        fn.nextTick(_.onlooped);
                     } else {
-                        fn.nextTick(onended.bind(this));
+                        fn.nextTick(_.onended);
                     }
                 } else if (phase < 0) {
                     if (_.isLooped) {
-                        fn.nextTick(onlooped.bind(this));
+                        fn.nextTick(_.onlooped);
                     } else {
-                        fn.nextTick(onended.bind(this));
+                        fn.nextTick(_.onended);
                     }
                 }
                 _.phase = phase;
@@ -250,21 +264,7 @@
         
         return cell;
     };
-    
-    var onlooped = function() {
-        var _ = this._;
-        if (_.phase >= _.buffer.length) {
-            _.phase = 0;
-        } else if (_.phase < 0) {
-            _.phase = _.buffer.length + _.phaseIncr;
-        }
-        this._.emit("looped");
-    };
-    
-    var onended = function() {
-        fn.onended(this, 0);
-    };
-    
+        
     var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
