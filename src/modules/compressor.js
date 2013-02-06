@@ -102,7 +102,7 @@
         }
         if (this.lastPreDelayFrames !== preDelayFrames) {
             this.lastPreDelayFrames = preDelayFrames;
-            for (var i = this.preDelayBuffer.length; i--; ) {
+            for (var i = 0, imax = this.preDelayBuffer.length; i < imax; ++i) {
                 this.preDelayBuffer[i] = 0;
             }
             this.preDelayReadIndex = 0;
@@ -412,7 +412,7 @@
         this.meteringGain = 1;
         
         // Predelay section.
-        for (var i = this.preDelayBuffer.length; i--; ) {
+        for (var i = 0, imax = this.preDelayBuffer.length; i < imax; ++i) {
             this.preDelayBuffer[i] = 0;
         }
         

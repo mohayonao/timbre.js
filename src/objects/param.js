@@ -117,7 +117,7 @@
             if (inputs.length) {
                 fn.inputSignalAR(this);
             } else {
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = 1;
                 }
             }
@@ -145,7 +145,7 @@
                 }
             } else {
                 value = env.next();
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = (cell[i] * value) * mul + add;
                 }
                 emit = _.env.emit;

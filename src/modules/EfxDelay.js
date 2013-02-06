@@ -60,7 +60,7 @@
         }
 
         if (overwrite) {
-            while (i--) {
+            for (i = 0; i < imax; ++i) {
                 _cell[i] = cell[i];
             }
         }

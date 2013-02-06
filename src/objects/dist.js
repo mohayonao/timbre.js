@@ -105,7 +105,7 @@
                     
                     _.x1 = x1; _.x2 = x2; _.y1 = y1; _.y2 = y2;
                 } else {
-                    for (i = cell.length; i--; ) {
+                    for (i = 0, imax = cell.length; i < imax; ++i) {
                         x0 = cell[i] * preScale;
                         x0 = (x0 > limit) ? limit : (x0 < -limit) ? -limit : x0;
                         cell[i] = x0 * mul + add;

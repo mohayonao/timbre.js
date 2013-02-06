@@ -134,7 +134,7 @@
                     var inputs = this.inputs;
                     var count  = _.count;
                     var x = count * _.mul + _.add;
-                    for (var j = cell.length; j--; ) {
+                    for (var j = 0, jmax = cell.length; j < jmax; ++j) {
                         cell[j] = x;
                     }
                     for (var i = 0, imax = inputs.length; i < imax; ++i) {

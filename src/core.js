@@ -106,7 +106,7 @@
         var p = instance;
         while (p !== null && p.constructor !== Object) {
             names = Object.getOwnPropertyNames(p);
-            for (var i = names.length; i--; ) {
+            for (var i = 0, imax = names.length; i < imax; ++i) {
                 if (meta[names[i]]) {
                     continue;
                 }
@@ -459,7 +459,7 @@
             x = 0;
         }
         var cell = this.cell;
-        for (var i = cell.length; i--; ) {
+        for (var i = 0, imax = cell.length; i < imax; ++i) {
             cell[i] = x;
         }
     };
@@ -564,7 +564,7 @@
             cellL = cellR = cell;
         }
         if (typeof lastValue === "number") {
-            for (var i = cell.length; i--; ) {
+            for (var i = 0, imax = cell.length; i < imax; ++i) {
                 cellL[i] = cellR[i] = cell[i] = lastValue;
             }
         }
@@ -653,7 +653,7 @@
     fn.debug.process = function(object) {
         var cell = object.process(+new Date());
         var min = +Infinity, max = -Infinity, nan = false;
-        for (var i = cell.length; i--; ) {
+        for (var i = 0, imax = cell.length; i < imax; ++i) {
             if (isNaN(cell[i])) {
                 nan = true;
             }
@@ -1289,7 +1289,7 @@
         __extend(SystemInlet);
         
         var onappend = function(list) {
-            for (var i = list.length; i--; ) {
+            for (var i = 0, imax = list.length; i < imax; ++i) {
                 list[i]._.dac = this;
             }
         };
@@ -1351,7 +1351,7 @@
             if (this.tickID !== tickID) {
                 this.tickID = tickID;
                 
-                for (j = jmax; j--; ) {
+                for (j = 0; j < jmax; ++j) {
                     cellL[j] = cellR[j] = cell[j] = 0;
                 }
                 
@@ -1364,12 +1364,12 @@
                     } else {
                         tmpL = tmpR = tmp.cell;
                     }
-                    for (j = jmax; j--; ) {
+                    for (j = 0; j < jmax; ++j) {
                         cellL[j] += tmpL[j];
                         cellR[j] += tmpR[j];
                     }
                 }
-                for (j = jmax; j--; ) {
+                for (j = 0; j < jmax; ++j) {
                     x  = cellL[j] = cellL[j] * mul + add;
                     x += cellR[j] = cellR[j] * mul + add;
                     cell[j] = x * 0.5;
@@ -1528,7 +1528,7 @@
             var listeners = this.listeners;
             var currentTimeIncr = this.currentTimeIncr;
             
-            for (i = imax; i--; ) {
+            for (i = 0; i < imax; ++i) {
                 strmL[i] = strmR[i] = 0;
             }
             
@@ -1563,7 +1563,7 @@
                 }
             }
             
-            for (i = imax; i--; ) {
+            for (i = 0; i < imax; ++i) {
                 x = strmL[i] * amp;
                 x = (x < -1) ? -1 : (x > 1) ? 1 : x;
                 strmL[i] = x;
@@ -1582,7 +1582,7 @@
                     this.recBuffers.push(new Float32Array(strmR));
                 } else {
                     var strm = new Float32Array(strmL.length);
-                    for (i = strm.length; i--; ) {
+                    for (i = 0, imax = strm.length; i < imax; ++i) {
                         strm[i] = (strmL[i] + strmR[i]) * 0.5;
                     }
                     this.recBuffers.push(strm);

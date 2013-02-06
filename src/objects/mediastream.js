@@ -40,15 +40,16 @@
         if (_impl) {
             _impl.unlisten.call(this);
         }
-        var i;
+        
         var cell = this.cell;
+        var i, imax = cell.length;
         var L = this.cellL, R = this.cellR;
-        for (i = cell.length; i--; ) {
+        for (i = 0; i < imax; ++i) {
             cell[i] = L[i] = R[i] = 0;
         }
         var _ = this._;
         var bufferL = _.bufferL, bufferR = _.bufferR;
-        for (i = bufferL.length; i--; ) {
+        for (i = 0, imax = bufferL.length; i < imax; ++i) {
             bufferL[i] = bufferR[i] = 0;
         }
     };

@@ -18,15 +18,15 @@
             this.tickID = tickID;
             
             var mul = _.mul, add = _.add;
-            var i, x, r = Math.random;
+            var i, imax, x;
             
             if (_.ar) { // audio-rate
-                for (i = cell.length; i--; ) {
-                    cell[i] = (r() * 2 - 1) * mul + add;
+                for (i = 0, imax = cell.length; i < imax; ++i) {
+                    cell[i] = (Math.random() * 2 - 1) * mul + add;
                 }
             } else {    // control-rate
-                x = (r() * 2 + 1) * mul + add;
-                for (i = cell.length; i--; ) {
+                x = (Math.random() * 2 + 1) * mul + add;
+                for (i = 0, imax = cell.length; i < imax; ++i) {
                     cell[i] = x;
                 }
             }

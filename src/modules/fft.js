@@ -54,16 +54,16 @@
         var i, j, k, k2, h, d, c, s, ik, dx, dy;
 
         if (window) {
-            for (i = n; i--; ) {
+            for (i = 0; i < n; ++i) {
                 buffer[i] = _buffer[i] * window[i];
             }
         } else {
-            for (i = n; i--; ) {
+            for (i = 0; i < n; ++i) {
                 buffer[i] = _buffer[i];
             }
         }
-        
-        for (i = n; i--; ) {
+
+        for (i = 0; i < n; ++i) {
             real[i] = buffer[bitrev[i]];
             imag[i] = 0.0;
         }
@@ -89,7 +89,7 @@
             var spectrum = this.spectrum;
             var rval, ival, mag;
             var peak = 0;
-            for (i = n; i--; ) {
+            for (i = 0; i < n; ++i) {
                 rval = real[i];
                 ival = imag[i];
                 mag  = bSi = Math.sqrt(rval * rval + ival * ival);
@@ -114,7 +114,7 @@
         var n = buffer.length;
         var i, j, k, k2, h, d, c, s, ik, dx, dy;
         
-        for (i = n; i--; ) {
+        for (i = 0; i < n; ++i) {
             j = bitrev[i];
             real[i] = +_real[j];
             imag[i] = -_imag[j];
@@ -136,7 +136,7 @@
             }
         }
         
-        for (i = n; i--; ) {
+        for (i = 0; i < n; ++i) {
             buffer[i] = real[i] / n;
         }
         return buffer;
@@ -164,12 +164,12 @@
                     }
                     return x;
                 }());
-                var i, k = Math.floor(Math.log(n) / Math.LN2);
+                var i, imax, k = Math.floor(Math.log(n) / Math.LN2);
                 var sintable = new Float32Array((1<<k)-1);
                 var costable = new Float32Array((1<<k)-1);
                 var PI2 = Math.PI * 2;
                 
-                for (i = sintable.length; i--; ) {
+                for (i = 0, imax = sintable.length; i < imax; ++i) {
                     sintable[i] = Math.sin(PI2 * (i / n));
                     costable[i] = Math.cos(PI2 * (i / n));
                 }

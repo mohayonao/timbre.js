@@ -40,7 +40,7 @@
         
         var cellL = instance.cellL;
         var cellR = instance.cellR;
-        for (var i = cellL.length; i--; ) {
+        for (var i = 0, imax = cellL.length; i < imax; ++i) {
             cellL[i] = x;
             cellR[i] = y;
         }

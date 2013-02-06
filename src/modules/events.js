@@ -159,7 +159,7 @@
         var remain = false;
         var listeners = _.events[type];
         if (isArray(listeners)) {
-            for (var i = listeners.length; i--; ) {
+            for (var i = 0, imax = listeners.length; i < imax; ++i) {
                 var listener = listeners[i];
                 if (listener.unremovable) {
                     remain = true;

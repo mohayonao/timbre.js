@@ -104,7 +104,7 @@
             if (inputs.length) {
                 fn.inputSignalAR(this);
             } else {
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = 1;
                 }
             }
@@ -113,13 +113,13 @@
             if (_.ar) {
                 var tmp = _.tmp;
                 _.env.process(tmp);
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = (cell[i] * tmp[i]) * mul + add;
                 }
                 emit = _.env.emit;
             } else {
                 value = _.env.next();
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = (cell[i] * value) * mul + add;
                 }
                 emit = _.env.emit;

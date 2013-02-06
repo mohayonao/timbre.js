@@ -56,19 +56,19 @@
             var cellL = this.cellL;
             var cellR = this.cellR;
             
-            for (j = jmax; j--; ) {
+            for (j = 0; j < jmax; ++j) {
                 cellL[j] = cellR[j] = cell[j] = 0;
             }
             for (i = 0; i < imax; ++i) {
                 tmp = inputs[i].process(tickID);
-                for (j = jmax; j--; ) {
+                for (j = 0; j < jmax; ++j) {
                     cellL[j] = cellR[j] = cell[j] += tmp[j];
                 }
             }
             
             var panL = _.panL;
             var panR = _.panR;
-            for (j = jmax; j--; ) {
+            for (j = 0; j < jmax; ++j) {
                 x  = cellL[j] = cellL[j] * panL * mul + add;
                 x += cellR[j] = cellR[j] * panR * mul + add;
                 cell[j] = x * 0.5;

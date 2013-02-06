@@ -79,13 +79,13 @@
             
             osc1.frequency = freq - (_.beats * 0.5);
             osc1.process(tmp);
-            for (i = imax; i--; ) {
+            for (i = 0; i < imax; ++i) {
                 cell[i] = tmp[i] * 0.5;
             }
             
             osc2.frequency = freq + (_.beats * 0.5);
             osc2.process(tmp);
-            for (i = imax; i--; ) {
+            for (i = 0; i < imax; ++i) {
                 cell[i] += tmp[i] * 0.5;
             }
             

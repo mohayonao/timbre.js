@@ -60,7 +60,7 @@
             var _real = _.fft.real;
             var _imag = _.fft.imag;
             
-            for (var i = cell.length; i--; ) {
+            for (var i = 0, imax = cell.length; i < imax; ++i) {
                 real[i] = _real[i];
                 imag[i] = _imag[i];
             }
@@ -96,7 +96,7 @@
                     peak = x;
                 }
             }
-            for (i = data.length; i--; ) {
+            for (i = 0; i < size; ++i) {
                 data[i] /= peak;
             }
             

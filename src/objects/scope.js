@@ -76,7 +76,7 @@
         var _ = this._;
         var buffer = _.buffer;
         
-        for (var i = buffer.length; i--; ) {
+        for (var i = 0, imax = buffer.length; i < imax; ++i) {
             buffer[i] = 0;
         }
         _.samples    = 0;

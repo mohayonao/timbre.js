@@ -43,7 +43,7 @@
     $.cancel = function() {
         var _ = this._;
         var cell = this.cell;
-        for (var i = cell.length; i--; ) {
+        for (var i = 0, imax = cell.length; i < imax; ++i) {
             cell[i] = 0;
         }
         _.node = null;

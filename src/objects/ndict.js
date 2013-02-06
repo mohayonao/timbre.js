@@ -81,7 +81,7 @@
             if (_.ar && len) {
                 
                 fn.inputSignalAR(this);
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     index = cell[i];
                     if (index < 0) {
                         index = (index - 0.5)|0;
@@ -99,7 +99,7 @@
                     index = (index + 0.5)|0;
                 }
                 value = (dict[index] || defaultValue) * mul + add;
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = value;
                 }
             }

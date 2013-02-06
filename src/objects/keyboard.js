@@ -30,7 +30,7 @@
         var cell = instance.cell;
         var value = e.keyCode * _.mul + _.add;
         
-        for (var i = cell.length; i--; ) {
+        for (var i = 0, imax = cell.length; i < imax; ++i) {
             cell[i] = value;
         }
         shiftKey = e.shiftKey;

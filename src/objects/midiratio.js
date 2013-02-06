@@ -63,7 +63,7 @@
             if (_.ar && len) {
                 fn.inputSignalAR(this);
                 var range = _.range;
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = Math.pow(2, cell[i] / range);
                 }
                 _.value = cell[imax-1];
@@ -75,7 +75,7 @@
                     _.value = Math.pow(2, input / _.range);
                 }
                 var value = _.value * _.mul + _.add;
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = value;
                 }
             }

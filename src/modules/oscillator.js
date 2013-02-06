@@ -300,11 +300,11 @@
         }
         
         if (sign === "+") {
-            for (i = 1024; i--; ) {
+            for (i = 0; i < 1024; ++i) {
                 wave[i] = wave[i] * 0.5 + 0.5;
             }
         } else if (sign === "-") {
-            for (i = 1024; i--; ) {
+            for (i = 0; i < 1024; ++i) {
                 wave[i] *= -1;
             }
         }
@@ -320,7 +320,7 @@
                 var x = parseInt(src.substr(i * 2, 2), 16);
                 
                 x = (x & 0x80) ? (x-256) / 128.0 : x / 127.0;
-                for (var j = 1024 / n; j--; ) {
+                for (var j = 0, jmax = 1024 / n; j < jmax; ++j) {
                     wave[k++] = x;
                 }
             }
@@ -330,7 +330,7 @@
     
     function wavc(src) {
         var wave = new Float32Array(1024);
-            if (src.length === 8) {
+        if (src.length === 8) {
             var color = parseInt(src, 16);
             var bar   = new Float32Array(8);
             var i, j;
@@ -350,13 +350,13 @@
             }
             
             var maxx = 0, absx;
-            for (i = 1024; i--; ) {
+            for (i = 0; i < 1024; ++i) {
                 if (maxx < (absx = Math.abs(wave[i]))) {
                     maxx = absx;
                 }
             }
             if (maxx > 0) {
-                for (i = 1024; i--; ) {
+                for (i = 0; i < 1024; ++i) {
                     wave[i] /= maxx;
                 }
             }
@@ -424,28 +424,28 @@
     var Wavetables = {
         sin: function() {
             var wave = new Float32Array(1024);
-            for (var i = 1024; i--; ) {
+            for (var i = 0; i < 1024; ++i) {
                 wave[i] = Math.sin(2 * Math.PI * (i/1024));
             }
             return wave;
         },
         cos: function() {
             var wave = new Float32Array(1024);
-            for (var i = 1024; i--; ) {
+            for (var i = 0; i < 1024; ++i) {
                 wave[i] = Math.cos(2 * Math.PI * (i/1024));
             }
             return wave;
         },
         pulse: function() {
             var wave = new Float32Array(1024);
-            for (var i = 1024; i--; ) {
+            for (var i = 0; i < 1024; ++i) {
                 wave[i] = (i < 512) ? +1 : -1;
             }
             return wave;
         },
         tri: function() {
             var wave = new Float32Array(1024);
-            for (var x, i = 1024; i--; ) {
+            for (var x, i = 0; i < 1024; ++i) {
                 x = (i / 1024) - 0.25;
                 wave[i] = 1.0 - 4.0 * Math.abs(Math.round(x) - x);
             }
@@ -453,7 +453,7 @@
         },
         saw: function() {
             var wave = new Float32Array(1024);
-            for (var x, i = 1024; i--; ) {
+            for (var x, i = 0; i < 1024; ++i) {
                 x = (i / 1024);
                 wave[i] = +2.0 * (x - Math.round(x));
             }
@@ -465,7 +465,7 @@
                       -0.125, -0.250, -0.375, -0.500, -0.625, -0.750, -0.875, -1.000,
                       -1.000, -0.875, -0.750, -0.625, -0.500, -0.375, -0.250, -0.125 ];
             var wave = new Float32Array(1024);
-            for (var i = 1024; i--; ) {
+            for (var i = 0; i < 1024; ++i) {
                 wave[i] = d[(i / 1024 * d.length)|0];
             }
             return wave;
@@ -476,7 +476,7 @@
                      -0.125, -0.750, +0.000, +0.625, + 0.125, -0.500, -0.375, -0.125,
                      -0.750, -1.000, -0.625, +0.000, - 0.375, -0.875, -0.625, -0.250 ];
             var wave = new Float32Array(1024);
-            for (var i = 1024; i--; ) {
+            for (var i = 0; i < 1024; ++i) {
                 wave[i] = d[(i / 1024 * d.length)|0];
             }
             return wave;

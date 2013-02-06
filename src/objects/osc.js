@@ -96,7 +96,7 @@
             if (inputs.length) {
                 fn.inputSignalAR(this);
             } else {
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = 1;
                 }
             }
@@ -123,12 +123,12 @@
                         osc.process(tmp);
                     }
                 }
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] *= tmp[i];
                 }
             } else {
                 var value = osc.next();
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] *= value;
                 }
             }

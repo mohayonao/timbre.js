@@ -36,7 +36,7 @@
         var freq   = _.freq;
         var size   = (T.samplerate / freq + 0.5)|0;
         var buffer = _.buffer = new Float32Array(size << 1);
-        for (var i = size; i--; ) {
+        for (var i = 0; i < size; ++i) {
             buffer[i] = Math.random() * 2 - 1;
         }
         _.readIndex  = 0;

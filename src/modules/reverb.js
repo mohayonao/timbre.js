@@ -17,14 +17,14 @@
         imax = CombParams.length;
         this.comb = new Array(imax);
         this.combout = new Array(imax);
-        for (i = imax; i--; ) {
+        for (i = 0; i < imax; ++i) {
             this.comb[i]    = new CombFilter(CombParams[i] * k);
             this.combout[i] = new Float32Array(buffersize);
         }
         
         imax = AllpassParams.length;
         this.allpass = new Array(imax);
-        for (i = imax; i--; ) {
+        for (i = 0; i < imax; ++i) {
             this.allpass[i] = new AllpassFilter(AllpassParams[i] * k);
         }
         this.output = new Float32Array(buffersize);
@@ -64,8 +64,8 @@
         comb[5].process(cell, combout[5]);
         comb[6].process(cell, combout[6]);
         comb[7].process(cell, combout[7]);
-
-        for (i = imax; i--; ) {
+        
+        for (i = 0; i < imax; ++i) {
             output[i] = combout[0][i] + combout[1][i] + combout[2][i] + combout[3][i] + combout[4][i] + combout[5][i] + combout[6][i] + combout[7][i];
         }
         
@@ -74,7 +74,7 @@
         allpass[2].process(output, output);
         allpass[3].process(output, output);
         
-        for (i = imax; i--; ) {
+        for (i = 0; i < imax; ++i) {
             cell[i] = output[i] * wet + cell[i] * dry;
         }
     };

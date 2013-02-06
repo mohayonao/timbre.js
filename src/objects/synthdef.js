@@ -178,7 +178,7 @@
                 list = _.genList;
                 for (i = 0, imax = list.length; i < imax; ++i) {
                     tmp = list[i].process(tickID);
-                    for (j = jmax; j--; ) {
+                    for (j = 0; j < jmax; ++j) {
                         cell[j] += tmp[j];
                     }
                 }

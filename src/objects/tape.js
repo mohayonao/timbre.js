@@ -80,7 +80,7 @@
                 var tmp  = tapeStream.fetch(cell.length);
                 var tmpL = tmp[0];
                 var tmpR = tmp[1];
-                for (var i = cell.length; i--; ) {
+                for (var i = 0, imax = cell.length; i < imax; ++i) {
                     cell[i] = (tmpL[i] + tmpR[i]) * 0.5 * mul + add;
                 }
             }

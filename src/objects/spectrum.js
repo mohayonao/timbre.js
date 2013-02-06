@@ -190,7 +190,7 @@
                     peak = x;
                 }
             }
-            for (i = data.length; i--; ) {
+            for (i = 0; i < size; ++i) {
                 data[i] /= peak;
             }
             

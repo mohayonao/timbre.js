@@ -30,14 +30,14 @@
     var waves = [];
     waves[0] = (function() {
         var wave = new Float32Array(256);
-        for (var i = 256; i--; ) {
+        for (var i = 0; i < 256; ++i) {
             wave[i] = Math.sin(2 * Math.PI * (i/256));
         }
         return wave;
     })();
     waves[1] = (function() {
         var wave = new Float32Array(256);
-        for (var x, i = 256; i--; ) {
+        for (var x, i = 0; i < 256; ++i) {
             x = (i / 256) - 0.25;
             wave[i] = 1.0 - 4.0 * Math.abs(Math.round(x) - x);
         }

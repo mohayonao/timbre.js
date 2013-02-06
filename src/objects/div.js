@@ -28,13 +28,13 @@
                     cell.set(tmp);
                     for (i = 1; i < imax; ++i) {
                         tmp = inputs[i].process(tickID);
-                        for (j = jmax; j--; ) {
+                        for (j = 0; j < jmax; ++j) {
                             div = tmp[j];
                             cell[j] = (div === 0) ? 0 : cell[j] / div;
                         }
                     }
                 } else {
-                    for (j = jmax; j--; ) {
+                    for (j = 0; j < jmax; ++j) {
                         cell[j] = 0;
                     }
                 }
