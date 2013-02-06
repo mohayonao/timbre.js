@@ -13,9 +13,9 @@ var saw = T("saw", {freq:440, mul:0.25}).play();
 
 var fft = T("fft").listen(saw);
 
-window.animate(function() {
-  fft.plot({target:canvas});
-});
+T("interval", {interval:100}, function() {
+  fft.plot({target:canvas});    
+}).start();
 ```
 
 ## Properties ##

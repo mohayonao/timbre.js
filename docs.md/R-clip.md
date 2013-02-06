@@ -14,12 +14,12 @@ T("clip")
 
 ```timbre
 var env  = T("env", {table:[0, [2, 2000], [0.2, 2000]], loopNode:1}).bang();
-var osc  = T("osc", {freq:880}, env);
-var clip = T("clip", {minmax:1, mul:0.5}, osc).play();
+var osc  = T("osc", {freq:440}, env);
+var clip = T("clip", {minmax:0.5, mul:0.5}, osc).play();
 
-window.animate(function() {
-  clip.plot({target:canvas});
-}, 10);
+T("scope", {interval:500, size:256}).on("data", function() {
+  this.plot({target:canvas});
+}).listen(clip);
 ```
 
 ## Properties ##
