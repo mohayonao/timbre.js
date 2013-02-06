@@ -61,7 +61,7 @@
         var index = (x + this.phase * this._radtoinc)|0;
         this.value = this.wave[index & TABLE_MASK];
         x += this.frequency * this._coeff * this.step;
-        while (x > TABLE_SIZE) {
+        if (x > TABLE_SIZE) {
             x -= TABLE_SIZE;
         }
         this._x = x;
@@ -102,7 +102,7 @@
                 x += dx;
             }
         }
-        while (x > TABLE_SIZE) {
+        if (x > TABLE_SIZE) {
             x -= TABLE_SIZE;
         }
         this._x = x;
@@ -143,7 +143,7 @@
                 x += freqs[i] * dx;
             }
         }
-        while (x > TABLE_SIZE) {
+        if (x > TABLE_SIZE) {
             x -= TABLE_SIZE;
         }
         this._x = x;
@@ -183,7 +183,7 @@
                 x += dx;
             }
         }
-        while (x > TABLE_SIZE) {
+        if (x > TABLE_SIZE) {
             x -= TABLE_SIZE;
         }
         this._x = x;
@@ -223,7 +223,7 @@
                 x += freqs[i] * dx;
             }
         }
-        while (x > TABLE_SIZE) {
+        if (x > TABLE_SIZE) {
             x -= TABLE_SIZE;
         }
         this._x = x;

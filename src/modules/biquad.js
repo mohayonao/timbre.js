@@ -31,20 +31,12 @@
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             x0 = cell[i];
             y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
-            cell[i] = (y0 < -1) ? -1 : (y0 > 1) ? 1 : y0;
+            cell[i] = y0;
             
             x2 = x1;
             x1 = x0;
             y2 = y1;
             y1 = y0;
-        }
-        
-        // flushDenormalFloatToZero
-        if ((x1 > 0 && x1 <  1e-4) || (x1 < 0 && x1 > -1e-4)) {
-            x1 = 0;
-        }
-        if ((y1 > 0 && y1 <  1e-4) || (y1 < 0 && y1 > -1e-4)) {
-            y1 = 0;
         }
         
         this.x1 = x1;
