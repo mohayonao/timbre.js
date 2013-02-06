@@ -1972,10 +1972,6 @@
     if (_envtype === "node") {
         module.exports = global.timbre = exports;
     } else if (_envtype === "browser") {
-        if (typeof window.Float32Array === "undefined") {
-            window.Float32Array = Array; // fake Float32Array (for IE9)
-        }
-        
         exports.noConflict = (function() {
            var _t = window.timbre, _T = window.T;
             return function(deep) {
