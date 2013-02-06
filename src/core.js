@@ -565,25 +565,6 @@
     })();
     fn.listener = __listener;
     
-    var __onended = function(object, lastValue) {
-        var cell = object.cell;
-        var cellL, cellR;
-        if (object.isStereo) {
-            cellL = object.cellL;
-            cellR = object.cellR;
-        } else {
-            cellL = cellR = cell;
-        }
-        if (typeof lastValue === "number") {
-            for (var i = 0, imax = cell.length; i < imax; ++i) {
-                cellL[i] = cellR[i] = cell[i] = lastValue;
-            }
-        }
-        object._.isEnded = true;
-        object._.emit("ended");
-    };
-    fn.onended = __onended;
-    
     var __make_onended = function(self, lastValue) {
         return function() {
             if (typeof lastValue === "number") {
