@@ -44,6 +44,10 @@ MIT
 
 
 ## ChangeLog ##
+**WORKING** (335.49KB)
+* Added: using Float64Array mode, `T.setup({f64:true})`
+* Fixed: performance improvement
+
 **13.02.06** (337.50KB)
 * Fixed: support iOS6.1
 
