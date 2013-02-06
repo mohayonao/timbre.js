@@ -6,7 +6,7 @@ $(function() {
     }
 
     timbre.setup({f64:true});
-    if (!timbre.envmobile) {
+    if (timbre.envmobile) {
         timbre.setup({samplerate:timbre.samplerate * 0.5});
     }
     
