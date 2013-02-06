@@ -10,7 +10,7 @@ This project is hosted on [GitHub](https://github.com/mohayonao/timbre.js/). You
 This documentation includes many executable and editable sample code, so you can try timbre.js and see how it works, easily.
 
 ## Downloads ##
-Recently released: v**${VERSION}**
+Recently released: **${VERSION}**
 
 ```table
 md:**[Production Version](/timbre.js/timbre.js)**|md: ${MINSIZE}kb, minified ([Source Maps](/timbre.js/timbre.js.map))

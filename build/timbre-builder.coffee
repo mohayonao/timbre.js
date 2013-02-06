@@ -9,7 +9,7 @@ build_timbre = (opts={})->
 
     version = do ->
         for line in fs.readFileSync("#{DST_DIR}README.md", 'utf-8').split('\n')
-            if (m = /\*\*(\d\d\.\d\d.\d\d\w*)\*\*/.exec line) != null then return m[1]
+            if (m = /\*\*(\d\d\.\d\d.\d\d\w*|WORKING)\*\*/.exec line) != null then return m[1]
         return null
 
     from = (dirpath)->
@@ -31,7 +31,7 @@ build_timbre = (opts={})->
 
     source = source.replace /\${VERSION}/g, version
 
-    source:source, version:"v#{version}", size:source.length
+    source:source, version:version, size:source.length
 
 if not module.parent
     opts = build_timbre()
