@@ -130,6 +130,7 @@
     
     var fn      = timbre.fn    = {};
     var modules = timbre.modules = {};
+    fn.SignalArray = Float32Array;
     
     (function() {
         var dict = {};
@@ -442,15 +443,6 @@
     };
     fn.nextTick = __nextTick;
     
-    var __getSignalArray = function(size) {
-        if (_f64mode) {
-            return new Float64Array(size);
-        } else {
-            return new Float32Array(size);
-        }
-    };
-    fn.getSignalArray = __getSignalArray;
-    
     var __fixAR = function(object) {
         object._.ar = true;
         object._.aronly = true;
@@ -687,7 +679,7 @@
             }
             
             this.tickID = -1;
-            this.cell   = __getSignalArray(_sys.cellsize);
+            this.cell   = new fn.SignalArray(_sys.cellsize);
             this.inputs = _args.map(timbre);
             
             this._.ar  = true;
@@ -1475,6 +1467,11 @@
                 }
                 if (typeof params.f64 !== "undefined") {
                     _f64mode = !!params.f64;
+                    if (_f64mode) {
+                        fn.SignalArray = Float64Array;
+                    } else {
+                        fn.SignalArray = Float32Array;
+                    }
                 }
             }
             return this;
@@ -1495,8 +1492,8 @@
                 this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
                 
                 this.streamsize = this.getAdjustSamples();
-                this.strmL = __getSignalArray(this.streamsize);
-                this.strmR = __getSignalArray(this.streamsize);
+                this.strmL = new fn.SignalArray(this.streamsize);
+                this.strmR = new fn.SignalArray(this.streamsize);
                 
                 this.impl.play();
                 this.events.emit("play");
@@ -1604,10 +1601,10 @@
             
             if (this.status === STATUS_REC) {
                 if (this.recCh === 2) {
-                    this.recBuffers.push(__getSignalArray(strmL));
-                    this.recBuffers.push(__getSignalArray(strmR));
+                    this.recBuffers.push(new fn.SignalArray(strmL));
+                    this.recBuffers.push(new fn.SignalArray(strmR));
                 } else {
-                    var strm = __getSignalArray(strmL.length);
+                    var strm = new fn.SignalArray(strmL.length);
                     for (i = 0, imax = strm.length; i < imax; ++i) {
                         strm[i] = (strmL[i] + strmR[i]) * 0.5;
                     }
@@ -1699,8 +1696,8 @@
             this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
             
             this.streamsize = this.getAdjustSamples();
-            this.strmL = __getSignalArray(this.streamsize);
-            this.strmR = __getSignalArray(this.streamsize);
+            this.strmL = new fn.SignalArray(this.streamsize);
+            this.strmR = new fn.SignalArray(this.streamsize);
             
             this.inlets.push(rec_inlet);
             
@@ -1734,8 +1731,8 @@
             var remaining = bufferLength;
             
             if (this.recCh === 2) {
-                var L = __getSignalArray(bufferLength);
-                var R = __getSignalArray(bufferLength);
+                var L = new fn.SignalArray(bufferLength);
+                var R = new fn.SignalArray(bufferLength);
                 
                 for (i = 0; i < imax; ++i) {
                     L.set(recBuffers[j++], k);
@@ -1755,7 +1752,7 @@
                 };
                 
             } else {
-                var buffer = __getSignalArray(bufferLength);
+                var buffer = new fn.SignalArray(bufferLength);
                 for (i = 0; i < imax; ++i) {
                     buffer.set(recBuffers[j++], k);
                     k += streamsize;
@@ -1988,12 +1985,12 @@
     function EfxDelay(opts) {
         var bits = Math.ceil(Math.log(T.samplerate * 1.5) * Math.LOG2E);
         
-        this.cell = T.fn.getSignalArray(T.cellsize);
+        this.cell = new T.fn.SignalArray(T.cellsize);
         
         this.time = 125;
         this.feedback  = 0.25;
         
-        this.buffer = T.fn.getSignalArray(1 << bits);
+        this.buffer = new T.fn.SignalArray(1 << bits);
         this.mask   = (1 << bits) - 1;
         this.wet    = 0.45;
         
@@ -2353,7 +2350,7 @@
         
         var bits = Math.round(Math.log(samplerate * 0.1) * Math.LOG2E);
         this.buffersize = 1 << bits;
-        this.buffer = T.fn.getSignalArray(this.buffersize + 1);
+        this.buffer = new T.fn.SignalArray(this.buffersize + 1);
         
         this.wave       = null;
         this._wave      = null;
@@ -2495,7 +2492,7 @@
         this.compressorGain  = 1;
         this.meteringGain    = 1;
 
-        this.preDelayBuffer = T.fn.getSignalArray(MaxPreDelayFrames);
+        this.preDelayBuffer = new T.fn.SignalArray(MaxPreDelayFrames);
         this.preDelayReadIndex = 0;
         this.preDelayWriteIndex = DefaultPreDelayFrames;
         this.maxAttackCompressionDiffDb = -1;
@@ -3852,12 +3849,12 @@
         n = 1 << Math.ceil(Math.log(n) * Math.LOG2E);
         
         this.length  = n;
-        this.buffer  = T.fn.getSignalArray(n);
-        this.real    = T.fn.getSignalArray(n);
-        this.imag    = T.fn.getSignalArray(n);
-        this._real   = T.fn.getSignalArray(n);
-        this._imag   = T.fn.getSignalArray(n);
-        this.spectrum = T.fn.getSignalArray(n>>1);
+        this.buffer  = new T.fn.SignalArray(n);
+        this.real    = new T.fn.SignalArray(n);
+        this.imag    = new T.fn.SignalArray(n);
+        this._real   = new T.fn.SignalArray(n);
+        this._imag   = new T.fn.SignalArray(n);
+        this.spectrum = new T.fn.SignalArray(n>>1);
         
         var params = FFTParams.get(n);
         this._bitrev   = params.bitrev;
@@ -3875,7 +3872,7 @@
                 var f = WindowFunctions[name];
                 if (f) {
                     if (!this._window) {
-                        this._window = T.fn.getSignalArray(this.length);
+                        this._window = new T.fn.SignalArray(this.length);
                     }
                     var w = this._window, n = 0, N = this.length;
                     a = (a < 0) ? 0 : (a > 1) ? 1 : a;
@@ -4011,8 +4008,8 @@
                     return x;
                 }());
                 var i, imax, k = Math.floor(Math.log(n) / Math.LN2);
-                var sintable = T.fn.getSignalArray((1<<k)-1);
-                var costable = T.fn.getSignalArray((1<<k)-1);
+                var sintable = new T.fn.SignalArray((1<<k)-1);
+                var costable = new T.fn.SignalArray((1<<k)-1);
                 var PI2 = Math.PI * 2;
                 
                 for (i = 0, imax = sintable.length; i < imax; ++i) {
@@ -4589,7 +4586,7 @@
         this.combout = new Array(imax);
         for (i = 0; i < imax; ++i) {
             this.comb[i]    = new CombFilter(CombParams[i] * k);
-            this.combout[i] = T.fn.getSignalArray(buffersize);
+            this.combout[i] = new T.fn.SignalArray(buffersize);
         }
         
         imax = AllpassParams.length;
@@ -4597,7 +4594,7 @@
         for (i = 0; i < imax; ++i) {
             this.allpass[i] = new AllpassFilter(AllpassParams[i] * k);
         }
-        this.output = T.fn.getSignalArray(buffersize);
+        this.output = new T.fn.SignalArray(buffersize);
         
         this.damp = 0;
         this.wet  = 0.33;
@@ -4650,7 +4647,7 @@
     };
     
     function CombFilter(buffersize) {
-        this.buffer = T.fn.getSignalArray(buffersize|0);
+        this.buffer = new T.fn.SignalArray(buffersize|0);
         this.buffersize = this.buffer.length;
         this.bufidx = 0;
         this.feedback =  0;
@@ -4688,7 +4685,7 @@
     };
 
     function AllpassFilter(buffersize) {
-        this.buffer = T.fn.getSignalArray(buffersize|0);
+        this.buffer = new T.fn.SignalArray(buffersize|0);
         this.buffersize = this.buffer.length;
         this.bufidx = 0;
     }
@@ -5031,8 +5028,8 @@
     };
     
     TapeStream.prototype.fetch = function(n) {
-        var cellL = T.fn.getSignalArray(n);
-        var cellR = T.fn.getSignalArray(n);
+        var cellL = new T.fn.SignalArray(n);
+        var cellR = new T.fn.SignalArray(n);
         var fragments     = this.fragments;
         
         if (fragments.length === 0) {
@@ -6122,7 +6119,7 @@
         _.osc2 = new Oscillator(T.samplerate);
         _.osc1.step = this.cell.length;
         _.osc2.step = this.cell.length;
-        _.tmp = fn.getSignalArray(this.cell.length);
+        _.tmp = new fn.SignalArray(this.cell.length);
         _.beats = 0.5;
         
         this.once("init", oninit);
@@ -6541,7 +6538,7 @@
         var _ = this._;
         _.env = new Envelope(T.samplerate);
         _.env.setStep(this.cell.length);
-        _.tmp = fn.getSignalArray(this.cell.length);
+        _.tmp = new fn.SignalArray(this.cell.length);
         _.ar = false;
         _.plotFlush = true;
         _.onended = fn.make_onended(this);
@@ -7156,8 +7153,8 @@
         this.imag = this.R;
         
         this._.fft = new FFT(T.cellsize * 2);
-        this._.fftCell  = fn.getSignalArray(this._.fft.length);
-        this._.prevCell = fn.getSignalArray(T.cellsize);
+        this._.fftCell  = new fn.SignalArray(this._.fft.length);
+        this._.prevCell = new fn.SignalArray(T.cellsize);
         
         this._.plotFlush = true;
         this._.plotRange = [0, 1];
@@ -7421,9 +7418,9 @@
 
         var _ = this._;
         _.fft = new FFT(T.cellsize * 2);
-        _.fftCell    = fn.getSignalArray(this._.fft.length);
-        _.realBuffer = fn.getSignalArray(this._.fft.length);
-        _.imagBuffer = fn.getSignalArray(this._.fft.length);
+        _.fftCell    = new fn.SignalArray(this._.fft.length);
+        _.realBuffer = new fn.SignalArray(this._.fft.length);
+        _.imagBuffer = new fn.SignalArray(this._.fft.length);
     }
     fn.extend(IFFTNode);
     
@@ -7897,8 +7894,8 @@
         
         var _ = this._;
         _.src = _.func = null;
-        _.bufferL = fn.getSignalArray(BUFFER_SIZE);
-        _.bufferR = fn.getSignalArray(BUFFER_SIZE);
+        _.bufferL = new fn.SignalArray(BUFFER_SIZE);
+        _.bufferR = new fn.SignalArray(BUFFER_SIZE);
         _.readIndex  = 0;
         _.writeIndex = 0;
         _.totalRead  = 0;
@@ -9204,7 +9201,7 @@
         _.freq  = T(440);
         _.phase = T(0);
         _.osc = new Oscillator(T.samplerate);
-        _.tmp = fn.getSignalArray(this.cell.length);
+        _.tmp = new fn.SignalArray(this.cell.length);
         _.osc.step = this.cell.length;
         
         this.once("init", oninit);
@@ -9669,7 +9666,7 @@
         fn.fixAR(this);
         
         var _ = this._;
-        _.buffer = fn.getSignalArray(T.cellsize);
+        _.buffer = new fn.SignalArray(T.cellsize);
         _.freq   = T("sin", {freq:1, add:1000, mul:250}).kr();
         _.Q      = T(1);
         _.allpass  = [];
@@ -9853,7 +9850,7 @@
         var _ = this._;
         var freq   = _.freq;
         var size   = (T.samplerate / freq + 0.5)|0;
-        var buffer = _.buffer = fn.getSignalArray(size << 1);
+        var buffer = _.buffer = new fn.SignalArray(size << 1);
         for (var i = 0; i < size; ++i) {
             buffer[i] = Math.random() * 2 - 1;
         }
@@ -9932,7 +9929,7 @@
         return function() {
             var _ = self._;
             
-            var buffer = fn.getSignalArray(_.buffer.subarray(0, _.writeIndex|0));
+            var buffer = new fn.SignalArray(_.buffer.subarray(0, _.writeIndex|0));
             
             _.status      = STATUS_WAIT;
             _.writeIndex  = 0;
@@ -9984,7 +9981,7 @@
         if (_.status === STATUS_WAIT) {
             len = (_.timeout * 0.01 * _.samplerate)|0;
             if (!_.buffer || _.buffer.length < len) {
-                _.buffer = fn.getSignalArray(len);
+                _.buffer = new fn.SignalArray(len);
             }
             _.writeIndex = 0;
             _.writeIndexIncr = _.samplerate / T.samplerate;
@@ -10304,7 +10301,7 @@
                 if (!_.buffer) {
                     if (typeof value === "number") {
                         var n = (value < 64) ? 64 : (value > 2048) ? 2048 : value;
-                        _.buffer = fn.getSignalArray(n);
+                        _.buffer = new fn.SignalArray(n);
                         if (_.reservedinterval) {
                             this.interval = _.reservedinterval;
                             _.reservedinterval = null;
@@ -10528,7 +10525,7 @@
                     if (typeof value === "number") {
                         var n = (value < 256) ? 256 : (value > 2048) ? 2048 : value;
                         _.fft    = new FFT(n);
-                        _.buffer = fn.getSignalArray(_.fft.length);
+                        _.buffer = new fn.SignalArray(_.fft.length);
                         if (_.reservedwindow) {
                             _.fft.setWindow(_.reservedwindow);
                             _.reservedwindow = null;
