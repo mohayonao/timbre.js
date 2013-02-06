@@ -4,16 +4,17 @@ $(function() {
     if (timbre.env === "nop") {
         timbre.bind(pico.FlashPlayer, {src:"/timbre.js/libs/PicoFlashPlayer.swf"});
     }
+
+    timbre.setup({f64:true});
+    if (!timbre.envmobile) {
+        timbre.setup({samplerate:timbre.samplerate * 0.5});
+    }
     
-    var nowPlaying, animationId;
+    var nowPlaying;
     var current;
     
     var onreset = function() {
         nowPlaying = null;
-        if (animationId) {
-            cancelAnimationFrame(animationId);
-        }
-        animationId = null;
         $(window).off("keydown").off("keyup");
         $(".play-button").text("Play");
         $(".CodeMirror").css("border-color", "silver");
@@ -60,19 +61,6 @@ $(function() {
         e.width  = $(e).width();
         e.height = $(e).height();
     });
-    
-    window.animate = function(fn, fps) {
-        var lastTime = 0;
-        var limit = 1 / (fps || 10) * 1000;
-        var _animate = function(time) {
-            if (time - lastTime > limit) {
-                lastTime = time;
-                fn();
-            }
-            animationId = requestAnimationFrame(_animate);
-        };
-        animationId = requestAnimationFrame(_animate);
-    };
     
     window.getDraggedFile = function() {
         return draggedfile;
