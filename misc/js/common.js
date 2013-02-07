@@ -1,8 +1,10 @@
 $(function() {
     "use strict";
-
+    
+    sc.use("prototype");
+    
     if (timbre.env === "nop") {
-        timbre.bind(pico.FlashPlayer, {src:"/timbre.js/libs/PicoFlashPlayer.swf"});
+        timbre.bind(timbre.FlashPlayer, {src:"/timbre.js/libs/TimbreFlashPlayer.swf"});
     }
 
     timbre.setup({f64:true});

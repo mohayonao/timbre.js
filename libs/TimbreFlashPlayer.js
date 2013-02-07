@@ -1,21 +1,21 @@
 (function() {
     "use strict";
-    var swf, PlayerDivID = "PicoFlashPlayerDiv";
+    var swf, PlayerDivID = "TimbreFlashPlayerDiv";
     var isEnabled = getFlashPlayerVersion(0) >= 10;
     
-    function PicoFlashPlayer(sys, opts) {
+    function TimbreFlashPlayer(sys, opts) {
         var timerId = 0;
         
         if (!document.getElementById(PlayerDivID)) {
             if (!isEnabled) {
-                console.warn("PicoFlashPlayer requires Flash Player 10.");
+                console.warn("TimbreFlashPlayer requires Flash Player 10.");
                 return;
             }
             initialize(opts || {});
         }
 
         this.maxSamplerate     = 44100;
-        this.defaultSamplerate = 22050;
+        this.defaultSamplerate = 44100;
         this.env = "flash";
         
         this.play = function() {
@@ -24,19 +24,19 @@
             var written = 0;
             
             onaudioprocess = function() {
-                var offset = swf.currentSampleOffset(),
-                    inL = sys.strmL, inR = sys.strmR,
-                    i = interleaved.length, j = inL.length;
+                var offset = swf.currentSampleOffset();
+                var inL = sys.strmL, inR = sys.strmR;
+                var i = interleaved.length, j = inL.length;
                 
                 if (offset > 0 && written > offset + 16384) {
                     return;
                 }
                 sys.process();
                 while (j--) {
-                    interleaved[--i] = inR[j];
-                    interleaved[--i] = inL[j];
+                    interleaved[--i] = (inR[j] * 32768)|0;
+                    interleaved[--i] = (inL[j] * 32768)|0;
                 }
-                written += swf.writeAudio(interleaved);
+                written += swf.writeAudio(interleaved.join(" "));
             };
             
             swf.setup(sys.channels, sys.samplerate);
@@ -45,6 +45,7 @@
         
         this.pause = function() {
             if (timerId !== 0) {
+                swf.cancel();
                 clearInterval(timerId);
                 timerId = 0;
             }
@@ -54,9 +55,9 @@
     
     function initialize(opts) {
         var o, p;
-        var swfSrc  = opts.src || "PicoFlashPlayer.swf";
+        var swfSrc  = opts.src || "TimbreFlashPlayer.swf";
         var swfName = swfSrc + "?" + (+new Date());
-        var swfId   = opts.id  || "PicoFlashPlayer";
+        var swfId   = opts.id  || "TimbreFlashPlayer";
         var div = document.createElement("div");
         div.id = PlayerDivID;
         div.style.display = "inline";
@@ -102,7 +103,7 @@
         }
     }
     
-    Object.defineProperties(PicoFlashPlayer, {
+    Object.defineProperties(TimbreFlashPlayer, {
         isEnabled: {
             get: function() {
                 return isEnabled;
@@ -110,9 +111,9 @@
         }
     });
     
-    if (window.pico) {
-        window.pico.FlashPlayer = PicoFlashPlayer;
+    if (window.timbre) {
+        window.timbre.FlashPlayer = TimbreFlashPlayer;
     } else {
-        window.PicoFlashPlayer = PicoFlashPlayer;    
+        window.TimbreFlashPlayer  = TimbreFlashPlayer;
     }
 })();
