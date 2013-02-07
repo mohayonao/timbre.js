@@ -55,6 +55,9 @@ MIT
 
 
 ## ChangeLog ##
+**WORKING** (335.26KB)
+* make it easier to make a stereo object
+
 **13.02.07** (334.61KB)
 * Added `T.setup({f64:true})` to use Float64Array instead of Float32Array
 * Added Android/Firefox support
