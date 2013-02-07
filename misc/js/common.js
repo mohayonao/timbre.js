@@ -47,6 +47,8 @@ $(function() {
         var lang = $(e).attr("lang");
         var mode = (lang === "timbre" || lang === "js") ? "javascript" : lang;
         
+        if (mode === "html") mode = "htmlmixed";
+        
         var editor = CodeMirror.fromTextArea(textarea.get(0), {
             lineNumbers:true, readOnly:(lang !== "timbre"), mode:mode
         });
