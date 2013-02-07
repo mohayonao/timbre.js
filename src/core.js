@@ -1922,25 +1922,14 @@
             
             this.play = function() {
                 var audio = new Audio();
-                var onaudioprocess;
                 var interleaved = new Float32Array(sys.streamsize * sys.channels);
-                var interval = sys.streammsec;
-                var written  = 0;
-                var limit    = sys.streamsize << 4;
+                var streammsec  = sys.streammsec;
+                var written     = 0;
+                var writtenIncr = sys.streamsize / sys.samplerate * 1000;
+                var start = Date.now();
                 
-                if (navigator.userAgent.toLowerCase().indexOf("linux") !== -1) {
-                    interval = sys.streamsize / sys.samplerate * 1000;
-                    written  = -Infinity;
-                } else if (_envmobile) {
-                    interval = sys.streamsize / sys.samplerate * 1000;
-                    audio.mozCurrentSampleOffset = function() {
-                        return Infinity;
-                    };
-                }
-                
-                onaudioprocess = function() {
-                    var offset = audio.mozCurrentSampleOffset();
-                    if (written > offset + limit) {
+                var onaudioprocess = function() {
+                    if (written > Date.now() - start) {
                         return;
                     }
                     var inL = sys.strmL;
@@ -1952,12 +1941,13 @@
                         interleaved[--i] = inR[j];
                         interleaved[--i] = inL[j];
                     }
-                    written += audio.mozWriteAudio(interleaved);
+                    audio.mozWriteAudio(interleaved);
+                    written += writtenIncr;
                 };
                 
                 audio.mozSetup(sys.channels, sys.samplerate);
                 timer.onmessage = onaudioprocess;
-                timer.postMessage(interval);
+                timer.postMessage(streammsec);
             };
             
             this.pause = function() {
