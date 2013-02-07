@@ -31,7 +31,17 @@
             xhr.responseType = "arraybuffer";
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    callback(new Uint8Array(xhr.response));
+                    if (xhr.response) {
+                        callback(new Uint8Array(xhr.response));
+                    } else if (xhr.responseBody !== undefined) {
+                        var res = VBArray(xhr.responseBody).toArray();
+                        var i, imax = res.length;
+                        var a = new Array(imax);
+                        for (var i = 0; i < imax; ++i) {
+                            a[i] = res[i];
+                        }
+                        callback(new Uint8Array(a));
+                    }
                 } else {
                     callback(xhr.status + " " + xhr.statusText);
                 }
