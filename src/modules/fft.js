@@ -11,7 +11,10 @@
         this.imag    = new T.fn.SignalArray(n);
         this._real   = new T.fn.SignalArray(n);
         this._imag   = new T.fn.SignalArray(n);
-        this.spectrum = new T.fn.SignalArray(n>>1);
+        this.mag     = new T.fn.SignalArray(n>>1);
+        
+        this.minDecibels =  -30;
+        this.maxDecibels = -100;
         
         var params = FFTParams.get(n);
         this._bitrev   = params.bitrev;
@@ -43,7 +46,7 @@
     };
     
     $.forward = function(_buffer) {
-        var buffer = this.buffer;
+        var buffer   = this.buffer;
         var real   = this.real;
         var imag   = this.imag;
         var window = this._window;
@@ -52,17 +55,15 @@
         var costable = this._costable;
         var n = buffer.length;
         var i, j, k, k2, h, d, c, s, ik, dx, dy;
-
+        
         if (window) {
             for (i = 0; i < n; ++i) {
                 buffer[i] = _buffer[i] * window[i];
             }
         } else {
-            for (i = 0; i < n; ++i) {
-                buffer[i] = _buffer[i];
-            }
+            buffer.set(_buffer);
         }
-
+        
         for (i = 0; i < n; ++i) {
             real[i] = buffer[bitrev[i]];
             imag[i] = 0.0;
@@ -84,21 +85,13 @@
             }
         }
         
-        if (!this.noSpectrum) {
-            var bSi = 2 / _buffer.length;
-            var spectrum = this.spectrum;
-            var rval, ival, mag;
-            var peak = 0;
-            for (i = 0; i < n; ++i) {
-                rval = real[i];
-                ival = imag[i];
-                mag  = bSi = Math.sqrt(rval * rval + ival * ival);
-                spectrum[i] = mag;
-                if (peak < mag) {
-                    peak = mag;
-                }
-            }
-            this.peak = peak;
+        var bSi = 2 / _buffer.length;
+        var mag = this.mag;
+        var rval, ival;
+        for (i = 0; i < n; ++i) {
+            rval = real[i];
+            ival = imag[i];
+            mag[i] = bSi = Math.sqrt(rval * rval + ival * ival);
         }
         
         return {real:real, imag:imag};
@@ -140,6 +133,23 @@
             buffer[i] = real[i] / n;
         }
         return buffer;
+    };
+    
+    $.getFrequencyData = function(array) {
+        var minDecibels  = this.minDecibels;
+        var i, imax = Math.min(this.mag.length, array.length);
+        if (imax) {
+            var x, mag = this.mag;
+            var peak = 0;
+            for (i = 0; i < imax; ++i) {
+                x  = mag[i];
+                array[i] = !x ? minDecibels : 20 * Math.log(x) * Math.LOG10E;
+                if (peak < array[i]) {
+                    peak = array[i];
+                }
+            }
+        }
+        return array;
     };
     
     var FFTParams = {

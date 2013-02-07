@@ -12,14 +12,16 @@
         
         this.real = this.L;
         this.imag = this.R;
+
+        var _ = this._;
+        _.fft = new FFT(T.cellsize * 2);
+        _.fftCell  = new fn.SignalArray(_.fft.length);
+        _.prevCell = new fn.SignalArray(T.cellsize);
+        _.freqs    = new fn.SignalArray(_.fft.length>>1);
         
-        this._.fft = new FFT(T.cellsize * 2);
-        this._.fftCell  = new fn.SignalArray(this._.fft.length);
-        this._.prevCell = new fn.SignalArray(T.cellsize);
-        
-        this._.plotFlush = true;
-        this._.plotRange = [0, 1];
-        this._.plotBarStyle = true;
+        _.plotFlush = true;
+        _.plotRange = [0, 32];
+        _.plotBarStyle = true;
     }
     fn.extend(FFTNode);
     
@@ -36,7 +38,7 @@
         },
         spectrum: {
             get: function() {
-                return this._.fft.spectrum;
+                return this._.fft.getFrequencyData(this._.freqs);
             }
         }
     });
@@ -74,33 +76,7 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var fft = this._.fft;
-
-            var size     = 64;
-            var spectrum = fft.spectrum;
-            var step     = spectrum.length / size;
-            var istep    = 1 / step;
-            var data    = new Float32Array(size);
-            var i, imax = spectrum.length;
-            var j, jmax = step;
-
-            var v, x, k = 0, peak = 0;
-            for (i = 0; i < imax; i += step) {
-                v = 0;
-                for (j = 0; j < jmax; ++j) {
-                    v += spectrum[i + j];
-                }
-                x = v * istep;
-                data[k++] = x;
-                if (peak < x) {
-                    peak = x;
-                }
-            }
-            for (i = 0; i < size; ++i) {
-                data[i] /= peak;
-            }
-            
-            this._.plotData  = data;
+            this._.plotData  = this.spectrum;
             this._.plotFlush = null;
         }
         return super_plot.call(this, opts);
