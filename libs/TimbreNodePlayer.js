@@ -14,7 +14,7 @@ var Speaker = require("speaker");
 //   npm install readable-stream
 if (!Readable) Readable = require("readable-stream/readable");
 
-function PicoNodePlayer(sys) {
+function TimbreNodePlayer(sys) {
     
     this.maxSamplerate     = 48000;
     this.defaultSamplerate = 44100;
@@ -51,7 +51,4 @@ function PicoNodePlayer(sys) {
     };
 }
 
-module.exports = PicoNodePlayer;
-if (global.pico) {
-    global.pico.NodePlayer = PicoNodePlayer;
-}
+module.exports = TimbreNodePlayer;
