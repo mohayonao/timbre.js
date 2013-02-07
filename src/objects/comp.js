@@ -103,16 +103,16 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
-            var thresh = _.thresh.process(tickID).getChannelData(0)[0];
-            var knee   = _.knee.process(tickID).getChannelData(0)[0];
-            var ratio  = _.ratio.process(tickID).getChannelData(0)[0];
+            var thresh = _.thresh.process(tickID).cells[0][0];
+            var knee   = _.knee.process(tickID).cells[0][0];
+            var ratio  = _.ratio.process(tickID).cells[0][0];
             if (_.prevThresh !== thresh || _.prevKnee !== knee || _.prevRatio !== ratio) {
                 _.prevThresh = thresh;
                 _.prevKnee   = knee;

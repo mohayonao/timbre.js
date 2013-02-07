@@ -11,7 +11,7 @@
     var $ = DivNode.prototype;
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
@@ -24,10 +24,10 @@
             
             if (_.ar) {
                 if (nodes.length > 0) {
-                    tmp = nodes[0].process(tickID).getChannelData(0);
+                    tmp = nodes[0].process(tickID).cells[0];
                     cell.set(tmp);
                     for (i = 1; i < imax; ++i) {
-                        tmp = nodes[i].process(tickID).getChannelData(0);
+                        tmp = nodes[i].process(tickID).cells[0];
                         for (j = 0; j < jmax; ++j) {
                             div = tmp[j];
                             cell[j] = (div === 0) ? 0 : cell[j] / div;
@@ -41,9 +41,9 @@
                 fn.outputSignalAR(this);
             } else {
                 if (nodes.length > 0) {
-                    tmp = nodes[0].process(tickID).getChannelData(0)[0];
+                    tmp = nodes[0].process(tickID).cells[0][0];
                     for (i = 1; i < imax; ++i) {
-                        div = nodes[i].process(tickID).getChannelData(0)[0];
+                        div = nodes[i].process(tickID).cells[0][0];
                         tmp = (div === 0) ? 0 : tmp / div;
                     }
                 } else {

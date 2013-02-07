@@ -50,15 +50,15 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
-            var preGain  = -_.pre.process(tickID).getChannelData(0)[0];
-            var postGain = -_.post.process(tickID).getChannelData(0)[0];
+            var preGain  = -_.pre.process(tickID).cells[0][0];
+            var postGain = -_.post.process(tickID).cells[0][0];
 
             if (_.prevPreGain !== preGain || _.prevPostGain !== postGain) {
                 _.prevPreGain  = preGain;

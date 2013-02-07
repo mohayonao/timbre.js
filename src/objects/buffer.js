@@ -14,7 +14,7 @@
         _.isReversed = false;
         _.duration    = 0;
         _.currentTime = 0;
-        _.currentTimeIncr = this.cell.length * 1000 / T.samplerate;
+        _.currentTimeIncr = this.cells[0].length * 1000 / T.samplerate;
         _.samplerate  = 44100;
         _.phase = 0;
         _.phaseIncr = 0;
@@ -211,7 +211,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
 
         if (_.isEnded && !_.buffer) {
             return this;
@@ -236,7 +236,7 @@
                 _.phase = phase;
                 _.currentTime = t;
             } else {
-                var pitch  = _.pitch.process(tickID).getChannelData(0)[0];
+                var pitch  = _.pitch.process(tickID).cells[0][0];
                 var phaseIncr = _.phaseIncr * pitch;
                 
                 for (i = 0; i < imax; ++i) {

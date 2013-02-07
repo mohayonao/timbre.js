@@ -15,7 +15,6 @@
         instance = this;
         
         T.Object.call(this, 2, _args);
-        fn.stereo(this);
         
         this.X = this.L;
         this.Y = this.R;
@@ -23,7 +22,6 @@
         fn.fixKR(this);
     }
     fn.extend(MouseListener);
-    
     
     var mouseX = 0;
     var mouseY = 0;
@@ -38,8 +36,8 @@
         var x = (mouseX = (e.clientX / window.innerWidth));
         var y = (mouseY = (e.clientY / window.innerHeight));
         
-        var cellL = instance.cellL;
-        var cellR = instance.cellR;
+        var cellL = instance.cells[1];
+        var cellR = instance.cells[2];
         for (var i = 0, imax = cellL.length; i < imax; ++i) {
             cellL[i] = x;
             cellR[i] = y;
@@ -167,7 +165,7 @@
             return f(_, x);
         }}, instance.X);
         
-        self.cell = _.map.cell;
+        self.cells[0] = _.map.cells[0];
         
         return self;
     });
@@ -185,7 +183,7 @@
             return f(_, x);
         }}, instance.Y);
         
-        self.cell = _.map.cell;
+        self.cells[0] = _.map.cells[0];
         return self;
     });
 })(timbre);

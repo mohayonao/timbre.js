@@ -107,7 +107,7 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         var _ = this._;
         
@@ -122,7 +122,7 @@
                 _.delaySamples -= cell.length;
             }
             
-            var interval = _.interval.process(tickID).getChannelData(0)[0];
+            var interval = _.interval.process(tickID).cells[0][0];
             
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;

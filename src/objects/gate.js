@@ -12,7 +12,7 @@
         this._.selected = 0;
         this._.outputs  = [];
         
-        empty = new Float32Array(this.cell.length);
+        empty = new Float32Array(this.cells[0].length);
     }
     fn.extend(GateNode);
     
@@ -52,12 +52,12 @@
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
+            
             fn.inputSignalAR(this);
             fn.outputSignalAR(this);
             
             if (_.outputs[_.selected]) {
-                _.outputs[_.selected].cell.set(this.cell);
+                _.outputs[_.selected].cell.set(this.cells[0]);
             }
         }
         

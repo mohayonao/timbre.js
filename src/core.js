@@ -88,12 +88,6 @@
             instance._.isUndefined = false;
         }
         
-        if (instance.isStereo === undefined) {
-            Object.defineProperty(instance, "isStereo", {
-                value:false, writable:false
-            });
-        }
-        
         instance._.originkey = key;
         instance._.meta = __buildMetaData(instance);
         instance._.emit("init");
@@ -463,7 +457,7 @@
         if (isNaN(x)) {
             x = 0;
         }
-        var cell = this.cell;
+        var cell = this.cells[0];
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             cell[i] = x;
         }
@@ -472,17 +466,6 @@
         value:true, writable:false
     });
     fn.changeWithValue = __changeWithValue;
-    
-    var __stereo = function(object) {
-        object.L = new ChannelObject(object);
-        object.R = new ChannelObject(object);
-        object.cellL = object.L.cell;
-        object.cellR = object.R.cell;
-        Object.defineProperty(object, "isStereo", {
-            value:true, writable:false
-        });
-    };
-    fn.stereo = __stereo;
     
     var __timer = (function() {
         var make_onstart = function(self) {
@@ -570,16 +553,11 @@
     var __make_onended = function(self, lastValue) {
         return function() {
             if (typeof lastValue === "number") {
-                var cell = self.cell;
-                var cellL, cellR;
-                if (self.isStereo) {
-                    cellL = self.cellL;
-                    cellR = self.cellR;
-                } else {
-                    cellL = cellR = cell;
-                }
-                for (var i = 0, imax = cell.length; i < imax; ++i) {
-                    cellL[i] = cellR[i] = cell[i] = lastValue;
+                var cell  = self.cells[0];
+                var cellL = self.cells[1];
+                var cellR = self.cells[2];
+                for (var i = 0, imax = cellL.length; i < imax; ++i) {
+                    cell[0] = cellL[i] = cellR[i] = lastValue;
                 }
             }
             self._.isEnded = true;
@@ -589,7 +567,7 @@
     fn.make_onended = __make_onended;
     
     var __inputSignalAR = function(object) {
-        var cell  = object.cell;
+        var cell  = object.cells[0];
         var nodes = object.nodes;
         var i, imax = nodes.length;
         var j, jmax = cell.length;
@@ -601,7 +579,7 @@
             cell[j] = cell[j+1] = cell[j+2] = cell[j+3] = cell[j+4] = cell[j+5] = cell[j+6] = cell[j+7] = 0;
         }
         for (i = 0; i < imax; ++i) {
-            tmp = nodes[i].process(tickID).getChannelData(0);
+            tmp = nodes[i].process(tickID).cells[0];
             for (j = jmax; j; ) {
                 j -= 8;
                 cell[j  ] += tmp[j  ];
@@ -623,7 +601,7 @@
         var tickID = object.tickID;
         var tmp = 0;
         for (i = 0; i < imax; ++i) {
-            tmp += nodes[i].process(tickID).getChannelData(0)[0];
+            tmp += nodes[i].process(tickID).cells[0][0];
         }
         return tmp;
     };
@@ -632,7 +610,7 @@
     var __outputSignalAR = function(object) {
         var mul = object._.mul, add = object._.add;
         if (mul !== 1 || add !== 0) {
-            var cell = object.cell;
+            var cell = object.cells[0];
             for (var i = cell.length; i; ) {
                 i -= 8;
                 cell[i  ] = cell[i  ] * mul + add;
@@ -649,7 +627,7 @@
     fn.outputSignalAR = __outputSignalAR;
     
     var __outputSignalKR = function(object) {
-        var cell = object.cell;
+        var cell = object.cells[0];
         var mul = object._.mul, add = object._.add;
         var value = cell[0] * mul + add;
         for (var i = cell.length; i; ) {
@@ -666,7 +644,7 @@
     //debug--
     fn.debug = {};
     fn.debug.process = function(object) {
-        var cell = object.process(+new Date()).getChannelData(0);
+        var cell = object.process(+new Date()).cells[0];
         var min = +Infinity, max = -Infinity, nan = false;
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             if (isNaN(cell[i])) {
@@ -698,9 +676,26 @@
             }
             
             this.tickID = -1;
-            this.cell  = new fn.SignalArray(_sys.cellsize);
-            this.nodes = _args.map(timbre);
+            this.nodes  = _args.map(timbre);
+            this.cells  = [];
             this.numChannels = numChannels;
+            switch (numChannels) {
+            case 0:
+                this.L = this.R = new ChannelObject(null);
+                this.cells[0] = this.cells[1] = this.cells[2] = this.L.cell;
+                break;
+            case 1:
+                this.L = this.R = new ChannelObject(this);
+                this.cells[0] = this.cells[1] = this.cells[2] = this.L.cell;
+                break;
+            case 2:
+                this.L = new ChannelObject(this);
+                this.R = new ChannelObject(this);
+                this.cells[0] = new fn.SignalArray(_sys.cellsize);
+                this.cells[1] = this.L.cell;
+                this.cells[2] = this.R.cell;
+                break;
+            }
             
             this._.ar  = true;
             this._.mul = 1;
@@ -779,7 +774,7 @@
             if (_sys.tickID !== this.tickID) {
                 this.process(_sys.tickID);
             }
-            return this.cell[0];
+            return this.cells[0][0];
         };
         
         $.append = function() {
@@ -910,18 +905,6 @@
         
         $.process = __nop;
         
-        $.getChannelData = function(ch) {
-            switch (ch) {
-            case 0:
-                return this.cell;
-            case 1:
-                return this.cellL;
-            case 2:
-                return this.cellR;
-            }
-            return this.cell;
-        };
-        
         $.bypass = function() {
             this._.bypassed = (arguments.length === 0) ? true : !!arguments[0];
             return this;
@@ -1018,7 +1001,7 @@
                 var lineWidth  = opts.lineWidth  || _.plotLineWidth || 1;
                 var cyclic     = !!_.plotCyclic;
                 
-                var data  = _.plotData || this.cell;
+                var data  = _.plotData || this.cells[0];
                 var range = opts.range || _.plotRange || [-1.2, +1.2];
                 var rangeMin   = range[0];
                 var rangeDelta = height / (range[1] - rangeMin);
@@ -1100,17 +1083,21 @@
     
     var ChannelObject = (function() {
         function ChannelObject(parent) {
-            timbre.Object.call(this, 1, []);
+            timbre.Object.call(this, -1, []);
             __fixAR(this);
             
             this._.parent = parent;
+            this.cell = new fn.SignalArray(_sys.cellsize);
+            this.cells[0] = this.cells[1] = this.cells[2] = this.cell;
         }
         __extend(ChannelObject);
         
         ChannelObject.prototype.process = function(tickID) {
             if (this.tickID !== tickID) {
                 this.tickID = tickID;
-                this._.parent.process(tickID);
+                if (this._.parent) {
+                    this._.parent.process(tickID);
+                }
             }
             return this;
         };
@@ -1307,8 +1294,7 @@
             if (object instanceof TimbreObject) {
                 this.nodes.push(object);
             }
-            __stereo(this);
-
+            
             var _ = this._;
             _.isPlaying = false;
             _.onplay  = make_onplay(this);
@@ -1375,12 +1361,11 @@
         
         $.process = function(tickID) {
             var _ = this._;
-            var cell  = this.cell;
-            var cellL = this.cellL;
-            var cellR = this.cellR;
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
             var nodes = this.nodes;
             var i, imax = nodes.length;
-            var j, jmax = cell.length;
+            var j, jmax = cellL.length;
             var add = _.add, mul = _.mul;
             var tmp, tmpL, tmpR, x;
             
@@ -1388,18 +1373,14 @@
                 this.tickID = tickID;
                 
                 for (j = 0; j < jmax; ++j) {
-                    cellL[j] = cellR[j] = cell[j] = 0;
+                    cellL[j] = cellR[j] = 0;
                 }
                 
                 for (i = 0; i < imax; ++i) {
                     tmp = nodes[i];
                     tmp.process(tickID);
-                    if (tmp.isStereo) {
-                        tmpL = tmp.cellL;
-                        tmpR = tmp.cellR;
-                    } else {
-                        tmpL = tmpR = tmp.cell;
-                    }
+                    tmpL = tmp.cells[1];
+                    tmpR = tmp.cells[2];
                     for (j = 0; j < jmax; ++j) {
                         cellL[j] += tmpL[j];
                         cellR[j] += tmpR[j];
@@ -1408,7 +1389,6 @@
                 for (j = 0; j < jmax; ++j) {
                     x  = cellL[j] = cellL[j] * mul + add;
                     x += cellR[j] = cellR[j] * mul + add;
-                    cell[j] = x * 0.5;
                 }
             }
             
@@ -1595,8 +1575,8 @@
                 for (j = 0, jmax = inlets.length; j < jmax; ++j) {
                     x = inlets[j];
                     x.process(tickID);
-                    tmpL = x.cellL;
-                    tmpR = x.cellR;
+                    tmpL = x.cells[0];
+                    tmpR = x.cells[1];
                     for (k = 0, i = saved_i; k < kmax; ++k, ++i) {
                         strmL[i] += tmpL[k];
                         strmR[i] += tmpR[k];

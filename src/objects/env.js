@@ -10,8 +10,8 @@
         T.Object.call(this, 1, _args);
         var _ = this._;
         _.env = new Envelope(T.samplerate);
-        _.env.setStep(this.cell.length);
-        _.tmp = new fn.SignalArray(this.cell.length);
+        _.env.setStep(this.cells[0].length);
+        _.tmp = new fn.SignalArray(this.cells[0].length);
         _.ar = false;
         _.plotFlush = true;
         _.onended = fn.make_onended(this);
@@ -20,7 +20,7 @@
     fn.extend(EnvNode);
     
     var onar = function(value) {
-        this._.env.setStep((value) ? 1 : this.cell.length);
+        this._.env.setStep((value) ? 1 : this.cells[0].length);
     };
     
     var $ = EnvNode.prototype;
@@ -94,7 +94,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;

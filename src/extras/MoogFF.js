@@ -78,7 +78,7 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
@@ -86,11 +86,11 @@
             
             fn.inputSignalAR(this);
             
-            var k = _.gain.process(tickID).getChannelData(0)[0]; // gain;
+            var k = _.gain.process(tickID).cells[0][0]; // gain;
             k = (k > 4) ? 4 : (k < 0) ? 0 : k;
             
             var s1 = _.s1, s2 = _.s2, s3 = _.s3, s4 = _.s4;
-            var freq = _.freq.process(tickID).getChannelData(0)[0];
+            var freq = _.freq.process(tickID).cells[0][0];
             var t = _.t, wcD = _.wcD, a1 = _.a1, b0 = _.b0;
             var TwcD, o, u, past, future, ins, outs;
             var i, imax = cell.length;

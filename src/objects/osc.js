@@ -12,8 +12,8 @@
         _.freq  = T(440);
         _.phase = T(0);
         _.osc = new Oscillator(T.samplerate);
-        _.tmp = new fn.SignalArray(this.cell.length);
-        _.osc.step = this.cell.length;
+        _.tmp = new fn.SignalArray(this.cells[0].length);
+        _.osc.step = this.cells[0].length;
         
         this.once("init", oninit);
     }
@@ -85,7 +85,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -102,8 +102,8 @@
             }
             
             var osc = _.osc;
-            var freq  = _.freq.process(tickID).getChannelData(0);
-            var phase = _.phase.process(tickID).getChannelData(0);
+            var freq  = _.freq.process(tickID).cells[0];
+            var phase = _.phase.process(tickID).cells[0];
             
             osc.frequency = freq[0];
             osc.phase     = phase[0];

@@ -55,7 +55,7 @@ timbre.fn.register("cell", CellNode);
 
 timbre.fn.register("cell.sin", function(_args) {
     var instance = new CellNode(_args);
-    var cell = instance.cell;
+    var cell = instance.cells[0];
     for (var i = 0; i < cell.length; i++) {
         cell[i] = Math.cos(2 * Math.PI * (i / cell.length));
     }
@@ -64,7 +64,7 @@ timbre.fn.register("cell.sin", function(_args) {
 
 timbre.fn.register("cell.pulse", function(_args) {
     var instance = new CellNode(_args);
-    var cell = instance.cell;
+    var cell = instance.cells[0];
     for (var i = 0; i < cell.length; i++) {
         cell[i] = (i / cell.length) < 0.5 ? +1 : -1;
     }
@@ -73,7 +73,7 @@ timbre.fn.register("cell.pulse", function(_args) {
 
 timbre.fn.register("cell.tri", function(_args) {
     var instance = new CellNode(_args);
-    var cell = instance.cell;
+    var cell = instance.cells[0];
     for (var x, i = 0; i < cell.length; i++) {
         x = (i / cell.length) - 0.25;
         cell[(i + 16) % cell.length] = 1.0 - 4.0 * Math.abs(Math.round(x) - x);

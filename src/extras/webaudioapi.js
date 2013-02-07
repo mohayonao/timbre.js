@@ -42,7 +42,7 @@
     
     $.cancel = function() {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             cell[i] = 0;
         }
@@ -105,7 +105,7 @@
         };
         
         $.process = function(tickID) {
-            var cell = this.cell;
+            var cell = this.cells[0];
             var _ = this._;
             
             if (_.node === null) {
@@ -200,7 +200,7 @@
         };
         
         $.process = function(tickID) {
-            var cell = this.cell;
+            var cell = this.cells[0];
             var _ = this._;
             
             if (_.script === null) {

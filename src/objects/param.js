@@ -12,7 +12,7 @@
         var _ = this._;
         _.value = 0;
         _.env = new EnvelopeValue(T.samplerate);
-        _.env.step = this.cell.length;
+        _.env.step = this.cells[0].length;
         _.curve   = "lin";
         _.counter = 0;
         _.ar = false;
@@ -23,7 +23,7 @@
     fn.extend(ParamNode);
     
     var onar = function(value) {
-        this._.env.step = (value) ? 1 : this.cell.length;
+        this._.env.step = (value) ? 1 : this.cells[0].length;
     };
     
     var $ = ParamNode.prototype;
@@ -104,7 +104,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;

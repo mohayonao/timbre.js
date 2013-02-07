@@ -5,7 +5,6 @@
     
     function PicoBinder(_args) {
         T.Object.call(this, 2, _args);
-        fn.stereo(this);
     }
     fn.extend(PicoBinder, T.Object);
     
@@ -26,18 +25,18 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             if (_.gen) {
-                var cellL = this.cellL;
-                var cellR = this.cellR;
+                var cell  = this.cells[0];
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
                 var mul = _.mul, add = _.add;
                 this._.gen.process(cellL, cellR);
                 for (var i = 0, imax = cell.length; i < imax; ++i) {
                     cellL[i] = cellL[i] * mul + add;
                     cellR[i] = cellR[i] * mul + add;
-                    cell[i]  = (cellL[i] + cellR[i]) * 0.5;
+                    cell [i] = (cellL[i] + cellR[i]) * 0.5;
                 }
             }
         }

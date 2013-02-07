@@ -39,7 +39,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -47,8 +47,8 @@
             if (_.real && _.imag) {
                 var real = _.realBuffer;
                 var imag = _.imagBuffer;
-                var _real = _.real.process(tickID).getChannelData(0);
-                var _imag = _.imag.process(tickID).getChannelData(0);
+                var _real = _.real.process(tickID).cells[0];
+                var _imag = _.imag.process(tickID).cells[0];
                 
                 real.set(_real);
                 imag.set(_imag);

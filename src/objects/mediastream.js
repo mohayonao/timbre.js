@@ -10,9 +10,8 @@
     var BUFFER_MASK = BUFFER_SIZE - 1;
     
     function MediaStreamNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
-        fn.stereo(this);
         
         var _ = this._;
         _.src = _.func = null;
@@ -40,12 +39,13 @@
         if (_impl) {
             _impl.unlisten.call(this);
         }
-        
-        var cell = this.cell;
+
+        var cell  = this.cells[0];
+        var cellL = this.cells[1];
+        var cellR = this.cells[2];
         var i, imax = cell.length;
-        var L = this.cellL, R = this.cellR;
         for (i = 0; i < imax; ++i) {
-            cell[i] = L[i] = R[i] = 0;
+            cell[i] = cellL[i] = cellR[i] = 0;
         }
         var _ = this._;
         var bufferL = _.bufferL, bufferR = _.bufferR;
@@ -55,7 +55,6 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
         var _ = this._;
         
         if (_.src === null) {
@@ -67,15 +66,17 @@
             
             var bufferL = _.bufferL;
             var bufferR = _.bufferR;
+            var cell  = this.cells[0];
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
             var i, imax = cell.length;
-
-            if (_.totalWrite > _.totalRead + cell.length) {
-                var L = this.cellL, R = this.cellR;
+            
+            if (_.totalWrite > _.totalRead + cellL.length) {
                 var readIndex = _.readIndex;
                 for (i = 0; i < imax; ++i, ++readIndex) {
-                    L[i] = bufferL[readIndex];
-                    R[i] = bufferR[readIndex];
-                    cell[i] = (L[i] + R[i]) * 0.5;
+                    cellL[i] = bufferL[readIndex];
+                    cellR[i] = bufferR[readIndex];
+                    cell [i] = (cellL[i] + cellR[i]) * 0.5;
                 }
                 _.readIndex = readIndex & BUFFER_MASK;
                 _.totalRead += cell.length;

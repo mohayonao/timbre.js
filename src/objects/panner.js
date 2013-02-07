@@ -5,7 +5,6 @@
     
     function PannerNode(_args) {
         T.Object.call(this, 2, _args);
-        fn.stereo(this);
         fn.fixAR(this);
         
         var _ = this._;
@@ -30,14 +29,13 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             var changed = false;
             
-            var value = _.value.process(tickID).getChannelData(0)[0];
+            var value = _.value.process(tickID).cells[0][0];
             if (_.prevValue !== value) {
                 _.prevValue = value;
                 changed = true;
@@ -48,21 +46,21 @@
             }
             
             var nodes = this.nodes;
+            var cell  = this.cells[0];
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
             var i, imax = nodes.length;
-            var j, jmax = cell.length;
+            var j, jmax = cellL.length;
             var mul = _.mul, add = _.add;
             var tmp, x;
             
-            var cellL = this.cellL;
-            var cellR = this.cellR;
-            
             for (j = 0; j < jmax; ++j) {
-                cellL[j] = cellR[j] = cell[j] = 0;
+                cell[i] = cellL[j] = cellR[j] = 0;
             }
             for (i = 0; i < imax; ++i) {
-                tmp = nodes[i].process(tickID).getChannelData(0);
+                tmp = nodes[i].process(tickID).cells[0];
                 for (j = 0; j < jmax; ++j) {
-                    cellL[j] = cellR[j] = cell[j] += tmp[j];
+                    cellL[j] = cellR[j] = (cell[j] += tmp[j]);
                 }
             }
             

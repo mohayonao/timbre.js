@@ -40,14 +40,14 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
             var lastValue = _.lastValue;
             var phase     = _.phase;
-            var phaseStep = _.freq.process(tickID).getChannelData(0)[0] / _.samplerate;
+            var phaseStep = _.freq.process(tickID).cells[0][0] / _.samplerate;
             var reg = _.reg;
             var mul = _.mul, add = _.add;
             var i, imax;

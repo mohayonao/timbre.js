@@ -118,7 +118,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
 
         if (this.tickID !== tickID) {
             this.tickID = tickID;

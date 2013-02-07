@@ -118,7 +118,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -127,17 +127,17 @@
             
             var changed = false;
             
-            var freq = _.freq.process(tickID).getChannelData(0)[0];
+            var freq = _.freq.process(tickID).cells[0][0];
             if (_.prevFreq !== freq) {
                 _.prevFreq = freq;
                 changed = true;
             }
-            var band = _.band.process(tickID).getChannelData(0)[0];
+            var band = _.band.process(tickID).cells[0][0];
             if (_.prevband !== band) {
                 _.prevband = band;
                 changed = true;
             }
-            var gain = _.gain.process(tickID).getChannelData(0)[0];
+            var gain = _.gain.process(tickID).cells[0][0];
             if (_.prevGain !== gain) {
                 _.prevGain = gain;
                 changed = true;

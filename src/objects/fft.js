@@ -7,7 +7,6 @@
     function FFTNode(_args) {
         T.Object.call(this, 1, _args);
         fn.listener(this);
-        fn.stereo(this);
         fn.fixAR(this);
         
         this.real = this.L;
@@ -45,20 +44,21 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
+            
+            var cell = this.cells[0];
             
             _.fftCell.set(_.prevCell);
             _.fftCell.set(cell, cell.length);
             _.fft.forward(_.fftCell);
             _.prevCell.set(cell);
             
-            var real = this.cellL;
-            var imag = this.cellR;
+            var real = this.cells[1];
+            var imag = this.cells[2];
             var _real = _.fft.real;
             var _imag = _.fft.imag;
             

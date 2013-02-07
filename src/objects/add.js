@@ -11,7 +11,7 @@
     var $ = AddNode.prototype;
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {

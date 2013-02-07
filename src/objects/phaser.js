@@ -61,7 +61,7 @@
 
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -69,8 +69,8 @@
             fn.inputSignalAR(this);
             
             if (!_.bypassed) {
-                var freq  = _.freq.process(tickID).getChannelData(0)[0];
-                var Q     = _.Q.process(tickID).getChannelData(0)[0];
+                var freq  = _.freq.process(tickID).cells[0][0];
+                var Q     = _.Q.process(tickID).cells[0][0];
                 var steps = _.steps;
                 var i, imax;
                 

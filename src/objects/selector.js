@@ -18,7 +18,7 @@
             set: function(value) {
                 if (typeof value === "number") {
                     this._.selected = value;
-                    var cell = this.cell;
+                    var cell = this.cells[0];
                     for (var i = 0, imax = cell.length; i < imax; ++i) {
                         cell[i] = 0;
                     }
@@ -40,7 +40,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -56,7 +56,7 @@
             
             var tmp = nodes[_.selected];
             if (tmp) {
-                cell.set(tmp.process(tickID).getChannelData(0));
+                cell.set(tmp.process(tickID).cells[0]);
             }
             
             fn.outputSignalAR(this);

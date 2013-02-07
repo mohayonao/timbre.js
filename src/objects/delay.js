@@ -77,14 +77,14 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
-            var fb  = _.fb.process(tickID).getChannelData(0)[0];
+            var fb  = _.fb.process(tickID).cells[0][0];
             var mix = _.mix;
             
             if (_.prevFb !== fb || _.prevMix !== mix) {

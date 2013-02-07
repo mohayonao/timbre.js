@@ -165,7 +165,7 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
@@ -182,7 +182,7 @@
                 
                 list = _.genList;
                 for (i = 0, imax = list.length; i < imax; ++i) {
-                    tmp = list[i].process(tickID).getChannelData(0);
+                    tmp = list[i].process(tickID).cells[0];
                     for (j = 0; j < jmax; ++j) {
                         cell[j] += tmp[j];
                     }

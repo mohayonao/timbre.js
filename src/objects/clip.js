@@ -60,7 +60,7 @@
     });
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
@@ -79,7 +79,7 @@
             
             if (_.ar) { // audio-rate
                 for (i = 0; i < imax; ++i) {
-                    tmp = nodes[i].process(tickID).getChannelData(0);
+                    tmp = nodes[i].process(tickID).cells[0];
                     for (j = 0; j < jmax; ++j) {
                         cell[j] += tmp[j];
                     }
@@ -98,7 +98,7 @@
             } else {    // control-rate
                 tmp = 0;
                 for (i = 0; i < imax; ++i) {
-                    tmp += nodes[i].process(tickID).getChannelData(0)[0];
+                    tmp += nodes[i].process(tickID).cells[0][0];
                 }
                 tmp = (tmp < min) ? min : (tmp > max) ? max : tmp;
                 tmp = tmp * mul + add;
