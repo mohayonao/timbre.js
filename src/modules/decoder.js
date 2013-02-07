@@ -34,13 +34,15 @@
                     if (xhr.response) {
                         callback(new Uint8Array(xhr.response));
                     } else if (xhr.responseBody !== undefined) {
+                        /*global VBArray:true */
                         var res = VBArray(xhr.responseBody).toArray();
                         var i, imax = res.length;
                         var a = new Array(imax);
-                        for (var i = 0; i < imax; ++i) {
+                        for (i = 0; i < imax; ++i) {
                             a[i] = res[i];
                         }
                         callback(new Uint8Array(a));
+                        /*global VBArray:false */
                     }
                 } else {
                     callback(xhr.status + " " + xhr.statusText);
