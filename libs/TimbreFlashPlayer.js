@@ -28,7 +28,7 @@
                 var inL = sys.strmL, inR = sys.strmR;
                 var i = interleaved.length, j = inL.length;
                 
-                if (offset > 0 && written > offset + 16384) {
+                if (written > offset + 16384) {
                     return;
                 }
                 sys.process();

@@ -21,6 +21,10 @@ package {
         
         private function _setup(channels:int, samplerate:int):void {
             _dx = samplerate / 44100;
+            for (var i:int = 0; i < 8192; ++i) {
+                _interleaved.push(0);
+                _interleaved.push(0);
+            }            
         }
         
         private function _cancel():void {
@@ -59,9 +63,9 @@ package {
         private function _streaming(e:SampleDataEvent):void {
             var i:int, buffer:ByteArray = e.data;
             
-            if (_cancel_flag || _interleaved.length < 8192) {
-                for (i = 0; i < 8192; ++i) {
-                    buffer.writeFloat(0);
+            if (_cancel_flag || _interleaved.length < 4096) {
+                for (i = 0; i < 4096; ++i) {
+                    buffer.writeFloat(0.0);
                 }
                 return;
             }
