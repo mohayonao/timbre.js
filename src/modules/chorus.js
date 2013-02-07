@@ -5,11 +5,12 @@
         this.samplerate = samplerate;
         
         var bits = Math.round(Math.log(samplerate * 0.1) * Math.LOG2E);
-        this.buffer = new Float32Array(1 << bits);
+        this.buffersize = 1 << bits;
+        this.buffer = new T.fn.SignalArray(this.buffersize + 1);
         
         this.wave       = null;
         this._wave      = null;
-        this.writeIndex = this.buffer.length >> 1;
+        this.writeIndex = this.buffersize >> 1;
         this.readIndex  = 0;
         this.delayTime  = 20;
         this.rate       = 4;
@@ -29,16 +30,16 @@
     
     var waves = [];
     waves[0] = (function() {
-        var wave = new Float32Array(256);
-        for (var i = 256; i--; ) {
-            wave[i] = Math.sin(2 * Math.PI * (i/256));
+        var wave = new Float32Array(512);
+        for (var i = 0; i < 512; ++i) {
+            wave[i] = Math.sin(2 * Math.PI * (i/512));
         }
         return wave;
     })();
     waves[1] = (function() {
-        var wave = new Float32Array(256);
-        for (var x, i = 256; i--; ) {
-            x = (i / 256) - 0.25;
+        var wave = new Float32Array(512);
+        for (var x, i = 0; i < 512; ++i) {
+            x = (i / 512) - 0.25;
             wave[i] = 1.0 - 4.0 * Math.abs(Math.round(x) - x);
         }
         return wave;
@@ -58,19 +59,19 @@
         this.delayTime = delayTime;
         var readIndex = this.writeIndex - ((delayTime * this.samplerate * 0.001)|0);
         while (readIndex < 0) {
-            readIndex += this.buffer.length;
+            readIndex += this.buffersize;
         }
         this.readIndex = readIndex;
     };
     
     $.setRate = function(rate) {
         this.rate      = rate;
-        this.phaseIncr = (256 * this.rate / this.samplerate) * this.phaseStep;
+        this.phaseIncr = (512 * this.rate / this.samplerate) * this.phaseStep;
     };
     
     $.process = function(cell) {
         var buffer = this.buffer;
-        var size   = buffer.length;
+        var size   = this.buffersize;
         var mask   = size - 1;
         var wave       = this._wave;
         var phase      = this.phase;
@@ -87,12 +88,12 @@
         for (i = 0; i < imax; ) {
             mod = wave[phase|0] * depth;
             phase += phaseIncr;
-            while (phase > 256) {
-                phase -= 256;
+            while (phase > 512) {
+                phase -= 512;
             }
             for (j = 0; j < jmax; ++j, ++i) {
                 index = (readIndex + size + mod) & mask;
-                x = buffer[index];
+                x = (buffer[index] + buffer[index + 1]) * 0.5;
                 buffer[writeIndex] = cell[i] - x * feedback;
                 cell[i] = (cell[i] * dry) + (x * wet);
                 writeIndex = (writeIndex + 1) & mask;

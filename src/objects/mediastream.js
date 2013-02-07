@@ -16,8 +16,8 @@
         
         var _ = this._;
         _.src = _.func = null;
-        _.bufferL = new Float32Array(BUFFER_SIZE);
-        _.bufferR = new Float32Array(BUFFER_SIZE);
+        _.bufferL = new fn.SignalArray(BUFFER_SIZE);
+        _.bufferR = new fn.SignalArray(BUFFER_SIZE);
         _.readIndex  = 0;
         _.writeIndex = 0;
         _.totalRead  = 0;
@@ -40,15 +40,16 @@
         if (_impl) {
             _impl.unlisten.call(this);
         }
-        var i;
+        
         var cell = this.cell;
+        var i, imax = cell.length;
         var L = this.cellL, R = this.cellR;
-        for (i = cell.length; i--; ) {
+        for (i = 0; i < imax; ++i) {
             cell[i] = L[i] = R[i] = 0;
         }
         var _ = this._;
         var bufferL = _.bufferL, bufferR = _.bufferR;
-        for (i = bufferL.length; i--; ) {
+        for (i = 0, imax = bufferL.length; i < imax; ++i) {
             bufferL[i] = bufferR[i] = 0;
         }
     };
@@ -102,7 +103,7 @@
             _.gain = context.createGainNode();
             _.gain.gain.value = 0;
             _.node = context.createJavaScriptNode(1024, 2, 1);
-            _.node.onaudioprocess = onaudioprocess.bind(this);
+            _.node.onaudioprocess = onaudioprocess(this);
             _.src.connect(_.node);
             _.node.connect(_.gain);
             _.gain.connect(context.destination);
@@ -120,20 +121,22 @@
             }
         }
     };
-    var onaudioprocess = function(e) {
-        var _ = this._;
-        var i0 = e.inputBuffer.getChannelData(0);
-        var i1 = e.inputBuffer.getChannelData(1);
-        var o0 = _.bufferL;
-        var o1 = _.bufferR;
-        var writeIndex = _.writeIndex;
-        var i, imax = i0.length;
-        for (i = 0; i < imax; ++i, ++writeIndex) {
-            o0[writeIndex] = i0[i];
-            o1[writeIndex] = i1[i];
-        }
-        _.writeIndex = writeIndex & BUFFER_MASK;
-        _.totalWrite += i0.length;
+    var onaudioprocess = function(self) {
+        return function(e) {
+            var _ = self._;
+            var i0 = e.inputBuffer.getChannelData(0);
+            var i1 = e.inputBuffer.getChannelData(1);
+            var o0 = _.bufferL;
+            var o1 = _.bufferR;
+            var writeIndex = _.writeIndex;
+            var i, imax = i0.length;
+            for (i = 0; i < imax; ++i, ++writeIndex) {
+                o0[writeIndex] = i0[i];
+                o1[writeIndex] = i1[i];
+            }
+            _.writeIndex = writeIndex & BUFFER_MASK;
+            _.totalWrite += i0.length;
+        };
     };
     
     impl.moz = {

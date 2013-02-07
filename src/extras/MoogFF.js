@@ -133,8 +133,8 @@
                 s4 = b0*future - a1*outs;
             }
             _.s1 = s1; _.s2 = s2; _.s3 = s3; _.s4 = s4;
-
-            for (i = imax; i--; ) {
+            
+            for (i = 0; i < imax; ++i) {
                 o = cell[i];
                 cell[i] = (o < -1) ? -1 : (1 < o) ? 1 : o;
             }

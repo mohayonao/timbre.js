@@ -25,7 +25,7 @@
                 if (typeof value === "number") {
                     _.selected = value;
                     var outputs = _.outputs;
-                    for (var i = outputs.length; i--; ) {
+                    for (var i = 0, imax = outputs.length; i < imax; ++i) {
                         if (outputs[i]) {
                             outputs[i].cell.set(empty);
                         }

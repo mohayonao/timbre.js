@@ -28,7 +28,7 @@
                     cell.set(tmp);
                     for (i = 1; i < imax; ++i) {
                         tmp = inputs[i].process(tickID);
-                        for (j = jmax; j--; ) {
+                        for (j = 0; j < jmax; ++j) {
                             val = tmp[j];
                             if (cell[j] > val) {
                                 cell[j] = val;
@@ -36,7 +36,7 @@
                         }
                     }
                 } else {
-                    for (j = jmax; j--; ) {
+                    for (j = 0; j < jmax; ++j) {
                         cell[j] = 0;
                     }
                 }

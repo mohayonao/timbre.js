@@ -32,8 +32,8 @@
         var args = arguments, i = 1;
         
         dfd.done(function() {
-            this._.emit("done");
-        }.bind(this));
+            self._.emit("done");
+        });
         
         if (typeof args[i] === "function") {
             dfd.done(args[i++]);

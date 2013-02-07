@@ -73,25 +73,25 @@
             var min = _.min, max = _.max;
             var tmp, x;
             
-            for (j = jmax; j--; ) {
+            for (j = 0; j < jmax; ++j) {
                 cell[j] = 0;
             }
             
             if (_.ar) { // audio-rate
                 for (i = 0; i < imax; ++i) {
                     tmp = inputs[i].process(tickID);
-                    for (j = jmax; j--; ) {
+                    for (j = 0; j < jmax; ++j) {
                         cell[j] += tmp[j];
                     }
                 }
-                for (j = jmax; j--; ) {
+                for (j = 0; j < jmax; ++j) {
                     x = cell[j];
                     x = (x < min) ? min : (x > max) ? max : x;
                     cell[j] = x;
                 }
                 
                 if (mul !== 1 || add !== 0) {
-                    for (j = jmax; j--; ) {
+                    for (j = 0; j < jmax; ++j) {
                         cell[j] = cell[j] * mul + add;
                     }
                 }
@@ -102,7 +102,7 @@
                 }
                 tmp = (tmp < min) ? min : (tmp > max) ? max : tmp;
                 tmp = tmp * mul + add;
-                for (j = jmax; j--; ) {
+                for (j = 0; j < jmax; ++j) {
                     cell[j] = tmp;
                 }
             }

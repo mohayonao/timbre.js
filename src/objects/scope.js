@@ -36,7 +36,7 @@
                 if (!_.buffer) {
                     if (typeof value === "number") {
                         var n = (value < 64) ? 64 : (value > 2048) ? 2048 : value;
-                        _.buffer = new Float32Array(n);
+                        _.buffer = new fn.SignalArray(n);
                         if (_.reservedinterval) {
                             this.interval = _.reservedinterval;
                             _.reservedinterval = null;
@@ -76,7 +76,7 @@
         var _ = this._;
         var buffer = _.buffer;
         
-        for (var i = buffer.length; i--; ) {
+        for (var i = 0, imax = buffer.length; i < imax; ++i) {
             buffer[i] = 0;
         }
         _.samples    = 0;

@@ -99,14 +99,14 @@
             
             if (_.ar && len) {
                 fn.inputSignalAR(this);
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = warp(cell[i], inMin, inMax, outMin, outMax) * mul + add;
                 }
                 fn.outputSignalAR(this);
             } else {
                 var input = (this.inputs.length) ? fn.inputSignalKR(this) : 0;
                 var value = warp(input, inMin, inMax, outMin, outMax) * mul + add;
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = value;
                 }
             }

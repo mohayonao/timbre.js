@@ -34,7 +34,7 @@
                 var cellR = this.cellR;
                 var mul = _.mul, add = _.add;
                 this._.gen.process(cellL, cellR);
-                for (var i = cell.length; i--; ) {
+                for (var i = 0, imax = cell.length; i < imax; ++i) {
                     cellL[i] = cellL[i] * mul + add;
                     cellR[i] = cellR[i] * mul + add;
                     cell[i]  = (cellL[i] + cellR[i]) * 0.5;

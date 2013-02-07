@@ -14,7 +14,7 @@
         _.osc2 = new Oscillator(T.samplerate);
         _.osc1.step = this.cell.length;
         _.osc2.step = this.cell.length;
-        _.tmp = new Float32Array(this.cell.length);
+        _.tmp = new fn.SignalArray(this.cell.length);
         _.beats = 0.5;
         
         this.once("init", oninit);
@@ -79,13 +79,13 @@
             
             osc1.frequency = freq - (_.beats * 0.5);
             osc1.process(tmp);
-            for (i = imax; i--; ) {
+            for (i = 0; i < imax; ++i) {
                 cell[i] = tmp[i] * 0.5;
             }
             
             osc2.frequency = freq + (_.beats * 0.5);
             osc2.process(tmp);
-            for (i = imax; i--; ) {
+            for (i = 0; i < imax; ++i) {
                 cell[i] += tmp[i] * 0.5;
             }
             

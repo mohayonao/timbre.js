@@ -20,6 +20,7 @@
         _.delaySamples = 0;
         _.countSamples = 0;
         _.isEnded = false;
+        _.onended = fn.make_onended(this);
         
         this.on("start", onstart);
     }
@@ -34,10 +35,6 @@
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
     });
-    var onended = function() {
-        this._.isEnded = true;
-        this._.emit("ended");
-    };
     
     var $ = IntervalNode.prototype;
     
@@ -134,7 +131,7 @@
                     var inputs = this.inputs;
                     var count  = _.count;
                     var x = count * _.mul + _.add;
-                    for (var j = cell.length; j--; ) {
+                    for (var j = 0, jmax = cell.length; j < jmax; ++j) {
                         cell[j] = x;
                     }
                     for (var i = 0, imax = inputs.length; i < imax; ++i) {
@@ -146,7 +143,7 @@
             _.currentTime += _.currentTimeIncr;
 
             if (_.currentTime >= _.timeout) {
-                fn.nextTick(onended.bind(this));
+                fn.nextTick(_.onended);
             }
         }
         return cell;

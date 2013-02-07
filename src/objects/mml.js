@@ -22,6 +22,7 @@
         _.prevNote = 0;
         _.isEnded  = false;
         _.remain   = Infinity;
+        _.onended  = fn.make_onended(this);
         
         this.on("start", onstart);
     }
@@ -121,17 +122,12 @@
             }
             _.remain -= _.currentTimeIncr;
             if (queue.length === 0 && _.remain <= 0) {
-                fn.nextTick(onended.bind(this));
+                fn.nextTick(_.onended);
             }
             _.currentTime += _.currentTimeIncr;
         }
         
         return cell;
-    };
-    
-    var onended = function() {
-        this._.isEnded = true;
-        this._.emit("ended");
     };
     
     var sched = function(self) {

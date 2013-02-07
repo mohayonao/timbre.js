@@ -167,8 +167,10 @@
             var size = 512;
             var data = new Float32Array(size);
             var nyquist  = T.samplerate * 0.5;
-            var spectrum = fft.spectrum;
+            var spectrum = new Float32Array(size);
             var j, f, index, delta, x0, x1, xx;
+            
+            fft.getFrequencyData(spectrum);
             for (i = 0; i < size; ++i) {
                 f = Math.pow(nyquist / PLOT_LOW_FREQ, i / size) * PLOT_LOW_FREQ;
                 j = f / (nyquist / spectrum.length);
@@ -181,7 +183,7 @@
                     x1 = spectrum[index];
                     xx = ((1.0 - delta) * x0 + delta * x1);
                 }
-                data[i] = Math.log(xx) * Math.LOG10E * 20;
+                data[i] = xx;
             }
             this._.plotData  = data;
             this._.plotFlush = null;

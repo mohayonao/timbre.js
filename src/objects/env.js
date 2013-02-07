@@ -11,9 +11,10 @@
         var _ = this._;
         _.env = new Envelope(T.samplerate);
         _.env.setStep(this.cell.length);
-        _.tmp = new Float32Array(this.cell.length);
+        _.tmp = new fn.SignalArray(this.cell.length);
         _.ar = false;
         _.plotFlush = true;
+        _.onended = fn.make_onended(this);
         this.on("ar", onar);
     }
     fn.extend(EnvNode);
@@ -67,6 +68,7 @@
     $.clone = function() {
         var instance = new EnvNode([]);
         instance._.env = this._.env.clone();
+        instance._.ar  = this._.ar;
         return instance;
     };
     
@@ -104,7 +106,7 @@
             if (inputs.length) {
                 fn.inputSignalAR(this);
             } else {
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = 1;
                 }
             }
@@ -113,13 +115,13 @@
             if (_.ar) {
                 var tmp = _.tmp;
                 _.env.process(tmp);
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = (cell[i] * tmp[i]) * mul + add;
                 }
                 emit = _.env.emit;
             } else {
                 value = _.env.next();
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = (cell[i] * value) * mul + add;
                 }
                 emit = _.env.emit;
@@ -127,7 +129,7 @@
             
             if (emit) {
                 if (emit === "ended") {
-                    fn.nextTick(fn.onended.bind(null, this, 0));
+                    fn.nextTick(_.onended);
                 } else {
                     this._.emit(emit, _.value);
                 }

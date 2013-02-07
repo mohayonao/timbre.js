@@ -17,17 +17,17 @@
         imax = CombParams.length;
         this.comb = new Array(imax);
         this.combout = new Array(imax);
-        for (i = imax; i--; ) {
+        for (i = 0; i < imax; ++i) {
             this.comb[i]    = new CombFilter(CombParams[i] * k);
-            this.combout[i] = new Float32Array(buffersize);
+            this.combout[i] = new T.fn.SignalArray(buffersize);
         }
         
         imax = AllpassParams.length;
         this.allpass = new Array(imax);
-        for (i = imax; i--; ) {
+        for (i = 0; i < imax; ++i) {
             this.allpass[i] = new AllpassFilter(AllpassParams[i] * k);
         }
-        this.output = new Float32Array(buffersize);
+        this.output = new T.fn.SignalArray(buffersize);
         
         this.damp = 0;
         this.wet  = 0.33;
@@ -64,8 +64,8 @@
         comb[5].process(cell, combout[5]);
         comb[6].process(cell, combout[6]);
         comb[7].process(cell, combout[7]);
-
-        for (i = imax; i--; ) {
+        
+        for (i = 0; i < imax; ++i) {
             output[i] = combout[0][i] + combout[1][i] + combout[2][i] + combout[3][i] + combout[4][i] + combout[5][i] + combout[6][i] + combout[7][i];
         }
         
@@ -74,13 +74,13 @@
         allpass[2].process(output, output);
         allpass[3].process(output, output);
         
-        for (i = imax; i--; ) {
+        for (i = 0; i < imax; ++i) {
             cell[i] = output[i] * wet + cell[i] * dry;
         }
     };
     
     function CombFilter(buffersize) {
-        this.buffer = new Float32Array(buffersize|0);
+        this.buffer = new T.fn.SignalArray(buffersize|0);
         this.buffersize = this.buffer.length;
         this.bufidx = 0;
         this.feedback =  0;
@@ -118,7 +118,7 @@
     };
 
     function AllpassFilter(buffersize) {
-        this.buffer = new Float32Array(buffersize|0);
+        this.buffer = new T.fn.SignalArray(buffersize|0);
         this.buffersize = this.buffer.length;
         this.bufidx = 0;
     }

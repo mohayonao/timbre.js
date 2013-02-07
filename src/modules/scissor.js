@@ -308,8 +308,8 @@
     };
     
     TapeStream.prototype.fetch = function(n) {
-        var cellL = new Float32Array(n);
-        var cellR = new Float32Array(n);
+        var cellL = new T.fn.SignalArray(n);
+        var cellR = new T.fn.SignalArray(n);
         var fragments     = this.fragments;
         
         if (fragments.length === 0) {

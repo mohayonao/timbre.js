@@ -15,7 +15,8 @@
         _.synthdef = null;
         _.isEnded  = true;
         
-        _.remGen = remGen.bind(this);
+        _.remGen = make_remGen(this);
+        _.onended = fn.make_onended(this);
     }
     fn.extend(SynthDefNode);
     
@@ -46,17 +47,21 @@
         }
     });
     
-    var doneAction = function(opts) {
-        remGen.call(this, opts.gen);
+    var make_doneAction = function(self, opts) {
+        return function() {
+            self._.remGen(opts.gen);
+        };
     };
     
-    var remGen = function(gen) {
-        var _ = this._;
-        var i = _.genList.indexOf(gen);
-        if (i !== -1) {
-            _.genList.splice(i, 1);
-        }
-        _.genDict[gen.noteNum] = null;
+    var make_remGen = function(self) {
+        return function(gen) {
+            var _ = self._;
+            var i = _.genList.indexOf(gen);
+            if (i !== -1) {
+                _.genList.splice(i, 1);
+            }
+            _.genDict[gen.noteNum] = null;
+        };
     };
     
     var noteOn = function(noteNum, freq, velocity, _opts) {
@@ -83,7 +88,7 @@
                 opts[key] = _opts[key];
             }
         }
-        opts.doneAction = doneAction.bind(this, opts);
+        opts.doneAction = make_doneAction(this, opts);
         
         gen = this._.synthdef.call(this, opts);
         
@@ -178,12 +183,12 @@
                 list = _.genList;
                 for (i = 0, imax = list.length; i < imax; ++i) {
                     tmp = list[i].process(tickID);
-                    for (j = jmax; j--; ) {
+                    for (j = 0; j < jmax; ++j) {
                         cell[j] += tmp[j];
                     }
                 }
                 if (imax === 0) {
-                    fn.nextTick(fn.onended.bind(null, this));
+                    fn.nextTick(_.onended);
                 }
             }
             

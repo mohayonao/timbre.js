@@ -9,15 +9,16 @@
         T.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
+
+        var _ = this._;
+        _.status  = 0;
+        _.samples = 0;
+        _.samplesIncr = 0;
+        _.writeIndex  = 0;
         
-        this._.status  = 0;
-        this._.samples = 0;
-        this._.samplesIncr = 0;
-        this._.writeIndex  = 0;
-        
-        this._.plotFlush = true;
-        this._.plotRange = [0, 1];
-        this._.plotBarStyle = true;
+        _.plotFlush = true;
+        _.plotRange = [0, 32];
+        _.plotBarStyle = true;
         
         this.once("init", oninit);
     }
@@ -43,7 +44,8 @@
                     if (typeof value === "number") {
                         var n = (value < 256) ? 256 : (value > 2048) ? 2048 : value;
                         _.fft    = new FFT(n);
-                        _.buffer = new Float32Array(_.fft.length);
+                        _.buffer = new fn.SignalArray(_.fft.length);
+                        _.freqs  = new fn.SignalArray(_.fft.length>>1);
                         if (_.reservedwindow) {
                             _.fft.setWindow(_.reservedwindow);
                             _.reservedwindow = null;
@@ -92,7 +94,7 @@
         },
         spectrum: {
             get: function() {
-                return this._.fft.spectrum;
+                return this._.fft.getFrequencyData(this._.freqs);
             }
         },
         real: {
@@ -168,33 +170,7 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var fft = this._.fft;
-            
-            var size     = 64;
-            var spectrum = fft.spectrum;
-            var step     = spectrum.length / size;
-            var istep    = 1 / step;
-            var data    = new Float32Array(size);
-            var i, imax = spectrum.length;
-            var j, jmax = step;
-            
-            var v, x, k = 0, peak = 0;
-            for (i = 0; i < imax; i += step) {
-                v = 0;
-                for (j = 0; j < jmax; ++j) {
-                    v += spectrum[i + j];
-                }
-                x = v * istep;
-                data[k++] = x;
-                if (peak < x) {
-                    peak = x;
-                }
-            }
-            for (i = data.length; i--; ) {
-                data[i] /= peak;
-            }
-            
-            this._.plotData  = data;
+            this._.plotData  = this.spectrum;
             this._.plotFlush = null;
         }
         return super_plot.call(this, opts);

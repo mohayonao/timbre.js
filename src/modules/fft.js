@@ -6,12 +6,15 @@
         n = 1 << Math.ceil(Math.log(n) * Math.LOG2E);
         
         this.length  = n;
-        this.buffer  = new Float32Array(n);
-        this.real    = new Float32Array(n);
-        this.imag    = new Float32Array(n);
-        this._real   = new Float32Array(n);
-        this._imag   = new Float32Array(n);
-        this.spectrum = new Float32Array(n>>1);
+        this.buffer  = new T.fn.SignalArray(n);
+        this.real    = new T.fn.SignalArray(n);
+        this.imag    = new T.fn.SignalArray(n);
+        this._real   = new T.fn.SignalArray(n);
+        this._imag   = new T.fn.SignalArray(n);
+        this.mag     = new T.fn.SignalArray(n>>1);
+        
+        this.minDecibels =  -30;
+        this.maxDecibels = -100;
         
         var params = FFTParams.get(n);
         this._bitrev   = params.bitrev;
@@ -29,7 +32,7 @@
                 var f = WindowFunctions[name];
                 if (f) {
                     if (!this._window) {
-                        this._window = new Float32Array(this.length);
+                        this._window = new T.fn.SignalArray(this.length);
                     }
                     var w = this._window, n = 0, N = this.length;
                     a = (a < 0) ? 0 : (a > 1) ? 1 : a;
@@ -43,7 +46,7 @@
     };
     
     $.forward = function(_buffer) {
-        var buffer = this.buffer;
+        var buffer   = this.buffer;
         var real   = this.real;
         var imag   = this.imag;
         var window = this._window;
@@ -52,18 +55,16 @@
         var costable = this._costable;
         var n = buffer.length;
         var i, j, k, k2, h, d, c, s, ik, dx, dy;
-
+        
         if (window) {
-            for (i = n; i--; ) {
+            for (i = 0; i < n; ++i) {
                 buffer[i] = _buffer[i] * window[i];
             }
         } else {
-            for (i = n; i--; ) {
-                buffer[i] = _buffer[i];
-            }
+            buffer.set(_buffer);
         }
         
-        for (i = n; i--; ) {
+        for (i = 0; i < n; ++i) {
             real[i] = buffer[bitrev[i]];
             imag[i] = 0.0;
         }
@@ -84,21 +85,13 @@
             }
         }
         
-        if (!this.noSpectrum) {
-            var bSi = 2 / _buffer.length;
-            var spectrum = this.spectrum;
-            var rval, ival, mag;
-            var peak = 0;
-            for (i = n; i--; ) {
-                rval = real[i];
-                ival = imag[i];
-                mag  = bSi = Math.sqrt(rval * rval + ival * ival);
-                spectrum[i] = mag;
-                if (peak < mag) {
-                    peak = mag;
-                }
-            }
-            this.peak = peak;
+        var bSi = 2 / _buffer.length;
+        var mag = this.mag;
+        var rval, ival;
+        for (i = 0; i < n; ++i) {
+            rval = real[i];
+            ival = imag[i];
+            mag[i] = bSi = Math.sqrt(rval * rval + ival * ival);
         }
         
         return {real:real, imag:imag};
@@ -114,7 +107,7 @@
         var n = buffer.length;
         var i, j, k, k2, h, d, c, s, ik, dx, dy;
         
-        for (i = n; i--; ) {
+        for (i = 0; i < n; ++i) {
             j = bitrev[i];
             real[i] = +_real[j];
             imag[i] = -_imag[j];
@@ -136,10 +129,27 @@
             }
         }
         
-        for (i = n; i--; ) {
+        for (i = 0; i < n; ++i) {
             buffer[i] = real[i] / n;
         }
         return buffer;
+    };
+    
+    $.getFrequencyData = function(array) {
+        var minDecibels  = this.minDecibels;
+        var i, imax = Math.min(this.mag.length, array.length);
+        if (imax) {
+            var x, mag = this.mag;
+            var peak = 0;
+            for (i = 0; i < imax; ++i) {
+                x  = mag[i];
+                array[i] = !x ? minDecibels : 20 * Math.log(x) * Math.LOG10E;
+                if (peak < array[i]) {
+                    peak = array[i];
+                }
+            }
+        }
+        return array;
     };
     
     var FFTParams = {
@@ -164,12 +174,12 @@
                     }
                     return x;
                 }());
-                var i, k = Math.floor(Math.log(n) / Math.LN2);
-                var sintable = new Float32Array((1<<k)-1);
-                var costable = new Float32Array((1<<k)-1);
+                var i, imax, k = Math.floor(Math.log(n) / Math.LN2);
+                var sintable = new T.fn.SignalArray((1<<k)-1);
+                var costable = new T.fn.SignalArray((1<<k)-1);
                 var PI2 = Math.PI * 2;
                 
-                for (i = sintable.length; i--; ) {
+                for (i = 0, imax = sintable.length; i < imax; ++i) {
                     sintable[i] = Math.sin(PI2 * (i / n));
                     costable[i] = Math.cos(PI2 * (i / n));
                 }

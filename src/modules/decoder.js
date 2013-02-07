@@ -31,7 +31,19 @@
             xhr.responseType = "arraybuffer";
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    callback(new Uint8Array(xhr.response));
+                    if (xhr.response) {
+                        callback(new Uint8Array(xhr.response));
+                    } else if (xhr.responseBody !== undefined) {
+                        /*global VBArray:true */
+                        var res = VBArray(xhr.responseBody).toArray();
+                        var i, imax = res.length;
+                        var a = new Array(imax);
+                        for (i = 0; i < imax; ++i) {
+                            a[i] = res[i];
+                        }
+                        callback(new Uint8Array(a));
+                        /*global VBArray:false */
+                    }
                 } else {
                     callback(xhr.status + " " + xhr.statusText);
                 }
@@ -47,13 +59,12 @@
     
     var deinterleave = function(list) {
         var result = new list.constructor(list.length>>1);
-        var i = list.length, j = result.length;
-        if (i % 2) {
-            i -= 1;
+        var i, j, jmax = result.length;
+        if (list.length % 2) {
             j |= 0;
         }
-        while (j) {
-            result[--j] = (list[--i] + list[--i]) * 0.5;
+        for (i = j = 0; j < jmax; ++j, i += 2) {
+            result[j] = (list[i] + list[i+1]) * 0.5;
         }
         return result;
     };
@@ -141,7 +152,7 @@
             }
             
             var k = 1 / ((1 << (bitSize-1)) - 1);
-            for (var i = buffer.length; i--; ) {
+            for (var i = 0, imax = buffer.length; i < imax; ++i) {
                 buffer[i] = data[i] * k;
             }
             

@@ -1,4 +1,4 @@
-module.exports = require("./timbre.dev").bind(require("./libs/PicoNodePlayer"));
+module.exports = require("./timbre.dev").bind(require("./libs/TimbreNodePlayer"));
 
 var fs   = require("fs");
 var lame = require("lame");

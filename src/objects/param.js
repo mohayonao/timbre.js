@@ -16,6 +16,7 @@
         _.curve   = "lin";
         _.counter = 0;
         _.ar = false;
+        _.onended = fn.make_onended(this);
         
         this.on("ar", onar);
     }
@@ -117,7 +118,7 @@
             if (inputs.length) {
                 fn.inputSignalAR(this);
             } else {
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = 1;
                 }
             }
@@ -129,7 +130,7 @@
                     } else {
                         env.setNext(env.value, 0, Envelope.CurveTypeSet);
                     }
-                    fn.nextTick(fn.onended.bind(null, this));
+                    fn.nextTick(_.onended);
                 }
                 _.counter = counter;
             }
@@ -145,7 +146,7 @@
                 }
             } else {
                 value = env.next();
-                for (i = imax; i--; ) {
+                for (i = 0; i < imax; ++i) {
                     cell[i] = (cell[i] * value) * mul + add;
                 }
                 emit = _.env.emit;

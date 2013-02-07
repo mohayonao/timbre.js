@@ -9,7 +9,7 @@
         fn.fixAR(this);
         
         var _ = this._;
-        _.buffer = new Float32Array(T.cellsize);
+        _.buffer = new fn.SignalArray(T.cellsize);
         _.freq   = T("sin", {freq:1, add:1000, mul:250}).kr();
         _.Q      = T(1);
         _.allpass  = [];
@@ -72,19 +72,18 @@
                 var freq  = _.freq.process(tickID)[0];
                 var Q     = _.Q.process(tickID)[0];
                 var steps = _.steps;
-                var i;
+                var i, imax;
                 
                 _.buffer.set(cell);
                 
-                for (i = steps; i--; ) {
-                    _.allpass[i].setParams(freq, Q, 0);
-                    _.allpass[i].process(_.buffer);
-                    i--;
-                    _.allpass[i].setParams(freq, Q, 0);
-                    _.allpass[i].process(_.buffer);
+                for (i = 0; i < steps; i += 2) {
+                    _.allpass[i  ].setParams(freq, Q, 0);
+                    _.allpass[i  ].process(_.buffer);
+                    _.allpass[i+1].setParams(freq, Q, 0);
+                    _.allpass[i+1].process(_.buffer);
                 }
                 
-                for (i = cell.length; i--; ) {
+                for (i = 0, imax = cell.length; i < imax; ++i) {
                     cell[i] = (cell[i] + _.buffer[i]) * 0.5;
                 }
             }
