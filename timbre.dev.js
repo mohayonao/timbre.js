@@ -1903,25 +1903,14 @@
             
             this.play = function() {
                 var audio = new Audio();
-                var onaudioprocess;
                 var interleaved = new Float32Array(sys.streamsize * sys.channels);
-                var interval = sys.streammsec;
-                var written  = 0;
-                var limit    = sys.streamsize << 4;
+                var streammsec  = sys.streammsec;
+                var written     = 0;
+                var writtenIncr = sys.streamsize / sys.samplerate * 1000;
+                var start = Date.now();
                 
-                if (navigator.userAgent.toLowerCase().indexOf("linux") !== -1) {
-                    interval = sys.streamsize / sys.samplerate * 1000;
-                    written  = -Infinity;
-                } else if (_envmobile) {
-                    interval = sys.streamsize / sys.samplerate * 1000;
-                    audio.mozCurrentSampleOffset = function() {
-                        return Infinity;
-                    };
-                }
-                
-                onaudioprocess = function() {
-                    var offset = audio.mozCurrentSampleOffset();
-                    if (written > offset + limit) {
+                var onaudioprocess = function() {
+                    if (written > Date.now() - start) {
                         return;
                     }
                     var inL = sys.strmL;
@@ -1933,12 +1922,13 @@
                         interleaved[--i] = inR[j];
                         interleaved[--i] = inL[j];
                     }
-                    written += audio.mozWriteAudio(interleaved);
+                    audio.mozWriteAudio(interleaved);
+                    written += writtenIncr;
                 };
                 
                 audio.mozSetup(sys.channels, sys.samplerate);
                 timer.onmessage = onaudioprocess;
-                timer.postMessage(interval);
+                timer.postMessage(streammsec);
             };
             
             this.pause = function() {
@@ -2826,7 +2816,19 @@
             xhr.responseType = "arraybuffer";
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    callback(new Uint8Array(xhr.response));
+                    if (xhr.response) {
+                        callback(new Uint8Array(xhr.response));
+                    } else if (xhr.responseBody !== undefined) {
+                        /*global VBArray:true */
+                        var res = VBArray(xhr.responseBody).toArray();
+                        var i, imax = res.length;
+                        var a = new Array(imax);
+                        for (i = 0; i < imax; ++i) {
+                            a[i] = res[i];
+                        }
+                        callback(new Uint8Array(a));
+                        /*global VBArray:false */
+                    }
                 } else {
                     callback(xhr.status + " " + xhr.statusText);
                 }
@@ -3854,7 +3856,10 @@
         this.imag    = new T.fn.SignalArray(n);
         this._real   = new T.fn.SignalArray(n);
         this._imag   = new T.fn.SignalArray(n);
-        this.spectrum = new T.fn.SignalArray(n>>1);
+        this.mag     = new T.fn.SignalArray(n>>1);
+        
+        this.minDecibels =  -30;
+        this.maxDecibels = -100;
         
         var params = FFTParams.get(n);
         this._bitrev   = params.bitrev;
@@ -3886,7 +3891,7 @@
     };
     
     $.forward = function(_buffer) {
-        var buffer = this.buffer;
+        var buffer   = this.buffer;
         var real   = this.real;
         var imag   = this.imag;
         var window = this._window;
@@ -3895,17 +3900,15 @@
         var costable = this._costable;
         var n = buffer.length;
         var i, j, k, k2, h, d, c, s, ik, dx, dy;
-
+        
         if (window) {
             for (i = 0; i < n; ++i) {
                 buffer[i] = _buffer[i] * window[i];
             }
         } else {
-            for (i = 0; i < n; ++i) {
-                buffer[i] = _buffer[i];
-            }
+            buffer.set(_buffer);
         }
-
+        
         for (i = 0; i < n; ++i) {
             real[i] = buffer[bitrev[i]];
             imag[i] = 0.0;
@@ -3927,21 +3930,13 @@
             }
         }
         
-        if (!this.noSpectrum) {
-            var bSi = 2 / _buffer.length;
-            var spectrum = this.spectrum;
-            var rval, ival, mag;
-            var peak = 0;
-            for (i = 0; i < n; ++i) {
-                rval = real[i];
-                ival = imag[i];
-                mag  = bSi = Math.sqrt(rval * rval + ival * ival);
-                spectrum[i] = mag;
-                if (peak < mag) {
-                    peak = mag;
-                }
-            }
-            this.peak = peak;
+        var bSi = 2 / _buffer.length;
+        var mag = this.mag;
+        var rval, ival;
+        for (i = 0; i < n; ++i) {
+            rval = real[i];
+            ival = imag[i];
+            mag[i] = bSi = Math.sqrt(rval * rval + ival * ival);
         }
         
         return {real:real, imag:imag};
@@ -3983,6 +3978,23 @@
             buffer[i] = real[i] / n;
         }
         return buffer;
+    };
+    
+    $.getFrequencyData = function(array) {
+        var minDecibels  = this.minDecibels;
+        var i, imax = Math.min(this.mag.length, array.length);
+        if (imax) {
+            var x, mag = this.mag;
+            var peak = 0;
+            for (i = 0; i < imax; ++i) {
+                x  = mag[i];
+                array[i] = !x ? minDecibels : 20 * Math.log(x) * Math.LOG10E;
+                if (peak < array[i]) {
+                    peak = array[i];
+                }
+            }
+        }
+        return array;
     };
     
     var FFTParams = {
@@ -5398,8 +5410,10 @@
             var size = 512;
             var data = new Float32Array(size);
             var nyquist  = T.samplerate * 0.5;
-            var spectrum = fft.spectrum;
+            var spectrum = new Float32Array(size);
             var i, j, f, index, delta, x0, x1, xx;
+            
+            fft.getFrequencyData(spectrum);
             for (i = 0; i < size; ++i) {
                 f = Math.pow(nyquist / PLOT_LOW_FREQ, i / size) * PLOT_LOW_FREQ;
                 j = f / (nyquist / spectrum.length);
@@ -5412,7 +5426,7 @@
                     x1 = spectrum[index];
                     xx = ((1.0 - delta) * x0 + delta * x1);
                 }
-                data[i] = Math.log(xx) * Math.LOG10E * 20;
+                data[i] = xx;
             }
             this._.plotData  = data;
             this._.plotFlush = null;
@@ -7112,8 +7126,10 @@
             var size = 512;
             var data = new Float32Array(size);
             var nyquist  = T.samplerate * 0.5;
-            var spectrum = fft.spectrum;
+            var spectrum = new Float32Array(size);
             var j, f, index, delta, x0, x1, xx;
+            
+            fft.getFrequencyData(spectrum);
             for (i = 0; i < size; ++i) {
                 f = Math.pow(nyquist / PLOT_LOW_FREQ, i / size) * PLOT_LOW_FREQ;
                 j = f / (nyquist / spectrum.length);
@@ -7126,7 +7142,7 @@
                     x1 = spectrum[index];
                     xx = ((1.0 - delta) * x0 + delta * x1);
                 }
-                data[i] = Math.log(xx) * Math.LOG10E * 20;
+                data[i] = xx;
             }
             this._.plotData  = data;
             this._.plotFlush = null;
@@ -7151,14 +7167,16 @@
         
         this.real = this.L;
         this.imag = this.R;
+
+        var _ = this._;
+        _.fft = new FFT(T.cellsize * 2);
+        _.fftCell  = new fn.SignalArray(_.fft.length);
+        _.prevCell = new fn.SignalArray(T.cellsize);
+        _.freqs    = new fn.SignalArray(_.fft.length>>1);
         
-        this._.fft = new FFT(T.cellsize * 2);
-        this._.fftCell  = new fn.SignalArray(this._.fft.length);
-        this._.prevCell = new fn.SignalArray(T.cellsize);
-        
-        this._.plotFlush = true;
-        this._.plotRange = [0, 1];
-        this._.plotBarStyle = true;
+        _.plotFlush = true;
+        _.plotRange = [0, 32];
+        _.plotBarStyle = true;
     }
     fn.extend(FFTNode);
     
@@ -7175,7 +7193,7 @@
         },
         spectrum: {
             get: function() {
-                return this._.fft.spectrum;
+                return this._.fft.getFrequencyData(this._.freqs);
             }
         }
     });
@@ -7213,33 +7231,7 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var fft = this._.fft;
-
-            var size     = 64;
-            var spectrum = fft.spectrum;
-            var step     = spectrum.length / size;
-            var istep    = 1 / step;
-            var data    = new Float32Array(size);
-            var i, imax = spectrum.length;
-            var j, jmax = step;
-
-            var v, x, k = 0, peak = 0;
-            for (i = 0; i < imax; i += step) {
-                v = 0;
-                for (j = 0; j < jmax; ++j) {
-                    v += spectrum[i + j];
-                }
-                x = v * istep;
-                data[k++] = x;
-                if (peak < x) {
-                    peak = x;
-                }
-            }
-            for (i = 0; i < size; ++i) {
-                data[i] /= peak;
-            }
-            
-            this._.plotData  = data;
+            this._.plotData  = this.spectrum;
             this._.plotFlush = null;
         }
         return super_plot.call(this, opts);
@@ -10491,15 +10483,16 @@
         T.Object.call(this, _args);
         fn.listener(this);
         fn.fixAR(this);
+
+        var _ = this._;
+        _.status  = 0;
+        _.samples = 0;
+        _.samplesIncr = 0;
+        _.writeIndex  = 0;
         
-        this._.status  = 0;
-        this._.samples = 0;
-        this._.samplesIncr = 0;
-        this._.writeIndex  = 0;
-        
-        this._.plotFlush = true;
-        this._.plotRange = [0, 1];
-        this._.plotBarStyle = true;
+        _.plotFlush = true;
+        _.plotRange = [0, 32];
+        _.plotBarStyle = true;
         
         this.once("init", oninit);
     }
@@ -10526,6 +10519,7 @@
                         var n = (value < 256) ? 256 : (value > 2048) ? 2048 : value;
                         _.fft    = new FFT(n);
                         _.buffer = new fn.SignalArray(_.fft.length);
+                        _.freqs  = new fn.SignalArray(_.fft.length>>1);
                         if (_.reservedwindow) {
                             _.fft.setWindow(_.reservedwindow);
                             _.reservedwindow = null;
@@ -10574,7 +10568,7 @@
         },
         spectrum: {
             get: function() {
-                return this._.fft.spectrum;
+                return this._.fft.getFrequencyData(this._.freqs);
             }
         },
         real: {
@@ -10650,33 +10644,7 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var fft = this._.fft;
-            
-            var size     = 64;
-            var spectrum = fft.spectrum;
-            var step     = spectrum.length / size;
-            var istep    = 1 / step;
-            var data    = new Float32Array(size);
-            var i, imax = spectrum.length;
-            var j, jmax = step;
-            
-            var v, x, k = 0, peak = 0;
-            for (i = 0; i < imax; i += step) {
-                v = 0;
-                for (j = 0; j < jmax; ++j) {
-                    v += spectrum[i + j];
-                }
-                x = v * istep;
-                data[k++] = x;
-                if (peak < x) {
-                    peak = x;
-                }
-            }
-            for (i = 0; i < size; ++i) {
-                data[i] /= peak;
-            }
-            
-            this._.plotData  = data;
+            this._.plotData  = this.spectrum;
             this._.plotFlush = null;
         }
         return super_plot.call(this, opts);
