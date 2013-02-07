@@ -14,7 +14,7 @@
     var STATUS_PLAY = 1;
     var STATUS_REC  = 2;
     
-    var _ver = "WORKING";
+    var _ver = "13.02.07";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};

@@ -11,12 +11,23 @@ Timbre.js provides a functional processing and synthesizing audio in your web ap
 [BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html) | [Chords Work](http://mohayonao.github.com/timbre.js/chord.html) | [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html) | [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html) | [Reich](http://mohayonao.github.com/timbre.js/reich.html)
 
 ## Supports ##
-Timbre.js runs on a modern browser or node.js.
+Timbre.js runs on a modern browser for Windows/Mac/Linux/iOS/Android or node.js.
 
 ![Chrome 14.0-](http://mohayonao.github.com/timbre.js/misc/img/chrome.png)
 ![Safari 6.0-](http://mohayonao.github.com/timbre.js/misc/img/safari.png)
 ![Firefox 4.0-](http://mohayonao.github.com/timbre.js/misc/img/firefox.png)
 ![node.js 0.8-](http://mohayonao.github.com/timbre.js/misc/img/nodejs.png)
+
+*iOS support is only later iOS6.0*  
+*Android support is only [Firefox](https://play.google.com/store/apps/details?id=org.mozilla.firefox) app.*
+
+## Optional Supports ##
+Timbre.js is able to run via Flash Player 10.
+
+![Opera](/timbre.js/misc/img/opera.png)
+![IE9](/timbre.js/misc/img/ie.png)
+
+*IE support is only Internet Exploler 9.*
 
 ## Installation ##
 ### browser
@@ -44,7 +55,7 @@ MIT
 
 
 ## ChangeLog ##
-**WORKING**
+**13.02.07** (334.61KB)
 * Added `T.setup({f64:true})` to use Float64Array instead of Float32Array
 * Added Android/Firefox support
 * Added flash support for Opera, IE9
