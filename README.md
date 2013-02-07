@@ -24,8 +24,8 @@ Timbre.js runs on a modern browser for Windows/Mac/Linux/iOS/Android or node.js.
 ## Optional Supports ##
 Timbre.js is able to run via Flash Player 10.
 
-![Opera](/timbre.js/misc/img/opera.png)
-![IE9](/timbre.js/misc/img/ie.png)
+![Opera](http://mohayonao.github.com/timbre.js/misc/img/opera.png)
+![IE9](http://mohayonao.github.com/timbre.js/misc/img/ie.png)
 
 *IE support is only Internet Exploler 9.*
 

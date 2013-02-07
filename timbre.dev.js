@@ -1,5 +1,5 @@
 /**
- * T("timbre.js") - A JavaScript library for objective sound programming
+ * T("timbre.js") - A JavaScript library for objective sound programming 
  */
 (function(undefined) {
     "use strict";
