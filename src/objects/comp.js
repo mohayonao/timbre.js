@@ -6,7 +6,7 @@
     var Compressor = T.modules.Compressor;
     
     function CompressorNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.fixAR(this);
         
         var _ = this._;

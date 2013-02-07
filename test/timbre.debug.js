@@ -48,7 +48,7 @@ function DummyPlayer(sys) {
 timbre.bind(DummyPlayer);
 
 function CellNode(_args) {
-    timbre.Object.call(this, _args);
+    timbre.Object.call(this, 1, _args);
 }
 timbre.fn.extend(CellNode);
 timbre.fn.register("cell", CellNode);

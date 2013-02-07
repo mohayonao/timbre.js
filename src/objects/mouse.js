@@ -14,7 +14,7 @@
         }
         instance = this;
         
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.stereo(this);
         
         this.X = this.L;
@@ -75,7 +75,7 @@
     
     
     function MouseXY(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         if (!instance) {
             instance = new MouseListener([]);
         }

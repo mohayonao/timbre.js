@@ -5,7 +5,7 @@
     var Reverb = T.modules.Reverb;
     
     function ReverbNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.fixAR(this);
         
         this._.reverb = new Reverb(T.samplerate, T.cellsize);

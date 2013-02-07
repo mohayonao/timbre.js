@@ -684,7 +684,7 @@
     
     // root object
     var TimbreObject = (function() {
-        function TimbreObject(_args) {
+        function TimbreObject(numChannels, _args) {
             this._ = {}; // private members
             var e = this._.events = new modules.EventEmitter(this);
             this._.emit   = function() {
@@ -700,6 +700,7 @@
             this.tickID = -1;
             this.cell  = new fn.SignalArray(_sys.cellsize);
             this.nodes = _args.map(timbre);
+            this.numChannels = numChannels;
             
             this._.ar  = true;
             this._.mul = 1;
@@ -1110,7 +1111,7 @@
     
     var NumberWrapper = (function() {
         function NumberWrapper(_args) {
-            TimbreObject.call(this, []);
+            TimbreObject.call(this, 1, []);
             __fixKR(this);
             
             this.value = _args[0];
@@ -1148,7 +1149,7 @@
     
     var BooleanWrapper = (function() {
         function BooleanWrapper(_args) {
-            TimbreObject.call(this, []);
+            TimbreObject.call(this, 1, []);
             __fixKR(this);
             
             this.value = _args[0];
@@ -1184,7 +1185,7 @@
     
     var FunctionWrapper = (function() {
         function FunctionWrapper(_args) {
-            TimbreObject.call(this, []);
+            TimbreObject.call(this, 1, []);
             __fixKR(this);
             
             this.func    = _args[0];
@@ -1246,7 +1247,7 @@
     
     var ArrayWrapper = (function() {
         function ArrayWrapper(_args) {
-            TimbreObject.call(this, []);
+            TimbreObject.call(this, 1, []);
             __fixKR(this);
             
             if (isDictionary(_args[1])) {
@@ -1269,7 +1270,7 @@
     
     var ObjectWrapper = (function() {
         function ObjectWrapper(_args) {
-            TimbreObject.call(this, []);
+            TimbreObject.call(this, 1, []);
             __fixKR(this);
 
             if (isDictionary(_args[1])) {
@@ -1292,7 +1293,7 @@
     
     var SystemInlet = (function() {
         function SystemInlet(object) {
-            TimbreObject.call(this, []);
+            TimbreObject.call(this, 2, []);
             if (object instanceof TimbreObject) {
                 this.nodes.push(object);
             }

@@ -5,7 +5,7 @@
     var FFT = T.modules.FFT;
     
     function FFTNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.listener(this);
         fn.stereo(this);
         fn.fixAR(this);

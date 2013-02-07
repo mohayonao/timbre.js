@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function ClipNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         
         var _ = this._;
         _.min = -0.8;

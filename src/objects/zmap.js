@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function ZMapNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
 
         var _ = this._;
         _.inMin  = 0;

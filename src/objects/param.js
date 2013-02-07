@@ -7,7 +7,7 @@
     var EnvelopeValue = T.modules.EnvelopeValue;
     
     function ParamNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         
         var _ = this._;
         _.value = 0;

@@ -6,7 +6,7 @@
     var empty;
     
     function GateNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.fixAR(this);
         
         this._.selected = 0;

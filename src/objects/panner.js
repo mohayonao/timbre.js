@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function PannerNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.stereo(this);
         fn.fixAR(this);
         

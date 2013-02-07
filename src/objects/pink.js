@@ -8,7 +8,7 @@
     var fn = T.fn;
     
     function PinkNoiseNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.fixAR(this);
         
         var whites = new Uint8Array(5);

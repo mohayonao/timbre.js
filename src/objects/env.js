@@ -7,7 +7,7 @@
     var isDictionary = fn.isDictionary;
     
     function EnvNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         var _ = this._;
         _.env = new Envelope(T.samplerate);
         _.env.setStep(this.cell.length);

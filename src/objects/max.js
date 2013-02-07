@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function MaxNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
     }
     fn.extend(MaxNode);
     

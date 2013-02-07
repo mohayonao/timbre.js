@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function MidiCpsNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         var _ = this._;
         _.midi = 0;
         _.value = 0;

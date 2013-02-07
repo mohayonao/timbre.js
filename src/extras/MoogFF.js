@@ -35,7 +35,7 @@
     var fn = T.fn;
     
     function MoogFFNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.fixAR(this);
         
         var _ = this._;

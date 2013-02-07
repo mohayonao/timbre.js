@@ -4,7 +4,7 @@
     var fn = T.fn;
 
     function SelectorNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         
         this._.selected   = 0;
         this._.background = false;

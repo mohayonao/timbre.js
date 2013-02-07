@@ -6,7 +6,7 @@
     var EfxDelay  = T.modules.EfxDelay;
     
     function DelayNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.fixAR(this);
         
         var _ = this._;

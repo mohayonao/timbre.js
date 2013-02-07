@@ -6,7 +6,7 @@
     var FFT = T.modules.FFT;
     
     function SpectrumNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.listener(this);
         fn.fixAR(this);
 
