@@ -128,14 +128,14 @@
                 _.countSamples -= cell.length;
                 if (_.countSamples <= 0) {
                     _.countSamples += (T.samplerate * interval * 0.001)|0;
-                    var inputs = this.inputs;
+                    var nodes = this.nodes;
                     var count  = _.count;
                     var x = count * _.mul + _.add;
                     for (var j = 0, jmax = cell.length; j < jmax; ++j) {
                         cell[j] = x;
                     }
-                    for (var i = 0, imax = inputs.length; i < imax; ++i) {
-                        inputs[i].bang(count);
+                    for (var i = 0, imax = nodes.length; i < imax; ++i) {
+                        nodes[i].bang(count);
                     }
                     _.count += 1;
                 }

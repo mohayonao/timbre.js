@@ -47,8 +47,8 @@
                 _.panR = Math.sin(0.5 * Math.PI * ((value * 0.5) + 0.5));
             }
             
-            var inputs = this.inputs;
-            var i, imax = inputs.length;
+            var nodes = this.nodes;
+            var i, imax = nodes.length;
             var j, jmax = cell.length;
             var mul = _.mul, add = _.add;
             var tmp, x;
@@ -60,7 +60,7 @@
                 cellL[j] = cellR[j] = cell[j] = 0;
             }
             for (i = 0; i < imax; ++i) {
-                tmp = inputs[i].process(tickID);
+                tmp = nodes[i].process(tickID);
                 for (j = 0; j < jmax; ++j) {
                     cellL[j] = cellR[j] = cell[j] += tmp[j];
                 }

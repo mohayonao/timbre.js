@@ -225,7 +225,7 @@
             var mul = _.mul, add = _.add;
             var i, imax = cell.length;
             
-            if (this.inputs.length) {
+            if (this.nodes.length) {
                 fn.inputSignalAR(this);
                 var t, sr = _.samplerate * 0.001;
                 for (i = 0; i < imax; ++i) {

@@ -66,9 +66,9 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var inputs = this.inputs;
+            var nodes = this.nodes;
             var mul = _.mul, add = _.add;
-            var i, imax = inputs.length;
+            var i, imax = nodes.length;
             var j, jmax = cell.length;
             var min = _.min, max = _.max;
             var tmp, x;
@@ -79,7 +79,7 @@
             
             if (_.ar) { // audio-rate
                 for (i = 0; i < imax; ++i) {
-                    tmp = inputs[i].process(tickID);
+                    tmp = nodes[i].process(tickID);
                     for (j = 0; j < jmax; ++j) {
                         cell[j] += tmp[j];
                     }
@@ -98,7 +98,7 @@
             } else {    // control-rate
                 tmp = 0;
                 for (i = 0; i < imax; ++i) {
-                    tmp += inputs[i].process(tickID)[0];
+                    tmp += nodes[i].process(tickID)[0];
                 }
                 tmp = (tmp < min) ? min : (tmp > max) ? max : tmp;
                 tmp = tmp * mul + add;

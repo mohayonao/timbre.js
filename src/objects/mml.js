@@ -84,7 +84,7 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var inputs = this.inputs;
+            var nodes = this.nodes;
             var queue  = _.queue;
             var gen, i, imax;
             
@@ -92,8 +92,8 @@
                 while (queue[0][0] <= _.currentTime) {
                     var nextItem = _.queue.shift();
                     if (nextItem[1]) {
-                        for (i = 0, imax = inputs.length; i < imax; ++i) {
-                            gen = inputs[i];
+                        for (i = 0, imax = nodes.length; i < imax; ++i) {
+                            gen = nodes[i];
                             if (gen.noteOn) {
                                 gen.noteOn(nextItem[1], nextItem[3]);
                             } else {
@@ -104,8 +104,8 @@
                         _.emit("mml", "noteOn", {noteNum:nextItem[1], velocity:nextItem[3]});
                         sched(this);
                     } else {
-                        for (i = 0, imax = inputs.length; i < imax; ++i) {
-                            gen = inputs[i];
+                        for (i = 0, imax = nodes.length; i < imax; ++i) {
+                            gen = nodes[i];
                             if (gen.noteOff) {
                                 gen.noteOff(nextItem[2], nextItem[3]);
                             } else if (gen.release) {

@@ -58,7 +58,7 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
-            var len = this.inputs.length;
+            var len = this.nodes.length;
             var i, imax = cell.length;
 
             if (_.ar && len) {
@@ -70,7 +70,7 @@
                 _.value = cell[imax-1];
                 fn.outputSignalAR(this);
             } else {
-                var input = (this.inputs.length) ? fn.inputSignalKR(this) : _.midi;
+                var input = (this.nodes.length) ? fn.inputSignalKR(this) : _.midi;
                 if (_.prev !== input) {
                     _.prev = input;
                     _.value = _.a4 * Math.pow(2, (input - 69) / 12);

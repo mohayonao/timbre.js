@@ -93,7 +93,7 @@
             var outMin = _.outMin, outMax = _.outMax;
             var warp   = _.warp;
             
-            var len = this.inputs.length;
+            var len = this.nodes.length;
             var mul = _.mul, add = _.add;
             var i, imax = cell.length;
             
@@ -104,7 +104,7 @@
                 }
                 fn.outputSignalAR(this);
             } else {
-                var input = (this.inputs.length) ? fn.inputSignalKR(this) : 0;
+                var input = (this.nodes.length) ? fn.inputSignalKR(this) : 0;
                 var value = warp(input, inMin, inMax, outMin, outMax) * mul + add;
                 for (i = 0; i < imax; ++i) {
                     cell[i] = value;

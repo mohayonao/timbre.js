@@ -99,11 +99,11 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var inputs  = this.inputs;
+            var nodes = this.nodes;
             var i, imax = cell.length;
             var mul = _.mul, add = _.add;
             
-            if (inputs.length) {
+            if (nodes.length) {
                 fn.inputSignalAR(this);
             } else {
                 for (i = 0; i < imax; ++i) {

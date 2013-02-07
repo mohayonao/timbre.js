@@ -548,7 +548,7 @@
                 if (arguments.length) {
                     self.append.apply(self, arguments);
                 }
-                if (self.inputs.length) {
+                if (self.nodes.length) {
                     _sys.nextTick(onlisten);
                 }
                 return self;
@@ -557,7 +557,7 @@
                 if (arguments.length) {
                     self.remove.apply(self, arguments);
                 }
-                if (!self.inputs.length) {
+                if (!self.nodes.length) {
                     _sys.nextTick(onunlisten);
                 }
                 return self;
@@ -589,9 +589,9 @@
     fn.make_onended = __make_onended;
     
     var __inputSignalAR = function(object) {
-        var cell   = object.cell;
-        var inputs = object.inputs;
-        var i, imax = inputs.length;
+        var cell  = object.cell;
+        var nodes = object.nodes;
+        var i, imax = nodes.length;
         var j, jmax = cell.length;
         var tickID = object.tickID;
         var tmp;
@@ -601,7 +601,7 @@
             cell[j] = cell[j+1] = cell[j+2] = cell[j+3] = cell[j+4] = cell[j+5] = cell[j+6] = cell[j+7] = 0;
         }
         for (i = 0; i < imax; ++i) {
-            tmp = inputs[i].process(tickID);
+            tmp = nodes[i].process(tickID);
             for (j = jmax; j; ) {
                 j -= 8;
                 cell[j  ] += tmp[j  ];
@@ -618,12 +618,12 @@
     fn.inputSignalAR = __inputSignalAR;
 
     var __inputSignalKR = function(object) {
-        var inputs = object.inputs;
-        var i, imax = inputs.length;
+        var nodes = object.nodes;
+        var i, imax = nodes.length;
         var tickID = object.tickID;
         var tmp = 0;
         for (i = 0; i < imax; ++i) {
-            tmp += inputs[i].process(tickID)[0];
+            tmp += nodes[i].process(tickID)[0];
         }
         return tmp;
     };
@@ -698,8 +698,8 @@
             }
             
             this.tickID = -1;
-            this.cell   = new fn.SignalArray(_sys.cellsize);
-            this.inputs = _args.map(timbre);
+            this.cell  = new fn.SignalArray(_sys.cellsize);
+            this.nodes = _args.map(timbre);
             
             this._.ar  = true;
             this._.mul = 1;
@@ -784,7 +784,7 @@
         $.append = function() {
             if (arguments.length > 0) {
                 var list = slice.call(arguments).map(timbre);
-                this.inputs = this.inputs.concat(list);
+                this.nodes = this.nodes.concat(list);
                 this._.emit("append", list);
             }
             return this;
@@ -797,11 +797,11 @@
         
         $.remove = function() {
             if (arguments.length > 0) {
-                var j, inputs = this.inputs, list = [];
+                var j, nodes = this.nodes, list = [];
                 for (var i = 0, imax = arguments.length; i < imax; ++i) {
-                    if ((j = inputs.indexOf(arguments[i])) !== -1) {
-                        list.push(inputs[j]);
-                        inputs.splice(j, 1);
+                    if ((j = nodes.indexOf(arguments[i])) !== -1) {
+                        list.push(nodes[j]);
+                        nodes.splice(j, 1);
                     }
                 }
                 if (list.length > 0) {
@@ -817,8 +817,8 @@
         };
 
         $.removeAll = function() {
-            var list = this.inputs.slice();
-            this.inputs = [];
+            var list = this.nodes.slice();
+            this.nodes = [];
             if (list.length > 0) {
                 this._.emit("remove", list);
             }
@@ -826,9 +826,9 @@
         };
 
         $.removeAtIndex = function(index) {
-            var item = this.inputs[index];
+            var item = this.nodes[index];
             if (item) {
-                this.inputs.splice(index, 1);
+                this.nodes.splice(index, 1);
                 this._.emit("remove", [item]);
             }
             return this;
@@ -922,7 +922,7 @@
             if (dac === null) {
                 dac = this._.dac = new SystemInlet(this);
                 emit = true;
-            } else if (dac.inputs.indexOf(this) === -1) {
+            } else if (dac.nodes.indexOf(this) === -1) {
                 dac.append(this);
                 emit = true;
             }
@@ -936,12 +936,12 @@
         $.pause = function() {
             var dac = this._.dac;
             if (dac) {
-                if (dac.inputs.indexOf(this) !== -1) {
+                if (dac.nodes.indexOf(this) !== -1) {
                     this._.dac = null;
                     dac.remove(this);
                     this._.emit("pause");
                 }
-                if (dac.inputs.length === 0) {
+                if (dac.nodes.length === 0) {
                     dac.pause();
                 }
             }
@@ -1294,7 +1294,7 @@
         function SystemInlet(object) {
             TimbreObject.call(this, []);
             if (object instanceof TimbreObject) {
-                this.inputs.push(object);
+                this.nodes.push(object);
             }
             __stereo(this);
 
@@ -1367,8 +1367,8 @@
             var cell  = this.cell;
             var cellL = this.cellL;
             var cellR = this.cellR;
-            var inputs = this.inputs;
-            var i, imax = inputs.length;
+            var nodes = this.nodes;
+            var i, imax = nodes.length;
             var j, jmax = cell.length;
             var add = _.add, mul = _.mul;
             var tmp, tmpL, tmpR, x;
@@ -1381,7 +1381,7 @@
                 }
                 
                 for (i = 0; i < imax; ++i) {
-                    tmp = inputs[i];
+                    tmp = nodes[i];
                     tmp.process(tickID);
                     if (tmp.isStereo) {
                         tmpL = tmp.cellL;

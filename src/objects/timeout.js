@@ -88,9 +88,9 @@
             }
             
             if (_.samples <= 0) {
-                var inputs = this.inputs;
-                for (var i = 0, imax = inputs.length; i < imax; ++i) {
-                    inputs[i].bang();
+                var nodes = this.nodes;
+                for (var i = 0, imax = nodes.length; i < imax; ++i) {
+                    nodes[i].bang();
                 }
                 fn.nextTick(_.onended);
             }

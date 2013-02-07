@@ -72,7 +72,7 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
-            var len = this.inputs.length;
+            var len = this.nodes.length;
             var index, value;
             var dict = _.dict, defaultValue = _.defaultValue;
             var mul = _.mul, add = _.add;
@@ -92,7 +92,7 @@
                 }
                 fn.outputSignalAR(this);
             } else {
-                index = (this.inputs.length) ? fn.inputSignalKR(this) : _.index;
+                index = (this.nodes.length) ? fn.inputSignalKR(this) : _.index;
                 if (index < 0) {
                     index = (index - 0.5)|0;
                 } else {
