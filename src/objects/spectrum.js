@@ -163,7 +163,7 @@
                 this._.emit("data");
             }
         }
-        return cell;
+        return this;
     };
     
     var super_plot = T.Object.prototype.plot;

@@ -110,9 +110,9 @@
             
             fn.inputSignalAR(this);
             
-            var thresh = _.thresh.process(tickID)[0];
-            var knee   = _.knee.process(tickID)[0];
-            var ratio  = _.ratio.process(tickID)[0];
+            var thresh = _.thresh.process(tickID).getChannelData(0)[0];
+            var knee   = _.knee.process(tickID).getChannelData(0)[0];
+            var ratio  = _.ratio.process(tickID).getChannelData(0)[0];
             if (_.prevThresh !== thresh || _.prevKnee !== knee || _.prevRatio !== ratio) {
                 _.prevThresh = thresh;
                 _.prevKnee   = knee;
@@ -128,7 +128,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("comp", CompressorNode);

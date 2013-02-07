@@ -135,7 +135,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
 
     var fft = new FFT(2048);

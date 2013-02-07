@@ -24,10 +24,10 @@
             
             if (_.ar) {
                 if (nodes.length > 0) {
-                    tmp = nodes[0].process(tickID);
+                    tmp = nodes[0].process(tickID).getChannelData(0);
                     cell.set(tmp);
                     for (i = 1; i < imax; ++i) {
-                        tmp = nodes[i].process(tickID);
+                        tmp = nodes[i].process(tickID).getChannelData(0);
                         for (j = 0; j < jmax; ++j) {
                             val = tmp[j];
                             if (cell[j] < val) {
@@ -43,9 +43,9 @@
                 fn.outputSignalAR(this);
             } else {
                 if (nodes.length > 0) {
-                    tmp = nodes[0].process(tickID)[0];
+                    tmp = nodes[0].process(tickID).getChannelData(0)[0];
                     for (i = 1; i < imax; ++i) {
-                        val = nodes[i].process(tickID)[0];
+                        val = nodes[i].process(tickID).getChannelData(0)[0];
                         if (tmp < val) {
                             tmp = val;
                         }
@@ -58,7 +58,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("max", MaxNode);

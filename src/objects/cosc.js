@@ -74,7 +74,7 @@
             this.tickID = tickID;
             
             var i, imax = cell.length;
-            var freq = _.freq.process(tickID)[0];
+            var freq = _.freq.process(tickID).getChannelData(0)[0];
             var osc1 = _.osc1, osc2 = _.osc2, tmp = _.tmp;
             
             osc1.frequency = freq - (_.beats * 0.5);
@@ -92,7 +92,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("cosc", COscNode);

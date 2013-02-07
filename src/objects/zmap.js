@@ -112,7 +112,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     var WarpFunctions = {

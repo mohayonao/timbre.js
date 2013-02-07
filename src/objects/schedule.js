@@ -98,11 +98,10 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
         var _ = this._;
 
         if (_.isEnded) {
-            return cell;
+            return this;
         }
 
         if (this.tickID !== tickID) {
@@ -127,6 +126,7 @@
                 _.emit(emit);
             }
         }
+        return this;
     };
     
     fn.register("schedule", ScheduleNode);

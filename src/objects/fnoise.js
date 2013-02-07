@@ -47,7 +47,7 @@
 
             var lastValue = _.lastValue;
             var phase     = _.phase;
-            var phaseStep = _.freq.process(tickID)[0] / _.samplerate;
+            var phaseStep = _.freq.process(tickID).getChannelData(0)[0] / _.samplerate;
             var reg = _.reg;
             var mul = _.mul, add = _.add;
             var i, imax;
@@ -80,7 +80,7 @@
             _.lastValue = lastValue;
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("fnoise", FNoiseNode);

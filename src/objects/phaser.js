@@ -69,8 +69,8 @@
             fn.inputSignalAR(this);
             
             if (!_.bypassed) {
-                var freq  = _.freq.process(tickID)[0];
-                var Q     = _.Q.process(tickID)[0];
+                var freq  = _.freq.process(tickID).getChannelData(0)[0];
+                var Q     = _.Q.process(tickID).getChannelData(0)[0];
                 var steps = _.steps;
                 var i, imax;
                 
@@ -91,7 +91,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
 
     fn.register("phaser", PhaserNode);

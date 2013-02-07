@@ -81,7 +81,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("midiratio", MidiRatioNode);

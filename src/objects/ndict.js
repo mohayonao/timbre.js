@@ -105,7 +105,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("ndict", NDictNode);

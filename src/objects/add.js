@@ -25,7 +25,7 @@
                 fn.outputSignalKR(this);
             }
         }
-        return cell;
+        return this;
     };
     
     fn.register("+", AddNode);

@@ -82,7 +82,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("midicps", MidiCpsNode);

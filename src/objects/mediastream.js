@@ -59,7 +59,7 @@
         var _ = this._;
         
         if (_.src === null) {
-            return cell;
+            return this;
         }
         
         if (this.tickID !== tickID) {
@@ -83,7 +83,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     var impl = {};

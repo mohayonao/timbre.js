@@ -112,7 +112,7 @@
         var _ = this._;
         
         if (_.isEnded) {
-            return cell;
+            return this;
         }
         
         if (this.tickID !== tickID) {
@@ -122,7 +122,7 @@
                 _.delaySamples -= cell.length;
             }
             
-            var interval = _.interval.process(tickID)[0];
+            var interval = _.interval.process(tickID).getChannelData(0)[0];
             
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;
@@ -146,7 +146,7 @@
                 fn.nextTick(_.onended);
             }
         }
-        return cell;
+        return this;
     };
     
     fn.register("interval", IntervalNode);

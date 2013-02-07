@@ -601,7 +601,7 @@
             cell[j] = cell[j+1] = cell[j+2] = cell[j+3] = cell[j+4] = cell[j+5] = cell[j+6] = cell[j+7] = 0;
         }
         for (i = 0; i < imax; ++i) {
-            tmp = nodes[i].process(tickID);
+            tmp = nodes[i].process(tickID).getChannelData(0);
             for (j = jmax; j; ) {
                 j -= 8;
                 cell[j  ] += tmp[j  ];
@@ -623,7 +623,7 @@
         var tickID = object.tickID;
         var tmp = 0;
         for (i = 0; i < imax; ++i) {
-            tmp += nodes[i].process(tickID)[0];
+            tmp += nodes[i].process(tickID).getChannelData(0)[0];
         }
         return tmp;
     };
@@ -666,7 +666,7 @@
     //debug--
     fn.debug = {};
     fn.debug.process = function(object) {
-        var cell = object.process(+new Date());
+        var cell = object.process(+new Date()).getChannelData(0);
         var min = +Infinity, max = -Infinity, nan = false;
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             if (isNaN(cell[i])) {
@@ -908,7 +908,17 @@
             return this;
         };
         
-        $.process = function() {
+        $.process = __nop;
+        
+        $.getChannelData = function(ch) {
+            switch (ch) {
+            case 0:
+                return this.cell;
+            case 1:
+                return this.cellL;
+            case 2:
+                return this.cellR;
+            }
             return this.cell;
         };
         
@@ -1090,7 +1100,7 @@
     
     var ChannelObject = (function() {
         function ChannelObject(parent) {
-            timbre.Object.call(this, []);
+            timbre.Object.call(this, 1, []);
             __fixAR(this);
             
             this._.parent = parent;
@@ -1102,7 +1112,7 @@
                 this.tickID = tickID;
                 this._.parent.process(tickID);
             }
-            return this.cell;
+            return this;
         };
         
         return ChannelObject;
@@ -1402,7 +1412,7 @@
                 }
             }
             
-            return cell;
+            return this;
         };
         
         return SystemInlet;

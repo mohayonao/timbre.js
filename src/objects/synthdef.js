@@ -182,7 +182,7 @@
                 
                 list = _.genList;
                 for (i = 0, imax = list.length; i < imax; ++i) {
-                    tmp = list[i].process(tickID);
+                    tmp = list[i].process(tickID).getChannelData(0);
                     for (j = 0; j < jmax; ++j) {
                         cell[j] += tmp[j];
                     }
@@ -195,7 +195,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("SynthDef", SynthDefNode);

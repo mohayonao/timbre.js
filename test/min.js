@@ -16,7 +16,7 @@ describe('T("min")', function() {
         var pulse = T("cell.pulse", {mul:0.25});
         var tri   = T("cell.tri");
         var t = T("min", sin, pulse, tri);
-        var val, cell = t.process(0);
+        var val, cell = t.process(0).getChannelData(0);;
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             val = Math.min(sin.cell[i], Math.min(pulse.cell[i], tri.cell[i]));
             assert.closeTo(cell[i], val, 1e-6);
@@ -27,7 +27,7 @@ describe('T("min")', function() {
         var pulse = T("cell.pulse", {mul:0.25});
         var tri   = T("cell.tri");
         var t = T("min", sin, pulse, tri).kr();
-        var val, cell = t.process(0);
+        var val, cell = t.process(0).getChannelData(0);;
         val = Math.min(sin.cell[0], Math.min(pulse.cell[0], tri.cell[0]));
         assert.closeTo(cell[0], val, 1e-6);
         for (var i = 1, imax = cell.length; i < imax; ++i) {

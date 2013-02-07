@@ -91,7 +91,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("tape", ScissorNode);

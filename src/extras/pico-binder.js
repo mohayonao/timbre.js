@@ -41,7 +41,7 @@
                 }
             }
         }
-        return cell;
+        return this;
     };
     
     var pico;

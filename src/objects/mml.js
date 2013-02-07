@@ -74,11 +74,10 @@
     });
     
     $.process = function(tickID) {
-        var cell = this.cell;
         var _ = this._;
         
         if (_.isEnded) {
-            return cell;
+            return this;
         }
         
         if (this.tickID !== tickID) {
@@ -127,7 +126,7 @@
             _.currentTime += _.currentTimeIncr;
         }
         
-        return cell;
+        return this;
     };
     
     var sched = function(self) {

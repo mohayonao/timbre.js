@@ -49,7 +49,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -62,7 +61,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("gate", GateNode);

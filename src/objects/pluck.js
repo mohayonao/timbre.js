@@ -77,7 +77,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("pluck", PluckNode);

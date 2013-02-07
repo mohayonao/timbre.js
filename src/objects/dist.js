@@ -57,8 +57,8 @@
             
             fn.inputSignalAR(this);
             
-            var preGain  = -_.pre.process(tickID)[0];
-            var postGain = -_.post.process(tickID)[0];
+            var preGain  = -_.pre.process(tickID).getChannelData(0)[0];
+            var postGain = -_.post.process(tickID).getChannelData(0)[0];
 
             if (_.prevPreGain !== preGain || _.prevPostGain !== postGain) {
                 _.prevPreGain  = preGain;
@@ -116,7 +116,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     var lowpass_params = function(_) {

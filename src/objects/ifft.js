@@ -47,8 +47,8 @@
             if (_.real && _.imag) {
                 var real = _.realBuffer;
                 var imag = _.imagBuffer;
-                var _real = _.real.process(tickID);
-                var _imag = _.imag.process(tickID);
+                var _real = _.real.process(tickID).getChannelData(0);
+                var _imag = _.imag.process(tickID).getChannelData(0);
                 
                 real.set(_real);
                 imag.set(_imag);
@@ -59,7 +59,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("ifft", IFFTNode);

@@ -136,7 +136,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
 
     var setTable = function(list) {

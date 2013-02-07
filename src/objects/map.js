@@ -86,7 +86,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("map", MapNode);

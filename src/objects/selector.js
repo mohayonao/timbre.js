@@ -56,13 +56,13 @@
             
             var tmp = nodes[_.selected];
             if (tmp) {
-                cell.set(tmp.process(tickID));
+                cell.set(tmp.process(tickID).getChannelData(0));
             }
             
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("selector", SelectorNode);

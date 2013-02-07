@@ -24,10 +24,10 @@
             
             if (_.ar) {
                 if (nodes.length > 0) {
-                    tmp = nodes[0].process(tickID);
+                    tmp = nodes[0].process(tickID).getChannelData(0);
                     cell.set(tmp);
                     for (i = 1; i < imax; ++i) {
-                        tmp = nodes[i].process(tickID);
+                        tmp = nodes[i].process(tickID).getChannelData(0);
                         for (j = 0; j < jmax; ++j) {
                             div = tmp[j];
                             cell[j] = (div === 0) ? 0 : cell[j] / div;
@@ -41,9 +41,9 @@
                 fn.outputSignalAR(this);
             } else {
                 if (nodes.length > 0) {
-                    tmp = nodes[0].process(tickID)[0];
+                    tmp = nodes[0].process(tickID).getChannelData(0)[0];
                     for (i = 1; i < imax; ++i) {
-                        div = nodes[i].process(tickID)[0];
+                        div = nodes[i].process(tickID).getChannelData(0)[0];
                         tmp = (div === 0) ? 0 : tmp / div;
                     }
                 } else {
@@ -54,7 +54,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("/", DivNode);

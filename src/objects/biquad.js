@@ -127,17 +127,17 @@
             
             var changed = false;
             
-            var freq = _.freq.process(tickID)[0];
+            var freq = _.freq.process(tickID).getChannelData(0)[0];
             if (_.prevFreq !== freq) {
                 _.prevFreq = freq;
                 changed = true;
             }
-            var band = _.band.process(tickID)[0];
+            var band = _.band.process(tickID).getChannelData(0)[0];
             if (_.prevband !== band) {
                 _.prevband = band;
                 changed = true;
             }
-            var gain = _.gain.process(tickID)[0];
+            var gain = _.gain.process(tickID).getChannelData(0)[0];
             if (_.prevGain !== gain) {
                 _.prevGain = gain;
                 changed = true;
@@ -154,7 +154,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     var fft = new FFT(2048);

@@ -109,7 +109,7 @@
             var _ = this._;
             
             if (_.node === null) {
-                return cell;
+                return this;
             }
             
             if (this.tickID !== tickID) {
@@ -128,7 +128,7 @@
                 }
                 fn.outputSignalAR(this);
             }
-            return cell;
+            return this;
         };
         
         fn.register("WebAudioAPI:recv", WebAudioAPIRecvNode);
@@ -204,7 +204,7 @@
             var _ = this._;
             
             if (_.script === null) {
-                return cell;
+                return this;
             }
             
             if (this.tickID !== tickID) {
@@ -223,7 +223,7 @@
                 
                 fn.outputSignalAR(this);
             }
-            return cell;
+            return this;
         };
         
         fn.register("WebAudioAPI:send", WebAudioAPISendNode);

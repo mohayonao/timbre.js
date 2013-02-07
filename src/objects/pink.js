@@ -50,7 +50,7 @@
             }
             _.key = key;
         }
-        return cell;
+        return this;
     };
     
     fn.register("pink", PinkNoiseNode);

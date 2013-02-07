@@ -214,7 +214,7 @@
         var cell = this.cell;
 
         if (_.isEnded && !_.buffer) {
-            return cell;
+            return this;
         }
         
         if (this.tickID !== tickID) {
@@ -236,7 +236,7 @@
                 _.phase = phase;
                 _.currentTime = t;
             } else {
-                var pitch  = _.pitch.process(tickID)[0];
+                var pitch  = _.pitch.process(tickID).getChannelData(0)[0];
                 var phaseIncr = _.phaseIncr * pitch;
                 
                 for (i = 0; i < imax; ++i) {
@@ -262,7 +262,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
         
     var super_plot = T.Object.prototype.plot;

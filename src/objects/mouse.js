@@ -133,7 +133,8 @@
         return this;
     };
     MouseXY.prototype.process = function(tickID) {
-        return this._.map.process(tickID);
+        this._.map.process(tickID);
+        return this;
     };
     
     var Curves = {

@@ -31,7 +31,7 @@
                 }
             }
         }
-        return cell;
+        return this;
     };
     
     fn.register("noise", NoiseNode);

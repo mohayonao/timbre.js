@@ -102,8 +102,8 @@
             }
             
             var osc = _.osc;
-            var freq  = _.freq.process(tickID);
-            var phase = _.phase.process(tickID);
+            var freq  = _.freq.process(tickID).getChannelData(0);
+            var phase = _.phase.process(tickID).getChannelData(0);
             
             osc.frequency = freq[0];
             osc.phase     = phase[0];
@@ -135,7 +135,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
 
     var plotBefore;

@@ -37,7 +37,7 @@
             
             var changed = false;
             
-            var value = _.value.process(tickID)[0];
+            var value = _.value.process(tickID).getChannelData(0)[0];
             if (_.prevValue !== value) {
                 _.prevValue = value;
                 changed = true;
@@ -60,7 +60,7 @@
                 cellL[j] = cellR[j] = cell[j] = 0;
             }
             for (i = 0; i < imax; ++i) {
-                tmp = nodes[i].process(tickID);
+                tmp = nodes[i].process(tickID).getChannelData(0);
                 for (j = 0; j < jmax; ++j) {
                     cellL[j] = cellR[j] = cell[j] += tmp[j];
                 }
@@ -75,7 +75,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("pan", PannerNode);

@@ -84,7 +84,7 @@
             
             fn.inputSignalAR(this);
             
-            var fb  = _.fb.process(tickID)[0];
+            var fb  = _.fb.process(tickID).getChannelData(0)[0];
             var mix = _.mix;
             
             if (_.prevFb !== fb || _.prevMix !== mix) {
@@ -100,7 +100,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("delay", DelayNode);

@@ -147,7 +147,7 @@
             
             fn.outputSignalAR(this);
         }
-        return cell;
+        return this;
     };
         
     fn.register("record", RecNode);
