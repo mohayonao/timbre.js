@@ -44,12 +44,14 @@ MIT
 
 
 ## ChangeLog ##
-**WORKING** (335.49KB)
-* Added: using Float64Array mode, `T.setup({f64:true})`
-* Fixed: performance improvement
+**WORKING**
+* Added `T.setup({f64:true})` to use Float64Array instead of Float32Array
+* Added Android/Firefox support
+* Added flash support for Opera, IE9
+* performance improvements
 
 **13.02.06** (337.50KB)
-* Fixed: support iOS6.1
+* Workadound for iOS6.1 bug (failure to start processing in a callback of XMLHttpRequest)
 
 **13.02.02** (335.97KB)
 * Fixed: decoder for webkit
