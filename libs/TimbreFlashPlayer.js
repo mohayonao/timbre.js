@@ -21,26 +21,30 @@
         this.play = function() {
             var onaudioprocess;
             var interleaved = new Array(sys.streamsize * sys.channels);
+            var streammsec  = sys.streammsec;
             var written = 0;
+            var writtenIncr = sys.streamsize / sys.samplerate * 1000;
+            var start = Date.now();
             
             onaudioprocess = function() {
-                var offset = swf.currentSampleOffset();
-                var inL = sys.strmL, inR = sys.strmR;
-                var i = interleaved.length, j = inL.length;
-                
-                if (written > offset + 16384) {
+                if (written > Date.now() - start) {
                     return;
                 }
+                var inL = sys.strmL;
+                var inR = sys.strmR;
+                var i = interleaved.length;
+                var j = inL.length;
                 sys.process();
                 while (j--) {
                     interleaved[--i] = (inR[j] * 32768)|0;
                     interleaved[--i] = (inL[j] * 32768)|0;
                 }
-                written += swf.writeAudio(interleaved.join(" "));
+                swf.writeAudio(interleaved.join(" "));
+                written += writtenIncr;
             };
             
             swf.setup(sys.channels, sys.samplerate);
-            timerId = setInterval(onaudioprocess, 20);
+            timerId = setInterval(onaudioprocess, streammsec);
         };
         
         this.pause = function() {

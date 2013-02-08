@@ -8,14 +8,12 @@ package {
     public class TimbreFlashPlayer extends Sprite {
         private var _sound:Sound = null;
         private var _dx:Number = 1;
-        private var _written:int = 0;
         private var _interleaved:Array = [];
         private var _cancel_flag:Boolean = false;
         
         function TimbreFlashPlayer() {
             ExternalInterface.addCallback("setup", _setup);
             ExternalInterface.addCallback("cancel", _cancel);
-            ExternalInterface.addCallback("currentSampleOffset", _currentSampleOffset);
             ExternalInterface.addCallback("writeAudio", _writeAudio);
         }
         
@@ -31,11 +29,7 @@ package {
             _cancel_flag = true;
         }
         
-        private function _currentSampleOffset():int {
-            return _written;
-        }
-        
-        private function _writeAudio(interleaved:String):int {
+        private function _writeAudio(interleaved:String):void {
             if (!_sound) {
                 _sound = new Sound();
                 _sound.addEventListener(SampleDataEvent.SAMPLE_DATA, _streaming);
@@ -44,7 +38,7 @@ package {
             _cancel_flag = false;
             
             var samples:Array = interleaved.split(" ");
-            var i:int, imax:int = samples.length, x:Number = 0, written:int = 0;
+            var i:int, imax:int = samples.length, x:Number = 0;
             var k:Number = 1/32768;
             
             for (i = 0; i < imax; i += 2) {
@@ -52,12 +46,9 @@ package {
                     _interleaved.push(samples[i+0] * k);
                     _interleaved.push(samples[i+1] * k);
                     x += _dx;
-                    written += 1;
                 }
                 x -= 1;
             }
-            
-            return written;
         }
         
         private function _streaming(e:SampleDataEvent):void {
@@ -74,7 +65,6 @@ package {
             
             for (i = 0; i < imax; ++i) {
                 buffer.writeFloat(_interleaved[i]);
-                ++_written;
             }
             
             _interleaved = _interleaved.slice(imax, _interleaved.length);
