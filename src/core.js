@@ -1575,8 +1575,8 @@
                 for (j = 0, jmax = inlets.length; j < jmax; ++j) {
                     x = inlets[j];
                     x.process(tickID);
-                    tmpL = x.cells[0];
-                    tmpR = x.cells[1];
+                    tmpL = x.cells[1];
+                    tmpR = x.cells[2];
                     for (k = 0, i = saved_i; k < kmax; ++k, ++i) {
                         strmL[i] += tmpL[k];
                         strmR[i] += tmpR[k];
