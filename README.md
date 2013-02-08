@@ -55,7 +55,9 @@ MIT
 
 
 ## ChangeLog ##
-**WORKING** (335.26KB)
+**WORKING** (341.90KB)
+* Added `T("lag")`
+* Added `T("delay").cross`
 * make it easier to make a stereo object
 
 **13.02.07** (334.61KB)
