@@ -4,14 +4,13 @@
     var fn = T.fn;
     
     function AddNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
     }
     fn.extend(AddNode);
     
     var $ = AddNode.prototype;
     
     $.process = function(tickID) {
-        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
@@ -21,10 +20,11 @@
                 fn.inputSignalAR(this);
                 fn.outputSignalAR(this);
             } else {
-                cell[0] = fn.inputSignalKR(this);
+                this.cells[0][0] = fn.inputSignalKR(this);
                 fn.outputSignalKR(this);
             }
         }
+        
         return this;
     };
     
