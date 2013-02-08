@@ -11,7 +11,6 @@
         
         var _ = this._;
         _.currentTime = 0;
-        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
         _.samplesMax = 0;
         _.samples    = 0;
         _.isEnded = true;
@@ -94,7 +93,7 @@
                 }
                 fn.nextTick(_.onended);
             }
-            _.currentTime += _.currentTimeIncr;
+            _.currentTime += fn.currentTimeIncr;
         }
         return this;
     };

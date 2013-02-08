@@ -15,7 +15,6 @@
         _.index    = 0;
         _.queue    = [];
         _.currentTime     = 0;
-        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
         _.queueTime = 0;
         _.segnoIndex  = -1;
         _.loopStack   = [];
@@ -119,11 +118,11 @@
                     }
                 }
             }
-            _.remain -= _.currentTimeIncr;
+            _.remain -= fn.currentTimeIncr;
             if (queue.length === 0 && _.remain <= 0) {
                 fn.nextTick(_.onended);
             }
-            _.currentTime += _.currentTimeIncr;
+            _.currentTime += fn.currentTimeIncr;
         }
         
         return this;

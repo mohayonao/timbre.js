@@ -14,7 +14,6 @@
         _.isReversed = false;
         _.duration    = 0;
         _.currentTime = 0;
-        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
         _.samplerate  = 44100;
         _.phase = 0;
         _.phaseIncr = 0;
@@ -258,7 +257,7 @@
                     }
                 }
                 _.phase = phase;
-                _.currentTime += _.currentTimeIncr;
+                _.currentTime += fn.currentTimeIncr;
             }
         }
         

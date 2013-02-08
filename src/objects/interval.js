@@ -15,8 +15,6 @@
         _.delay   = 0;
         _.timeout = Infinity;
         _.currentTime = 0;
-        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
-        
         _.delaySamples = 0;
         _.countSamples = 0;
         _.isEnded = false;
@@ -140,7 +138,7 @@
                     _.count += 1;
                 }
             }
-            _.currentTime += _.currentTimeIncr;
+            _.currentTime += fn.currentTimeIncr;
 
             if (_.currentTime >= _.timeout) {
                 fn.nextTick(_.onended);

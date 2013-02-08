@@ -11,9 +11,8 @@
         
         var _ = this._;
         _.queue = [];
-        _.currentTime     = 0;
-        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
-        _.maxRemain = 1000;
+        _.currentTime = 0;
+        _.maxRemain   = 1000;
     }
     fn.extend(ScheduleNode);
     
@@ -121,7 +120,7 @@
                     }
                 }
             }
-            _.currentTime += _.currentTimeIncr;
+            _.currentTime += fn.currentTimeIncr;
             if (emit) {
                 _.emit(emit);
             }

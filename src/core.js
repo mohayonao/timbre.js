@@ -127,6 +127,8 @@
     var fn      = timbre.fn    = {};
     var modules = timbre.modules = {};
     fn.SignalArray = Float32Array;
+    fn.currentTimeIncr = 0;
+    fn.empty = null;
     
     (function() {
         var dict = {};
@@ -1475,7 +1477,6 @@
             this.streammsec = 20;
             this.streamsize = 0;
             this.currentTime = 0;
-            this.currentTimeIncr = 0;
             this.nextTicks = [];
             this.inlets    = [];
             this.timers    = [];
@@ -1485,7 +1486,10 @@
             this.recStart   = 0;
             this.recBuffers = null;
             this.delayProcess = make_delayProcess(this);
-
+            
+            fn.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
+            fn.empty = new fn.SignalArray(this.cellsize);
+            
             var self = this;
             modules.ready("events", function() {
                 self.events = new modules.EventEmitter(self);
@@ -1546,6 +1550,8 @@
                     }
                 }
             }
+            fn.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
+            fn.empty = new fn.SignalArray(this.cellsize);
             return this;
         };
         
@@ -1561,7 +1567,6 @@
         $.play = function() {
             if (this.status === STATUS_NONE) {
                 this.status = STATUS_PLAY;
-                this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
                 
                 this.streamsize = this.getAdjustSamples();
                 this.strmL = new fn.SignalArray(this.streamsize);
@@ -1621,7 +1626,7 @@
             var timers    = this.timers;
             var inlets    = this.inlets;
             var listeners = this.listeners;
-            var currentTimeIncr = this.currentTimeIncr;
+            var currentTimeIncr = fn.currentTimeIncr;
             
             for (i = 0; i < imax; ++i) {
                 strmL[i] = strmR[i] = 0;
@@ -1764,8 +1769,6 @@
                 this.recCh = 1;
             }
             this.recBuffers = [];
-            
-            this.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
             
             this.streamsize = this.getAdjustSamples();
             this.strmL = new fn.SignalArray(this.streamsize);
