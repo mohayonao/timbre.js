@@ -85,13 +85,12 @@
             }
         }
         
-        var bSi = 2 / _buffer.length;
         var mag = this.mag;
         var rval, ival;
         for (i = 0; i < n; ++i) {
             rval = real[i];
             ival = imag[i];
-            mag[i] = bSi = Math.sqrt(rval * rval + ival * ival);
+            mag[i] = Math.sqrt(rval * rval + ival * ival);
         }
         
         return {real:real, imag:imag};
