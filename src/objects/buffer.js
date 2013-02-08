@@ -19,14 +19,8 @@
         _.phaseIncr = 0;
         _.onended  = fn.make_onended(this, 0);
         _.onlooped = make_onlooped(this);
-        
-        this.on("play", onplay);
     }
     fn.extend(BufferNode);
-    
-    var onplay = function(value) {
-        this._.isEnded = (value === false);
-    };
     
     var make_onlooped = function(self) {
         return function() {
@@ -211,8 +205,8 @@
     $.process = function(tickID) {
         var _ = this._;
         var cell = this.cells[0];
-
-        if (_.isEnded && !_.buffer) {
+        
+        if (_.isEnded || !_.buffer) {
             return this;
         }
         
