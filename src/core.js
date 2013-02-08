@@ -439,15 +439,15 @@
     };
     fn.nextTick = __nextTick;
     
-    var __fixAR = function(object) {
-        object._.ar = true;
-        object._.aronly = true;
+    var __fixAR = function(self) {
+        self._.ar = true;
+        self._.aronly = true;
     };
     fn.fixAR = __fixAR;
     
-    var __fixKR = function(object) {
-        object._.ar = false;
-        object._.kronly = true;
+    var __fixKR = function(self) {
+        self._.ar = false;
+        self._.kronly = true;
     };
     fn.fixKR = __fixKR;
     
@@ -566,12 +566,12 @@
     };
     fn.make_onended = __make_onended;
     
-    var __inputSignalAR = function(object) {
-        var cell  = object.cells[0];
-        var nodes = object.nodes;
+    var __inputSignalAR = function(self) {
+        var cell  = self.cells[0];
+        var nodes = self.nodes;
         var i, imax = nodes.length;
         var j, jmax = cell.length;
-        var tickID = object.tickID;
+        var tickID = self.tickID;
         var tmp;
         
         for (j = jmax; j; ) {
@@ -595,10 +595,10 @@
     };
     fn.inputSignalAR = __inputSignalAR;
 
-    var __inputSignalKR = function(object) {
-        var nodes = object.nodes;
+    var __inputSignalKR = function(self) {
+        var nodes = self.nodes;
         var i, imax = nodes.length;
-        var tickID = object.tickID;
+        var tickID = self.tickID;
         var tmp = 0;
         for (i = 0; i < imax; ++i) {
             tmp += nodes[i].process(tickID).cells[0][0];
@@ -607,10 +607,10 @@
     };
     fn.inputSignalKR = __inputSignalKR;
     
-    var __outputSignalAR = function(object) {
-        var mul = object._.mul, add = object._.add;
+    var __outputSignalAR = function(self) {
+        var mul = self._.mul, add = self._.add;
         if (mul !== 1 || add !== 0) {
-            var cell = object.cells[0];
+            var cell = self.cells[0];
             for (var i = cell.length; i; ) {
                 i -= 8;
                 cell[i  ] = cell[i  ] * mul + add;
@@ -626,9 +626,9 @@
     };
     fn.outputSignalAR = __outputSignalAR;
     
-    var __outputSignalKR = function(object) {
-        var cell = object.cells[0];
-        var mul = object._.mul, add = object._.add;
+    var __outputSignalKR = function(self) {
+        var cell = self.cells[0];
+        var mul = self._.mul, add = self._.add;
         var value = cell[0] * mul + add;
         for (var i = cell.length; i; ) {
             i -= 8;
@@ -643,8 +643,8 @@
     
     //debug--
     fn.debug = {};
-    fn.debug.process = function(object) {
-        var cell = object.process(+new Date()).cells[0];
+    fn.debug.process = function(self) {
+        var cell = self.process(+new Date()).cells[0];
         var min = +Infinity, max = -Infinity, nan = false;
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             if (isNaN(cell[i])) {
