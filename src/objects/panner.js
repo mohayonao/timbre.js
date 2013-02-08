@@ -46,31 +46,29 @@
             }
             
             var nodes = this.nodes;
-            var cell  = this.cells[0];
             var cellL = this.cells[1];
             var cellR = this.cells[2];
             var i, imax = nodes.length;
             var j, jmax = cellL.length;
-            var mul = _.mul, add = _.add;
-            var tmp, x;
+            var tmp;
             
             for (j = 0; j < jmax; ++j) {
-                cell[i] = cellL[j] = cellR[j] = 0;
+                cellL[j] = cellR[j] = 0;
             }
             for (i = 0; i < imax; ++i) {
                 tmp = nodes[i].process(tickID).cells[0];
                 for (j = 0; j < jmax; ++j) {
-                    cellL[j] = cellR[j] = (cell[j] += tmp[j]);
+                    cellL[j] = (cellR[j] += tmp[j]);
                 }
             }
             
             var panL = _.panL;
             var panR = _.panR;
             for (j = 0; j < jmax; ++j) {
-                x  = cellL[j] = cellL[j] * panL * mul + add;
-                x += cellR[j] = cellR[j] * panR * mul + add;
-                cell[j] = x * 0.5;
+                cellL[j] = cellL[j] * panL;
+                cellR[j] = cellR[j] * panR;
             }
+            fn.outputSignalAR(this);
         }
         
         return this;

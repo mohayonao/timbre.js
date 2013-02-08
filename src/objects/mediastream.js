@@ -66,20 +66,18 @@
             
             var bufferL = _.bufferL;
             var bufferR = _.bufferR;
-            var cell  = this.cells[0];
             var cellL = this.cells[1];
             var cellR = this.cells[2];
-            var i, imax = cell.length;
+            var i, imax = cellL.length;
             
             if (_.totalWrite > _.totalRead + cellL.length) {
                 var readIndex = _.readIndex;
                 for (i = 0; i < imax; ++i, ++readIndex) {
                     cellL[i] = bufferL[readIndex];
                     cellR[i] = bufferR[readIndex];
-                    cell [i] = (cellL[i] + cellR[i]) * 0.5;
                 }
                 _.readIndex = readIndex & BUFFER_MASK;
-                _.totalRead += cell.length;
+                _.totalRead += cellL.length;
             }
             fn.outputSignalAR(this);
         }
