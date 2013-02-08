@@ -61,6 +61,7 @@
         var writeBufferR = this.writeBufferR;
         var readIndex  = this.readIndex;
         var writeIndex = this.writeIndex;
+        var mask = this.buffermask;
         var fb = this.feedback;
         var wet = this.mix, dry = 1 - wet;
         var prevL = this.prevL;
@@ -79,11 +80,11 @@
             cellR[i] = prevR = ((cellR[i] * dry) + (x * wet) + prevR) * 0.5;
             
             readIndex  += 1;
-            writeIndex += 1;
+            writeIndex = (writeIndex + 1) & mask;
         }
         
         this.readIndex  = readIndex  & this.buffermask;
-        this.writeIndex = writeIndex & this.buffermask;
+        this.writeIndex = writeIndex;
         this.prevL = prevL;
         this.prevR = prevR;
     };
