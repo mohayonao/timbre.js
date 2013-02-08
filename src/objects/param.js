@@ -12,7 +12,7 @@
         var _ = this._;
         _.value = 0;
         _.env = new EnvelopeValue(T.samplerate);
-        _.env.step = this.cells[0].length;
+        _.env.step = T.cellsize;
         _.curve   = "lin";
         _.counter = 0;
         _.ar = false;
@@ -23,7 +23,7 @@
     fn.extend(ParamNode);
     
     var onar = function(value) {
-        this._.env.step = (value) ? 1 : this.cells[0].length;
+        this._.env.step = (value) ? 1 : T.cellsize;
     };
     
     var $ = ParamNode.prototype;

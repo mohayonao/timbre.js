@@ -12,9 +12,9 @@
         _.freq = T(440);
         _.osc1 = new Oscillator(T.samplerate);
         _.osc2 = new Oscillator(T.samplerate);
-        _.osc1.step = this.cells[0].length;
-        _.osc2.step = this.cells[0].length;
-        _.tmp = new fn.SignalArray(this.cells[0].length);
+        _.osc1.step = T.cellsize;
+        _.osc2.step = T.cellsize;
+        _.tmp = new fn.SignalArray(T.cellsize);
         _.beats = 0.5;
         
         this.once("init", oninit);

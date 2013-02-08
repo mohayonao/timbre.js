@@ -12,8 +12,8 @@
         _.freq  = T(440);
         _.phase = T(0);
         _.osc = new Oscillator(T.samplerate);
-        _.tmp = new fn.SignalArray(this.cells[0].length);
-        _.osc.step = this.cells[0].length;
+        _.tmp = new fn.SignalArray(T.cellsize);
+        _.osc.step = T.cellsize;
         
         this.once("init", oninit);
     }

@@ -12,7 +12,7 @@
         this._.selected = 0;
         this._.outputs  = [];
         
-        empty = new Float32Array(this.cells[0].length);
+        empty = new Float32Array(T.cellsize);
     }
     fn.extend(GateNode);
     

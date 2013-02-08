@@ -14,7 +14,7 @@
         _.isReversed = false;
         _.duration    = 0;
         _.currentTime = 0;
-        _.currentTimeIncr = this.cells[0].length * 1000 / T.samplerate;
+        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
         _.samplerate  = 44100;
         _.phase = 0;
         _.phaseIncr = 0;
