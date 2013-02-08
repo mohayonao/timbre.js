@@ -7,7 +7,7 @@
     var TapeStream = Scissor.TapeStream;
     
     function ScissorNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
 
         var _ = this._;
@@ -69,26 +69,24 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell  = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
+            
             var tapeStream = _.tapeStream;
             
             if (tapeStream) {
-                var mul = _.mul, add = _.add;
-                var tmp  = tapeStream.fetch(cell.length);
-                var tmpL = tmp[0];
-                var tmpR = tmp[1];
-                for (var i = 0, imax = cell.length; i < imax; ++i) {
-                    cell[i] = (tmpL[i] + tmpR[i]) * 0.5 * mul + add;
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
+                var tmp  = tapeStream.fetch(cellL.length);
+                cellL.set(tmp[0]);
+                cellR.set(tmp[1]);
+                if (!_.isEnded && tapeStream.isEnded) {
+                    fn.nextTick(_.onended);
                 }
             }
             
-            if (!_.isEnded && tapeStream.isEnded) {
-                fn.nextTick(_.onended);
-            }
+            fn.outputSignalAR(this);
         }
         
         return this;
