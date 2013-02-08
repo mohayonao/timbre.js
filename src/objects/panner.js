@@ -17,12 +17,12 @@
     var $ = PannerNode.prototype;
     
     Object.defineProperties($, {
-        value: {
+        pos: {
             set: function(value) {
-                this._.value = T(value);
+                this._.pos = T(value);
             },
             get: function() {
-                return this._.value;
+                return this._.pos;
             }
         }
     });
@@ -35,14 +35,14 @@
             
             var changed = false;
             
-            var value = _.value.process(tickID).cells[0][0];
-            if (_.prevValue !== value) {
-                _.prevValue = value;
+            var pos = _.pos.process(tickID).cells[0][0];
+            if (_.prevPos !== pos) {
+                _.prevPos = pos;
                 changed = true;
             }
             if (changed) {
-                _.panL = Math.cos(0.5 * Math.PI * ((value * 0.5) + 0.5));
-                _.panR = Math.sin(0.5 * Math.PI * ((value * 0.5) + 0.5));
+                _.panL = Math.cos(0.5 * Math.PI * ((pos * 0.5) + 0.5));
+                _.panR = Math.sin(0.5 * Math.PI * ((pos * 0.5) + 0.5));
             }
             
             var nodes = this.nodes;
