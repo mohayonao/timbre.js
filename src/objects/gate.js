@@ -3,7 +3,6 @@
     
     var fn = T.fn;
     var ChannelObject = T.ChannelObject;
-    var empty;
     
     function GateNode(_args) {
         T.Object.call(this, 1, _args);
@@ -11,8 +10,6 @@
         
         this._.selected = 0;
         this._.outputs  = [];
-        
-        empty = new Float32Array(T.cellsize);
     }
     fn.extend(GateNode);
     
@@ -27,7 +24,7 @@
                     var outputs = _.outputs;
                     for (var i = 0, imax = outputs.length; i < imax; ++i) {
                         if (outputs[i]) {
-                            outputs[i].cell.set(empty);
+                            outputs[i].cell.set(fn.emptycell);
                         }
                     }
                 }

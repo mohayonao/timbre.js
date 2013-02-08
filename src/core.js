@@ -128,7 +128,7 @@
     var modules = timbre.modules = {};
     fn.SignalArray = Float32Array;
     fn.currentTimeIncr = 0;
-    fn.empty = null;
+    fn.emptycell = null;
     
     (function() {
         var dict = {};
@@ -1488,7 +1488,7 @@
             this.delayProcess = make_delayProcess(this);
             
             fn.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
-            fn.empty = new fn.SignalArray(this.cellsize);
+            fn.emptycell = new fn.SignalArray(this.cellsize);
             
             var self = this;
             modules.ready("events", function() {
@@ -1551,7 +1551,7 @@
                 }
             }
             fn.currentTimeIncr = this.cellsize * 1000 / this.samplerate;
-            fn.empty = new fn.SignalArray(this.cellsize);
+            fn.emptycell = new fn.SignalArray(this.cellsize);
             return this;
         };
         
