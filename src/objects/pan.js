@@ -3,7 +3,7 @@
     
     var fn = T.fn;
     
-    function PannerNode(_args) {
+    function PanNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
@@ -12,9 +12,9 @@
         _.panL = 0.5;
         _.panR = 0.5;
     }
-    fn.extend(PannerNode);
+    fn.extend(PanNode);
     
-    var $ = PannerNode.prototype;
+    var $ = PanNode.prototype;
     
     Object.defineProperties($, {
         pos: {
@@ -74,6 +74,6 @@
         return this;
     };
     
-    fn.register("pan", PannerNode);
+    fn.register("pan", PanNode);
     
 })(timbre);
