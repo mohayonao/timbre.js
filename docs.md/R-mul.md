@@ -1,6 +1,6 @@
 T("*")
 ======
-{arkr} Multiply signals
+{arkr}{stereo} Multiply signals
 
 ## Description ##
 ###### en ######

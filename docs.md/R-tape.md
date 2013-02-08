@@ -1,6 +1,6 @@
 T("tape")
 =========
-{ar} Tape edit
+{ar}{stereo} Tape edit
 
 ## Description ##
 

@@ -1,6 +1,6 @@
 T("delay")
 ==========
-{ar} Delay signal
+{ar}{stereo} Delay signal
 
 ## Description ##
 ###### en ######

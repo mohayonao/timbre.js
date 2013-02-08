@@ -1,6 +1,6 @@
 T("+")
 ======
-{arkr} Add signals
+{arkr}{stereo} Add signals
 
 ## Description ##
 ###### en ######

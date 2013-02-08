@@ -1,6 +1,6 @@
 T("pan")
-===========
-{ar} Panner
+========
+{ar}{stereo} Panner
 
 ## Description ##
 
