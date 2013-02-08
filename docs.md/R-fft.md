@@ -20,15 +20,21 @@ T("interval", {interval:100}, function() {
 
 ## Properties ##
 - `real` _(ReadOnly T Object)_
+  - The real part of the Fourier transform.
 - `imag` _(ReadOnly T Object)_
-- `window` _(String)_
+  - The imaginary part of the Fourier transform.
 - `spectrum` _(ReadOnly Float32Array)_
+  - The frequency-domain data analyzed (dB).
 
 ## Methods ##
 - `plot(opts)`
 
 ## Note ##
-スペクトルを表示することだけが目的の場合は `T("spectrum")` オブジェクトのほうが適しています。
+###### en ######
+When it is the purpose to display a spectrum. `T("spectrum")` is suitable. 
+###### ja ######
+スペクトルを表示することが目的の場合は `T("spectrum")` オブジェクトのほうが適しています。
+###### -- ######
 
 ## See Also ##
 - [T("ifft")](./ifft.html)

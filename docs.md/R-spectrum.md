@@ -17,11 +17,15 @@ var fft = T("spectrum", {size:512, interval:100}).on("data", function() {
 
 ## Properties ##
 - `size` _(Number)_
-- `window` _(String)_
+  - The size of the FFT. This must be a power of two. Default value is **512**.
 - `interval` _(Number or timevalue)_
+  - The interval to analyze. Default value is **500**msec.
 - `spectrum` _(ReadOnly Float32Array)_
+  - The frequency-domain data analyzed (dB).
 - `real` _(ReadOnly Float32Array)_
+  - The real part of the Fourier transform.
 - `imag` _(ReadOnly Float32Array)_
+  - The imaginary part of the Fourier transform.
 
 ## Methods ##
 - `plot(opts)`
