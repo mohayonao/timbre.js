@@ -30,6 +30,9 @@ $(function() {
     }).on("pause", onreset).on("reset", onreset).amp = 0.6;
     
     function playCode(code) {
+        code = code.split("\n").map(function(line) {
+            return line.replace(/\/\/[\d\D]*$/, "");
+        }).join("\n");
         if (timbre.isPlaying && nowPlaying === code) {
             timbre.reset();
             timbre.pause();
