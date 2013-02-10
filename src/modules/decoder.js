@@ -75,7 +75,7 @@
         for (var i = 0, imax = uint8.length, j = 0; i < imax; ) {
             b0 = uint8[i++] ,b1 = uint8[i++], b2 = uint8[i++];
             bb = b0 + (b1 << 8) + (b2 << 16);
-            x = (bb & 0x800000) ? -((bb^0xFFFFFF)+1) : bb;
+            x = (bb & 0x800000) ? bb - 16777216 : bb;
             int32[j++] = x;
         }
         return int32;
@@ -83,49 +83,35 @@
     
     Decoder.wav_decode = function(src, onloadedmetadata, onloadeddata) {
         Decoder.getBinaryWithPath(src, function(data) {
-            if (data[0] !== 0x52 || data[1] !== 0x49 ||
-                data[2] !== 0x46 || data[3] !== 0x46) { // 'RIFF'
-                    // "HeaderError: not exists 'RIFF'"
-                    return onloadedmetadata(false);
+            if (String.fromCharCode(data[0], data[1], data[2], data[3]) !== "RIFF") {
+                return onloadedmetadata(false);
             }
             
             var l1 = data[4] + (data[5]<<8) + (data[6]<<16) + (data[7]<<24);
             if (l1 + 8 !== data.length) {
-                // "HeaderError: invalid data size"
                 return onloadedmetadata(false);
             }
             
-            if (data[ 8] !== 0x57 || data[ 9] !== 0x41 ||
-                data[10] !== 0x56 || data[11] !== 0x45) { // 'WAVE'
-                    // "HeaderError: not exists 'WAVE'"
-                    return onloadedmetadata(false);
+            if (String.fromCharCode(data[8], data[9], data[10], data[11]) !== "WAVE") {
+                return onloadedmetadata(false);
             }
             
-            if (data[12] !== 0x66 || data[13] !== 0x6D ||
-                data[14] !== 0x74 || data[15] !== 0x20) { // 'fmt '
-                    // "HeaderError: not exists 'fmt '"
-                    return onloadedmetadata(false);
+            if (String.fromCharCode(data[12], data[13], data[14], data[15]) !== "fmt ") {
+                return onloadedmetadata(false);
             }
             
-            // var byteLength = data[16] + (data[17]<<8) + (data[18]<<16) + (data[19]<<24);
-            // var linearPCM  = data[20] + (data[21]<<8);
             var channels   = data[22] + (data[23]<<8);
             var samplerate = data[24] + (data[25]<<8) + (data[26]<<16) + (data[27]<<24);
-            // var dataSpeed  = data[28] + (data[29]<<8) + (data[30]<<16) + (data[31]<<24);
-            // var blockSize  = data[32] + (data[33]<<8);
             var bitSize    = data[34] + (data[35]<<8);
             
-            if (data[36] !== 0x64 || data[37] !== 0x61 ||
-                data[38] !== 0x74 || data[39] !== 0x61) { // 'data'
-                    // "HeaderError: not exists 'data'"
-                    return onloadedmetadata(false);
+            if (String.fromCharCode(data[36], data[37], data[38], data[39]) !== "data") {
+                return onloadedmetadata(false);
             }
             
             var l2 = data[40] + (data[41]<<8) + (data[42]<<16) + (data[43]<<24);
             var duration = ((l2 / channels) >> 1) / samplerate;
-
+            
             if (l2 > data.length - 44) {
-                // "HeaderError: not exists data"
                 return onloadedmetadata(false);
             }
             
