@@ -5,7 +5,7 @@
     var timevalue = T.timevalue;
     
     function ScheduleNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 0, _args);
         fn.timer(this);
         fn.fixKR(this);
         

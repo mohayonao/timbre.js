@@ -722,7 +722,7 @@
     //debug--
     fn.debug = {};
     fn.debug.process = function(self) {
-        var cell = self.process(+new Date()).cells[0];
+        var cell = self.process(Date.now()).cells[0];
         var min = +Infinity, max = -Infinity, nan = false;
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             if (isNaN(cell[i])) {
@@ -782,6 +782,7 @@
             this._.dac = null;
             this._.bypassed = false;
             this._.meta = {};
+            this._.cellsize = _sys.cellsize;
         }
         
         var $ = TimbreObject.prototype;
@@ -1454,7 +1455,7 @@
 
         var make_delayProcess = function(self) {
             return function() {
-                self.recStart = +new Date();
+                self.recStart = Date.now();
                 self.process();
             };
         };
@@ -1654,7 +1655,7 @@
                 } else if (currentTime >= this.recDuration) {
                     this._.deferred.sub.resolve();
                 } else {
-                    var now = +new Date();
+                    var now = Date.now();
                     if ((now - this.recStart) > 20) {
                         setTimeout(this.delayProcess, 10);
                     } else {
@@ -1701,7 +1702,7 @@
             this.status = STATUS_REC;
             this.reset();
             
-            var rec_inlet = new SystemInlet();
+            var rec_inlet = new T("+");
             var inlet_dfd = new modules.Deferred(this);
             
             var outlet = {
@@ -1769,6 +1770,7 @@
             if (this.recCh === 2) {
                 var L = new fn.SignalArray(bufferLength);
                 var R = new fn.SignalArray(bufferLength);
+                var mixed = new fn.SignalArray(bufferLength);
                 
                 for (i = 0; i < imax; ++i) {
                     L.set(recBuffers[j++], k);
@@ -1781,10 +1783,14 @@
                         break;
                     }
                 }
+                for (i = 0, imax = bufferLength; i < imax; ++i) {
+                    mixed[i] = (L[i] + R[i]) * 0.5;
+                }
+                
                 result = {
-                    L: { buffer:L, samplerate:samplerate },
-                    R: { buffer:R, samplerate:samplerate },
-                    samplerate:samplerate
+                    samplerate: samplerate,
+                    channels  : 2,
+                    buffer: mixed, bufferL: L, bufferR: R
                 };
                 
             } else {
@@ -1798,7 +1804,11 @@
                         break;
                     }
                 }
-                result = { buffer: buffer, samplerate:samplerate };
+                result = {
+                    samplerate: samplerate,
+                    channels  : 1,
+                    buffer: buffer, bufferL: buffer, bufferR: buffer
+                };
             }
             
             var args = [].concat.apply([result], arguments);

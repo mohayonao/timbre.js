@@ -5,13 +5,16 @@
     var timevalue = T.timevalue;
     var FFT = T.modules.FFT;
     
+    var WAIT_STATE = 0;
+    var EXEC_STATE = 1;
+    
     function SpectrumNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.listener(this);
         fn.fixAR(this);
-
+        
         var _ = this._;
-        _.status  = 0;
+        _.status  = WAIT_STATE;
         _.samples = 0;
         _.samplesIncr = 0;
         _.writeIndex  = 0;
@@ -118,13 +121,14 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
-            fn.inputSignalAR(this);
             
+            fn.inputSignalAR(this);
+            fn.outputSignalAR(this);
+            
+            var cell = this.cells[0];
             var i, imax = cell.length;
             var status  = _.status;
             var samples = _.samples;
@@ -132,26 +136,24 @@
             var writeIndex  = _.writeIndex;
             var buffer = _.buffer;
             var bufferLength = buffer.length;
-            var mul = _.mul, add = _.add;
             var emit;
             
             for (i = 0; i < imax; ++i) {
                 if (samples <= 0) {
-                    if (status === 0) {
-                        status = 1;
-                        writeIndex  = 0;
+                    if (status === WAIT_STATE) {
+                        status = EXEC_STATE;
+                        writeIndex = 0;
                         samples += samplesIncr;
                     }
                 }
-                if (status === 1) {
+                if (status === EXEC_STATE) {
                     buffer[writeIndex++] = cell[i];
                     if (bufferLength <= writeIndex) {
                         _.fft.forward(buffer);
                         emit = _.plotFlush = true;
-                        status = 0;
+                        status = WAIT_STATE;
                     }
                 }
-                cell[i] = cell[i] * mul + add;
                 --samples;
             }
             

@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function ClipNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         
         var _ = this._;
         _.min = -0.8;
@@ -60,51 +60,45 @@
     });
     
     $.process = function(tickID) {
-        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
-            var nodes = this.nodes;
-            var mul = _.mul, add = _.add;
-            var i, imax = nodes.length;
-            var j, jmax = cell.length;
+
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = cellL.length;
             var min = _.min, max = _.max;
-            var tmp, x;
+            var value;
             
-            for (j = 0; j < jmax; ++j) {
-                cell[j] = 0;
-            }
-            
-            if (_.ar) { // audio-rate
+            if (_.ar) {
+                fn.inputSignalAR(this);
                 for (i = 0; i < imax; ++i) {
-                    tmp = nodes[i].process(tickID).cells[0];
-                    for (j = 0; j < jmax; ++j) {
-                        cell[j] += tmp[j];
+                    value = cellL[i];
+                    if (value < min) {
+                        value = min;
+                    } else if (value > max) {
+                        value = max;
                     }
-                }
-                for (j = 0; j < jmax; ++j) {
-                    x = cell[j];
-                    x = (x < min) ? min : (x > max) ? max : x;
-                    cell[j] = x;
-                }
-                
-                if (mul !== 1 || add !== 0) {
-                    for (j = 0; j < jmax; ++j) {
-                        cell[j] = cell[j] * mul + add;
+                    cellL[i] = value;
+                    value = cellR[i];
+                    if (value < min) {
+                        value = min;
+                    } else if (value > max) {
+                        value = max;
                     }
+                    cellR[i] = value;
                 }
-            } else {    // control-rate
-                tmp = 0;
-                for (i = 0; i < imax; ++i) {
-                    tmp += nodes[i].process(tickID).cells[0][0];
+                fn.outputSignalAR(this);
+            } else {
+                value = fn.inputSignalKR(this);
+                if (value < min) {
+                    value = min;
+                } else if (value > max) {
+                    value = max;
                 }
-                tmp = (tmp < min) ? min : (tmp > max) ? max : tmp;
-                tmp = tmp * mul + add;
-                for (j = 0; j < jmax; ++j) {
-                    cell[j] = tmp;
-                }
+                this.cells[0][0] = value;
+                fn.outputSignalKR(this);
             }
         }
         return this;

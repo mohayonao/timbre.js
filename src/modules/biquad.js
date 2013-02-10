@@ -1,13 +1,15 @@
 (function(T) {
     "use strict";
     
-    function Biquad(samplerate) {
-        this.samplerate = samplerate || 44100;
+    function Biquad(samplerate, channels) {
+        this.samplerate = samplerate;
+        this.channels   = channels;
         this.frequency = 340;
         this.Q         = 1;
         this.gain      = 0;
         
-        this.x1 = this.x2 = this.y1 = this.y2 = 0;
+        this.x1L = this.x2L = this.y1L = this.y2L = 0;
+        this.x1R = this.x2R = this.y1R = this.y2R = 0;
         this.b0 = this.b1 = this.b2 = this.a1 = this.a2 = 0;
         
         this.setType("lpf");
@@ -15,34 +17,36 @@
     
     var $ = Biquad.prototype;
     
-    $.process = function(cell) {
-        var x0, y0;
-        var x1 = this.x1;
-        var x2 = this.x2;
-        var y1 = this.y1;
-        var y2 = this.y2;
+    $.process = function(cellL, cellR) {
+        var x, y;
+        var x1L = this.x1L, x2L = this.x2L, y1L = this.y1L, y2L = this.y2L;
+        var x1R = this.x1R, x2R = this.x2R, y1R = this.y1R, y2R = this.y2R;
+        var b0 = this.b0, b1 = this.b1, b2 = this.b2, a1 = this.a1, a2 = this.a2;
+        var i, imax;
         
-        var b0 = this.b0;
-        var b1 = this.b1;
-        var b2 = this.b2;
-        var a1 = this.a1;
-        var a2 = this.a2;
-        
-        for (var i = 0, imax = cell.length; i < imax; ++i) {
-            x0 = cell[i];
-            y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
-            cell[i] = y0;
-            
-            x2 = x1;
-            x1 = x0;
-            y2 = y1;
-            y1 = y0;
+        if (this.channels === 2) {
+            for (i = 0, imax = cellL.length; i < imax; ++i) {
+                x = cellL[i];
+                y = b0 * x + b1 * x1L + b2 * x2L - a1 * y1L - a2 * y2L;
+                cellL[i] = y;
+                x2L = x1L; x1L = x; y2L = y1L; y1L = y;
+                
+                x = cellR[i];
+                y = b0 * x + b1 * x1R + b2 * x2R - a1 * y1R - a2 * y2R;
+                cellR[i] = y;
+                x2R = x1R; x1R = x; y2R = y1R; y1R = y;
+            }
+            this.x1L = x1L; this.x2L = x2L; this.y1L = y1L; this.y2L = y2L;
+            this.x1R = x1R; this.x2R = x2R; this.y1R = y1R; this.y2R = y2R;
+        } else {
+            for (i = 0, imax = cellL.length; i < imax; ++i) {
+                x = cellL[i];
+                y = b0 * x + b1 * x1L + b2 * x2L - a1 * y1L - a2 * y2L;
+                cellL[i] = y;
+                x2L = x1L; x1L = x; y2L = y1L; y1L = y;
+            }
+            this.x1L = x1L; this.x2L = x2L; this.y1L = y1L; this.y2L = y2L;
         }
-        
-        this.x1 = x1;
-        this.x2 = x2;
-        this.y1 = y1;
-        this.y2 = y2;
     };
     
     $.setType = function(type) {

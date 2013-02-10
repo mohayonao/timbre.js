@@ -14,10 +14,12 @@
         }
         instance = this;
         
-        T.Object.call(this, 2, _args);
+        T.Object.call(this, 1, _args);
         
-        this.X = this.L;
-        this.Y = this.R;
+        this.X = new T.ChannelObject(this);
+        this.Y = new T.ChannelObject(this);
+        this.cells[3] = this.X.cell;
+        this.cells[4] = this.Y.cell;
         
         fn.fixKR(this);
     }
@@ -36,11 +38,11 @@
         var x = (mouseX = (e.clientX / window.innerWidth));
         var y = (mouseY = (e.clientY / window.innerHeight));
         
-        var cellL = instance.cells[1];
-        var cellR = instance.cells[2];
-        for (var i = 0, imax = cellL.length; i < imax; ++i) {
-            cellL[i] = x;
-            cellR[i] = y;
+        var cellX = instance.cells[3];
+        var cellY = instance.cells[4];
+        for (var i = 0, imax = cellX.length; i < imax; ++i) {
+            cellX[i] = x;
+            cellY[i] = y;
         }
     };
     var onmouseup = function(e) {
@@ -165,7 +167,7 @@
             return f(_, x);
         }}, instance.X);
         
-        self.cells[0] = _.map.cells[0];
+        self.cells[0] = _.map.cells[3];
         
         return self;
     });
@@ -183,7 +185,8 @@
             return f(_, x);
         }}, instance.Y);
         
-        self.cells[0] = _.map.cells[0];
+        self.cells[0] = _.map.cells[4];
+        
         return self;
     });
 })(timbre);

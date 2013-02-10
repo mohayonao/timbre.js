@@ -49,14 +49,17 @@
             if (result) {
                 self.playbackState = fn.PLAYING_STATE;
                 _.samplerate = result.samplerate;
-                _.buffer     = result.buffer;
+                _.channels   = result.channels;
+                _.bufferMix  = null;
+                _.bufferL    = result.bufferL;
+                _.bufferR    = result.bufferR;
                 _.phase      = 0;
                 _.phaseIncr  = result.samplerate / T.samplerate;
                 _.duration   = result.duration * 1000;
                 _.currentTime = 0;
                 if (_.isReversed) {
                     _.phaseIncr *= -1;
-                    _.phase = result.buffer.length + _.phaseIncr;
+                    _.phase = result.bufferL.length + _.phaseIncr;
                 }
                 self._.emit("loadedmetadata");
             } else {

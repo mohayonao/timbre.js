@@ -28,16 +28,8 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             if (_.gen) {
-                var cell  = this.cells[0];
-                var cellL = this.cells[1];
-                var cellR = this.cells[2];
-                var mul = _.mul, add = _.add;
-                this._.gen.process(cellL, cellR);
-                for (var i = 0, imax = cell.length; i < imax; ++i) {
-                    cellL[i] = cellL[i] * mul + add;
-                    cellR[i] = cellR[i] * mul + add;
-                    cell [i] = (cellL[i] + cellR[i]) * 0.5;
-                }
+                this._.gen.process(this.cells[1], this.cells[2]);
+                fn.outputSignalAR(this);
             }
         }
         return this;

@@ -7,20 +7,26 @@
     var isDictionary = fn.isDictionary;
     
     function EnvNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         var _ = this._;
         _.env = new Envelope(T.samplerate);
-        _.env.setStep(T.cellsize);
-        _.tmp = new fn.SignalArray(T.cellsize);
+        _.env.setStep(_.cellsize);
+        _.tmp = new fn.SignalArray(_.cellsize);
         _.ar = false;
         _.plotFlush = true;
-        _.onended = fn.make_onended(this);
+        _.onended = make_onended(this);
         this.on("ar", onar);
     }
     fn.extend(EnvNode);
     
     var onar = function(value) {
-        this._.env.setStep((value) ? 1 : T.cellsize);
+        this._.env.setStep((value) ? 1 : this._.cellsize);
+    };
+
+    var make_onended = function(self) {
+        return function() {
+            self._.emit("ended");
+        };
     };
     
     var $ = EnvNode.prototype;
@@ -94,20 +100,19 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var nodes = this.nodes;
-            var i, imax = cell.length;
-            var mul = _.mul, add = _.add;
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = _.cellsize;
             
-            if (nodes.length) {
+            if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = 1;
+                    cellL[i] = cellR[i] = 1;
                 }
             }
             
@@ -116,16 +121,20 @@
                 var tmp = _.tmp;
                 _.env.process(tmp);
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = (cell[i] * tmp[i]) * mul + add;
+                    cellL[i] *= tmp[i];
+                    cellR[i] *= tmp[i];
                 }
                 emit = _.env.emit;
             } else {
                 value = _.env.next();
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = (cell[i] * value) * mul + add;
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
                 emit = _.env.emit;
             }
+            
+            fn.outputSignalAR(this);
             
             if (emit) {
                 if (emit === "ended") {

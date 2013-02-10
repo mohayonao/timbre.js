@@ -8,26 +8,31 @@
     var CombParams    = [1116,1188,1277,1356,1422,1491,1557,1617];
     var AllpassParams = [225,556,441,341];
     
-    function Reverb(samplerate, buffersize) {
+    function Reverb(samplerate, channels, buffersize) {
         this.samplerate = samplerate;
+        this.channels   = channels;
         
         var i, imax;
         var k = samplerate / 44100;
         
-        imax = CombParams.length;
+        imax = CombParams.length * channels;
         this.comb = new Array(imax);
         this.combout = new Array(imax);
         for (i = 0; i < imax; ++i) {
-            this.comb[i]    = new CombFilter(CombParams[i] * k);
+            this.comb[i]    = new CombFilter(CombParams[i % CombParams.length] * k);
             this.combout[i] = new T.fn.SignalArray(buffersize);
         }
         
-        imax = AllpassParams.length;
+        imax = AllpassParams.length * channels;
         this.allpass = new Array(imax);
         for (i = 0; i < imax; ++i) {
-            this.allpass[i] = new AllpassFilter(AllpassParams[i] * k);
+            this.allpass[i] = new AllpassFilter(AllpassParams[i % AllpassParams.length] * k);
         }
-        this.output = new T.fn.SignalArray(buffersize);
+        this.outputs = new Array(channels);
+        this.outputs[0] = new T.fn.SignalArray(buffersize);
+        if (channels === 2) {
+            this.outputs[1] = new T.fn.SignalArray(buffersize);
+        }
         
         this.damp = 0;
         this.wet  = 0.33;
@@ -40,42 +45,71 @@
     
     $.setRoomSize = function(roomsize) {
         var comb = this.comb;
+        var value = (roomsize * 0.28) + 0.7;
         this.roomsize = roomsize;
-        comb[0].feedback = comb[1].feedback = comb[2].feedback = comb[3].feedback = comb[4].feedback = comb[5].feedback = comb[6].feedback = comb[7].feedback = (roomsize * 0.28) + 0.7;
+        comb[0].feedback = comb[1].feedback = comb[2].feedback = comb[3].feedback = comb[4].feedback = comb[5].feedback = comb[6].feedback = comb[7].feedback = value;
+        if (this.channels === 2) {
+            comb[8].feedback = comb[9].feedback = comb[10].feedback = comb[11].feedback = comb[12].feedback = comb[13].feedback = comb[14].feedback = comb[15].feedback = value;
+        }
     };
     $.setDamp = function(damp) {
         var comb = this.comb;
+        var value = damp * 0.4;
         this.damp = damp;
-        comb[0].damp = comb[1].damp = comb[2].damp = comb[3].damp = comb[4].damp = comb[5].damp = comb[6].damp = comb[7].damp = damp * 0.4;
+        comb[0].damp = comb[1].damp = comb[2].damp = comb[3].damp = comb[4].damp = comb[5].damp = comb[6].damp = comb[7].damp = value;
+        if (this.channels === 2) {
+            comb[8].damp = comb[9].damp = comb[10].damp = comb[11].damp = comb[12].damp = comb[13].damp = comb[14].damp = comb[15].damp = value;
+        }
     };
-    $.process = function(cell) {
+    $.process = function(cellL, cellR) {
+        var channels = this.channels;
         var comb = this.comb;
         var combout = this.combout;
         var allpass = this.allpass;
-        var output  = this.output;
+        var output0 = this.outputs[0];
+        var output1 = this.outputs[1];
         var wet = this.wet, dry = 1 - wet;
-        var i, imax = cell.length;
+        var i, imax = cellL.length;
         
-        comb[0].process(cell, combout[0]);
-        comb[1].process(cell, combout[1]);
-        comb[2].process(cell, combout[2]);
-        comb[3].process(cell, combout[3]);
-        comb[4].process(cell, combout[4]);
-        comb[5].process(cell, combout[5]);
-        comb[6].process(cell, combout[6]);
-        comb[7].process(cell, combout[7]);
+        comb[0].process(cellL, combout[0]);
+        comb[1].process(cellL, combout[1]);
+        comb[2].process(cellL, combout[2]);
+        comb[3].process(cellL, combout[3]);
+        comb[4].process(cellL, combout[4]);
+        comb[5].process(cellL, combout[5]);
+        comb[6].process(cellL, combout[6]);
+        comb[7].process(cellL, combout[7]);
+        for (i = 0; i < imax; ++i) {
+            output0[i] = combout[0][i] + combout[1][i] + combout[2][i] + combout[3][i] + combout[4][i] + combout[5][i] + combout[6][i] + combout[7][i];
+        }
+        allpass[0].process(output0, output0);
+        allpass[1].process(output0, output0);
+        allpass[2].process(output0, output0);
+        allpass[3].process(output0, output0);
         
         for (i = 0; i < imax; ++i) {
-            output[i] = combout[0][i] + combout[1][i] + combout[2][i] + combout[3][i] + combout[4][i] + combout[5][i] + combout[6][i] + combout[7][i];
+            cellL[i] = output0[i] * wet + cellL[i] * dry;
         }
         
-        allpass[0].process(output, output);
-        allpass[1].process(output, output);
-        allpass[2].process(output, output);
-        allpass[3].process(output, output);
-        
-        for (i = 0; i < imax; ++i) {
-            cell[i] = output[i] * wet + cell[i] * dry;
+        if (channels === 2) {
+            comb[ 8].process(cellR, combout[ 8]);
+            comb[ 9].process(cellR, combout[ 9]);
+            comb[10].process(cellR, combout[10]);
+            comb[11].process(cellR, combout[11]);
+            comb[12].process(cellR, combout[12]);
+            comb[13].process(cellR, combout[13]);
+            comb[14].process(cellR, combout[14]);
+            comb[15].process(cellR, combout[15]);
+            for (i = 0; i < imax; ++i) {
+                output1[i] = combout[8][i] + combout[9][i] + combout[10][i] + combout[11][i] + combout[12][i] + combout[13][i] + combout[14][i] + combout[15][i];
+            }
+            allpass[4].process(output1, output1);
+            allpass[5].process(output1, output1);
+            allpass[6].process(output1, output1);
+            allpass[7].process(output1, output1);
+            for (i = 0; i < imax; ++i) {
+                cellR[i] = output1[i] * wet + cellR[i] * dry;
+            }
         }
     };
     

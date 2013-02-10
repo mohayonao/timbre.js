@@ -6,14 +6,14 @@
     var Oscillator = T.modules.Oscillator;
     
     function OscNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         
         var _ = this._;
         _.freq  = T(440);
         _.phase = T(0);
         _.osc = new Oscillator(T.samplerate);
-        _.tmp = new fn.SignalArray(T.cellsize);
-        _.osc.step = T.cellsize;
+        _.tmp = new fn.SignalArray(_.cellsize);
+        _.osc.step = _.cellsize;
         
         this.once("init", oninit);
     }
@@ -85,19 +85,19 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var nodes = this.nodes;
-            var i, imax = cell.length;
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = _.cellsize;
             
-            if (nodes.length) {
+            if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = 1;
+                    cellL[i] = cellR[i] = 1;
                 }
             }
             
@@ -124,12 +124,14 @@
                     }
                 }
                 for (i = 0; i < imax; ++i) {
-                    cell[i] *= tmp[i];
+                    cellL[i] *= tmp[i];
+                    cellR[i] *= tmp[i];
                 }
             } else {
                 var value = osc.next();
                 for (i = 0; i < imax; ++i) {
-                    cell[i] *= value;
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
             }
             fn.outputSignalAR(this);

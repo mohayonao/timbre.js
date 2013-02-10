@@ -6,7 +6,7 @@
     var Compressor = T.modules.Compressor;
     
     function CompressorNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         var _ = this._;
@@ -16,7 +16,7 @@
         _.postGain  =   6;
         _.reduction =   0;
         
-        _.comp = new Compressor(T.samplerate);
+        _.comp = new Compressor(T.samplerate, 2);
         _.comp.dbPostGain  = _.postGain;
         _.comp.setAttackTime(0.003);
         _.comp.setReleaseTime(0.25);
@@ -103,7 +103,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -121,7 +120,7 @@
             }
             
             if (!_.bypassed) {
-                _.comp.process(cell);
+                _.comp.process(this.cells[1], this.cells[2]);
                 _.reduction = _.comp.meteringGain;
             }
             

@@ -5,10 +5,10 @@
     var Reverb = T.modules.Reverb;
     
     function ReverbNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
-        this._.reverb = new Reverb(T.samplerate, T.cellsize);
+        this._.reverb = new Reverb(T.samplerate, 2, T.cellsize);
     }
     fn.extend(ReverbNode);
     
@@ -52,7 +52,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -60,7 +59,7 @@
             fn.inputSignalAR(this);
             
             if (!_.bypassed) {
-                _.reverb.process(cell);
+                _.reverb.process(this.cells[1], this.cells[2]);
             }
             
             fn.outputSignalAR(this);

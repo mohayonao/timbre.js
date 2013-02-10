@@ -10,14 +10,16 @@
     var BUFFERSIZE = 1024;
     
     function WebAudioAPINode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         var _ = this._;
         _.mode = "";
-        _.buffer = new fn.SignalArray(BUFFERSIZE << 2);
+        _.bufferL = new fn.SignalArray(BUFFERSIZE << 2);
+        _.bufferR = new fn.SignalArray(BUFFERSIZE << 2);
+        _.buffermask = _.bufferL.length - 1;
         _.node   = null;
-        _.script = context.createJavaScriptNode(BUFFERSIZE, 1, 1);
+        _.script = context.createJavaScriptNode(BUFFERSIZE, 2, 2);
         _.writeIndex = 0;
         _.readIndex  = 0;
         _.totalRead  = 0;
@@ -65,16 +67,15 @@
         var make_recv_process = function(self) {
             return function(e) {
                 var _ = self._;
-                var input = e.inputBuffer.getChannelData(0);
-                var buffer = _.buffer;
+                var ins = e.inputBuffer;
+                var inputL = ins.getChannelData(0);
+                var inputR = ins.getChannelData(1);
+                var length = ins.length;
                 var writeIndex = _.writeIndex;
-                var i, imax = input.length;
-                
-                for (i = 0; i < imax; ++i) {
-                    buffer[writeIndex++] = input[i];
-                }
-                _.writeIndex = writeIndex & (buffer.length - 1);
-                _.totalWrite += input.length;
+                _.bufferL.set(inputL, writeIndex);
+                _.bufferR.set(inputR, writeIndex);
+                _.writeIndex = (writeIndex + length) & _.buffermask;
+                _.totalWrite += length;
             };
         };
         
@@ -105,7 +106,6 @@
         };
         
         $.process = function(tickID) {
-            var cell = this.cells[0];
             var _ = this._;
             
             if (_.node === null) {
@@ -114,17 +114,18 @@
             
             if (this.tickID !== tickID) {
                 this.tickID = tickID;
+
+                var cellsize = _.cellsize;
+                var bufferL = _.bufferL;
+                var bufferR = _.bufferR;
                 
-                var buffer = _.buffer;
-                var i, imax = cell.length;
-                
-                if (_.totalWrite > _.totalRead + cell.length) {
-                    var readIndex = _.readIndex;
-                    for (i = 0; i < imax; ++i) {
-                        cell[i] = buffer[readIndex++];
-                    }
-                    _.readIndex = readIndex & (buffer.length - 1);
-                    _.totalRead += cell.length;
+                if (_.totalWrite > _.totalRead + cellsize) {
+                    var begin = _.readIndex;
+                    var end = begin + cellsize;
+                    this.cells[1].set(bufferL.subarray(begin, end));
+                    this.cells[2].set(bufferR.subarray(begin, end));
+                    _.readIndex = end & _.buffermask;
+                    _.totalRead += cellsize;
                 }
                 fn.outputSignalAR(this);
             }
@@ -149,17 +150,16 @@
         var make_send_process = function(self) {
             return function(e) {
                 var _ = self._;
-                var output = e.outputBuffer.getChannelData(0);
-                var buffer = _.buffer;
-                var readIndex = _.readIndex;
-                var i, imax = output.length;
+                var outs = e.outputBuffer;
+                var length  = outs.length;
                 
-                if (_.totalWrite > _.totalRead + output.length) {
-                    for (i = 0; i < imax; ++i) {
-                        output[i] = buffer[readIndex++];
-                    }
-                    _.readIndex = readIndex & (buffer.length - 1);
-                    _.totalRead += output.length;
+                if (_.totalWrite > _.totalRead + length) {
+                    var begin = _.readIndex;
+                    var end = begin + length;
+                    outs.getChannelData(0).set(_.bufferL.subarray(begin, end));
+                    outs.getChannelData(1).set(_.bufferR.subarray(begin, end));
+                    _.readIndex = end & _.buffermask;
+                    _.totalRead += length;
                 }
             };
         };
@@ -200,7 +200,6 @@
         };
         
         $.process = function(tickID) {
-            var cell = this.cells[0];
             var _ = this._;
             
             if (_.script === null) {
@@ -210,16 +209,17 @@
             if (this.tickID !== tickID) {
                 this.tickID = tickID;
                 
-                var buffer = _.buffer;
-                var i, imax = cell.length;
-                
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
+                var cellsize = _.cellsize;
                 var writeIndex = _.writeIndex;
+                
                 fn.inputSignalAR(this);
-                for (i = 0; i < imax; ++i) {
-                    buffer[writeIndex++] = cell[i];
-                }
-                _.writeIndex = writeIndex & (buffer.length - 1);
-                _.totalWrite += cell.length;
+                
+                _.bufferL.set(cellL, writeIndex);
+                _.bufferR.set(cellR, writeIndex);
+                _.writeIndex = (writeIndex + cellsize) & _.buffermask;
+                _.totalWrite += cellsize;
                 
                 fn.outputSignalAR(this);
             }

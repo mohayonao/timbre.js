@@ -10,9 +10,9 @@
     };
     
     function EQNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
-
+        
         var _ = this._;
         _.biquads = new Array(7);
         
@@ -84,7 +84,7 @@
                 }
                 var biquad = _.biquads[index];
                 if (!biquad) {
-                    biquad = _.biquads[index] = new Biquad(T.samplerate);
+                    biquad = _.biquads[index] = new Biquad(T.samplerate, 2);
                     switch (index) {
                     case 0:
                         biquad.setType("highpass");
@@ -116,7 +116,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -124,10 +123,12 @@
             fn.inputSignalAR(this);
 
             if (!_.bypassed) {
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
                 var biquads = _.biquads;
                 for (var i = 0, imax = biquads.length; i < imax; ++i) {
                     if (biquads[i]) {
-                        biquads[i].process(cell);
+                        biquads[i].process(cellL, cellR);
                     }
                 }
             }

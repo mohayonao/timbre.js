@@ -7,12 +7,12 @@
     var EnvelopeValue = T.modules.EnvelopeValue;
     
     function ParamNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         
         var _ = this._;
         _.value = 0;
         _.env = new EnvelopeValue(T.samplerate);
-        _.env.step = T.cellsize;
+        _.env.step = _.cellsize;
         _.curve   = "lin";
         _.counter = 0;
         _.ar = false;
@@ -23,7 +23,7 @@
     fn.extend(ParamNode);
     
     var onar = function(value) {
-        this._.env.step = (value) ? 1 : T.cellsize;
+        this._.env.step = (value) ? 1 : this._.cellsize;
     };
     
     var $ = ParamNode.prototype;
@@ -108,19 +108,18 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
-            var cell = this.cells[0];
-            var nodes = this.nodes;
-            var i, imax = cell.length;
-            var mul = _.mul, add = _.add;
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = _.cellsize;
             var env = _.env;
             var counter = _.counter;
             var value;
             
-            if (nodes.length) {
+            if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = 1;
+                    cellL[i] = cellR[i] = 1;
                 }
             }
             
@@ -137,15 +136,21 @@
             if (_.ar) {
                 for (i = 0; i < imax; ++i) {
                     value = env.next();
-                    cell[i] = (cell[i] * value) * mul + add;
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
+                _.counter -= _.cellsize;
             } else {
                 value = env.next();
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = (cell[i] * value) * mul + add;
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
+                _.counter -= 1;
             }
-            _.counter -= cell.length;
+            
+            fn.outputSignalAR(this);
+            
             _.value = value;
         }
         

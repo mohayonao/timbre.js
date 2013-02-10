@@ -6,7 +6,7 @@
     var DefaultPreDelayFrames = 256;
     var kSpacingDb = 5;
     
-    function Compressor(samplerate) {
+    function Compressor(samplerate, channels) {
         this.samplerate = samplerate || 44100;
         this.lastPreDelayFrames = 0;
         this.preDelayReadIndex  = 0;
@@ -35,8 +35,13 @@
         this.detectorAverage = 0;
         this.compressorGain  = 1;
         this.meteringGain    = 1;
-
-        this.preDelayBuffer = new T.fn.SignalArray(MaxPreDelayFrames);
+        
+        this.delayBufferL = new T.fn.SignalArray(MaxPreDelayFrames);
+        if (channels === 2) {
+            this.delayBufferR = new T.fn.SignalArray(MaxPreDelayFrames);
+        } else {
+            this.delayBufferR = this.delayBufferL;
+        }
         this.preDelayReadIndex = 0;
         this.preDelayWriteIndex = DefaultPreDelayFrames;
         this.maxAttackCompressionDiffDb = -1;
@@ -80,8 +85,8 @@
         }
         if (this.lastPreDelayFrames !== preDelayFrames) {
             this.lastPreDelayFrames = preDelayFrames;
-            for (var i = 0, imax = this.preDelayBuffer.length; i < imax; ++i) {
-                this.preDelayBuffer[i] = 0;
+            for (var i = 0, imax = this.delayBufferL.length; i < imax; ++i) {
+                this.delayBufferL[i] = this.delayBufferR[i] = 0;
             }
             this.preDelayReadIndex = 0;
             this.preDelayWriteIndex = preDelayFrames;
@@ -160,37 +165,31 @@
         this.ratio = ratio;
         this.slope = 1 / this.ratio;
         
-        var k = this.kAtSlope(1 / this.ratio);
-        
         this.kneeThresholdDb = dbThreshold + dbKnee;
         this.kneeThreshold   = Math.pow(10, 0.05 * this.kneeThresholdDb);
         
+        var k = this.kAtSlope(1 / this.ratio);
         var y = this.kneeCurve(this.kneeThreshold, k);
-        this.ykneeThresholdDb = (y) ? 20 * Math.log(y ) * Math.LOG10E : -1000;
+        this.ykneeThresholdDb = (y) ? 20 * Math.log(y) * Math.LOG10E : -1000;
         
         this.K = k;
         
         return this.K;
     };
     
-    $.process = function(cell) {
+    $.process = function(cellL, cellR) {
         var dryMix = 1 - this.effectBlend;
         var wetMix = this.effectBlend;
-        
         var k = this._k;
         var masterLinearGain = this._masterLinearGain;
-        
-        var satReleaseFrames = this._satReleaseFrame;
+        var satReleaseFrames = this._satReleaseFrames;
         var kA = this._kA;
         var kB = this._kB;
         var kC = this._kC;
         var kD = this._kD;
         var kE = this._kE;
-        
         var nDivisionFrames = 64;
-        
-        var nDivisions = cell.length / nDivisionFrames;
-        
+        var nDivisions = cellL.length / nDivisionFrames;
         var frameIndex = 0;
         var desiredGain = this.detectorAverage;
         var compressorGain = this.compressorGain;
@@ -199,8 +198,8 @@
         var preDelayReadIndex = this.preDelayReadIndex;
         var preDelayWriteIndex = this.preDelayWriteIndex;
         var detectorAverage = this.detectorAverage;
-        var delayBuffer = this.preDelayBuffer;
-        var preDelayBuffer = this.preDelayBuffer;
+        var delayBufferL = this.delayBufferL;
+        var delayBufferR = this.delayBufferR;
         var meteringGain = this.meteringGain;
         var meteringReleaseK = this.meteringReleaseK;
         
@@ -211,6 +210,9 @@
             var x = compressorGain / scaledDesiredGain;
             
             var compressionDiffDb = (x) ? 20 * Math.log(x) * Math.LOG10E : -1000;
+            if (compressionDiffDb === Infinity || isNaN(compressionDiffDb)) {
+                compressionDiffDb = -1;
+            }
             
             if (isReleasing) {
                 maxAttackCompressionDiffDb = -1;
@@ -247,8 +249,9 @@
             while (loopFrames--) {
                 var compressorInput = 0;
                 
-                var absUndelayedSource = cell[frameIndex];
-                delayBuffer[preDelayWriteIndex] = absUndelayedSource;
+                var absUndelayedSource = (cellL[frameIndex] + cellR[frameIndex]) * 0.5;
+                delayBufferL[preDelayWriteIndex] = cellL[frameIndex];
+                delayBufferR[preDelayWriteIndex] = cellR[frameIndex];
                 
                 if (absUndelayedSource < 0) {
                     absUndelayedSource *= -1;
@@ -297,13 +300,14 @@
                 } else {
                     meteringGain += (dbRealGain - meteringGain) * meteringReleaseK;
                 }
-                cell[frameIndex] = preDelayBuffer[preDelayReadIndex] * totalGain;
+                cellL[frameIndex] = delayBufferL[preDelayReadIndex] * totalGain;
+                cellR[frameIndex] = delayBufferR[preDelayReadIndex] * totalGain;
                 
                 frameIndex++;
                 preDelayReadIndex  = (preDelayReadIndex  + 1) & MaxPreDelayFramesMask;
                 preDelayWriteIndex = (preDelayWriteIndex + 1) & MaxPreDelayFramesMask;
             }
-
+            
             if (detectorAverage < 1e-6) {
                 detectorAverage = 1e-6;
             }
@@ -324,8 +328,8 @@
         this.compressorGain = 1;
         this.meteringGain = 1;
         
-        for (var i = 0, imax = this.preDelayBuffer.length; i < imax; ++i) {
-            this.preDelayBuffer[i] = 0;
+        for (var i = 0, imax = this.delayBufferL.length; i < imax; ++i) {
+            this.delayBufferL[i] = this.delayBufferR[i] = 0;
         }
         
         this.preDelayReadIndex = 0;

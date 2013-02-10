@@ -4,7 +4,7 @@
     var fn = T.fn;
 
     function SelectorNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         
         this._.selected   = 0;
         this._.background = false;
@@ -12,16 +12,14 @@
     fn.extend(SelectorNode);
     
     var $ = SelectorNode.prototype;
-
+    
     Object.defineProperties($, {
         selected: {
             set: function(value) {
                 if (typeof value === "number") {
                     this._.selected = value;
-                    var cell = this.cells[0];
-                    for (var i = 0, imax = cell.length; i < imax; ++i) {
-                        cell[i] = 0;
-                    }
+                    this.cells[1].set(fn.emptycell);
+                    this.cells[2].set(fn.emptycell);
                 }
             },
             get: function() {
@@ -40,11 +38,10 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
+            
             var nodes = this.nodes;
             var i, imax = nodes.length;
             
@@ -56,7 +53,11 @@
             
             var tmp = nodes[_.selected];
             if (tmp) {
-                cell.set(tmp.process(tickID).cells[0]);
+                if (!_.background) {
+                    tmp.process(tickID);
+                }
+                this.cells[1].set(tmp.cells[1]);
+                this.cells[2].set(tmp.cells[2]);
             }
             
             fn.outputSignalAR(this);

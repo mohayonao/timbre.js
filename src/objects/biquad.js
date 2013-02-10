@@ -7,11 +7,11 @@
     var PLOT_LOW_FREQ = 20;
     
     function BiquadNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.biquad = new Biquad(T.samplerate);
+        _.biquad = new Biquad(T.samplerate, 2);
         _.freq = T(340);
         _.band = T(1);
         _.gain = T(0);
@@ -21,7 +21,7 @@
         _.plotFlush  = true;
     }
     fn.extend(BiquadNode);
-
+    
     var plotBefore = function(context, x, y, width, height) {
         context.lineWidth = 1;
         context.strokeStyle = "rgb(192, 192, 192)";
@@ -118,37 +118,25 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
-            var changed = false;
-            
             var freq = _.freq.process(tickID).cells[0][0];
-            if (_.prevFreq !== freq) {
-                _.prevFreq = freq;
-                changed = true;
-            }
             var band = _.band.process(tickID).cells[0][0];
-            if (_.prevband !== band) {
-                _.prevband = band;
-                changed = true;
-            }
             var gain = _.gain.process(tickID).cells[0][0];
-            if (_.prevGain !== gain) {
+            if (_.prevFreq !== freq || _.prevband !== band || _.prevGain !== gain) {
+                _.prevFreq = freq;
+                _.prevband = band;
                 _.prevGain = gain;
-                changed = true;
-            }
-            if (changed) {
                 _.biquad.setParams(freq, band, gain);
                 _.plotFlush = true;
             }
             
             if (!_.bypassed) {
-                _.biquad.process(cell);
+                _.biquad.process(this.cells[1], this.cells[2]);
             }
             
             fn.outputSignalAR(this);
@@ -162,7 +150,7 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var biquad = new Biquad(T.samplerate);
+            var biquad = new Biquad(T.samplerate, 1);
             biquad.setType(this.type);
             biquad.setParams(this.freq.valueOf(), this.band.valueOf(), this.gain.valueOf());
             
@@ -200,7 +188,6 @@
     };
     
     fn.register("biquad", BiquadNode);
-    
     fn.register("lowpass", function(_args) {
         return new BiquadNode(_args).set("type", "lowpass");
     });

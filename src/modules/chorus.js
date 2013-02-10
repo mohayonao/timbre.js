@@ -1,12 +1,16 @@
 (function(T) {
     "use strict";
     
-    function Chorus(samplerate) {
+    function Chorus(samplerate, channels) {
         this.samplerate = samplerate;
+        this.channels = channels;
         
         var bits = Math.round(Math.log(samplerate * 0.1) * Math.LOG2E);
         this.buffersize = 1 << bits;
-        this.buffer = new T.fn.SignalArray(this.buffersize + 1);
+        this.bufferL = new T.fn.SignalArray(this.buffersize + 1);
+        if (channels === 2) {
+            this.bufferR = new T.fn.SignalArray(this.buffersize + 1);
+        }
         
         this.wave       = null;
         this._wave      = null;
@@ -69,10 +73,11 @@
         this.phaseIncr = (512 * this.rate / this.samplerate) * this.phaseStep;
     };
     
-    $.process = function(cell) {
-        var buffer = this.buffer;
-        var size   = this.buffersize;
-        var mask   = size - 1;
+    $.process = function(cellL, cellR) {
+        var bufferL = this.bufferL;
+        var bufferR = this.bufferR;
+        var size = this.buffersize;
+        var mask = size - 1;
         var wave       = this._wave;
         var phase      = this.phase;
         var phaseIncr  = this.phaseIncr;
@@ -82,29 +87,51 @@
         var feedback   = this.feedback;
         var x, index, mod;
         var wet = this.wet, dry = 1 - wet;
-        var i, imax = cell.length;
+        var i, imax = cellL.length;
         var j, jmax = this.phaseStep;
-        
-        for (i = 0; i < imax; ) {
-            mod = wave[phase|0] * depth;
-            phase += phaseIncr;
-            while (phase > 512) {
-                phase -= 512;
+
+        if (this.channels === 2) {
+            for (i = 0; i < imax; ) {
+                mod = wave[phase|0] * depth;
+                phase += phaseIncr;
+                while (phase > 512) {
+                    phase -= 512;
+                }
+                for (j = 0; j < jmax; ++j, ++i) {
+                    index = (readIndex + size + mod) & mask;
+                    
+                    x = (bufferL[index] + bufferL[index + 1]) * 0.5;
+                    bufferL[writeIndex] = cellL[i] - x * feedback;
+                    cellL[i] = (cellL[i] * dry) + (x * wet);
+
+                    x = (bufferR[index] + bufferR[index + 1]) * 0.5;
+                    bufferR[writeIndex] = cellR[i] - x * feedback;
+                    cellR[i] = (cellR[i] * dry) + (x * wet);
+                    
+                    writeIndex = (writeIndex + 1) & mask;
+                    readIndex  = (readIndex  + 1) & mask;
+                }
             }
-            for (j = 0; j < jmax; ++j, ++i) {
-                index = (readIndex + size + mod) & mask;
-                x = (buffer[index] + buffer[index + 1]) * 0.5;
-                buffer[writeIndex] = cell[i] - x * feedback;
-                cell[i] = (cell[i] * dry) + (x * wet);
-                writeIndex = (writeIndex + 1) & mask;
-                readIndex  = (readIndex  + 1) & mask;
+        } else {
+            for (i = 0; i < imax; ) {
+                mod = wave[phase|0] * depth;
+                phase += phaseIncr;
+                while (phase > 512) {
+                    phase -= 512;
+                }
+                for (j = 0; j < jmax; ++j, ++i) {
+                    index = (readIndex + size + mod) & mask;
+                    x = (bufferL[index] + bufferL[index + 1]) * 0.5;
+                    bufferL[writeIndex] = cellL[i] - x * feedback;
+                    cellL[i] = (cellL[i] * dry) + (x * wet);
+                    writeIndex = (writeIndex + 1) & mask;
+                    readIndex  = (readIndex  + 1) & mask;
+                }
             }
         }
         this.phase = phase;
         this.writeIndex = writeIndex;
         this.readIndex  = readIndex;
-        
-        return cell;
     };
     
     T.modules.Chorus = Chorus;

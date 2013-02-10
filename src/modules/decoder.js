@@ -27,10 +27,10 @@
             T.fn.fix_iOS6_1_problem(true);
             
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", path, true);
+            xhr.open("GET", path);
             xhr.responseType = "arraybuffer";
-            xhr.onload = function() {
-                if (xhr.status === 200) {
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
                     if (xhr.response) {
                         callback(new Uint8Array(xhr.response));
                     } else if (xhr.responseBody !== undefined) {
@@ -44,10 +44,8 @@
                         callback(new Uint8Array(a));
                         /*global VBArray:false */
                     }
-                } else {
-                    callback(xhr.status + " " + xhr.statusText);
+                    T.fn.fix_iOS6_1_problem(false);
                 }
-                T.fn.fix_iOS6_1_problem(false);
             };
             xhr.send();
         };
@@ -56,18 +54,6 @@
             callback("no support");
         };
     }
-    
-    var deinterleave = function(list) {
-        var result = new list.constructor(list.length>>1);
-        var i, j, jmax = result.length;
-        if (list.length % 2) {
-            j |= 0;
-        }
-        for (i = j = 0; j < jmax; ++j, i += 2) {
-            result[j] = (list[i] + list[i+1]) * 0.5;
-        }
-        return result;
-    };
     
     var _24bit_to_32bit = function(uint8) {
         var b0, b1, b2, bb, x;
@@ -115,11 +101,19 @@
                 return onloadedmetadata(false);
             }
             
-            var buffer = new Float32Array((duration * samplerate)|0);
+            var bufferL, bufferR;
+            bufferL = new Float32Array((duration * samplerate)|0);
+            if (channels === 2) {
+                bufferR = new Float32Array((duration * samplerate)|0);
+            } else {
+                bufferR = bufferL;
+            }
             
             onloadedmetadata({
                 samplerate: samplerate,
-                buffer    : buffer,
+                channels  : channels,
+                bufferL   : bufferL,
+                bufferR   : bufferR,
                 duration  : duration
             });
             
@@ -133,13 +127,16 @@
                 data = _24bit_to_32bit(new Uint8Array(data.buffer, 44));
             }
             
+            var i, imax, j, k = 1 / ((1 << (bitSize-1)) - 1);
             if (channels === 2) {
-                data = deinterleave(data);
-            }
-            
-            var k = 1 / ((1 << (bitSize-1)) - 1);
-            for (var i = 0, imax = buffer.length; i < imax; ++i) {
-                buffer[i] = data[i] * k;
+                for (i = j = 0, imax = bufferL.length; i < imax; ++i) {
+                    bufferL[i] = data[j++] * k;
+                    bufferR[i] = data[j++] * k;
+                }
+            } else {
+                for (i = 0, imax = bufferL.length; i < imax; ++i) {
+                    bufferL[i] = data[i] * k;
+                }
             }
             
             onloadeddata();
@@ -151,24 +148,33 @@
         if (typeof webkitAudioContext !== "undefined") {
             var ctx = T.fn._audioContext;
             var _decode = function(data, onloadedmetadata, onloadeddata) {
-                var samplerate, duration, buffer;
+                var samplerate, channels, bufferL, bufferR, duration;
                 if (typeof data === "string") {
                     return onloadeddata(false);
                 }
                 
+                var buffer;
                 try {
-                    buffer = ctx.createBuffer(data.buffer, true);
+                    buffer = ctx.createBuffer(data.buffer, false);
                 } catch (e) {
                     return onloadedmetadata(false);
                 }
                 
                 samplerate = ctx.sampleRate;
-                buffer     = buffer.getChannelData(0);
-                duration   = buffer.length / samplerate;
+                channels   = buffer.numberOfChannels;
+                if (channels === 2) {
+                    bufferL = buffer.getChannelData(0);
+                    bufferR = buffer.getChannelData(1);
+                } else {
+                    bufferL = bufferR = buffer.getChannelData(0);
+                }
+                duration = bufferL.length / samplerate;
                 
                 onloadedmetadata({
                     samplerate: samplerate,
-                    buffer    : buffer,
+                    channels  : channels,
+                    bufferL   : bufferL,
+                    bufferR   : bufferR,
                     duration  : duration
                 });
                 
@@ -197,28 +203,36 @@
     Decoder.moz_decode = (function() {
         if (typeof Audio === "function" && typeof new Audio().mozSetup === "function") {
             return function(src, onloadedmetadata, onloadeddata) {
-                var samplerate, duration, buffer;
+                var samplerate, channels, bufferL, bufferR, duration;
                 var writeIndex = 0;
                 
                 var audio = new Audio(src);
                 audio.volume = 0.0;
-                audio.speed  = 4;
                 audio.addEventListener("loadedmetadata", function() {
                     samplerate = audio.mozSampleRate;
-                    duration = audio.duration;
-                    buffer = new Float32Array((audio.duration * samplerate)|0);
-                    if (audio.mozChannels === 2) {
+                    channels   = audio.mozChannels;
+                    duration   = audio.duration;
+                    bufferL = new Float32Array((audio.duration * samplerate)|0);
+                    if (channels === 2) {
+                        bufferR = new Float32Array((audio.duration * samplerate)|0);
+                    } else {
+                        bufferR = bufferL;
+                    }
+                    if (channels === 2) {
                         audio.addEventListener("MozAudioAvailable", function(e) {
                             var samples = e.frameBuffer;
                             for (var i = 0, imax = samples.length; i < imax; i += 2) {
-                                buffer[writeIndex++] = (samples[i] + samples[i+1]) * 0.5;
+                                bufferL[writeIndex] = samples[i  ];
+                                bufferR[writeIndex] = samples[i+1];
+                                writeIndex += 1;
                             }
                         }, false);
                     } else {
                         audio.addEventListener("MozAudioAvailable", function(e) {
                             var samples = e.frameBuffer;
                             for (var i = 0, imax = samples.length; i < imax; ++i) {
-                                buffer[writeIndex++] = samples[i];
+                                bufferL[writeIndex] = bufferR[writeIndex] = samples[i];
+                                writeIndex += 1;
                             }
                         }, false);
                     }
@@ -226,7 +240,9 @@
                     setTimeout(function() {
                         onloadedmetadata({
                             samplerate: samplerate,
-                            buffer    : buffer,
+                            channels  : channels,
+                            bufferL   : bufferL,
+                            bufferR   : bufferR,
                             duration  : duration
                         });
                     }, 1000);
