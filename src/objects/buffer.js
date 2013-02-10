@@ -14,6 +14,7 @@
         _.isReversed = false;
         _.duration    = 0;
         _.currentTime = 0;
+        _.currentTimeObj = null;
         _.samplerate  = 44100;
         _.phase = 0;
         _.phaseIncr = 0;
@@ -111,14 +112,22 @@
                         _.phase = (value / 1000) * _.samplerate;
                         _.currentTime = value;
                     }
+                } else if (value instanceof T.Object) {
+                    this._.currentTimeObj = value;
+                } else if (value === null) {
+                    this._.currentTimeObj = null;
                 }
             },
             get: function() {
-                return this._.currentTime;
+                if (this._.currentTimeObj) {
+                    return this._.currentTimeObj;
+                } else {
+                    return this._.currentTime;
+                }
             }
         }
     });
-
+    
     $.clone = function() {
         var _ = this._;
         var instance = T("buffer");
@@ -218,11 +227,11 @@
             var mul = _.mul, add = _.add;
             var i, imax = cell.length;
             
-            if (this.nodes.length) {
-                fn.inputSignalAR(this);
+            if (_.currentTimeObj) {
+                var pos = _.currentTimeObj.process(tickID).cells[0];
                 var t, sr = _.samplerate * 0.001;
                 for (i = 0; i < imax; ++i) {
-                    t = cell[i];
+                    t = pos[i];
                     phase = t * sr;
                     cell[i] = (buffer[phase|0] || 0) * mul + add;
                 }
@@ -257,7 +266,7 @@
         
         return this;
     };
-        
+    
     var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
