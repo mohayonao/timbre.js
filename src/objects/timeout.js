@@ -10,10 +10,10 @@
         fn.fixKR(this);
         
         var _ = this._;
+        this.playbackState = fn.FINISHED_STATE;
         _.currentTime = 0;
         _.samplesMax = 0;
         _.samples    = 0;
-        _.isEnded = true;
         _.onended = fn.make_onended(this);
         
         this.once("init", oninit);
@@ -29,7 +29,7 @@
     };
     
     var onstart = function() {
-        this._.isEnded = false;
+        this.playbackState = fn.PLAYING_STATE;
     };
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
@@ -45,10 +45,10 @@
                     value = timevalue(value);
                 }
                 if (typeof value === "number" && value >= 0) {
+                    this.playbackState = fn.PLAYING_STATE;
                     _.timeout = value;
                     _.samplesMax = (T.samplerate * (value * 0.001))|0;
                     _.samples = _.samplesMax;
-                    _.isEnded = false;
                 }
             },
             get: function() {
@@ -64,9 +64,9 @@
     
     $.bang = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.samples = _.samplesMax;
         _.currentTime = 0;
-        _.isEnded = false;
         _.emit("bang");
         return this;
     };
@@ -74,10 +74,6 @@
     $.process = function(tickID) {
         var cell = this.cells[0];
         var _ = this._;
-
-        if (_.isEnded) {
-            return this;
-        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;

@@ -12,7 +12,6 @@
 
         var _ = this._;
         _.isLooped = false;
-        _.isEnded  = false;
         _.onended  = fn.make_onended(this, 0);
     }
     fn.extend(ScissorNode);
@@ -23,14 +22,14 @@
         tape: {
             set: function(tape) {
                 if (tape instanceof Tape) {
+                    this.playbackState = fn.PLAYING_STATE;
                     this._.tape = tape;
                     this._.tapeStream = new TapeStream(tape, T.samplerate);
-                    this._.isEnded = false;
                 } else if (typeof tape === "object") {
                     if (tape.buffer instanceof Float32Array || tape.buffer instanceof Float64Array) {
+                        this.playbackState = fn.PLAYING_STATE;
                         this._.tape = new Scissor(tape);
                         this._.tapeStream = new TapeStream(tape, T.samplerate);
-                        this._.isEnded = false;
                     }
                 }
             },
@@ -41,11 +40,6 @@
         isLooped: {
             get: function() {
                 return this._.isLooped;
-            }
-        },
-        isEnded: {
-            get: function() {
-                return this._.isEnded;
             }
         }
     });
@@ -59,10 +53,10 @@
     };
     
     $.bang = function() {
+        this.playbackState = fn.PLAYING_STATE;
         if (this._.tapeStream) {
             this._.tapeStream.reset();
         }
-        this._.isEnded = false;
         this._.emit("bang");
         return this;
     };
@@ -81,7 +75,7 @@
                 var tmp  = tapeStream.fetch(cellL.length);
                 cellL.set(tmp[0]);
                 cellR.set(tmp[1]);
-                if (!_.isEnded && tapeStream.isEnded) {
+                if (this.playbackState === fn.PLAYING_STATE && tapeStream.isEnded) {
                     fn.nextTick(_.onended);
                 }
             }

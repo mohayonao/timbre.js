@@ -19,7 +19,6 @@
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
-        _.isEnded  = false;
         _.remain   = Infinity;
         _.onended  = fn.make_onended(this);
         
@@ -29,6 +28,7 @@
     
     var onstart = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.commands = compile(_.mml);
         _.index    = 0;
         _.queue    = [];
@@ -37,7 +37,6 @@
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
-        _.isEnded  = false;
         _.remain   = Infinity;
         
         sched(this);
@@ -64,20 +63,11 @@
             get: function() {
                 return this._.currentTime;
             }
-        },
-        isEnded: {
-            get: function() {
-                return this._.isEnded;
-            }
         }
     });
     
     $.process = function(tickID) {
         var _ = this._;
-        
-        if (_.isEnded) {
-            return this;
-        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -113,7 +103,6 @@
                         _.emit("mml", "noteOff", {noteNum:nextItem[2], velocity:nextItem[3]});
                     }
                     if (queue.length === 0) {
-                        
                         break;
                     }
                 }
@@ -130,10 +119,6 @@
     
     var sched = function(self) {
         var _ = self._;
-        
-        if (_.isEnded) {
-            return;
-        }
         
         var cmd, commands = _.commands;
         var queue  = _.queue;

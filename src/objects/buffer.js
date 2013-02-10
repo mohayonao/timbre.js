@@ -89,11 +89,6 @@
                 return this._.isReversed;
             }
         },
-        isEnded: {
-            get: function() {
-                return this._.isEnded;
-            }
-        },
         samplerate: {
             get: function() {
                 return this._.samplerate;
@@ -171,7 +166,7 @@
                 buffer    : _.buffer.subarray(begin, end),
                 samplerate: _.samplerate
             });
-            instance._.isEnded = false;
+            instance.playbackState = fn.PLAYING_STATE;
         }
         instance.loop(_.isLooped);
         instance.reverse(_.isReversed);
@@ -205,8 +200,8 @@
     };
     
     $.bang = function(value) {
-        this._.phase   = 0;
-        this._.isEnded = (value === false);
+        this.playbackState = (value === false ? fn.FINISHED_STATE : fn.PLAYING_STATE);
+        this._.phase = 0;
         this._.emit("bang");
         return this;
     };
@@ -215,7 +210,7 @@
         var _ = this._;
         var cell = this.cells[0];
         
-        if (_.isEnded || !_.buffer) {
+        if (!_.buffer) {
             return this;
         }
         

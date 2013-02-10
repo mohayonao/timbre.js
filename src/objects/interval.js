@@ -17,7 +17,6 @@
         _.currentTime = 0;
         _.delaySamples = 0;
         _.countSamples = 0;
-        _.isEnded = false;
         _.onended = fn.make_onended(this);
         
         this.on("start", onstart);
@@ -26,9 +25,9 @@
     
     var onstart = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.delaySamples = (T.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
-        _.isEnded = false;
     };
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
@@ -97,9 +96,9 @@
     
     $.bang = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.delaySamples = (T.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
-        _.isEnded = false;
         _.emit("bang");
         return this;
     };
@@ -108,10 +107,6 @@
         var cell = this.cells[0];
         
         var _ = this._;
-        
-        if (_.isEnded) {
-            return this;
-        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;

@@ -98,11 +98,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-
-        if (_.isEnded) {
-            return this;
-        }
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             

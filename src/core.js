@@ -13,6 +13,10 @@
     var STATUS_NONE = 0;
     var STATUS_PLAY = 1;
     var STATUS_REC  = 2;
+    var FINISHED_STATE    = 0;
+    var PLAYING_STATE     = 1;
+    var UNSCHEDULED_STATE = 2; // (not use)
+    var SCHEDULED_STATE   = 3; // (not use)
     
     var _ver = "${VERSION}";
     var _sys = null;
@@ -129,6 +133,10 @@
     fn.SignalArray = Float32Array;
     fn.currentTimeIncr = 0;
     fn.emptycell = null;
+    fn.FINISHED_STATE    = FINISHED_STATE;
+    fn.PLAYING_STATE     = PLAYING_STATE;
+    fn.UNSCHEDULED_STATE = UNSCHEDULED_STATE;
+    fn.SCHEDULED_STATE   = SCHEDULED_STATE;
     
     (function() {
         var dict = {};
@@ -554,6 +562,7 @@
     
     var __make_onended = function(self, lastValue) {
         return function() {
+            self.playbackState = FINISHED_STATE;
             if (typeof lastValue === "number") {
                 var cell  = self.cells[0];
                 var cellL = self.cells[1];
@@ -562,7 +571,6 @@
                     cell[0] = cellL[i] = cellR[i] = lastValue;
                 }
             }
-            self._.isEnded = true;
             self._.emit("ended");
         };
     };
@@ -584,19 +592,21 @@
                 cellL[j] = cellL[j+1] = cellL[j+2] = cellL[j+3] = cellL[j+4] = cellL[j+5] = cellL[j+6] = cellL[j+7] = cellR[j] = cellR[j+1] = cellR[j+2] = cellR[j+3] = cellR[j+4] = cellR[j+5] = cellR[j+6] = cellR[j+7] = 0;
             }
             for (i = 0; i < imax; ++i) {
-                nodes[i].process(tickID);
-                tmpL = nodes[i].cells[1];
-                tmpR = nodes[i].cells[2];
-                for (j = jmax; j; ) {
-                    j -= 8;
-                    cellL[j  ] += tmpL[j  ]; cellR[j  ] += tmpR[j  ];
-                    cellL[j+1] += tmpL[j+1]; cellR[j+1] += tmpR[j+1];
-                    cellL[j+2] += tmpL[j+2]; cellR[j+2] += tmpR[j+2];
-                    cellL[j+3] += tmpL[j+3]; cellR[j+3] += tmpR[j+3];
-                    cellL[j+4] += tmpL[j+4]; cellR[j+4] += tmpR[j+4];
-                    cellL[j+5] += tmpL[j+5]; cellR[j+5] += tmpR[j+5];
-                    cellL[j+6] += tmpL[j+6]; cellR[j+6] += tmpR[j+6];
-                    cellL[j+7] += tmpL[j+7]; cellR[j+7] += tmpR[j+7];
+                if (nodes[i].playbackState === PLAYING_STATE) {
+                    nodes[i].process(tickID);
+                    tmpL = nodes[i].cells[1];
+                    tmpR = nodes[i].cells[2];
+                    for (j = jmax; j; ) {
+                        j -= 8;
+                        cellL[j  ] += tmpL[j  ]; cellR[j  ] += tmpR[j  ];
+                        cellL[j+1] += tmpL[j+1]; cellR[j+1] += tmpR[j+1];
+                        cellL[j+2] += tmpL[j+2]; cellR[j+2] += tmpR[j+2];
+                        cellL[j+3] += tmpL[j+3]; cellR[j+3] += tmpR[j+3];
+                        cellL[j+4] += tmpL[j+4]; cellR[j+4] += tmpR[j+4];
+                        cellL[j+5] += tmpL[j+5]; cellR[j+5] += tmpR[j+5];
+                        cellL[j+6] += tmpL[j+6]; cellR[j+6] += tmpR[j+6];
+                        cellL[j+7] += tmpL[j+7]; cellR[j+7] += tmpR[j+7];
+                    }
                 }
             }
         } else {
@@ -605,17 +615,19 @@
                 cell[j] = cell[j+1] = cell[j+2] = cell[j+3] = cell[j+4] = cell[j+5] = cell[j+6] = cell[j+7] = 0;
             }
             for (i = 0; i < imax; ++i) {
-                tmp = nodes[i].process(tickID).cells[0];
-                for (j = jmax; j; ) {
-                    j -= 8;
-                    cell[j  ] += tmp[j  ];
-                    cell[j+1] += tmp[j+1];
-                    cell[j+2] += tmp[j+2];
-                    cell[j+3] += tmp[j+3];
-                    cell[j+4] += tmp[j+4];
-                    cell[j+5] += tmp[j+5];
-                    cell[j+6] += tmp[j+6];
-                    cell[j+7] += tmp[j+7];
+                if (nodes[i].playbackState === PLAYING_STATE) {
+                    tmp = nodes[i].process(tickID).cells[0];
+                    for (j = jmax; j; ) {
+                        j -= 8;
+                        cell[j  ] += tmp[j  ];
+                        cell[j+1] += tmp[j+1];
+                        cell[j+2] += tmp[j+2];
+                        cell[j+3] += tmp[j+3];
+                        cell[j+4] += tmp[j+4];
+                        cell[j+5] += tmp[j+5];
+                        cell[j+6] += tmp[j+6];
+                        cell[j+7] += tmp[j+7];
+                    }
                 }
             }
         }
@@ -628,7 +640,9 @@
         var tickID = self.tickID;
         var tmp = 0;
         for (i = 0; i < imax; ++i) {
-            tmp += nodes[i].process(tickID).cells[0][0];
+            if (nodes[i].playbackState === PLAYING_STATE) {
+                tmp += nodes[i].process(tickID).cells[0][0];
+            }
         }
         return tmp;
     };
@@ -760,6 +774,7 @@
                 this.cells[2] = this.R.cell;
                 break;
             }
+            this.playbackState = PLAYING_STATE;
             
             this._.ar  = true;
             this._.mul = 1;
@@ -792,6 +807,11 @@
                     return this._.bypassed;
                 }
             },
+            isEnded: {
+                get: function() {
+                    return !(this.playbackState & 1);
+                }
+            },
             mul: {
                 set: function(value) {
                     if (typeof value === "number") {
@@ -812,20 +832,6 @@
                 },
                 get: function() {
                     return this._.add;
-                }
-            },
-            dac: {
-                set: function(value) {
-                    var _ = this._;
-                    if (value instanceof SystemInlet && _.dac !== value) {
-                        if (_.dac) {
-                            _.dac.remove(this);
-                        }
-                        value.append(this);
-                    }
-                },
-                get: function() {
-                    return this._.dac;
                 }
             }
         });
@@ -976,16 +982,11 @@
         
         $.play = function() {
             var dac = this._.dac;
-            var emit = false;
             if (dac === null) {
                 dac = this._.dac = new SystemInlet(this);
-                emit = true;
-            } else if (dac.nodes.indexOf(this) === -1) {
-                dac.append(this);
-                emit = true;
             }
-            dac.play();
-            if (emit) {
+            if (dac.playbackState === FINISHED_STATE) {
+                dac.play();
                 this._.emit.apply(this, ["play"].concat(slice.call(arguments)));
             }
             return this;
@@ -993,15 +994,10 @@
         
         $.pause = function() {
             var dac = this._.dac;
-            if (dac) {
-                if (dac.nodes.indexOf(this) !== -1) {
-                    this._.dac = null;
-                    dac.remove(this);
-                    this._.emit("pause");
-                }
-                if (dac.nodes.length === 0) {
-                    dac.pause();
-                }
+            if (dac && dac.playbackState === PLAYING_STATE) {
+                dac.pause();
+                this._.dac = null;
+                this._.emit("pause");
             }
             return this;
         };
@@ -1359,25 +1355,21 @@
     var SystemInlet = (function() {
         function SystemInlet(object) {
             TimbreObject.call(this, 2, []);
-            if (object instanceof TimbreObject) {
-                this.nodes.push(object);
-            }
-            
+
+            this.playbackState = FINISHED_STATE;
             var _ = this._;
-            _.isPlaying = false;
+            _.node = object;
             _.onplay  = make_onplay(this);
             _.onpause = make_onpause(this);
-            
-            this.on("append", onappend);
         }
         __extend(SystemInlet);
-
+        
         var make_onplay = function(self) {
             return function() {
                 if (_sys.inlets.indexOf(self) === -1) {
                     _sys.inlets.push(self);
                     _sys.events.emit("addObject");
-                    self._.isPlaying = true;
+                    self.playbackState = PLAYING_STATE;
                     self._.emit("play");
                 }
             };
@@ -1388,34 +1380,14 @@
                 var i = _sys.inlets.indexOf(self);
                 if (i !== -1) {
                     _sys.inlets.splice(i, 1);
-                    self._.isPlaying = false;
+                    self.playbackState = FINISHED_STATE;
                     self._.emit("pause");
                     _sys.events.emit("removeObject");
                 }
             };
         };
         
-        var onappend = function(list) {
-            for (var i = 0, imax = list.length; i < imax; ++i) {
-                list[i]._.dac = this;
-            }
-        };
-        Object.defineProperty(onappend, "unremovable", {
-            value:true, writable:false
-        });
-        
         var $ = SystemInlet.prototype;
-        
-        Object.defineProperties($, {
-            dac: {
-                get: __nop
-            },
-            isPlaying: {
-                get: function() {
-                    return this._.isPlaying;
-                }
-            }
-        });
         
         $.play = function() {
             _sys.nextTick(this._.onplay);
@@ -1428,36 +1400,15 @@
         };
         
         $.process = function(tickID) {
-            var _ = this._;
-            var cellL = this.cells[1];
-            var cellR = this.cells[2];
-            var nodes = this.nodes;
-            var i, imax = nodes.length;
-            var j, jmax = cellL.length;
-            var add = _.add, mul = _.mul;
-            var tmp, tmpL, tmpR, x;
+            var node  = this._.node;
             
-            if (this.tickID !== tickID) {
-                this.tickID = tickID;
-                
-                for (j = 0; j < jmax; ++j) {
-                    cellL[j] = cellR[j] = 0;
-                }
-                
-                for (i = 0; i < imax; ++i) {
-                    tmp = nodes[i];
-                    tmp.process(tickID);
-                    tmpL = tmp.cells[1];
-                    tmpR = tmp.cells[2];
-                    for (j = 0; j < jmax; ++j) {
-                        cellL[j] += tmpL[j];
-                        cellR[j] += tmpR[j];
-                    }
-                }
-                for (j = 0; j < jmax; ++j) {
-                    x  = cellL[j] = cellL[j] * mul + add;
-                    x += cellR[j] = cellR[j] * mul + add;
-                }
+            if (node.playbackState & 1) {
+                node.process(tickID);
+                this.cells[1].set(node.cells[1]);
+                this.cells[2].set(node.cells[2]);
+            } else {
+                this.cells[1].set(fn.emptycell);
+                this.cells[2].set(fn.emptycell);
             }
             
             return this;
@@ -1640,23 +1591,29 @@
                 ++tickID;
                 
                 for (j = 0, jmax = timers.length; j < jmax; ++j) {
-                    timers[j].process(tickID);
+                    if (timers[j].playbackState & 1) {
+                        timers[j].process(tickID);
+                    }
                 }
-                
+
                 for (j = 0, jmax = inlets.length; j < jmax; ++j) {
                     x = inlets[j];
                     x.process(tickID);
-                    tmpL = x.cells[1];
-                    tmpR = x.cells[2];
-                    for (k = 0, i = saved_i; k < kmax; ++k, ++i) {
-                        strmL[i] += tmpL[k];
-                        strmR[i] += tmpR[k];
+                    if (x.playbackState & 1) {
+                        tmpL = x.cells[1];
+                        tmpR = x.cells[2];
+                        for (k = 0, i = saved_i; k < kmax; ++k, ++i) {
+                            strmL[i] += tmpL[k];
+                            strmR[i] += tmpR[k];
+                        }
                     }
                 }
-                saved_i = i;
+                saved_i += kmax;
                 
                 for (j = 0, jmax = listeners.length; j < jmax; ++j) {
-                    listeners[j].process(tickID);
+                    if (listeners[j].playbackState & 1) {
+                        listeners[j].process(tickID);
+                    }
                 }
                 
                 this.currentTime += currentTimeIncr;

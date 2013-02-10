@@ -8,13 +8,11 @@
         fn.fixAR(this);
 
         var _ = this._;
-
+        this.playbackState = fn.FINISHED_STATE;
         _.poly     = 4;
         _.genList  = [];
         _.genDict  = {};
         _.synthdef = null;
-        _.isEnded  = true;
-        
         _.remGen = make_remGen(this);
         _.onended = fn.make_onended(this);
     }
@@ -97,7 +95,7 @@
             list.push(gen);
             dict[noteNum] = opts.gen = gen;
             
-            _.isEnded = false;
+            this.playbackState = fn.PLAYING_STATE;
             
             if (list.length > _.poly) {
                 _.remGen(list[0]);
@@ -174,7 +172,7 @@
             fn.inputSignalAR(this);
             
             // process
-            if (!_.isEnded) {
+            if (this.playbackState === fn.PLAYING_STATE) {
                 var list;
                 var i, imax;
                 var j, jmax = cell.length;
