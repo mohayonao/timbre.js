@@ -10,9 +10,12 @@
         fn.fixAR(this);
         
         var _ = this._;
-        _.thresh = T(-24);
-        _.knee   = T(30);
-        _.ratio  = T(12);
+        _.prevThresh = -24;
+        _.prevKnee   =  30;
+        _.prevRatio  =  12;
+        _.thresh = T(_.prevThresh);
+        _.knee   = T(_.prevKnee);
+        _.ratio  = T(_.prevRatio);
         _.postGain  =   6;
         _.reduction =   0;
         
@@ -20,6 +23,8 @@
         _.comp.dbPostGain  = _.postGain;
         _.comp.setAttackTime(0.003);
         _.comp.setReleaseTime(0.25);
+        _.comp.setPreDelayTime(6);
+        _.comp.setParams(_.prevThresh, _.prevKnee, _.prevRatio);
     }
     fn.extend(CompressorNode);
     
@@ -128,6 +133,43 @@
         }
         
         return this;
+    };
+    
+    var super_plot = T.Object.prototype.plot;
+    
+    $.plot = function(opts) {
+        if (true) {
+            var comp = this._.comp.clone();
+            comp.setParams(this.thresh.valueOf(), this.knee.valueOf(), this.ratio.valueOf());
+            
+            var cell = new fn.SignalArray(1024);
+            var data = new Float32Array(128);
+            var db, maxdb;
+            var i, j;
+            for (i = 0; i < 128; ++i) {
+                db = Math.pow(10, (i * 0.625 - 80) * 0.05);
+                for (j = 0; j < 1024; ++j) {
+                    cell[j] = db;
+                }
+                comp.process(cell, cell);
+                maxdb = 0;
+                for (j = 0; j < 32; ++j) {
+                    if (Math.abs(cell[j]) > maxdb) {
+                        maxdb = Math.abs(cell[j]);
+                    }
+                }
+                if (maxdb < 1e-6) {
+                    maxdb = 1e-6;
+                }
+                maxdb = (Math.log(maxdb) * Math.LOG10E * 20);
+                maxdb = 80 + maxdb;
+                data[i] = maxdb;
+            }
+            this._.plotData = data;
+            this._.plotRange = [0, 80];
+            this._.plotFlush = null;
+        }
+        return super_plot.call(this, opts);
     };
     
     fn.register("comp", CompressorNode);

@@ -7,7 +7,9 @@
     var kSpacingDb = 5;
     
     function Compressor(samplerate, channels) {
-        this.samplerate = samplerate || 44100;
+        this.samplerate = samplerate;
+        this.channels = channels;
+        
         this.lastPreDelayFrames = 0;
         this.preDelayReadIndex  = 0;
         this.preDelayWriteIndex = DefaultPreDelayFrames;
@@ -42,6 +44,7 @@
         } else {
             this.delayBufferR = this.delayBufferL;
         }
+        this.preDelayTime = 6;
         this.preDelayReadIndex = 0;
         this.preDelayWriteIndex = DefaultPreDelayFrames;
         this.maxAttackCompressionDiffDb = -1;
@@ -49,11 +52,21 @@
         
         this.setAttackTime(this.attackTime);
         this.setReleaseTime(this.releaseTime);
+        this.setPreDelayTime(this.preDelayTime);
         this.setParams(-24, 30, 12);
     }
     
     var $ = Compressor.prototype;
 
+    $.clone = function() {
+        var new_instance = new Compressor(this.samplerate, this.channels);
+        new_instance.setAttackTime(this.attackTime);
+        new_instance.setReleaseTime(this.releaseTime);
+        new_instance.setPreDelayTime(this.preDelayTime);
+        new_instance.setParams(this.dbThreshold, this.dbKnee, this.ratio);
+        return new_instance;
+    };
+    
     $.setAttackTime = function(value) {
         this.attackTime = Math.max(0.001, value);
         this._attackFrames = this.attackTime * this.samplerate;
@@ -79,6 +92,7 @@
     };
     
     $.setPreDelayTime = function(preDelayTime) {
+        this.preDelayTime = preDelayTime;
         var preDelayFrames = preDelayTime * this.samplerate;
         if (preDelayFrames > MaxPreDelayFrames - 1) {
             preDelayFrames = MaxPreDelayFrames - 1;
@@ -127,6 +141,7 @@
         if (x < this.linearThreshold) {
             return 1;
         }
+        
         var x2   = x * 1.001;
         var xDb  = (x ) ? 20 * Math.log(x ) * Math.LOG10E : -1000;
         var x2Db = (x2) ? 20 * Math.log(x2) * Math.LOG10E : -1000;
@@ -153,8 +168,9 @@
             } else {
                 minK = k;
             }
+            k = Math.sqrt(minK * maxK);
         }
-        return Math.sqrt(minK * maxK);
+        return k;
     };
     
     $.updateStaticCurveParameters = function(dbThreshold, dbKnee, ratio) {
@@ -172,9 +188,9 @@
         var y = this.kneeCurve(this.kneeThreshold, k);
         this.ykneeThresholdDb = (y) ? 20 * Math.log(y) * Math.LOG10E : -1000;
         
-        this.K = k;
+        this._k = k;
         
-        return this.K;
+        return this._k;
     };
     
     $.process = function(cellL, cellR) {
