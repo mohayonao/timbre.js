@@ -1,5 +1,5 @@
-Chords Work
-===========
+ChordWork
+=========
 
 ```timbre
 var pattern = new sc.Pshuf(sc.series(12), Infinity);
@@ -14,7 +14,9 @@ var msec = timbre.timevalue("BPM120 L16");
 var env  = T("env", {table:[0.2, [1, msec * 48], [0.2, msec * 16]]});
 var gen  = T("OscGen", {wave:"saw", env:env, mul:0.5});
 
-var synth = gen;
+var pan   = T("pan", gen);
+var synth = pan;
+
 synth = T("+saw", {freq:(msec * 2)+"ms", add:0.5, mul:0.85}, synth);
 synth = T("lpf" , {cutoff:800, Q:12}, synth);
 synth = T("reverb", {room:0.95, damp:0.1, mix:0.75}, synth);
@@ -25,6 +27,7 @@ T("interval", {interval:msec * 64}, function() {
   chords.choose().forEach(function(i) {
     gen.noteOn(scale.wrapAt(root + i) +60, 80); 
   });
+  pan.pos.value = Math.random() * 2 - 1;
 }).start();
 ```
 

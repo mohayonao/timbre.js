@@ -1,6 +1,6 @@
 T("spectrum")
 =============
-{ar}{listener} Spectrum Viewer
+{ar}{stereo}{listener} Spectrum Viewer
 
 (canvas canvas w:240 h:80)
 

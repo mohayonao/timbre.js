@@ -52,8 +52,8 @@ Include the `timbre.js` file. It will install itself as `timbre`, `T` under the 
 Download additional files (Right-click and use "Save As")
 
 - [typedarray.js](/timbre.js/libs/typedarray.js) defines TypedArray for IE9.
-- [TimbreFlashPlayer.js](/timbre.js/libs/typedarray.js) is a Flash bridge.
-- [TimbreFlashPlayer.swf](/timbre.js/libs/typedarray.swf)
+- [TimbreFlashPlayer.js](/timbre.js/libs/TimbreFlashPlayer.js) is a Flash bridge.
+- [TimbreFlashPlayer.swf](/timbre.js/libs/TimbreFlashPlayer.swf)
 
 ```html
 <script src="typedarray.js"></script> 

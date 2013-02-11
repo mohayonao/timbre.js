@@ -16,9 +16,9 @@ timbre.rec(function(output) {
   }).start();
     
   output.send(synth);
-}).then(function(buffer) {
-  var L = T("buffer", {buffer:buffer, loop:true});
-  var R = T("buffer", {buffer:buffer, loop:true});
+}).then(function(result) {
+  var L = T("buffer", {buffer:result, loop:true});
+  var R = T("buffer", {buffer:result, loop:true});
   
   var num = 400;
   var duration = L.duration;

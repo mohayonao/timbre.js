@@ -1,6 +1,6 @@
 T("fft")
 ========
-{ar}{listener} Fast Fourier transform
+{ar}{stereo}{listener} Fast Fourier transform
 
 ## Description ##
 

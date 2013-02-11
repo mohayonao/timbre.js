@@ -1,6 +1,6 @@
 T("audio")
 ==========
-{ar} AudioFile
+{ar}{stereo} AudioFile
 
 ## Description ##
 

@@ -1,6 +1,6 @@
 T("SynthDef")
 =============
-{ar} Synth Definition
+{ar}{stereo} Synth Definition
 
 ## Description ##
 ###### en ######

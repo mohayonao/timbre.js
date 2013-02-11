@@ -1,6 +1,6 @@
 T("phaser")
 ===========
-{ar} Phaser
+{ar}{stereo} Phaser
 
 ```timbre
 var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";

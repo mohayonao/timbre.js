@@ -1,6 +1,6 @@
 T("chorus")
 ===========
-Chorus
+{ar}{stereo} Chorus
 
 ```timbre
 T("audio", {loop:true}).load("/timbre.js/misc/audio/guitar.wav", function() {

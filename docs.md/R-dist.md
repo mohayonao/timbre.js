@@ -1,6 +1,6 @@
 T("dist")
 =========
-{ar} Distortion
+{ar}{stereo} Distortion
 
 ## Description ##
 preGain -> highcut -> postGain

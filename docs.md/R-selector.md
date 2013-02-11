@@ -1,6 +1,6 @@
 T("selector")
 =============
-Assign one of several inputs to an outlet
+{ar}{stereo} Assign one of several inputs to an outlet
 
 ## Description ##
 処理を行う入力オブジェクトを選択します。

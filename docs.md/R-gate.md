@@ -1,6 +1,6 @@
 T("gate")
 =========
-Route a signal to one of several outlets
+{ar}{stereo} Route a signal to one of several outlets
 
 ## Description ##
 ###### en ######
