@@ -13,6 +13,10 @@
     var STATUS_NONE = 0;
     var STATUS_PLAY = 1;
     var STATUS_REC  = 2;
+    var FINISHED_STATE    = 0;
+    var PLAYING_STATE     = 1;
+    var UNSCHEDULED_STATE = 2; // (not use)
+    var SCHEDULED_STATE   = 3; // (not use)
     
     var _ver = "WORKING";
     var _sys = null;
@@ -127,6 +131,10 @@
     fn.SignalArray = Float32Array;
     fn.currentTimeIncr = 0;
     fn.emptycell = null;
+    fn.FINISHED_STATE    = FINISHED_STATE;
+    fn.PLAYING_STATE     = PLAYING_STATE;
+    fn.UNSCHEDULED_STATE = UNSCHEDULED_STATE;
+    fn.SCHEDULED_STATE   = SCHEDULED_STATE;
     
     (function() {
         var dict = {};
@@ -552,6 +560,7 @@
     
     var __make_onended = function(self, lastValue) {
         return function() {
+            self.playbackState = FINISHED_STATE;
             if (typeof lastValue === "number") {
                 var cell  = self.cells[0];
                 var cellL = self.cells[1];
@@ -560,7 +569,6 @@
                     cell[0] = cellL[i] = cellR[i] = lastValue;
                 }
             }
-            self._.isEnded = true;
             self._.emit("ended");
         };
     };
@@ -574,47 +582,75 @@
         var i, imax = nodes.length;
         var j, jmax = cell.length;
         var tickID  = self.tickID;
-        var tmp, tmpL, tmpR;
+        var not_clear, tmp, tmpL, tmpR;
         
         if (self.numChannels === 2) {
-            for (j = jmax; j; ) {
-                j -= 8;
-                cellL[j] = cellL[j+1] = cellL[j+2] = cellL[j+3] = cellL[j+4] = cellL[j+5] = cellL[j+6] = cellL[j+7] = cellR[j] = cellR[j+1] = cellR[j+2] = cellR[j+3] = cellR[j+4] = cellR[j+5] = cellR[j+6] = cellR[j+7] = 0;
-            }
-            for (i = 0; i < imax; ++i) {
-                nodes[i].process(tickID);
-                tmpL = nodes[i].cells[1];
-                tmpR = nodes[i].cells[2];
-                for (j = jmax; j; ) {
-                    j -= 8;
-                    cellL[j  ] += tmpL[j  ]; cellR[j  ] += tmpR[j  ];
-                    cellL[j+1] += tmpL[j+1]; cellR[j+1] += tmpR[j+1];
-                    cellL[j+2] += tmpL[j+2]; cellR[j+2] += tmpR[j+2];
-                    cellL[j+3] += tmpL[j+3]; cellR[j+3] += tmpR[j+3];
-                    cellL[j+4] += tmpL[j+4]; cellR[j+4] += tmpR[j+4];
-                    cellL[j+5] += tmpL[j+5]; cellR[j+5] += tmpR[j+5];
-                    cellL[j+6] += tmpL[j+6]; cellR[j+6] += tmpR[j+6];
-                    cellL[j+7] += tmpL[j+7]; cellR[j+7] += tmpR[j+7];
+            not_clear = true;
+            if (imax !== 0) {
+                for (i = 0; i < imax; ++i) {
+                    if (nodes[i].playbackState === PLAYING_STATE) {
+                        nodes[i].process(tickID);
+                        cellL.set(nodes[i].cells[1]);
+                        cellR.set(nodes[i].cells[2]);
+                        not_clear = false;
+                        ++i;
+                        break;
+                    }
                 }
+                for (; i < imax; ++i) {
+                    if (nodes[i].playbackState === PLAYING_STATE) {
+                        nodes[i].process(tickID);
+                        tmpL = nodes[i].cells[1];
+                        tmpR = nodes[i].cells[2];
+                        for (j = jmax; j; ) {
+                            j -= 8;
+                            cellL[j  ] += tmpL[j  ]; cellR[j  ] += tmpR[j  ];
+                            cellL[j+1] += tmpL[j+1]; cellR[j+1] += tmpR[j+1];
+                            cellL[j+2] += tmpL[j+2]; cellR[j+2] += tmpR[j+2];
+                            cellL[j+3] += tmpL[j+3]; cellR[j+3] += tmpR[j+3];
+                            cellL[j+4] += tmpL[j+4]; cellR[j+4] += tmpR[j+4];
+                            cellL[j+5] += tmpL[j+5]; cellR[j+5] += tmpR[j+5];
+                            cellL[j+6] += tmpL[j+6]; cellR[j+6] += tmpR[j+6];
+                            cellL[j+7] += tmpL[j+7]; cellR[j+7] += tmpR[j+7];
+                        }
+                    }
+                }
+            }
+            if (not_clear) {
+                cellL.set(fn.emptycell);
+                cellR.set(fn.emptycell);
             }
         } else {
-            for (j = jmax; j; ) {
-                j -= 8;
-                cell[j] = cell[j+1] = cell[j+2] = cell[j+3] = cell[j+4] = cell[j+5] = cell[j+6] = cell[j+7] = 0;
-            }
-            for (i = 0; i < imax; ++i) {
-                tmp = nodes[i].process(tickID).cells[0];
-                for (j = jmax; j; ) {
-                    j -= 8;
-                    cell[j  ] += tmp[j  ];
-                    cell[j+1] += tmp[j+1];
-                    cell[j+2] += tmp[j+2];
-                    cell[j+3] += tmp[j+3];
-                    cell[j+4] += tmp[j+4];
-                    cell[j+5] += tmp[j+5];
-                    cell[j+6] += tmp[j+6];
-                    cell[j+7] += tmp[j+7];
+            not_clear = true;
+            if (imax !== 0) {
+                for (i = 0; i < imax; ++i) {
+                    if (nodes[i].playbackState === PLAYING_STATE) {
+                        nodes[i].process(tickID);
+                        cell.set(nodes[i].cells[1]);
+                        not_clear = false;
+                        ++i;
+                        break;
+                    }
                 }
+                for (; i < imax; ++i) {
+                    if (nodes[i].playbackState === PLAYING_STATE) {
+                        tmp = nodes[i].process(tickID).cells[0];
+                        for (j = jmax; j; ) {
+                            j -= 8;
+                            cell[j  ] += tmp[j  ];
+                            cell[j+1] += tmp[j+1];
+                            cell[j+2] += tmp[j+2];
+                            cell[j+3] += tmp[j+3];
+                            cell[j+4] += tmp[j+4];
+                            cell[j+5] += tmp[j+5];
+                            cell[j+6] += tmp[j+6];
+                            cell[j+7] += tmp[j+7];
+                        }
+                    }
+                }
+            }
+            if (not_clear) {
+                cell.set(fn.emptycell);
             }
         }
     };
@@ -626,7 +662,9 @@
         var tickID = self.tickID;
         var tmp = 0;
         for (i = 0; i < imax; ++i) {
-            tmp += nodes[i].process(tickID).cells[0][0];
+            if (nodes[i].playbackState === PLAYING_STATE) {
+                tmp += nodes[i].process(tickID).cells[0][0];
+            }
         }
         return tmp;
     };
@@ -741,6 +779,7 @@
                 this.cells[2] = this.R.cell;
                 break;
             }
+            this.playbackState = PLAYING_STATE;
             
             this._.ar  = true;
             this._.mul = 1;
@@ -748,6 +787,7 @@
             this._.dac = null;
             this._.bypassed = false;
             this._.meta = {};
+            this._.cellsize = _sys.cellsize;
         }
         
         var $ = TimbreObject.prototype;
@@ -773,6 +813,11 @@
                     return this._.bypassed;
                 }
             },
+            isEnded: {
+                get: function() {
+                    return !(this.playbackState & 1);
+                }
+            },
             mul: {
                 set: function(value) {
                     if (typeof value === "number") {
@@ -793,20 +838,6 @@
                 },
                 get: function() {
                     return this._.add;
-                }
-            },
-            dac: {
-                set: function(value) {
-                    var _ = this._;
-                    if (value instanceof SystemInlet && _.dac !== value) {
-                        if (_.dac) {
-                            _.dac.remove(this);
-                        }
-                        value.append(this);
-                    }
-                },
-                get: function() {
-                    return this._.dac;
                 }
             }
         });
@@ -957,16 +988,11 @@
         
         $.play = function() {
             var dac = this._.dac;
-            var emit = false;
             if (dac === null) {
                 dac = this._.dac = new SystemInlet(this);
-                emit = true;
-            } else if (dac.nodes.indexOf(this) === -1) {
-                dac.append(this);
-                emit = true;
             }
-            dac.play();
-            if (emit) {
+            if (dac.playbackState === FINISHED_STATE) {
+                dac.play();
                 this._.emit.apply(this, ["play"].concat(slice.call(arguments)));
             }
             return this;
@@ -974,15 +1000,10 @@
         
         $.pause = function() {
             var dac = this._.dac;
-            if (dac) {
-                if (dac.nodes.indexOf(this) !== -1) {
-                    this._.dac = null;
-                    dac.remove(this);
-                    this._.emit("pause");
-                }
-                if (dac.nodes.length === 0) {
-                    dac.pause();
-                }
+            if (dac && dac.playbackState === PLAYING_STATE) {
+                dac.pause();
+                this._.dac = null;
+                this._.emit("pause");
             }
             return this;
         };
@@ -1340,25 +1361,21 @@
     var SystemInlet = (function() {
         function SystemInlet(object) {
             TimbreObject.call(this, 2, []);
-            if (object instanceof TimbreObject) {
-                this.nodes.push(object);
-            }
-            
+
+            this.playbackState = FINISHED_STATE;
             var _ = this._;
-            _.isPlaying = false;
+            _.node = object;
             _.onplay  = make_onplay(this);
             _.onpause = make_onpause(this);
-            
-            this.on("append", onappend);
         }
         __extend(SystemInlet);
-
+        
         var make_onplay = function(self) {
             return function() {
                 if (_sys.inlets.indexOf(self) === -1) {
                     _sys.inlets.push(self);
                     _sys.events.emit("addObject");
-                    self._.isPlaying = true;
+                    self.playbackState = PLAYING_STATE;
                     self._.emit("play");
                 }
             };
@@ -1369,34 +1386,14 @@
                 var i = _sys.inlets.indexOf(self);
                 if (i !== -1) {
                     _sys.inlets.splice(i, 1);
-                    self._.isPlaying = false;
+                    self.playbackState = FINISHED_STATE;
                     self._.emit("pause");
                     _sys.events.emit("removeObject");
                 }
             };
         };
         
-        var onappend = function(list) {
-            for (var i = 0, imax = list.length; i < imax; ++i) {
-                list[i]._.dac = this;
-            }
-        };
-        Object.defineProperty(onappend, "unremovable", {
-            value:true, writable:false
-        });
-        
         var $ = SystemInlet.prototype;
-        
-        Object.defineProperties($, {
-            dac: {
-                get: __nop
-            },
-            isPlaying: {
-                get: function() {
-                    return this._.isPlaying;
-                }
-            }
-        });
         
         $.play = function() {
             _sys.nextTick(this._.onplay);
@@ -1409,36 +1406,15 @@
         };
         
         $.process = function(tickID) {
-            var _ = this._;
-            var cellL = this.cells[1];
-            var cellR = this.cells[2];
-            var nodes = this.nodes;
-            var i, imax = nodes.length;
-            var j, jmax = cellL.length;
-            var add = _.add, mul = _.mul;
-            var tmp, tmpL, tmpR, x;
+            var node  = this._.node;
             
-            if (this.tickID !== tickID) {
-                this.tickID = tickID;
-                
-                for (j = 0; j < jmax; ++j) {
-                    cellL[j] = cellR[j] = 0;
-                }
-                
-                for (i = 0; i < imax; ++i) {
-                    tmp = nodes[i];
-                    tmp.process(tickID);
-                    tmpL = tmp.cells[1];
-                    tmpR = tmp.cells[2];
-                    for (j = 0; j < jmax; ++j) {
-                        cellL[j] += tmpL[j];
-                        cellR[j] += tmpR[j];
-                    }
-                }
-                for (j = 0; j < jmax; ++j) {
-                    x  = cellL[j] = cellL[j] * mul + add;
-                    x += cellR[j] = cellR[j] * mul + add;
-                }
+            if (node.playbackState & 1) {
+                node.process(tickID);
+                this.cells[1].set(node.cells[1]);
+                this.cells[2].set(node.cells[2]);
+            } else {
+                this.cells[1].set(fn.emptycell);
+                this.cells[2].set(fn.emptycell);
             }
             
             return this;
@@ -1448,7 +1424,6 @@
     })();
     
     var SoundSystem = (function() {
-        
         function SoundSystem() {
             this._ = {};
             this.context = this;
@@ -1458,7 +1433,7 @@
             this.status = STATUS_NONE;
             this.samplerate = 44100;
             this.channels   = 2;
-            this.cellsize   = 128;
+            this.cellsize   = 64;
             this.streammsec = 20;
             this.streamsize = 0;
             this.currentTime = 0;
@@ -1484,7 +1459,7 @@
 
         var make_delayProcess = function(self) {
             return function() {
-                self.recStart = +new Date();
+                self.recStart = Date.now();
                 self.process();
             };
         };
@@ -1621,23 +1596,29 @@
                 ++tickID;
                 
                 for (j = 0, jmax = timers.length; j < jmax; ++j) {
-                    timers[j].process(tickID);
+                    if (timers[j].playbackState & 1) {
+                        timers[j].process(tickID);
+                    }
                 }
-                
+
                 for (j = 0, jmax = inlets.length; j < jmax; ++j) {
                     x = inlets[j];
                     x.process(tickID);
-                    tmpL = x.cells[1];
-                    tmpR = x.cells[2];
-                    for (k = 0, i = saved_i; k < kmax; ++k, ++i) {
-                        strmL[i] += tmpL[k];
-                        strmR[i] += tmpR[k];
+                    if (x.playbackState & 1) {
+                        tmpL = x.cells[1];
+                        tmpR = x.cells[2];
+                        for (k = 0, i = saved_i; k < kmax; ++k, ++i) {
+                            strmL[i] += tmpL[k];
+                            strmR[i] += tmpR[k];
+                        }
                     }
                 }
-                saved_i = i;
+                saved_i += kmax;
                 
                 for (j = 0, jmax = listeners.length; j < jmax; ++j) {
-                    listeners[j].process(tickID);
+                    if (listeners[j].playbackState & 1) {
+                        listeners[j].process(tickID);
+                    }
                 }
                 
                 this.currentTime += currentTimeIncr;
@@ -1650,10 +1631,18 @@
             
             for (i = 0; i < imax; ++i) {
                 x = strmL[i] * amp;
-                x = (x < -1) ? -1 : (x > 1) ? 1 : x;
+                if (x < -1) {
+                    x = -1;
+                } else if (x > 1) {
+                    x = 1;
+                }
                 strmL[i] = x;
                 x = strmR[i] * amp;
-                x = (x < -1) ? -1 : (x > 1) ? 1 : x;
+                if (x < -1) {
+                    x = -1;
+                } else if (x > 1) {
+                    x = 1;
+                }
                 strmR[i] = x;
             }
             
@@ -1678,7 +1667,7 @@
                 } else if (currentTime >= this.recDuration) {
                     this._.deferred.sub.resolve();
                 } else {
-                    var now = +new Date();
+                    var now = Date.now();
                     if ((now - this.recStart) > 20) {
                         setTimeout(this.delayProcess, 10);
                     } else {
@@ -1725,7 +1714,7 @@
             this.status = STATUS_REC;
             this.reset();
             
-            var rec_inlet = new SystemInlet();
+            var rec_inlet = new T("+");
             var inlet_dfd = new modules.Deferred(this);
             
             var outlet = {
@@ -1793,6 +1782,7 @@
             if (this.recCh === 2) {
                 var L = new fn.SignalArray(bufferLength);
                 var R = new fn.SignalArray(bufferLength);
+                var mixed = new fn.SignalArray(bufferLength);
                 
                 for (i = 0; i < imax; ++i) {
                     L.set(recBuffers[j++], k);
@@ -1805,10 +1795,14 @@
                         break;
                     }
                 }
+                for (i = 0, imax = bufferLength; i < imax; ++i) {
+                    mixed[i] = (L[i] + R[i]) * 0.5;
+                }
+                
                 result = {
-                    L: { buffer:L, samplerate:samplerate },
-                    R: { buffer:R, samplerate:samplerate },
-                    samplerate:samplerate
+                    samplerate: samplerate,
+                    channels  : 2,
+                    buffer: mixed, bufferL: L, bufferR: R
                 };
                 
             } else {
@@ -1822,7 +1816,11 @@
                         break;
                     }
                 }
-                result = { buffer: buffer, samplerate:samplerate };
+                result = {
+                    samplerate: samplerate,
+                    channels  : 1,
+                    buffer: buffer, bufferL: buffer, bufferR: buffer
+                };
             }
             
             var args = [].concat.apply([result], arguments);
@@ -1881,30 +1879,44 @@
             this.play = function() {
                 var onaudioprocess;
                 var jsn_streamsize = sys.getAdjustSamples(context.sampleRate);
-                var sys_streamsize;
+                var sys_streamsize = sys.streamsize;
                 var x, dx;
                 
                 if (sys.samplerate === context.sampleRate) {
                     onaudioprocess = function(e) {
-                        var inL = sys.strmL, inR = sys.strmR,
-                            outL = e.outputBuffer.getChannelData(0),
-                            outR = e.outputBuffer.getChannelData(1),
-                            i = outL.length;
+                        var outs = e.outputBuffer;
                         sys.process();
-                        while (i--) {
-                            outL[i] = inL[i];
-                            outR[i] = inR[i];
+                        outs.getChannelData(0).set(sys.strmL);
+                        outs.getChannelData(1).set(sys.strmR);
+                    };
+                } else if (sys.samplerate * 2 === context.sampleRate) {
+                    onaudioprocess = function(e) {
+                        var inL = sys.strmL;
+                        var inR = sys.strmR;
+                        var outs = e.outputBuffer;
+                        var outL = outs.getChannelData(0);
+                        var outR = outs.getChannelData(1);
+                        var i, imax = outs.length;
+                        var j;
+                        
+                        sys.process();
+                        for (i = j = 0; i < imax; i += 2, ++j) {
+                            outL[i  ] = inL[j];
+                            outR[i  ] = inR[j];
+                            outL[i+1] = inL[j];
+                            outR[i+1] = inR[j];
                         }
                     };
                 } else {
-                    sys_streamsize = sys.streamsize;
                     x  = sys_streamsize;
                     dx = sys.samplerate / context.sampleRate;
                     onaudioprocess = function(e) {
-                        var inL = sys.strmL, inR = sys.strmR,
-                            outL = e.outputBuffer.getChannelData(0),
-                            outR = e.outputBuffer.getChannelData(1),
-                            i, imax = outL.length;
+                        var inL = sys.strmL;
+                        var inR = sys.strmR;
+                        var outs = e.outputBuffer;
+                        var outL = outs.getChannelData(0);
+                        var outR = outs.getChannelData(1);
+                        var i, imax = outs.length;
                         
                         for (i = 0; i < imax; ++i) {
                             if (x >= sys_streamsize) {
@@ -2032,13 +2044,15 @@
 (function(T) {
     "use strict";
     
-    function Biquad(samplerate) {
-        this.samplerate = samplerate || 44100;
+    function Biquad(samplerate, channels) {
+        this.samplerate = samplerate;
+        this.channels   = channels;
         this.frequency = 340;
         this.Q         = 1;
         this.gain      = 0;
         
-        this.x1 = this.x2 = this.y1 = this.y2 = 0;
+        this.x1L = this.x2L = this.y1L = this.y2L = 0;
+        this.x1R = this.x2R = this.y1R = this.y2R = 0;
         this.b0 = this.b1 = this.b2 = this.a1 = this.a2 = 0;
         
         this.setType("lpf");
@@ -2046,34 +2060,36 @@
     
     var $ = Biquad.prototype;
     
-    $.process = function(cell) {
-        var x0, y0;
-        var x1 = this.x1;
-        var x2 = this.x2;
-        var y1 = this.y1;
-        var y2 = this.y2;
+    $.process = function(cellL, cellR) {
+        var x, y;
+        var x1L = this.x1L, x2L = this.x2L, y1L = this.y1L, y2L = this.y2L;
+        var x1R = this.x1R, x2R = this.x2R, y1R = this.y1R, y2R = this.y2R;
+        var b0 = this.b0, b1 = this.b1, b2 = this.b2, a1 = this.a1, a2 = this.a2;
+        var i, imax;
         
-        var b0 = this.b0;
-        var b1 = this.b1;
-        var b2 = this.b2;
-        var a1 = this.a1;
-        var a2 = this.a2;
-        
-        for (var i = 0, imax = cell.length; i < imax; ++i) {
-            x0 = cell[i];
-            y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
-            cell[i] = y0;
-            
-            x2 = x1;
-            x1 = x0;
-            y2 = y1;
-            y1 = y0;
+        if (this.channels === 2) {
+            for (i = 0, imax = cellL.length; i < imax; ++i) {
+                x = cellL[i];
+                y = b0 * x + b1 * x1L + b2 * x2L - a1 * y1L - a2 * y2L;
+                cellL[i] = y;
+                x2L = x1L; x1L = x; y2L = y1L; y1L = y;
+                
+                x = cellR[i];
+                y = b0 * x + b1 * x1R + b2 * x2R - a1 * y1R - a2 * y2R;
+                cellR[i] = y;
+                x2R = x1R; x1R = x; y2R = y1R; y1R = y;
+            }
+            this.x1L = x1L; this.x2L = x2L; this.y1L = y1L; this.y2L = y2L;
+            this.x1R = x1R; this.x2R = x2R; this.y1R = y1R; this.y2R = y2R;
+        } else {
+            for (i = 0, imax = cellL.length; i < imax; ++i) {
+                x = cellL[i];
+                y = b0 * x + b1 * x1L + b2 * x2L - a1 * y1L - a2 * y2L;
+                cellL[i] = y;
+                x2L = x1L; x1L = x; y2L = y1L; y1L = y;
+            }
+            this.x1L = x1L; this.x2L = x2L; this.y1L = y1L; this.y2L = y2L;
         }
-        
-        this.x1 = x1;
-        this.x2 = x2;
-        this.y1 = y1;
-        this.y2 = y2;
     };
     
     $.setType = function(type) {
@@ -2319,12 +2335,16 @@
 (function(T) {
     "use strict";
     
-    function Chorus(samplerate) {
+    function Chorus(samplerate, channels) {
         this.samplerate = samplerate;
+        this.channels = channels;
         
         var bits = Math.round(Math.log(samplerate * 0.1) * Math.LOG2E);
         this.buffersize = 1 << bits;
-        this.buffer = new T.fn.SignalArray(this.buffersize + 1);
+        this.bufferL = new T.fn.SignalArray(this.buffersize + 1);
+        if (channels === 2) {
+            this.bufferR = new T.fn.SignalArray(this.buffersize + 1);
+        }
         
         this.wave       = null;
         this._wave      = null;
@@ -2387,10 +2407,11 @@
         this.phaseIncr = (512 * this.rate / this.samplerate) * this.phaseStep;
     };
     
-    $.process = function(cell) {
-        var buffer = this.buffer;
-        var size   = this.buffersize;
-        var mask   = size - 1;
+    $.process = function(cellL, cellR) {
+        var bufferL = this.bufferL;
+        var bufferR = this.bufferR;
+        var size = this.buffersize;
+        var mask = size - 1;
         var wave       = this._wave;
         var phase      = this.phase;
         var phaseIncr  = this.phaseIncr;
@@ -2400,29 +2421,51 @@
         var feedback   = this.feedback;
         var x, index, mod;
         var wet = this.wet, dry = 1 - wet;
-        var i, imax = cell.length;
+        var i, imax = cellL.length;
         var j, jmax = this.phaseStep;
-        
-        for (i = 0; i < imax; ) {
-            mod = wave[phase|0] * depth;
-            phase += phaseIncr;
-            while (phase > 512) {
-                phase -= 512;
+
+        if (this.channels === 2) {
+            for (i = 0; i < imax; ) {
+                mod = wave[phase|0] * depth;
+                phase += phaseIncr;
+                while (phase > 512) {
+                    phase -= 512;
+                }
+                for (j = 0; j < jmax; ++j, ++i) {
+                    index = (readIndex + size + mod) & mask;
+                    
+                    x = (bufferL[index] + bufferL[index + 1]) * 0.5;
+                    bufferL[writeIndex] = cellL[i] - x * feedback;
+                    cellL[i] = (cellL[i] * dry) + (x * wet);
+
+                    x = (bufferR[index] + bufferR[index + 1]) * 0.5;
+                    bufferR[writeIndex] = cellR[i] - x * feedback;
+                    cellR[i] = (cellR[i] * dry) + (x * wet);
+                    
+                    writeIndex = (writeIndex + 1) & mask;
+                    readIndex  = (readIndex  + 1) & mask;
+                }
             }
-            for (j = 0; j < jmax; ++j, ++i) {
-                index = (readIndex + size + mod) & mask;
-                x = (buffer[index] + buffer[index + 1]) * 0.5;
-                buffer[writeIndex] = cell[i] - x * feedback;
-                cell[i] = (cell[i] * dry) + (x * wet);
-                writeIndex = (writeIndex + 1) & mask;
-                readIndex  = (readIndex  + 1) & mask;
+        } else {
+            for (i = 0; i < imax; ) {
+                mod = wave[phase|0] * depth;
+                phase += phaseIncr;
+                while (phase > 512) {
+                    phase -= 512;
+                }
+                for (j = 0; j < jmax; ++j, ++i) {
+                    index = (readIndex + size + mod) & mask;
+                    x = (bufferL[index] + bufferL[index + 1]) * 0.5;
+                    bufferL[writeIndex] = cellL[i] - x * feedback;
+                    cellL[i] = (cellL[i] * dry) + (x * wet);
+                    writeIndex = (writeIndex + 1) & mask;
+                    readIndex  = (readIndex  + 1) & mask;
+                }
             }
         }
         this.phase = phase;
         this.writeIndex = writeIndex;
         this.readIndex  = readIndex;
-        
-        return cell;
     };
     
     T.modules.Chorus = Chorus;
@@ -2436,8 +2479,10 @@
     var DefaultPreDelayFrames = 256;
     var kSpacingDb = 5;
     
-    function Compressor(samplerate) {
-        this.samplerate = samplerate || 44100;
+    function Compressor(samplerate, channels) {
+        this.samplerate = samplerate;
+        this.channels = channels;
+        
         this.lastPreDelayFrames = 0;
         this.preDelayReadIndex  = 0;
         this.preDelayWriteIndex = DefaultPreDelayFrames;
@@ -2465,8 +2510,14 @@
         this.detectorAverage = 0;
         this.compressorGain  = 1;
         this.meteringGain    = 1;
-
-        this.preDelayBuffer = new T.fn.SignalArray(MaxPreDelayFrames);
+        
+        this.delayBufferL = new T.fn.SignalArray(MaxPreDelayFrames);
+        if (channels === 2) {
+            this.delayBufferR = new T.fn.SignalArray(MaxPreDelayFrames);
+        } else {
+            this.delayBufferR = this.delayBufferL;
+        }
+        this.preDelayTime = 6;
         this.preDelayReadIndex = 0;
         this.preDelayWriteIndex = DefaultPreDelayFrames;
         this.maxAttackCompressionDiffDb = -1;
@@ -2474,11 +2525,21 @@
         
         this.setAttackTime(this.attackTime);
         this.setReleaseTime(this.releaseTime);
+        this.setPreDelayTime(this.preDelayTime);
         this.setParams(-24, 30, 12);
     }
     
     var $ = Compressor.prototype;
 
+    $.clone = function() {
+        var new_instance = new Compressor(this.samplerate, this.channels);
+        new_instance.setAttackTime(this.attackTime);
+        new_instance.setReleaseTime(this.releaseTime);
+        new_instance.setPreDelayTime(this.preDelayTime);
+        new_instance.setParams(this.dbThreshold, this.dbKnee, this.ratio);
+        return new_instance;
+    };
+    
     $.setAttackTime = function(value) {
         this.attackTime = Math.max(0.001, value);
         this._attackFrames = this.attackTime * this.samplerate;
@@ -2504,14 +2565,15 @@
     };
     
     $.setPreDelayTime = function(preDelayTime) {
+        this.preDelayTime = preDelayTime;
         var preDelayFrames = preDelayTime * this.samplerate;
         if (preDelayFrames > MaxPreDelayFrames - 1) {
             preDelayFrames = MaxPreDelayFrames - 1;
         }
         if (this.lastPreDelayFrames !== preDelayFrames) {
             this.lastPreDelayFrames = preDelayFrames;
-            for (var i = 0, imax = this.preDelayBuffer.length; i < imax; ++i) {
-                this.preDelayBuffer[i] = 0;
+            for (var i = 0, imax = this.delayBufferL.length; i < imax; ++i) {
+                this.delayBufferL[i] = this.delayBufferR[i] = 0;
             }
             this.preDelayReadIndex = 0;
             this.preDelayWriteIndex = preDelayFrames;
@@ -2552,6 +2614,7 @@
         if (x < this.linearThreshold) {
             return 1;
         }
+        
         var x2   = x * 1.001;
         var xDb  = (x ) ? 20 * Math.log(x ) * Math.LOG10E : -1000;
         var x2Db = (x2) ? 20 * Math.log(x2) * Math.LOG10E : -1000;
@@ -2578,8 +2641,9 @@
             } else {
                 minK = k;
             }
+            k = Math.sqrt(minK * maxK);
         }
-        return Math.sqrt(minK * maxK);
+        return k;
     };
     
     $.updateStaticCurveParameters = function(dbThreshold, dbKnee, ratio) {
@@ -2590,37 +2654,31 @@
         this.ratio = ratio;
         this.slope = 1 / this.ratio;
         
-        var k = this.kAtSlope(1 / this.ratio);
-        
         this.kneeThresholdDb = dbThreshold + dbKnee;
         this.kneeThreshold   = Math.pow(10, 0.05 * this.kneeThresholdDb);
         
+        var k = this.kAtSlope(1 / this.ratio);
         var y = this.kneeCurve(this.kneeThreshold, k);
-        this.ykneeThresholdDb = (y) ? 20 * Math.log(y ) * Math.LOG10E : -1000;
+        this.ykneeThresholdDb = (y) ? 20 * Math.log(y) * Math.LOG10E : -1000;
         
-        this.K = k;
+        this._k = k;
         
-        return this.K;
+        return this._k;
     };
     
-    $.process = function(cell) {
+    $.process = function(cellL, cellR) {
         var dryMix = 1 - this.effectBlend;
         var wetMix = this.effectBlend;
-        
         var k = this._k;
         var masterLinearGain = this._masterLinearGain;
-        
-        var satReleaseFrames = this._satReleaseFrame;
+        var satReleaseFrames = this._satReleaseFrames;
         var kA = this._kA;
         var kB = this._kB;
         var kC = this._kC;
         var kD = this._kD;
         var kE = this._kE;
-        
         var nDivisionFrames = 64;
-        
-        var nDivisions = cell.length / nDivisionFrames;
-        
+        var nDivisions = cellL.length / nDivisionFrames;
         var frameIndex = 0;
         var desiredGain = this.detectorAverage;
         var compressorGain = this.compressorGain;
@@ -2629,8 +2687,8 @@
         var preDelayReadIndex = this.preDelayReadIndex;
         var preDelayWriteIndex = this.preDelayWriteIndex;
         var detectorAverage = this.detectorAverage;
-        var delayBuffer = this.preDelayBuffer;
-        var preDelayBuffer = this.preDelayBuffer;
+        var delayBufferL = this.delayBufferL;
+        var delayBufferR = this.delayBufferR;
         var meteringGain = this.meteringGain;
         var meteringReleaseK = this.meteringReleaseK;
         
@@ -2641,6 +2699,9 @@
             var x = compressorGain / scaledDesiredGain;
             
             var compressionDiffDb = (x) ? 20 * Math.log(x) * Math.LOG10E : -1000;
+            if (compressionDiffDb === Infinity || isNaN(compressionDiffDb)) {
+                compressionDiffDb = -1;
+            }
             
             if (isReleasing) {
                 maxAttackCompressionDiffDb = -1;
@@ -2677,8 +2738,9 @@
             while (loopFrames--) {
                 var compressorInput = 0;
                 
-                var absUndelayedSource = cell[frameIndex];
-                delayBuffer[preDelayWriteIndex] = absUndelayedSource;
+                var absUndelayedSource = (cellL[frameIndex] + cellR[frameIndex]) * 0.5;
+                delayBufferL[preDelayWriteIndex] = cellL[frameIndex];
+                delayBufferR[preDelayWriteIndex] = cellR[frameIndex];
                 
                 if (absUndelayedSource < 0) {
                     absUndelayedSource *= -1;
@@ -2727,13 +2789,14 @@
                 } else {
                     meteringGain += (dbRealGain - meteringGain) * meteringReleaseK;
                 }
-                cell[frameIndex] = preDelayBuffer[preDelayReadIndex] * totalGain;
+                cellL[frameIndex] = delayBufferL[preDelayReadIndex] * totalGain;
+                cellR[frameIndex] = delayBufferR[preDelayReadIndex] * totalGain;
                 
                 frameIndex++;
                 preDelayReadIndex  = (preDelayReadIndex  + 1) & MaxPreDelayFramesMask;
                 preDelayWriteIndex = (preDelayWriteIndex + 1) & MaxPreDelayFramesMask;
             }
-
+            
             if (detectorAverage < 1e-6) {
                 detectorAverage = 1e-6;
             }
@@ -2754,8 +2817,8 @@
         this.compressorGain = 1;
         this.meteringGain = 1;
         
-        for (var i = 0, imax = this.preDelayBuffer.length; i < imax; ++i) {
-            this.preDelayBuffer[i] = 0;
+        for (var i = 0, imax = this.delayBufferL.length; i < imax; ++i) {
+            this.delayBufferL[i] = this.delayBufferR[i] = 0;
         }
         
         this.preDelayReadIndex = 0;
@@ -2796,10 +2859,10 @@
             T.fn.fix_iOS6_1_problem(true);
             
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", path, true);
+            xhr.open("GET", path);
             xhr.responseType = "arraybuffer";
-            xhr.onload = function() {
-                if (xhr.status === 200) {
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
                     if (xhr.response) {
                         callback(new Uint8Array(xhr.response));
                     } else if (xhr.responseBody !== undefined) {
@@ -2813,10 +2876,8 @@
                         callback(new Uint8Array(a));
                         /*global VBArray:false */
                     }
-                } else {
-                    callback(xhr.status + " " + xhr.statusText);
+                    T.fn.fix_iOS6_1_problem(false);
                 }
-                T.fn.fix_iOS6_1_problem(false);
             };
             xhr.send();
         };
@@ -2826,25 +2887,13 @@
         };
     }
     
-    var deinterleave = function(list) {
-        var result = new list.constructor(list.length>>1);
-        var i, j, jmax = result.length;
-        if (list.length % 2) {
-            j |= 0;
-        }
-        for (i = j = 0; j < jmax; ++j, i += 2) {
-            result[j] = (list[i] + list[i+1]) * 0.5;
-        }
-        return result;
-    };
-    
     var _24bit_to_32bit = function(uint8) {
         var b0, b1, b2, bb, x;
         var int32 = new Int32Array(uint8.length / 3);
         for (var i = 0, imax = uint8.length, j = 0; i < imax; ) {
             b0 = uint8[i++] ,b1 = uint8[i++], b2 = uint8[i++];
             bb = b0 + (b1 << 8) + (b2 << 16);
-            x = (bb & 0x800000) ? -((bb^0xFFFFFF)+1) : bb;
+            x = (bb & 0x800000) ? bb - 16777216 : bb;
             int32[j++] = x;
         }
         return int32;
@@ -2852,57 +2901,51 @@
     
     Decoder.wav_decode = function(src, onloadedmetadata, onloadeddata) {
         Decoder.getBinaryWithPath(src, function(data) {
-            if (data[0] !== 0x52 || data[1] !== 0x49 ||
-                data[2] !== 0x46 || data[3] !== 0x46) { // 'RIFF'
-                    // "HeaderError: not exists 'RIFF'"
-                    return onloadedmetadata(false);
+            if (String.fromCharCode(data[0], data[1], data[2], data[3]) !== "RIFF") {
+                return onloadedmetadata(false);
             }
             
             var l1 = data[4] + (data[5]<<8) + (data[6]<<16) + (data[7]<<24);
             if (l1 + 8 !== data.length) {
-                // "HeaderError: invalid data size"
                 return onloadedmetadata(false);
             }
             
-            if (data[ 8] !== 0x57 || data[ 9] !== 0x41 ||
-                data[10] !== 0x56 || data[11] !== 0x45) { // 'WAVE'
-                    // "HeaderError: not exists 'WAVE'"
-                    return onloadedmetadata(false);
+            if (String.fromCharCode(data[8], data[9], data[10], data[11]) !== "WAVE") {
+                return onloadedmetadata(false);
             }
             
-            if (data[12] !== 0x66 || data[13] !== 0x6D ||
-                data[14] !== 0x74 || data[15] !== 0x20) { // 'fmt '
-                    // "HeaderError: not exists 'fmt '"
-                    return onloadedmetadata(false);
+            if (String.fromCharCode(data[12], data[13], data[14], data[15]) !== "fmt ") {
+                return onloadedmetadata(false);
             }
             
-            // var byteLength = data[16] + (data[17]<<8) + (data[18]<<16) + (data[19]<<24);
-            // var linearPCM  = data[20] + (data[21]<<8);
             var channels   = data[22] + (data[23]<<8);
             var samplerate = data[24] + (data[25]<<8) + (data[26]<<16) + (data[27]<<24);
-            // var dataSpeed  = data[28] + (data[29]<<8) + (data[30]<<16) + (data[31]<<24);
-            // var blockSize  = data[32] + (data[33]<<8);
             var bitSize    = data[34] + (data[35]<<8);
             
-            if (data[36] !== 0x64 || data[37] !== 0x61 ||
-                data[38] !== 0x74 || data[39] !== 0x61) { // 'data'
-                    // "HeaderError: not exists 'data'"
-                    return onloadedmetadata(false);
+            if (String.fromCharCode(data[36], data[37], data[38], data[39]) !== "data") {
+                return onloadedmetadata(false);
             }
             
             var l2 = data[40] + (data[41]<<8) + (data[42]<<16) + (data[43]<<24);
             var duration = ((l2 / channels) >> 1) / samplerate;
-
+            
             if (l2 > data.length - 44) {
-                // "HeaderError: not exists data"
                 return onloadedmetadata(false);
             }
             
-            var buffer = new Float32Array((duration * samplerate)|0);
+            var bufferL, bufferR;
+            bufferL = new Float32Array((duration * samplerate)|0);
+            if (channels === 2) {
+                bufferR = new Float32Array((duration * samplerate)|0);
+            } else {
+                bufferR = bufferL;
+            }
             
             onloadedmetadata({
                 samplerate: samplerate,
-                buffer    : buffer,
+                channels  : channels,
+                bufferL   : bufferL,
+                bufferR   : bufferR,
                 duration  : duration
             });
             
@@ -2916,13 +2959,16 @@
                 data = _24bit_to_32bit(new Uint8Array(data.buffer, 44));
             }
             
+            var i, imax, j, k = 1 / ((1 << (bitSize-1)) - 1);
             if (channels === 2) {
-                data = deinterleave(data);
-            }
-            
-            var k = 1 / ((1 << (bitSize-1)) - 1);
-            for (var i = 0, imax = buffer.length; i < imax; ++i) {
-                buffer[i] = data[i] * k;
+                for (i = j = 0, imax = bufferL.length; i < imax; ++i) {
+                    bufferL[i] = data[j++] * k;
+                    bufferR[i] = data[j++] * k;
+                }
+            } else {
+                for (i = 0, imax = bufferL.length; i < imax; ++i) {
+                    bufferL[i] = data[i] * k;
+                }
             }
             
             onloadeddata();
@@ -2934,24 +2980,33 @@
         if (typeof webkitAudioContext !== "undefined") {
             var ctx = T.fn._audioContext;
             var _decode = function(data, onloadedmetadata, onloadeddata) {
-                var samplerate, duration, buffer;
+                var samplerate, channels, bufferL, bufferR, duration;
                 if (typeof data === "string") {
                     return onloadeddata(false);
                 }
                 
+                var buffer;
                 try {
-                    buffer = ctx.createBuffer(data.buffer, true);
+                    buffer = ctx.createBuffer(data.buffer, false);
                 } catch (e) {
                     return onloadedmetadata(false);
                 }
                 
                 samplerate = ctx.sampleRate;
-                buffer     = buffer.getChannelData(0);
-                duration   = buffer.length / samplerate;
+                channels   = buffer.numberOfChannels;
+                if (channels === 2) {
+                    bufferL = buffer.getChannelData(0);
+                    bufferR = buffer.getChannelData(1);
+                } else {
+                    bufferL = bufferR = buffer.getChannelData(0);
+                }
+                duration = bufferL.length / samplerate;
                 
                 onloadedmetadata({
                     samplerate: samplerate,
-                    buffer    : buffer,
+                    channels  : channels,
+                    bufferL   : bufferL,
+                    bufferR   : bufferR,
                     duration  : duration
                 });
                 
@@ -2980,28 +3035,36 @@
     Decoder.moz_decode = (function() {
         if (typeof Audio === "function" && typeof new Audio().mozSetup === "function") {
             return function(src, onloadedmetadata, onloadeddata) {
-                var samplerate, duration, buffer;
+                var samplerate, channels, bufferL, bufferR, duration;
                 var writeIndex = 0;
                 
                 var audio = new Audio(src);
                 audio.volume = 0.0;
-                audio.speed  = 4;
                 audio.addEventListener("loadedmetadata", function() {
                     samplerate = audio.mozSampleRate;
-                    duration = audio.duration;
-                    buffer = new Float32Array((audio.duration * samplerate)|0);
-                    if (audio.mozChannels === 2) {
+                    channels   = audio.mozChannels;
+                    duration   = audio.duration;
+                    bufferL = new Float32Array((audio.duration * samplerate)|0);
+                    if (channels === 2) {
+                        bufferR = new Float32Array((audio.duration * samplerate)|0);
+                    } else {
+                        bufferR = bufferL;
+                    }
+                    if (channels === 2) {
                         audio.addEventListener("MozAudioAvailable", function(e) {
                             var samples = e.frameBuffer;
                             for (var i = 0, imax = samples.length; i < imax; i += 2) {
-                                buffer[writeIndex++] = (samples[i] + samples[i+1]) * 0.5;
+                                bufferL[writeIndex] = samples[i  ];
+                                bufferR[writeIndex] = samples[i+1];
+                                writeIndex += 1;
                             }
                         }, false);
                     } else {
                         audio.addEventListener("MozAudioAvailable", function(e) {
                             var samples = e.frameBuffer;
                             for (var i = 0, imax = samples.length; i < imax; ++i) {
-                                buffer[writeIndex++] = samples[i];
+                                bufferL[writeIndex] = bufferR[writeIndex] = samples[i];
+                                writeIndex += 1;
                             }
                         }, false);
                     }
@@ -3009,7 +3072,9 @@
                     setTimeout(function() {
                         onloadedmetadata({
                             samplerate: samplerate,
-                            buffer    : buffer,
+                            channels  : channels,
+                            bufferL   : bufferL,
+                            bufferR   : bufferR,
                             duration  : duration
                         });
                     }, 1000);
@@ -4570,26 +4635,31 @@
     var CombParams    = [1116,1188,1277,1356,1422,1491,1557,1617];
     var AllpassParams = [225,556,441,341];
     
-    function Reverb(samplerate, buffersize) {
+    function Reverb(samplerate, channels, buffersize) {
         this.samplerate = samplerate;
+        this.channels   = channels;
         
         var i, imax;
         var k = samplerate / 44100;
         
-        imax = CombParams.length;
+        imax = CombParams.length * channels;
         this.comb = new Array(imax);
         this.combout = new Array(imax);
         for (i = 0; i < imax; ++i) {
-            this.comb[i]    = new CombFilter(CombParams[i] * k);
+            this.comb[i]    = new CombFilter(CombParams[i % CombParams.length] * k);
             this.combout[i] = new T.fn.SignalArray(buffersize);
         }
         
-        imax = AllpassParams.length;
+        imax = AllpassParams.length * channels;
         this.allpass = new Array(imax);
         for (i = 0; i < imax; ++i) {
-            this.allpass[i] = new AllpassFilter(AllpassParams[i] * k);
+            this.allpass[i] = new AllpassFilter(AllpassParams[i % AllpassParams.length] * k);
         }
-        this.output = new T.fn.SignalArray(buffersize);
+        this.outputs = new Array(channels);
+        this.outputs[0] = new T.fn.SignalArray(buffersize);
+        if (channels === 2) {
+            this.outputs[1] = new T.fn.SignalArray(buffersize);
+        }
         
         this.damp = 0;
         this.wet  = 0.33;
@@ -4602,42 +4672,71 @@
     
     $.setRoomSize = function(roomsize) {
         var comb = this.comb;
+        var value = (roomsize * 0.28) + 0.7;
         this.roomsize = roomsize;
-        comb[0].feedback = comb[1].feedback = comb[2].feedback = comb[3].feedback = comb[4].feedback = comb[5].feedback = comb[6].feedback = comb[7].feedback = (roomsize * 0.28) + 0.7;
+        comb[0].feedback = comb[1].feedback = comb[2].feedback = comb[3].feedback = comb[4].feedback = comb[5].feedback = comb[6].feedback = comb[7].feedback = value;
+        if (this.channels === 2) {
+            comb[8].feedback = comb[9].feedback = comb[10].feedback = comb[11].feedback = comb[12].feedback = comb[13].feedback = comb[14].feedback = comb[15].feedback = value;
+        }
     };
     $.setDamp = function(damp) {
         var comb = this.comb;
+        var value = damp * 0.4;
         this.damp = damp;
-        comb[0].damp = comb[1].damp = comb[2].damp = comb[3].damp = comb[4].damp = comb[5].damp = comb[6].damp = comb[7].damp = damp * 0.4;
+        comb[0].damp = comb[1].damp = comb[2].damp = comb[3].damp = comb[4].damp = comb[5].damp = comb[6].damp = comb[7].damp = value;
+        if (this.channels === 2) {
+            comb[8].damp = comb[9].damp = comb[10].damp = comb[11].damp = comb[12].damp = comb[13].damp = comb[14].damp = comb[15].damp = value;
+        }
     };
-    $.process = function(cell) {
+    $.process = function(cellL, cellR) {
+        var channels = this.channels;
         var comb = this.comb;
         var combout = this.combout;
         var allpass = this.allpass;
-        var output  = this.output;
+        var output0 = this.outputs[0];
+        var output1 = this.outputs[1];
         var wet = this.wet, dry = 1 - wet;
-        var i, imax = cell.length;
+        var i, imax = cellL.length;
         
-        comb[0].process(cell, combout[0]);
-        comb[1].process(cell, combout[1]);
-        comb[2].process(cell, combout[2]);
-        comb[3].process(cell, combout[3]);
-        comb[4].process(cell, combout[4]);
-        comb[5].process(cell, combout[5]);
-        comb[6].process(cell, combout[6]);
-        comb[7].process(cell, combout[7]);
+        comb[0].process(cellL, combout[0]);
+        comb[1].process(cellL, combout[1]);
+        comb[2].process(cellL, combout[2]);
+        comb[3].process(cellL, combout[3]);
+        comb[4].process(cellL, combout[4]);
+        comb[5].process(cellL, combout[5]);
+        comb[6].process(cellL, combout[6]);
+        comb[7].process(cellL, combout[7]);
+        for (i = 0; i < imax; ++i) {
+            output0[i] = combout[0][i] + combout[1][i] + combout[2][i] + combout[3][i] + combout[4][i] + combout[5][i] + combout[6][i] + combout[7][i];
+        }
+        allpass[0].process(output0, output0);
+        allpass[1].process(output0, output0);
+        allpass[2].process(output0, output0);
+        allpass[3].process(output0, output0);
         
         for (i = 0; i < imax; ++i) {
-            output[i] = combout[0][i] + combout[1][i] + combout[2][i] + combout[3][i] + combout[4][i] + combout[5][i] + combout[6][i] + combout[7][i];
+            cellL[i] = output0[i] * wet + cellL[i] * dry;
         }
         
-        allpass[0].process(output, output);
-        allpass[1].process(output, output);
-        allpass[2].process(output, output);
-        allpass[3].process(output, output);
-        
-        for (i = 0; i < imax; ++i) {
-            cell[i] = output[i] * wet + cell[i] * dry;
+        if (channels === 2) {
+            comb[ 8].process(cellR, combout[ 8]);
+            comb[ 9].process(cellR, combout[ 9]);
+            comb[10].process(cellR, combout[10]);
+            comb[11].process(cellR, combout[11]);
+            comb[12].process(cellR, combout[12]);
+            comb[13].process(cellR, combout[13]);
+            comb[14].process(cellR, combout[14]);
+            comb[15].process(cellR, combout[15]);
+            for (i = 0; i < imax; ++i) {
+                output1[i] = combout[8][i] + combout[9][i] + combout[10][i] + combout[11][i] + combout[12][i] + combout[13][i] + combout[14][i] + combout[15][i];
+            }
+            allpass[4].process(output1, output1);
+            allpass[5].process(output1, output1);
+            allpass[6].process(output1, output1);
+            allpass[7].process(output1, output1);
+            for (i = 0; i < imax; ++i) {
+                cellR[i] = output1[i] * wet + cellR[i] * dry;
+            }
         }
     };
     
@@ -5236,8 +5335,8 @@
         var BufferNode = fn.getClass("buffer");
         var instance = new BufferNode(_args);
         
+        instance.playbackState = fn.FINISHED_STATE;
         instance._.isLoaded = false;
-        instance._.isEnded  = true;
         
         Object.defineProperties(instance, {
             isLoaded: {
@@ -5275,16 +5374,19 @@
         var onloadedmetadata = function(result, msg) {
             var _ = self._;
             if (result) {
+                self.playbackState = fn.PLAYING_STATE;
                 _.samplerate = result.samplerate;
-                _.buffer     = result.buffer;
+                _.channels   = result.channels;
+                _.bufferMix  = null;
+                _.bufferL    = result.bufferL;
+                _.bufferR    = result.bufferR;
                 _.phase      = 0;
                 _.phaseIncr  = result.samplerate / T.samplerate;
                 _.duration   = result.duration * 1000;
-                _.isEnded    = false;
                 _.currentTime = 0;
                 if (_.isReversed) {
                     _.phaseIncr *= -1;
-                    _.phase = result.buffer.length + _.phaseIncr;
+                    _.phase = result.bufferL.length + _.phaseIncr;
                 }
                 self._.emit("loadedmetadata");
             } else {
@@ -5319,11 +5421,11 @@
     var PLOT_LOW_FREQ = 20;
     
     function BiquadNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.biquad = new Biquad(T.samplerate);
+        _.biquad = new Biquad(T.samplerate, 2);
         _.freq = T(340);
         _.band = T(1);
         _.gain = T(0);
@@ -5333,7 +5435,7 @@
         _.plotFlush  = true;
     }
     fn.extend(BiquadNode);
-
+    
     var plotBefore = function(context, x, y, width, height) {
         context.lineWidth = 1;
         context.strokeStyle = "rgb(192, 192, 192)";
@@ -5430,37 +5532,25 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
-            var changed = false;
-            
             var freq = _.freq.process(tickID).cells[0][0];
-            if (_.prevFreq !== freq) {
-                _.prevFreq = freq;
-                changed = true;
-            }
             var band = _.band.process(tickID).cells[0][0];
-            if (_.prevband !== band) {
-                _.prevband = band;
-                changed = true;
-            }
             var gain = _.gain.process(tickID).cells[0][0];
-            if (_.prevGain !== gain) {
+            if (_.prevFreq !== freq || _.prevband !== band || _.prevGain !== gain) {
+                _.prevFreq = freq;
+                _.prevband = band;
                 _.prevGain = gain;
-                changed = true;
-            }
-            if (changed) {
                 _.biquad.setParams(freq, band, gain);
                 _.plotFlush = true;
             }
             
             if (!_.bypassed) {
-                _.biquad.process(cell);
+                _.biquad.process(this.cells[1], this.cells[2]);
             }
             
             fn.outputSignalAR(this);
@@ -5474,7 +5564,7 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var biquad = new Biquad(T.samplerate);
+            var biquad = new Biquad(T.samplerate, 1);
             biquad.setType(this.type);
             biquad.setParams(this.freq.valueOf(), this.band.valueOf(), this.gain.valueOf());
             
@@ -5512,7 +5602,6 @@
     };
     
     fn.register("biquad", BiquadNode);
-    
     fn.register("lowpass", function(_args) {
         return new BiquadNode(_args).set("type", "lowpass");
     });
@@ -5557,12 +5646,16 @@
         
         var _ = this._;
         _.pitch      = T(1);
-        _.buffer     = new Float32Array(0);
+        _.samplerate = 44100;
+        _.channels   = 0;
+        _.bufferMix  = null;
+        _.bufferL    = new Float32Array(0);
+        _.bufferR    = _.bufferL;
         _.isLooped   = false;
         _.isReversed = false;
         _.duration    = 0;
         _.currentTime = 0;
-        _.samplerate  = 44100;
+        _.currentTimeObj = null;
         _.phase = 0;
         _.phaseIncr = 0;
         _.onended  = fn.make_onended(this, 0);
@@ -5573,37 +5666,55 @@
     var make_onlooped = function(self) {
         return function() {
             var _ = self._;
-            if (_.phase >= _.buffer.length) {
+            if (_.phase >= _.bufferL.length) {
                 _.phase = 0;
             } else if (_.phase < 0) {
-                _.phase = _.buffer.length + _.phaseIncr;
+                _.phase = _.bufferL.length + _.phaseIncr;
             }
             self._.emit("looped");
         };
     };
+
+    function isSignalArray(obj) {
+        if (obj instanceof Float32Array || obj instanceof Float64Array) {
+            return true;
+        }
+        return false;
+    }
     
     var $ = BufferNode.prototype;
     
     var setBuffer = function(value) {
         var _ = this._;
         if (typeof value === "object") {
-            var buffer, samplerate;
-            if (value instanceof Float32Array || value instanceof Float64Array) {
-                buffer = value;
-            } else if (value.buffer instanceof Float32Array || value.buffer instanceof Float64Array) {
-                buffer = value.buffer;
+            var bufferL, bufferR, samplerate, channels;
+            if (isSignalArray(value)) {
+                bufferL = bufferR = value;
+                channels = 1;
+            } else if (isSignalArray(value.buffer)) {
+                bufferL = bufferR = value.buffer;
+                channels = 1;
+                if (typeof value.samplerate === "number") {
+                    samplerate = value.samplerate;
+                }
+            } else if (isSignalArray(value.bufferL) && isSignalArray(value.bufferR)) {
+                channels = 2;
+                bufferL = value.bufferL;
+                bufferR = value.bufferR;
                 if (typeof value.samplerate === "number") {
                     samplerate = value.samplerate;
                 }
             }
-            if (buffer) {
+            if (bufferL && bufferR) {
                 if (samplerate > 0) {
                     _.samplerate = value.samplerate;
                 }
-                _.buffer = buffer;
+                _.bufferMix = null;
+                _.bufferL = bufferL;
+                _.bufferR = bufferR;
                 _.phase     = 0;
                 _.phaseIncr = _.samplerate / T.samplerate;
-                _.duration  = _.buffer.length * 1000 / _.samplerate;
+                _.duration  = _.bufferL.length * 1000 / _.samplerate;
                 _.currentTime = 0;
                 _.plotFlush = true;
                 this.reverse(_.isReversed);
@@ -5615,7 +5726,29 @@
         buffer: {
             set: setBuffer,
             get: function() {
-                return this._.buffer;
+                var _ = this._;
+                if (_.channels === 2) {
+                    if (!_.bufferMix) {
+                        var bufferMix = new Float32Array(_.bufferL);
+                        var bufferR   = _.bufferR;
+                        for (var i = 0, imax = _.bufferMix.length; i < imax; i++) {
+                            bufferMix[i] = (bufferMix[i] + bufferR[i]) * 0.5;
+                        }
+                        _.bufferMix = bufferMix;
+                    }
+                    return _.bufferMix;
+                }
+                return _.bufferL;
+            }
+        },
+        bufferL: {
+            get: function() {
+                return this._.bufferL;
+            }
+        },
+        bufferR: {
+            get: function() {
+                return this._.bufferR;
             }
         },
         pitch: {
@@ -5636,11 +5769,6 @@
                 return this._.isReversed;
             }
         },
-        isEnded: {
-            get: function() {
-                return this._.isEnded;
-            }
-        },
         samplerate: {
             get: function() {
                 return this._.samplerate;
@@ -5659,23 +5787,39 @@
                         _.phase = (value / 1000) * _.samplerate;
                         _.currentTime = value;
                     }
+                } else if (value instanceof T.Object) {
+                    this._.currentTimeObj = value;
+                } else if (value === null) {
+                    this._.currentTimeObj = null;
                 }
             },
             get: function() {
-                return this._.currentTime;
+                if (this._.currentTimeObj) {
+                    return this._.currentTimeObj;
+                } else {
+                    return this._.currentTime;
+                }
             }
         }
     });
-
+    
     $.clone = function() {
         var _ = this._;
         var instance = T("buffer");
         
-        if (_.buffer) {
-            setBuffer.call(instance, {
-                buffer    : _.buffer,
-                samplerate: _.samplerate
-            });
+        if (_.bufferL) {
+            if (_.channels === 2) {
+                setBuffer.call(instance, {
+                    bufferL   : _.bufferL,
+                    bufferR   : _.bufferR,
+                    samplerate: _.samplerate
+                });
+            } else {
+                setBuffer.call(instance, {
+                    buffer    : _.bufferL,
+                    samplerate: _.samplerate
+                });
+            }
         }
         instance.loop(_.isLooped);
         instance.reverse(_.isReversed);
@@ -5696,7 +5840,7 @@
         if (typeof end === "number") {
             end   = (end   * 0.001 * _.samplerate)|0;
         } else {
-            end = _.buffer.length;
+            end = _.bufferL.length;
         }
         if (begin > end) {
             var tmp = begin;
@@ -5705,12 +5849,20 @@
             isReversed = !isReversed;
         }
         
-        if (_.buffer) {
-            setBuffer.call(instance, {
-                buffer    : _.buffer.subarray(begin, end),
-                samplerate: _.samplerate
-            });
-            instance._.isEnded = false;
+        if (_.bufferL) {
+            if (_.channels === 2) {
+                setBuffer.call(instance, {
+                    bufferL   : _.bufferL.subarray(begin, end),
+                    bufferR   : _.bufferR.subarray(begin, end),
+                    samplerate: _.samplerate
+                });
+            } else {
+                setBuffer.call(instance, {
+                    buffer: _.bufferL.subarray(begin, end),
+                    samplerate: _.samplerate
+                });
+            }
+            instance.playbackState = fn.PLAYING_STATE;
         }
         instance.loop(_.isLooped);
         instance.reverse(_.isReversed);
@@ -5727,7 +5879,7 @@
                 _.phaseIncr *= -1;
             }
             if (_.phase === 0 && _.buffer) {
-                _.phase = _.buffer.length + _.phaseIncr;
+                _.phase = _.bufferL.length + _.phaseIncr;
             }
         } else {
             if (_.phaseIncr < 0) {
@@ -5744,35 +5896,37 @@
     };
     
     $.bang = function(value) {
-        this._.phase   = 0;
-        this._.isEnded = (value === false);
+        this.playbackState = (value === false ? fn.FINISHED_STATE : fn.PLAYING_STATE);
+        this._.phase = 0;
         this._.emit("bang");
         return this;
     };
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
-        if (_.isEnded || !_.buffer) {
+        if (!_.bufferL) {
             return this;
         }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var buffer = _.buffer;
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var bufferL = _.bufferL;
+            var bufferR = _.bufferR;
             var phase  = _.phase;
-            var mul = _.mul, add = _.add;
-            var i, imax = cell.length;
+            var i, imax = _.cellsize;
             
-            if (this.nodes.length) {
-                fn.inputSignalAR(this);
+            if (_.currentTimeObj) {
+                var pos = _.currentTimeObj.process(tickID).cells[0];
                 var t, sr = _.samplerate * 0.001;
                 for (i = 0; i < imax; ++i) {
-                    t = cell[i];
+                    t = pos[i];
                     phase = t * sr;
-                    cell[i] = (buffer[phase|0] || 0) * mul + add;
+                    cellL[i] = (bufferL[phase|0] || 0);
+                    cellR[i] = (bufferR[phase|0] || 0);
                 }
                 _.phase = phase;
                 _.currentTime = t;
@@ -5781,11 +5935,12 @@
                 var phaseIncr = _.phaseIncr * pitch;
                 
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = (buffer[phase|0] || 0) * mul + add;
+                    cellL[i] = (bufferL[phase|0] || 0);
+                    cellR[i] = (bufferR[phase|0] || 0);
                     phase += phaseIncr;
                 }
                 
-                if (phase >= buffer.length) {
+                if (phase >= bufferL.length) {
                     if (_.isLooped) {
                         fn.nextTick(_.onlooped);
                     } else {
@@ -5801,21 +5956,24 @@
                 _.phase = phase;
                 _.currentTime += fn.currentTimeIncr;
             }
+            
+            fn.outputSignalAR(this);
         }
         
         return this;
     };
-        
+    
     var super_plot = T.Object.prototype.plot;
     
     $.plot = function(opts) {
         var _ = this._;
-        var buffer = _.buffer;
+        var bufferL = _.bufferL;
+        var bufferR = _.bufferR;
         if (_.plotFlush) {
             var data = new Float32Array(2048);
-            var x = 0, xIncr = buffer.length / 2048;
+            var x = 0, xIncr = bufferL.length / 2048;
             for (var i = 0; i < 2048; i++) {
-                data[i] = buffer[x|0];
+                data[i] = (bufferL[x|0] + bufferR[x|0]) * 0.5;
                 x += xIncr;
             }
             _.plotData  = data;
@@ -5834,10 +5992,10 @@
     var Chorus = T.modules.Chorus;
     
     function ChorusNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
 
-        var chorus = new Chorus(T.samplerate);
+        var chorus = new Chorus(T.samplerate, 2);
         chorus.setDelayTime(20);
         chorus.setRate(4);
         chorus.depth = 20;
@@ -5915,7 +6073,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -5923,7 +6080,7 @@
             fn.inputSignalAR(this);
             
             if (!_.bypassed) {
-                _.chorus.process(cell);
+                _.chorus.process(this.cells[1], this.cells[2]);
             }
             
             fn.outputSignalAR(this);
@@ -5941,7 +6098,7 @@
     var fn = T.fn;
     
     function ClipNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         
         var _ = this._;
         _.min = -0.8;
@@ -5997,51 +6154,45 @@
     });
     
     $.process = function(tickID) {
-        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
-            var nodes = this.nodes;
-            var mul = _.mul, add = _.add;
-            var i, imax = nodes.length;
-            var j, jmax = cell.length;
+
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = cellL.length;
             var min = _.min, max = _.max;
-            var tmp, x;
+            var value;
             
-            for (j = 0; j < jmax; ++j) {
-                cell[j] = 0;
-            }
-            
-            if (_.ar) { // audio-rate
+            if (_.ar) {
+                fn.inputSignalAR(this);
                 for (i = 0; i < imax; ++i) {
-                    tmp = nodes[i].process(tickID).cells[0];
-                    for (j = 0; j < jmax; ++j) {
-                        cell[j] += tmp[j];
+                    value = cellL[i];
+                    if (value < min) {
+                        value = min;
+                    } else if (value > max) {
+                        value = max;
                     }
-                }
-                for (j = 0; j < jmax; ++j) {
-                    x = cell[j];
-                    x = (x < min) ? min : (x > max) ? max : x;
-                    cell[j] = x;
-                }
-                
-                if (mul !== 1 || add !== 0) {
-                    for (j = 0; j < jmax; ++j) {
-                        cell[j] = cell[j] * mul + add;
+                    cellL[i] = value;
+                    value = cellR[i];
+                    if (value < min) {
+                        value = min;
+                    } else if (value > max) {
+                        value = max;
                     }
+                    cellR[i] = value;
                 }
-            } else {    // control-rate
-                tmp = 0;
-                for (i = 0; i < imax; ++i) {
-                    tmp += nodes[i].process(tickID).cells[0][0];
+                fn.outputSignalAR(this);
+            } else {
+                value = fn.inputSignalKR(this);
+                if (value < min) {
+                    value = min;
+                } else if (value > max) {
+                    value = max;
                 }
-                tmp = (tmp < min) ? min : (tmp > max) ? max : tmp;
-                tmp = tmp * mul + add;
-                for (j = 0; j < jmax; ++j) {
-                    cell[j] = tmp;
-                }
+                this.cells[0][0] = value;
+                fn.outputSignalKR(this);
             }
         }
         return this;
@@ -6058,20 +6209,25 @@
     var Compressor = T.modules.Compressor;
     
     function CompressorNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.thresh = T(-24);
-        _.knee   = T(30);
-        _.ratio  = T(12);
+        _.prevThresh = -24;
+        _.prevKnee   =  30;
+        _.prevRatio  =  12;
+        _.thresh = T(_.prevThresh);
+        _.knee   = T(_.prevKnee);
+        _.ratio  = T(_.prevRatio);
         _.postGain  =   6;
         _.reduction =   0;
         
-        _.comp = new Compressor(T.samplerate);
+        _.comp = new Compressor(T.samplerate, 2);
         _.comp.dbPostGain  = _.postGain;
         _.comp.setAttackTime(0.003);
         _.comp.setReleaseTime(0.25);
+        _.comp.setPreDelayTime(6);
+        _.comp.setParams(_.prevThresh, _.prevKnee, _.prevRatio);
     }
     fn.extend(CompressorNode);
     
@@ -6155,7 +6311,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -6173,7 +6328,7 @@
             }
             
             if (!_.bypassed) {
-                _.comp.process(cell);
+                _.comp.process(this.cells[1], this.cells[2]);
                 _.reduction = _.comp.meteringGain;
             }
             
@@ -6181,6 +6336,43 @@
         }
         
         return this;
+    };
+    
+    var super_plot = T.Object.prototype.plot;
+    
+    $.plot = function(opts) {
+        if (true) {
+            var comp = this._.comp.clone();
+            comp.setParams(this.thresh.valueOf(), this.knee.valueOf(), this.ratio.valueOf());
+            
+            var cell = new fn.SignalArray(1024);
+            var data = new Float32Array(128);
+            var db, maxdb;
+            var i, j;
+            for (i = 0; i < 128; ++i) {
+                db = Math.pow(10, (i * 0.625 - 80) * 0.05);
+                for (j = 0; j < 1024; ++j) {
+                    cell[j] = db;
+                }
+                comp.process(cell, cell);
+                maxdb = 0;
+                for (j = 0; j < 32; ++j) {
+                    if (Math.abs(cell[j]) > maxdb) {
+                        maxdb = Math.abs(cell[j]);
+                    }
+                }
+                if (maxdb < 1e-6) {
+                    maxdb = 1e-6;
+                }
+                maxdb = (Math.log(maxdb) * Math.LOG10E * 20);
+                maxdb = 80 + maxdb;
+                data[i] = maxdb;
+            }
+            this._.plotData = data;
+            this._.plotRange = [0, 80];
+            this._.plotFlush = null;
+        }
+        return super_plot.call(this, opts);
     };
     
     fn.register("comp", CompressorNode);
@@ -6391,16 +6583,20 @@
     var fn = T.fn;
     
     function DistNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         var _ = this._;
         _.pre  = T( 60);
         _.post = T(-18);
         _.samplerate = T.samplerate;
-        _.x1 = _.x2 = _.y1 = _.y2 = 0;
+        _.x1L = _.x2L = _.y1L = _.y2L = 0;
+        _.x1R = _.x2R = _.y1R = _.y2R = 0;
         _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
         _.cutoff = 0;
+        _.Q = 1;
+        _.preScale = 0;
+        _.postScale = 0;
     }
     fn.extend(DistNode);
     
@@ -6437,7 +6633,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -6446,21 +6641,20 @@
             
             var preGain  = -_.pre.process(tickID).cells[0][0];
             var postGain = -_.post.process(tickID).cells[0][0];
-
+            
             if (_.prevPreGain !== preGain || _.prevPostGain !== postGain) {
                 _.prevPreGain  = preGain;
                 _.prevPostGain = postGain;
-                var postScale = Math.pow(2, -postGain * 0.166666666);
-                _.preScale = Math.pow(2, -preGain * 0.166666666) * postScale;
-                _.limit = postScale;
+                _.preScale  = Math.pow(10, -preGain  * 0.05);
+                _.postScale = Math.pow(10, -postGain * 0.05);
             }
             
             if (!_.bypassed) {
-                var preScale = _.preScale;
-                var limit    = _.limit;
-                var mul = _.mul, add = _.add;
-                var i, imax;
-                var x0, y0;
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
+                var preScale  = _.preScale;
+                var postScale = _.postScale;
+                var i, imax, value, x0, y0;
                 
                 if (_.cutoff) {
                     if (_.prevCutoff !== _.cutoff) {
@@ -6468,73 +6662,78 @@
                         lowpass_params(_);
                     }
                     
-                    var x1 = _.x1, x2 = _.x2, y1 = _.y1, y2 = _.y2;
+                    var x1L = _.x1L, x2L = _.x2L, y1L = _.y1L, y2L = _.y2L;
+                    var x1R = _.x1R, x2R = _.x2R, y1R = _.y1R, y2R = _.y2R;
                     var b0 = _.b0, b1 = _.b1, b2 = _.b2, a1 = _.a1, a2 = _.a2;
                     
-                    for (i = 0, imax = cell.length; i < imax; ++i) {
-                        x0 = cell[i] * preScale;
-                        y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+                    for (i = 0, imax = cellL.length; i < imax; ++i) {
+                        x0 = cellL[i] * preScale;
+                        y0 = b0 * x0 + b1 * x1L + b2 * x2L - a1 * y1L - a2 * y2L;
+                        value = y0 * postScale;
+                        if (value < -1) {
+                            value = -1;
+                        } else if (value > 1) {
+                            value = 1;
+                        }
+                        cellL[i] = value;
+                        x2L = x1L; x1L = x0; y2L = y1L; y1L = y0;
                         
-                        y0 = (y0 > limit) ? limit : (y0 < -limit) ? -limit : y0;
-                        
-                        cell[i] = y0 * mul + add;
-                        
-                        x2 = x1; x1 = x0; y2 = y1; y1 = y0;
+                        x0 = cellR[i] * preScale;
+                        y0 = b0 * x0 + b1 * x1R + b2 * x2R - a1 * y1R - a2 * y2R;
+                        value = y0 * postScale;
+                        if (value < -1) {
+                            value = -1;
+                        } else if (value > 1) {
+                            value = 1;
+                        }
+                        cellR[i] = value;
+                        x2R = x1R; x1R = x0; y2R = y1R; y1R = y0;
                     }
                     
-                    // flushDenormalFloatToZero
-                    if ((x1 > 0 && x1 <  1e-4) || (x1 < 0 && x1 > -1e-4)) {
-                        x1 = 0;
-                    }
-                    if ((y1 > 0 && y1 <  1e-4) || (y1 < 0 && y1 > -1e-4)) {
-                        y1 = 0;
-                    }
-                    
-                    _.x1 = x1; _.x2 = x2; _.y1 = y1; _.y2 = y2;
+                    _.x1L = x1L; _.x2L = x2L; _.y1L = y1L; _.y2L = y2L;
+                    _.x1R = x1R; _.x2R = x2R; _.y1R = y1R; _.y2R = y2R;
                 } else {
-                    for (i = 0, imax = cell.length; i < imax; ++i) {
-                        x0 = cell[i] * preScale;
-                        x0 = (x0 > limit) ? limit : (x0 < -limit) ? -limit : x0;
-                        cell[i] = x0 * mul + add;
+                    for (i = 0, imax = cellL.length; i < imax; ++i) {
+                        value = cellL[i] * preScale * postScale;
+                        if (value < -1) {
+                            value = -1;
+                        } else if (value > 1) {
+                            value = 1;
+                        }
+                        cellL[i] = value;
+                        
+                        value = cellR[i] * preScale * postScale;
+                        if (value < -1) {
+                            value = -1;
+                        } else if (value > 1) {
+                            value = 1;
+                        }
+                        cellR[i] = value;
                     }
                 }
-            } else {
-                fn.outputSignalAR(this);
             }
+
+            fn.outputSignalAR(this);
         }
         
         return this;
     };
     
     var lowpass_params = function(_) {
-        var cutoff = _.cutoff / (_.samplerate * 0.5);
-        
-        if (cutoff >= 1) {
-            _.b0 = 1;
-            _.b1 = _.b2 = _.a1 = _.a2 = 0;
-        } else if (cutoff <= 0) {
-            _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
-        } else {
-            var resonance = 1;
-            var g = Math.pow(10.0, 0.05 * resonance);
-            var d = Math.sqrt((4 - Math.sqrt(16 - 16 / (g * g))) * 0.5);
-            
-            var theta = Math.PI * cutoff;
-            var sn = 0.5 * d * Math.sin(theta);
-            var beta = 0.5 * (1 - sn) / (1 + sn);
-            var gamma = (0.5 + beta) * Math.cos(theta);
-            var alpha = 0.25 * (0.5 + beta - gamma);
-            
-            _.b0 = 2 * alpha;
-            _.b1 = 4 * alpha;
-            _.b2 = _.b0;
-            _.a1 = 2 * -gamma;
-            _.a2 = 2 * beta;
-        }
-    };
+        var w0 = 2 * Math.PI * _.cutoff / _.samplerate;
+        var cos = Math.cos(w0);
+        var sin = Math.sin(w0);
+        var alpha = sin / (2 * _.Q);
 
-    fn.register("distortion", DistNode);
-    fn.alias("dist", "distortion");
+        var ia0 = 1 / (1 + alpha);
+        _.b0 =  (1 - cos) * 0.5 * ia0;
+        _.b1 =   1 - cos * ia0;
+        _.b2 =  (1 - cos) * 0.5 * ia0;
+        _.a1 =  -2 * cos * ia0;
+        _.a2 =   1 - alpha * ia0;
+    };
+    
+    fn.register("dist", DistNode);
     
 })(timbre);
 (function(T) {
@@ -6618,20 +6817,26 @@
     var isDictionary = fn.isDictionary;
     
     function EnvNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         var _ = this._;
         _.env = new Envelope(T.samplerate);
-        _.env.setStep(T.cellsize);
-        _.tmp = new fn.SignalArray(T.cellsize);
+        _.env.setStep(_.cellsize);
+        _.tmp = new fn.SignalArray(_.cellsize);
         _.ar = false;
         _.plotFlush = true;
-        _.onended = fn.make_onended(this);
+        _.onended = make_onended(this);
         this.on("ar", onar);
     }
     fn.extend(EnvNode);
     
     var onar = function(value) {
-        this._.env.setStep((value) ? 1 : T.cellsize);
+        this._.env.setStep((value) ? 1 : this._.cellsize);
+    };
+
+    var make_onended = function(self) {
+        return function() {
+            self._.emit("ended");
+        };
     };
     
     var $ = EnvNode.prototype;
@@ -6705,20 +6910,19 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var nodes = this.nodes;
-            var i, imax = cell.length;
-            var mul = _.mul, add = _.add;
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = _.cellsize;
             
-            if (nodes.length) {
+            if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = 1;
+                    cellL[i] = cellR[i] = 1;
                 }
             }
             
@@ -6727,16 +6931,20 @@
                 var tmp = _.tmp;
                 _.env.process(tmp);
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = (cell[i] * tmp[i]) * mul + add;
+                    cellL[i] *= tmp[i];
+                    cellR[i] *= tmp[i];
                 }
                 emit = _.env.emit;
             } else {
                 value = _.env.next();
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = (cell[i] * value) * mul + add;
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
                 emit = _.env.emit;
             }
+            
+            fn.outputSignalAR(this);
             
             if (emit) {
                 if (emit === "ended") {
@@ -7039,9 +7247,9 @@
     };
     
     function EQNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
-
+        
         var _ = this._;
         _.biquads = new Array(7);
         
@@ -7113,7 +7321,7 @@
                 }
                 var biquad = _.biquads[index];
                 if (!biquad) {
-                    biquad = _.biquads[index] = new Biquad(T.samplerate);
+                    biquad = _.biquads[index] = new Biquad(T.samplerate, 2);
                     switch (index) {
                     case 0:
                         biquad.setType("highpass");
@@ -7145,7 +7353,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -7153,10 +7360,12 @@
             fn.inputSignalAR(this);
 
             if (!_.bypassed) {
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
                 var biquads = _.biquads;
                 for (var i = 0, imax = biquads.length; i < imax; ++i) {
                     if (biquads[i]) {
-                        biquads[i].process(cell);
+                        biquads[i].process(cellL, cellR);
                     }
                 }
             }
@@ -7230,17 +7439,19 @@
     var FFT = T.modules.FFT;
     
     function FFTNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.listener(this);
         fn.fixAR(this);
         
-        this.real = this.L;
-        this.imag = this.R;
-
+        this.real = new T.ChannelObject(this);
+        this.imag = new T.ChannelObject(this);
+        this.cells[3] = this.real.cell;
+        this.cells[4] = this.imag.cell;
+        
         var _ = this._;
-        _.fft = new FFT(T.cellsize * 2);
+        _.fft = new FFT(_.cellsize * 2);
         _.fftCell  = new fn.SignalArray(_.fft.length);
-        _.prevCell = new fn.SignalArray(T.cellsize);
+        _.prevCell = new fn.SignalArray(_.cellsize);
         _.freqs    = new fn.SignalArray(_.fft.length>>1);
         
         _.plotFlush = true;
@@ -7274,26 +7485,21 @@
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
+            fn.outputSignalAR(this);
             
             var cell = this.cells[0];
+            var cellsize = _.cellsize;
             
             _.fftCell.set(_.prevCell);
-            _.fftCell.set(cell, cell.length);
+            _.fftCell.set(cell, cellsize);
             _.fft.forward(_.fftCell);
             _.prevCell.set(cell);
+            _.plotFlush = true;
             
-            var real = this.cells[1];
-            var imag = this.cells[2];
-            var _real = _.fft.real;
-            var _imag = _.fft.imag;
-            
-            for (var i = 0, imax = cell.length; i < imax; ++i) {
-                real[i] = _real[i];
-                imag[i] = _imag[i];
-            }
-            
-            this._.plotFlush = true;
+            this.cells[3].set(_.fft.real.subarray(0, cellsize));
+            this.cells[4].set(_.fft.imag.subarray(0, cellsize));
         }
+        
         return this;
     };
     
@@ -7402,10 +7608,28 @@
     "use strict";
     
     var fn = T.fn;
-    var ChannelObject = T.ChannelObject;
+    
+    var GateChannelNode = (function() {
+        function GateChannelNode(parent) {
+            T.Object.call(this, 2, []);
+            fn.fixAR(this);
+            this._.parent = parent;
+        }
+        fn.extend(GateChannelNode);
+        
+        GateChannelNode.prototype.process = function(tickID) {
+            if (this.tickID !== tickID) {
+                this.tickID = tickID;
+                this._.parent.process(tickID);
+            }
+            return this;
+        };
+        
+        return GateChannelNode;
+    })();
     
     function GateNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         this._.selected = 0;
@@ -7414,7 +7638,7 @@
     fn.extend(GateNode);
     
     var $ = GateNode.prototype;
-
+    
     Object.defineProperties($, {
         selected: {
             set: function(value) {
@@ -7424,7 +7648,9 @@
                     var outputs = _.outputs;
                     for (var i = 0, imax = outputs.length; i < imax; ++i) {
                         if (outputs[i]) {
-                            outputs[i].cell.set(fn.emptycell);
+                            outputs[i].cells[0].set(fn.emptycell);
+                            outputs[i].cells[1].set(fn.emptycell);
+                            outputs[i].cells[2].set(fn.emptycell);
                         }
                     }
                 }
@@ -7434,12 +7660,12 @@
             }
         }
     });
-
+    
     $.at = function(index) {
         var _ = this._;
         var output = _.outputs[index];
         if (!output) {
-            _.outputs[index] = output = new ChannelObject(this);
+            _.outputs[index] = output = new GateChannelNode(this);
         }
         return output;
     };
@@ -7453,8 +7679,11 @@
             fn.inputSignalAR(this);
             fn.outputSignalAR(this);
             
-            if (_.outputs[_.selected]) {
-                _.outputs[_.selected].cell.set(this.cells[0]);
+            var output = _.outputs[_.selected];
+            if (output) {
+                output.cells[0].set(this.cells[0]);
+                output.cells[1].set(this.cells[1]);
+                output.cells[2].set(this.cells[2]);
             }
         }
         
@@ -7473,9 +7702,9 @@
     function IFFTNode(_args) {
         T.Object.call(this, 1, _args);
         fn.fixAR(this);
-
+        
         var _ = this._;
-        _.fft = new FFT(T.cellsize * 2);
+        _.fft = new FFT(_.cellsize * 2);
         _.fftCell    = new fn.SignalArray(this._.fft.length);
         _.realBuffer = new fn.SignalArray(this._.fft.length);
         _.imagBuffer = new fn.SignalArray(this._.fft.length);
@@ -7505,12 +7734,12 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             if (_.real && _.imag) {
+                var cell = this.cells[0];
                 var real = _.realBuffer;
                 var imag = _.imagBuffer;
                 var _real = _.real.process(tickID).cells[0];
@@ -7519,7 +7748,7 @@
                 real.set(_real);
                 imag.set(_imag);
                 
-                cell.set(_.fft.inverse(real, imag).subarray(0, cell.length));
+                cell.set(_.fft.inverse(real, imag).subarray(0, _.cellsize));
                 
                 fn.outputSignalAR(this);
             }
@@ -7550,7 +7779,6 @@
         _.currentTime = 0;
         _.delaySamples = 0;
         _.countSamples = 0;
-        _.isEnded = false;
         _.onended = fn.make_onended(this);
         
         this.on("start", onstart);
@@ -7559,9 +7787,9 @@
     
     var onstart = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.delaySamples = (T.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
-        _.isEnded = false;
     };
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
@@ -7630,9 +7858,9 @@
     
     $.bang = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.delaySamples = (T.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
-        _.isEnded = false;
         _.emit("bang");
         return this;
     };
@@ -7641,10 +7869,6 @@
         var cell = this.cells[0];
         
         var _ = this._;
-        
-        if (_.isEnded) {
-            return this;
-        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -8053,17 +8277,14 @@
         if (_impl) {
             _impl.unlisten.call(this);
         }
-
-        var cell  = this.cells[0];
-        var cellL = this.cells[1];
-        var cellR = this.cells[2];
-        var i, imax = cell.length;
-        for (i = 0; i < imax; ++i) {
-            cell[i] = cellL[i] = cellR[i] = 0;
-        }
+        
+        this.cells[0].set(fn.emptycell);
+        this.cells[1].set(fn.emptycell);
+        this.cells[2].set(fn.emptycell);
+        
         var _ = this._;
         var bufferL = _.bufferL, bufferR = _.bufferR;
-        for (i = 0, imax = bufferL.length; i < imax; ++i) {
+        for (var i = 0, imax = bufferL.length; i < imax; ++i) {
             bufferL[i] = bufferR[i] = 0;
         }
     };
@@ -8078,21 +8299,16 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var bufferL = _.bufferL;
-            var bufferR = _.bufferR;
-            var cellL = this.cells[1];
-            var cellR = this.cells[2];
-            var i, imax = cellL.length;
-            
-            if (_.totalWrite > _.totalRead + cellL.length) {
-                var readIndex = _.readIndex;
-                for (i = 0; i < imax; ++i, ++readIndex) {
-                    cellL[i] = bufferL[readIndex];
-                    cellR[i] = bufferR[readIndex];
-                }
-                _.readIndex = readIndex & BUFFER_MASK;
-                _.totalRead += cellL.length;
+            var cellsize = _.cellsize;
+            if (_.totalWrite > _.totalRead + cellsize) {
+                var begin = _.readIndex;
+                var end   = begin + cellsize;
+                this.cells[1].set(_.bufferL.subarray(begin, end));
+                this.cells[2].set(_.bufferR.subarray(begin, end));
+                _.readIndex = end & BUFFER_MASK;
+                _.totalRead += cellsize;
             }
+            
             fn.outputSignalAR(this);
         }
         
@@ -8115,7 +8331,7 @@
             var context = fn._audioContext;
             _.gain = context.createGainNode();
             _.gain.gain.value = 0;
-            _.node = context.createJavaScriptNode(1024, 2, 1);
+            _.node = context.createJavaScriptNode(1024, 2, 2);
             _.node.onaudioprocess = onaudioprocess(this);
             _.src.connect(_.node);
             _.node.connect(_.gain);
@@ -8137,18 +8353,14 @@
     var onaudioprocess = function(self) {
         return function(e) {
             var _ = self._;
-            var i0 = e.inputBuffer.getChannelData(0);
-            var i1 = e.inputBuffer.getChannelData(1);
-            var o0 = _.bufferL;
-            var o1 = _.bufferR;
+            var ins = e.inputBuffer;
+            var length = ins.length;
             var writeIndex = _.writeIndex;
-            var i, imax = i0.length;
-            for (i = 0; i < imax; ++i, ++writeIndex) {
-                o0[writeIndex] = i0[i];
-                o1[writeIndex] = i1[i];
-            }
-            _.writeIndex = writeIndex & BUFFER_MASK;
-            _.totalWrite += i0.length;
+            
+            _.bufferL.set(ins.getChannelData(0), writeIndex);
+            _.bufferR.set(ins.getChannelData(1), writeIndex);
+            _.writeIndex = (writeIndex + length) & BUFFER_MASK;
+            _.totalWrite += length;
         };
     };
     
@@ -8181,12 +8393,12 @@
                         while (x > 0) {
                             o0[writeIndex] = (samples[i  ] + prev0) * 0.5;
                             o1[writeIndex] = (samples[i+1] + prev1) * 0.5;
-                            prev0 = samples[i  ];
-                            prev1 = samples[i+1];
                             writeIndex = (writeIndex + 1) & BUFFER_MASK;
                             ++totalWrite;
                             x -= 1;
                         }
+                        prev0 = samples[i  ];
+                        prev1 = samples[i+1];
                     }
                     _.x = x;
                     _.writeIndex = writeIndex;
@@ -8204,11 +8416,12 @@
                     for (i = 0; i < imax; ++i) {
                         x += istep;
                         while (x >= 0) {
-                            o0[writeIndex] = o1[writeIndex] = samples[i];
+                            o0[writeIndex] = o1[writeIndex] = (samples[i] + prev0) * 0.5;
                             writeIndex = (writeIndex + 1) & BUFFER_MASK;
                             ++totalWrite;
                             x -= 1;
                         }
+                        prev0 = samples[i];
                     }
                     _.x = x;
                     _.writeIndex = writeIndex;
@@ -8283,15 +8496,15 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
-            var len = this.nodes.length;
+            
+            var cell = this.cells[0];
+            var len  = this.nodes.length;
             var i, imax = cell.length;
-
+            
             if (_.ar && len) {
                 fn.inputSignalAR(this);
                 var a4 = _.a4;
@@ -8301,15 +8514,13 @@
                 _.value = cell[imax-1];
                 fn.outputSignalAR(this);
             } else {
-                var input = (this.nodes.length) ? fn.inputSignalKR(this) : _.midi;
+                var input = (len) ? fn.inputSignalKR(this) : _.midi;
                 if (_.prev !== input) {
                     _.prev = input;
                     _.value = _.a4 * Math.pow(2, (input - 69) / 12);
                 }
-                var value = _.value * _.mul + _.add;
-                for (i = 0; i < imax; ++i) {
-                    cell[i] = value;
-                }
+                cell[0] = _.value;
+                fn.outputSignalKR(this);
             }
         }
         
@@ -8480,7 +8691,7 @@
     var fn = T.fn;
     
     function MML(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 0, _args);
         fn.timer(this);
         fn.fixKR(this);
         
@@ -8495,7 +8706,6 @@
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
-        _.isEnded  = false;
         _.remain   = Infinity;
         _.onended  = fn.make_onended(this);
         
@@ -8505,6 +8715,7 @@
     
     var onstart = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.commands = compile(_.mml);
         _.index    = 0;
         _.queue    = [];
@@ -8513,7 +8724,6 @@
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
-        _.isEnded  = false;
         _.remain   = Infinity;
         
         sched(this);
@@ -8540,20 +8750,11 @@
             get: function() {
                 return this._.currentTime;
             }
-        },
-        isEnded: {
-            get: function() {
-                return this._.isEnded;
-            }
         }
     });
     
     $.process = function(tickID) {
         var _ = this._;
-        
-        if (_.isEnded) {
-            return this;
-        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -8589,7 +8790,6 @@
                         _.emit("mml", "noteOff", {noteNum:nextItem[2], velocity:nextItem[3]});
                     }
                     if (queue.length === 0) {
-                        
                         break;
                     }
                 }
@@ -8606,10 +8806,6 @@
     
     var sched = function(self) {
         var _ = self._;
-        
-        if (_.isEnded) {
-            return;
-        }
         
         var cmd, commands = _.commands;
         var queue  = _.queue;
@@ -8891,10 +9087,12 @@
         }
         instance = this;
         
-        T.Object.call(this, 2, _args);
+        T.Object.call(this, 1, _args);
         
-        this.X = this.L;
-        this.Y = this.R;
+        this.X = new T.ChannelObject(this);
+        this.Y = new T.ChannelObject(this);
+        this.cells[3] = this.X.cell;
+        this.cells[4] = this.Y.cell;
         
         fn.fixKR(this);
     }
@@ -8913,11 +9111,11 @@
         var x = (mouseX = (e.clientX / window.innerWidth));
         var y = (mouseY = (e.clientY / window.innerHeight));
         
-        var cellL = instance.cells[1];
-        var cellR = instance.cells[2];
-        for (var i = 0, imax = cellL.length; i < imax; ++i) {
-            cellL[i] = x;
-            cellR[i] = y;
+        var cellX = instance.cells[3];
+        var cellY = instance.cells[4];
+        for (var i = 0, imax = cellX.length; i < imax; ++i) {
+            cellX[i] = x;
+            cellY[i] = y;
         }
     };
     var onmouseup = function(e) {
@@ -9042,7 +9240,7 @@
             return f(_, x);
         }}, instance.X);
         
-        self.cells[0] = _.map.cells[0];
+        self.cells[0] = _.map.cells[3];
         
         return self;
     });
@@ -9060,7 +9258,8 @@
             return f(_, x);
         }}, instance.Y);
         
-        self.cells[0] = _.map.cells[0];
+        self.cells[0] = _.map.cells[4];
+        
         return self;
     });
 })(timbre);
@@ -9335,14 +9534,14 @@
     var Oscillator = T.modules.Oscillator;
     
     function OscNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         
         var _ = this._;
         _.freq  = T(440);
         _.phase = T(0);
         _.osc = new Oscillator(T.samplerate);
-        _.tmp = new fn.SignalArray(T.cellsize);
-        _.osc.step = T.cellsize;
+        _.tmp = new fn.SignalArray(_.cellsize);
+        _.osc.step = _.cellsize;
         
         this.once("init", oninit);
     }
@@ -9414,19 +9613,19 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var nodes = this.nodes;
-            var i, imax = cell.length;
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = _.cellsize;
             
-            if (nodes.length) {
+            if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = 1;
+                    cellL[i] = cellR[i] = 1;
                 }
             }
             
@@ -9453,12 +9652,14 @@
                     }
                 }
                 for (i = 0; i < imax; ++i) {
-                    cell[i] *= tmp[i];
+                    cellL[i] *= tmp[i];
+                    cellR[i] *= tmp[i];
                 }
             } else {
                 var value = osc.next();
                 for (i = 0; i < imax; ++i) {
-                    cell[i] *= value;
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
             }
             fn.outputSignalAR(this);
@@ -9529,7 +9730,7 @@
         fn.fixAR(this);
         
         var _ = this._;
-        _.value = T(0);
+        _.pos  = T(0);
         _.panL = 0.5;
         _.panR = 0.5;
     }
@@ -9554,14 +9755,9 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var changed = false;
-            
             var pos = _.pos.process(tickID).cells[0][0];
             if (_.prevPos !== pos) {
                 _.prevPos = pos;
-                changed = true;
-            }
-            if (changed) {
                 _.panL = Math.cos(0.5 * Math.PI * ((pos * 0.5) + 0.5));
                 _.panR = Math.sin(0.5 * Math.PI * ((pos * 0.5) + 0.5));
             }
@@ -9573,22 +9769,30 @@
             var j, jmax = cellL.length;
             var tmp;
             
-            for (j = 0; j < jmax; ++j) {
-                cellL[j] = cellR[j] = 0;
-            }
-            for (i = 0; i < imax; ++i) {
-                tmp = nodes[i].process(tickID).cells[0];
+            if (imax) {
+                tmp = nodes[0].process(tickID).cells[0];
                 for (j = 0; j < jmax; ++j) {
-                    cellL[j] = (cellR[j] += tmp[j]);
+                    cellL[j] = cellR[j] = tmp[j];
                 }
+                for (i = 1; i < imax; ++i) {
+                    tmp = nodes[i].process(tickID).cells[0];
+                    for (j = 0; j < jmax; ++j) {
+                        cellL[j] = (cellR[j] += tmp[j]);
+                    }
+                }
+                
+                var panL = _.panL;
+                var panR = _.panR;
+                for (j = 0; j < jmax; ++j) {
+                    cellL[j] = cellL[j] * panL;
+                    cellR[j] = cellR[j] * panR;
+                }
+                
+            } else {
+                cellL.set(fn.emptycell);
+                cellR.set(fn.emptycell);
             }
             
-            var panL = _.panL;
-            var panR = _.panR;
-            for (j = 0; j < jmax; ++j) {
-                cellL[j] = cellL[j] * panL;
-                cellR[j] = cellR[j] * panR;
-            }
             fn.outputSignalAR(this);
         }
         
@@ -9607,12 +9811,12 @@
     var EnvelopeValue = T.modules.EnvelopeValue;
     
     function ParamNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         
         var _ = this._;
         _.value = 0;
         _.env = new EnvelopeValue(T.samplerate);
-        _.env.step = T.cellsize;
+        _.env.step = _.cellsize;
         _.curve   = "lin";
         _.counter = 0;
         _.ar = false;
@@ -9623,7 +9827,7 @@
     fn.extend(ParamNode);
     
     var onar = function(value) {
-        this._.env.step = (value) ? 1 : T.cellsize;
+        this._.env.step = (value) ? 1 : this._.cellsize;
     };
     
     var $ = ParamNode.prototype;
@@ -9704,53 +9908,53 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
-            var nodes = this.nodes;
-            var i, imax = cell.length;
-            var mul = _.mul, add = _.add;
+
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = _.cellsize;
             var env = _.env;
             var counter = _.counter;
+            var value;
             
-            if (nodes.length) {
+            if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = 1;
+                    cellL[i] = cellR[i] = 1;
                 }
             }
             
-            if (counter-- > 0) {
-                if (counter <= 0) {
-                    if (_.curve === "set") {
-                        env.setNext(_.atValue, 0, Envelope.CurveTypeSet);
-                    } else {
-                        env.setNext(env.value, 0, Envelope.CurveTypeSet);
-                    }
-                    fn.nextTick(_.onended);
+            if (counter <= 0) {
+                if (_.curve === "set") {
+                    env.setNext(_.atValue, 0, Envelope.CurveTypeSet);
+                } else {
+                    env.setNext(env.value, 0, Envelope.CurveTypeSet);
                 }
-                _.counter = counter;
+                fn.nextTick(_.onended);
+                _.counter = Infinity;
             }
             
-            var value, emit = null;
             if (_.ar) {
                 for (i = 0; i < imax; ++i) {
                     value = env.next();
-                    cell[i] = (cell[i] * value) * mul + add;
-                    if (emit === null) {
-                        emit = _.env.emit;
-                    }
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
+                _.counter -= _.cellsize;
             } else {
                 value = env.next();
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = (cell[i] * value) * mul + add;
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
-                emit = _.env.emit;
+                _.counter -= 1;
             }
+            
+            fn.outputSignalAR(this);
+            
             _.value = value;
         }
         
@@ -9798,13 +10002,12 @@
     var Biquad = T.modules.Biquad;
 
     function PhaserNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.buffer = new fn.SignalArray(T.cellsize);
-        _.freq   = T("sin", {freq:1, add:1000, mul:250}).kr();
-        _.Q      = T(1);
+        _.freq = T("sin", {freq:1, add:1000, mul:250}).kr();
+        _.Q    = T(1);
         _.allpass  = [];
         
         this.steps = 2;
@@ -9838,7 +10041,7 @@
                         var allpass = this._.allpass;
                         if (allpass.length < value) {
                             for (var i = allpass.length; i < value; ++i) {
-                                allpass[i] = new Biquad(T.samplerate);
+                                allpass[i] = new Biquad(T.samplerate, 2);
                                 allpass[i].setType("allpass");
                             }
                         }
@@ -9854,7 +10057,6 @@
 
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -9862,22 +10064,18 @@
             fn.inputSignalAR(this);
             
             if (!_.bypassed) {
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
                 var freq  = _.freq.process(tickID).cells[0][0];
                 var Q     = _.Q.process(tickID).cells[0][0];
                 var steps = _.steps;
-                var i, imax;
-                
-                _.buffer.set(cell);
+                var i;
                 
                 for (i = 0; i < steps; i += 2) {
                     _.allpass[i  ].setParams(freq, Q, 0);
-                    _.allpass[i  ].process(_.buffer);
+                    _.allpass[i  ].process(cellL, cellR);
                     _.allpass[i+1].setParams(freq, Q, 0);
-                    _.allpass[i+1].process(_.buffer);
-                }
-                
-                for (i = 0, imax = cell.length; i < imax; ++i) {
-                    cell[i] = (cell[i] + _.buffer[i]) * 0.5;
+                    _.allpass[i+1].process(cellL, cellR);
                 }
             }
             
@@ -9886,9 +10084,8 @@
         
         return this;
     };
-
+    
     fn.register("phaser", PhaserNode);
-    fn.alias("phaseshift", "phaser");
     
 })(timbre);
 (function(T) {
@@ -10197,10 +10394,10 @@
     var Reverb = T.modules.Reverb;
     
     function ReverbNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
-        this._.reverb = new Reverb(T.samplerate, T.cellsize);
+        this._.reverb = new Reverb(T.samplerate, 2, T.cellsize);
     }
     fn.extend(ReverbNode);
     
@@ -10244,7 +10441,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -10252,7 +10448,7 @@
             fn.inputSignalAR(this);
             
             if (!_.bypassed) {
-                _.reverb.process(cell);
+                _.reverb.process(this.cells[1], this.cells[2]);
             }
             
             fn.outputSignalAR(this);
@@ -10271,7 +10467,7 @@
     var timevalue = T.timevalue;
     
     function ScheduleNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 0, _args);
         fn.timer(this);
         fn.fixKR(this);
         
@@ -10364,11 +10560,7 @@
     
     $.process = function(tickID) {
         var _ = this._;
-
-        if (_.isEnded) {
-            return this;
-        }
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
@@ -10405,14 +10597,14 @@
     var timevalue = T.timevalue;
     
     function ScopeNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.listener(this);
         fn.fixAR(this);
         
-        this._.samples    = 0;
-        this._.writeIndex = 0;
-        
-        this._.plotFlush = true;
+        var _ = this._;
+        _.samples    = 0;
+        _.writeIndex = 0;
+        _.plotFlush = true;
         
         this.once("init", oninit);
     }
@@ -10487,30 +10679,31 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
+            fn.outputSignalAR(this);
             
-            var i, imax = cell.length;
+            var cell = this.cells[0];
+            var i, imax = _.cellsize;
             var samples     = _.samples;
             var samplesIncr = _.samplesIncr;
             var buffer      = _.buffer;
             var writeIndex  = _.writeIndex;
             var emit = false;
-            var mul = _.mul, add = _.add;
-            var mask = buffer.length - 1;
+            var bufferlength = buffer.length;
             
             for (i = 0; i < imax; ++i) {
                 if (samples <= 0) {
                     buffer[writeIndex++] = cell[i];
-                    writeIndex &= mask;
+                    if (writeIndex >= bufferlength) {
+                        writeIndex = 0;
+                    }
                     emit = _.plotFlush = true;
                     samples += samplesIncr;
                 }
-                cell[i] = cell[i] * mul + add;
                 --samples;
             }
             _.samples    = samples;
@@ -10551,7 +10744,7 @@
     var fn = T.fn;
 
     function SelectorNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         
         this._.selected   = 0;
         this._.background = false;
@@ -10559,16 +10752,14 @@
     fn.extend(SelectorNode);
     
     var $ = SelectorNode.prototype;
-
+    
     Object.defineProperties($, {
         selected: {
             set: function(value) {
                 if (typeof value === "number") {
                     this._.selected = value;
-                    var cell = this.cells[0];
-                    for (var i = 0, imax = cell.length; i < imax; ++i) {
-                        cell[i] = 0;
-                    }
+                    this.cells[1].set(fn.emptycell);
+                    this.cells[2].set(fn.emptycell);
                 }
             },
             get: function() {
@@ -10587,11 +10778,10 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
+            
             var nodes = this.nodes;
             var i, imax = nodes.length;
             
@@ -10603,7 +10793,11 @@
             
             var tmp = nodes[_.selected];
             if (tmp) {
-                cell.set(tmp.process(tickID).cells[0]);
+                if (!_.background) {
+                    tmp.process(tickID);
+                }
+                this.cells[1].set(tmp.cells[1]);
+                this.cells[2].set(tmp.cells[2]);
             }
             
             fn.outputSignalAR(this);
@@ -10622,13 +10816,16 @@
     var timevalue = T.timevalue;
     var FFT = T.modules.FFT;
     
+    var WAIT_STATE = 0;
+    var EXEC_STATE = 1;
+    
     function SpectrumNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.listener(this);
         fn.fixAR(this);
-
+        
         var _ = this._;
-        _.status  = 0;
+        _.status  = WAIT_STATE;
         _.samples = 0;
         _.samplesIncr = 0;
         _.writeIndex  = 0;
@@ -10735,13 +10932,14 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cells[0];
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
-            fn.inputSignalAR(this);
             
+            fn.inputSignalAR(this);
+            fn.outputSignalAR(this);
+            
+            var cell = this.cells[0];
             var i, imax = cell.length;
             var status  = _.status;
             var samples = _.samples;
@@ -10749,26 +10947,24 @@
             var writeIndex  = _.writeIndex;
             var buffer = _.buffer;
             var bufferLength = buffer.length;
-            var mul = _.mul, add = _.add;
             var emit;
             
             for (i = 0; i < imax; ++i) {
                 if (samples <= 0) {
-                    if (status === 0) {
-                        status = 1;
-                        writeIndex  = 0;
+                    if (status === WAIT_STATE) {
+                        status = EXEC_STATE;
+                        writeIndex = 0;
                         samples += samplesIncr;
                     }
                 }
-                if (status === 1) {
+                if (status === EXEC_STATE) {
                     buffer[writeIndex++] = cell[i];
                     if (bufferLength <= writeIndex) {
                         _.fft.forward(buffer);
                         emit = _.plotFlush = true;
-                        status = 0;
+                        status = WAIT_STATE;
                     }
                 }
-                cell[i] = cell[i] * mul + add;
                 --samples;
             }
             
@@ -10871,17 +11067,15 @@
     var fn = T.fn;
     
     function SynthDefNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
 
         var _ = this._;
-
+        this.playbackState = fn.FINISHED_STATE;
         _.poly     = 4;
         _.genList  = [];
         _.genDict  = {};
         _.synthdef = null;
-        _.isEnded  = true;
-        
         _.remGen = make_remGen(this);
         _.onended = fn.make_onended(this);
     }
@@ -10964,7 +11158,7 @@
             list.push(gen);
             dict[noteNum] = opts.gen = gen;
             
-            _.isEnded = false;
+            this.playbackState = fn.PLAYING_STATE;
             
             if (list.length > _.poly) {
                 _.remGen(list[0]);
@@ -11038,23 +11232,31 @@
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            fn.inputSignalAR(this);
-            
-            // process
-            if (!_.isEnded) {
-                var list;
+            if (this.playbackState === fn.PLAYING_STATE) {
+                var list = _.genList;
+                var gen;
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
                 var i, imax;
                 var j, jmax = cell.length;
-                var tmp;
+                var tmpL, tmpR;
                 
-                list = _.genList;
-                for (i = 0, imax = list.length; i < imax; ++i) {
-                    tmp = list[i].process(tickID).cells[0];
-                    for (j = 0; j < jmax; ++j) {
-                        cell[j] += tmp[j];
+                if (list.length) {
+                    gen = list[0];
+                    gen.process(tickID);
+                    cellL.set(gen.cells[1]);
+                    cellR.set(gen.cells[2]);
+                    for (i = 1, imax = list.length; i < imax; ++i) {
+                        gen = list[i];
+                        gen.process(tickID);
+                        tmpL = gen.cells[1];
+                        tmpR = gen.cells[2];
+                        for (j = 0; j < jmax; ++j) {
+                            cellL[j] += tmpL[j];
+                            cellR[j] += tmpR[j];
+                        }
                     }
-                }
-                if (imax === 0) {
+                } else {
                     fn.nextTick(_.onended);
                 }
             }
@@ -11178,10 +11380,9 @@
     function ScissorNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
-
+        
         var _ = this._;
         _.isLooped = false;
-        _.isEnded  = false;
         _.onended  = fn.make_onended(this, 0);
     }
     fn.extend(ScissorNode);
@@ -11192,14 +11393,14 @@
         tape: {
             set: function(tape) {
                 if (tape instanceof Tape) {
+                    this.playbackState = fn.PLAYING_STATE;
                     this._.tape = tape;
                     this._.tapeStream = new TapeStream(tape, T.samplerate);
-                    this._.isEnded = false;
                 } else if (typeof tape === "object") {
                     if (tape.buffer instanceof Float32Array || tape.buffer instanceof Float64Array) {
+                        this.playbackState = fn.PLAYING_STATE;
                         this._.tape = new Scissor(tape);
                         this._.tapeStream = new TapeStream(tape, T.samplerate);
-                        this._.isEnded = false;
                     }
                 }
             },
@@ -11210,11 +11411,6 @@
         isLooped: {
             get: function() {
                 return this._.isLooped;
-            }
-        },
-        isEnded: {
-            get: function() {
-                return this._.isEnded;
             }
         }
     });
@@ -11228,10 +11424,10 @@
     };
     
     $.bang = function() {
+        this.playbackState = fn.PLAYING_STATE;
         if (this._.tapeStream) {
             this._.tapeStream.reset();
         }
-        this._.isEnded = false;
         this._.emit("bang");
         return this;
     };
@@ -11250,7 +11446,7 @@
                 var tmp  = tapeStream.fetch(cellL.length);
                 cellL.set(tmp[0]);
                 cellR.set(tmp[1]);
-                if (!_.isEnded && tapeStream.isEnded) {
+                if (this.playbackState === fn.PLAYING_STATE && tapeStream.isEnded) {
                     fn.nextTick(_.onended);
                 }
             }
@@ -11271,15 +11467,15 @@
     var timevalue = T.timevalue;
     
     function TimeoutNode(_args) {
-        T.Object.call(this, 1, _args);
+        T.Object.call(this, 0, _args);
         fn.timer(this);
         fn.fixKR(this);
         
         var _ = this._;
+        this.playbackState = fn.FINISHED_STATE;
         _.currentTime = 0;
         _.samplesMax = 0;
         _.samples    = 0;
-        _.isEnded = true;
         _.onended = fn.make_onended(this);
         
         this.once("init", oninit);
@@ -11295,7 +11491,7 @@
     };
     
     var onstart = function() {
-        this._.isEnded = false;
+        this.playbackState = fn.PLAYING_STATE;
     };
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
@@ -11311,10 +11507,10 @@
                     value = timevalue(value);
                 }
                 if (typeof value === "number" && value >= 0) {
+                    this.playbackState = fn.PLAYING_STATE;
                     _.timeout = value;
                     _.samplesMax = (T.samplerate * (value * 0.001))|0;
                     _.samples = _.samplesMax;
-                    _.isEnded = false;
                 }
             },
             get: function() {
@@ -11330,9 +11526,9 @@
     
     $.bang = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.samples = _.samplesMax;
         _.currentTime = 0;
-        _.isEnded = false;
         _.emit("bang");
         return this;
     };
@@ -11340,10 +11536,6 @@
     $.process = function(tickID) {
         var cell = this.cells[0];
         var _ = this._;
-
-        if (_.isEnded) {
-            return this;
-        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
