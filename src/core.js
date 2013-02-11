@@ -597,7 +597,7 @@
                         not_clear = false;
                         ++i;
                         break;
-                    }                    
+                    }
                 }
                 for (; i < imax; ++i) {
                     if (nodes[i].playbackState === PLAYING_STATE) {
@@ -632,7 +632,7 @@
                         not_clear = false;
                         ++i;
                         break;
-                    }                    
+                    }
                 }
                 for (; i < imax; ++i) {
                     if (nodes[i].playbackState === PLAYING_STATE) {
