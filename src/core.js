@@ -584,51 +584,75 @@
         var i, imax = nodes.length;
         var j, jmax = cell.length;
         var tickID  = self.tickID;
-        var tmp, tmpL, tmpR;
+        var not_clear, tmp, tmpL, tmpR;
         
         if (self.numChannels === 2) {
-            for (j = jmax; j; ) {
-                j -= 8;
-                cellL[j] = cellL[j+1] = cellL[j+2] = cellL[j+3] = cellL[j+4] = cellL[j+5] = cellL[j+6] = cellL[j+7] = cellR[j] = cellR[j+1] = cellR[j+2] = cellR[j+3] = cellR[j+4] = cellR[j+5] = cellR[j+6] = cellR[j+7] = 0;
-            }
-            for (i = 0; i < imax; ++i) {
-                if (nodes[i].playbackState === PLAYING_STATE) {
-                    nodes[i].process(tickID);
-                    tmpL = nodes[i].cells[1];
-                    tmpR = nodes[i].cells[2];
-                    for (j = jmax; j; ) {
-                        j -= 8;
-                        cellL[j  ] += tmpL[j  ]; cellR[j  ] += tmpR[j  ];
-                        cellL[j+1] += tmpL[j+1]; cellR[j+1] += tmpR[j+1];
-                        cellL[j+2] += tmpL[j+2]; cellR[j+2] += tmpR[j+2];
-                        cellL[j+3] += tmpL[j+3]; cellR[j+3] += tmpR[j+3];
-                        cellL[j+4] += tmpL[j+4]; cellR[j+4] += tmpR[j+4];
-                        cellL[j+5] += tmpL[j+5]; cellR[j+5] += tmpR[j+5];
-                        cellL[j+6] += tmpL[j+6]; cellR[j+6] += tmpR[j+6];
-                        cellL[j+7] += tmpL[j+7]; cellR[j+7] += tmpR[j+7];
+            not_clear = true;
+            if (imax !== 0) {
+                for (i = 0; i < imax; ++i) {
+                    if (nodes[i].playbackState === PLAYING_STATE) {
+                        nodes[i].process(tickID);
+                        cellL.set(nodes[i].cells[1]);
+                        cellR.set(nodes[i].cells[2]);
+                        not_clear = false;
+                        ++i;
+                        break;
+                    }                    
+                }
+                for (; i < imax; ++i) {
+                    if (nodes[i].playbackState === PLAYING_STATE) {
+                        nodes[i].process(tickID);
+                        tmpL = nodes[i].cells[1];
+                        tmpR = nodes[i].cells[2];
+                        for (j = jmax; j; ) {
+                            j -= 8;
+                            cellL[j  ] += tmpL[j  ]; cellR[j  ] += tmpR[j  ];
+                            cellL[j+1] += tmpL[j+1]; cellR[j+1] += tmpR[j+1];
+                            cellL[j+2] += tmpL[j+2]; cellR[j+2] += tmpR[j+2];
+                            cellL[j+3] += tmpL[j+3]; cellR[j+3] += tmpR[j+3];
+                            cellL[j+4] += tmpL[j+4]; cellR[j+4] += tmpR[j+4];
+                            cellL[j+5] += tmpL[j+5]; cellR[j+5] += tmpR[j+5];
+                            cellL[j+6] += tmpL[j+6]; cellR[j+6] += tmpR[j+6];
+                            cellL[j+7] += tmpL[j+7]; cellR[j+7] += tmpR[j+7];
+                        }
                     }
                 }
+            }
+            if (not_clear) {
+                cellL.set(fn.emptycell);
+                cellR.set(fn.emptycell);
             }
         } else {
-            for (j = jmax; j; ) {
-                j -= 8;
-                cell[j] = cell[j+1] = cell[j+2] = cell[j+3] = cell[j+4] = cell[j+5] = cell[j+6] = cell[j+7] = 0;
-            }
-            for (i = 0; i < imax; ++i) {
-                if (nodes[i].playbackState === PLAYING_STATE) {
-                    tmp = nodes[i].process(tickID).cells[0];
-                    for (j = jmax; j; ) {
-                        j -= 8;
-                        cell[j  ] += tmp[j  ];
-                        cell[j+1] += tmp[j+1];
-                        cell[j+2] += tmp[j+2];
-                        cell[j+3] += tmp[j+3];
-                        cell[j+4] += tmp[j+4];
-                        cell[j+5] += tmp[j+5];
-                        cell[j+6] += tmp[j+6];
-                        cell[j+7] += tmp[j+7];
+            not_clear = true;
+            if (imax !== 0) {
+                for (i = 0; i < imax; ++i) {
+                    if (nodes[i].playbackState === PLAYING_STATE) {
+                        nodes[i].process(tickID);
+                        cell.set(nodes[i].cells[1]);
+                        not_clear = false;
+                        ++i;
+                        break;
+                    }                    
+                }
+                for (; i < imax; ++i) {
+                    if (nodes[i].playbackState === PLAYING_STATE) {
+                        tmp = nodes[i].process(tickID).cells[0];
+                        for (j = jmax; j; ) {
+                            j -= 8;
+                            cell[j  ] += tmp[j  ];
+                            cell[j+1] += tmp[j+1];
+                            cell[j+2] += tmp[j+2];
+                            cell[j+3] += tmp[j+3];
+                            cell[j+4] += tmp[j+4];
+                            cell[j+5] += tmp[j+5];
+                            cell[j+6] += tmp[j+6];
+                            cell[j+7] += tmp[j+7];
+                        }
                     }
                 }
+            }
+            if (not_clear) {
+                cell.set(fn.emptycell);
             }
         }
     };
@@ -1419,7 +1443,6 @@
     })();
     
     var SoundSystem = (function() {
-        
         function SoundSystem() {
             this._ = {};
             this.context = this;
@@ -1429,7 +1452,7 @@
             this.status = STATUS_NONE;
             this.samplerate = 44100;
             this.channels   = 2;
-            this.cellsize   = 128;
+            this.cellsize   = 64;
             this.streammsec = 20;
             this.streamsize = 0;
             this.currentTime = 0;
@@ -1627,10 +1650,18 @@
             
             for (i = 0; i < imax; ++i) {
                 x = strmL[i] * amp;
-                x = (x < -1) ? -1 : (x > 1) ? 1 : x;
+                if (x < -1) {
+                    x = -1;
+                } else if (x > 1) {
+                    x = 1;
+                }
                 strmL[i] = x;
                 x = strmR[i] * amp;
-                x = (x < -1) ? -1 : (x > 1) ? 1 : x;
+                if (x < -1) {
+                    x = -1;
+                } else if (x > 1) {
+                    x = 1;
+                }
                 strmR[i] = x;
             }
             
@@ -1867,30 +1898,44 @@
             this.play = function() {
                 var onaudioprocess;
                 var jsn_streamsize = sys.getAdjustSamples(context.sampleRate);
-                var sys_streamsize;
+                var sys_streamsize = sys.streamsize;
                 var x, dx;
                 
                 if (sys.samplerate === context.sampleRate) {
                     onaudioprocess = function(e) {
-                        var inL = sys.strmL, inR = sys.strmR,
-                            outL = e.outputBuffer.getChannelData(0),
-                            outR = e.outputBuffer.getChannelData(1),
-                            i = outL.length;
+                        var outs = e.outputBuffer;
                         sys.process();
-                        while (i--) {
-                            outL[i] = inL[i];
-                            outR[i] = inR[i];
+                        outs.getChannelData(0).set(sys.strmL);
+                        outs.getChannelData(1).set(sys.strmR);
+                    };
+                } else if (sys.samplerate * 2 === context.sampleRate) {
+                    onaudioprocess = function(e) {
+                        var inL = sys.strmL;
+                        var inR = sys.strmR;
+                        var outs = e.outputBuffer;
+                        var outL = outs.getChannelData(0);
+                        var outR = outs.getChannelData(1);
+                        var i, imax = outs.length;
+                        var j;
+                        
+                        sys.process();
+                        for (i = j = 0; i < imax; i += 2, ++j) {
+                            outL[i  ] = inL[j];
+                            outR[i  ] = inR[j];
+                            outL[i+1] = inL[j];
+                            outR[i+1] = inR[j];
                         }
                     };
                 } else {
-                    sys_streamsize = sys.streamsize;
                     x  = sys_streamsize;
                     dx = sys.samplerate / context.sampleRate;
                     onaudioprocess = function(e) {
-                        var inL = sys.strmL, inR = sys.strmR,
-                            outL = e.outputBuffer.getChannelData(0),
-                            outR = e.outputBuffer.getChannelData(1),
-                            i, imax = outL.length;
+                        var inL = sys.strmL;
+                        var inR = sys.strmR;
+                        var outs = e.outputBuffer;
+                        var outL = outs.getChannelData(0);
+                        var outR = outs.getChannelData(1);
+                        var i, imax = outs.length;
                         
                         for (i = 0; i < imax; ++i) {
                             if (x >= sys_streamsize) {
