@@ -35,13 +35,7 @@
                         callback(new Uint8Array(xhr.response));
                     } else if (xhr.responseBody !== undefined) {
                         /*global VBArray:true */
-                        var res = VBArray(xhr.responseBody).toArray();
-                        var i, imax = res.length;
-                        var a = new Array(imax);
-                        for (i = 0; i < imax; ++i) {
-                            a[i] = res[i];
-                        }
-                        callback(new Uint8Array(a));
+                        callback(new Uint8Array(VBArray(xhr.responseBody).toArray()));
                         /*global VBArray:false */
                     }
                     T.fn.fix_iOS6_1_problem(false);
