@@ -7,8 +7,8 @@
     function ChorusNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
-
-        var chorus = new Chorus(T.samplerate, 2);
+        
+        var chorus = new Chorus(T.samplerate);
         chorus.setDelayTime(20);
         chorus.setRate(4);
         chorus.depth = 20;
