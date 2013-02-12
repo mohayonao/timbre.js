@@ -84,7 +84,7 @@
                 }
                 var biquad = _.biquads[index];
                 if (!biquad) {
-                    biquad = _.biquads[index] = new Biquad(T.samplerate, 2);
+                    biquad = _.biquads[index] = new Biquad(T.samplerate);
                     switch (index) {
                     case 0:
                         biquad.setType("highpass");
@@ -159,7 +159,7 @@
                         biquad.setType("peaking");
                     }
                     biquad.setParams(params.freq, params.Q, params.gain);
-                    biquad.process(impluse);
+                    biquad.process(impluse, impluse);
                 }
             }
             

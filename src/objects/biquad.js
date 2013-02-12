@@ -11,7 +11,7 @@
         fn.fixAR(this);
         
         var _ = this._;
-        _.biquad = new Biquad(T.samplerate, 2);
+        _.biquad = new Biquad(T.samplerate);
         _.freq = T(340);
         _.band = T(1);
         _.gain = T(0);
@@ -150,14 +150,14 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var biquad = new Biquad(T.samplerate, 1);
+            var biquad = new Biquad(T.samplerate);
             biquad.setType(this.type);
             biquad.setParams(this.freq.valueOf(), this.band.valueOf(), this.gain.valueOf());
             
             var impluse = new Float32Array(fft.length);
             impluse[0] = 1;
             
-            biquad.process(impluse);
+            biquad.process(impluse, impluse);
             fft.forward(impluse);
 
             var size = 512;
