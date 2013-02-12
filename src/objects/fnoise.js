@@ -9,7 +9,6 @@
         
         var _ = this._;
         _.freq = T(440);
-        _.samplerate = T.samplerate;
         _.reg = 0x8000;
         _.shortFlag = false;
         _.phase     = 0;

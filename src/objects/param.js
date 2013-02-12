@@ -11,7 +11,7 @@
         
         var _ = this._;
         _.value = 0;
-        _.env = new EnvelopeValue(T.samplerate);
+        _.env = new EnvelopeValue(_.samplerate);
         _.env.step = _.cellsize;
         _.curve   = "lin";
         _.counter = 0;

@@ -8,7 +8,7 @@
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
-        this._.reverb = new Reverb(T.samplerate, this._.cellsize);
+        this._.reverb = new Reverb(this._.samplerate, this._.cellsize);
     }
     fn.extend(ReverbNode);
     

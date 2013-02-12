@@ -817,7 +817,8 @@
             this._.dac = null;
             this._.bypassed = false;
             this._.meta = {};
-            this._.cellsize = _sys.cellsize;
+            this._.samplerate = _sys.samplerate;
+            this._.cellsize   = _sys.cellsize;
         }
         
         var $ = TimbreObject.prototype;

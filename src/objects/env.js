@@ -9,7 +9,7 @@
     function EnvNode(_args) {
         T.Object.call(this, 2, _args);
         var _ = this._;
-        _.env = new Envelope(T.samplerate);
+        _.env = new Envelope(_.samplerate);
         _.env.setStep(_.cellsize);
         _.tmp = new fn.SignalArray(_.cellsize);
         _.ar = false;
@@ -197,7 +197,7 @@
             var duration = 0;
             var durationIncr = totalDuration / data.length;
             var isReleased   = false;
-            var samples = (totalDuration * 0.001 * T.samplerate)|0;
+            var samples = (totalDuration * 0.001 * this._.samplerate)|0;
             var i, imax;
             
             samples /= data.length;

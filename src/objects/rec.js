@@ -13,14 +13,12 @@
         fn.fixAR(this);
         
         var _ = this._;
-        
         _.timeout    = 5000;
-        _.samplerate = T.samplerate;
         _.status     = STATUS_WAIT;
         _.writeIndex = 0;
         _.writeIndexIncr  = 1;
         _.currentTime     = 0;
-        _.currentTimeIncr = 1000 / T.samplerate;
+        _.currentTimeIncr = 1000 / _.samplerate;
         _.onended = make_onended(this);
     }
     fn.extend(RecNode);
@@ -60,7 +58,7 @@
         samplerate: {
             set: function(value) {
                 if (typeof value === "number") {
-                    if (0 < value && value <= T.samplerate) {
+                    if (0 < value && value <= this._.samplerate) {
                         this._.samplerate = value;
                     }
                 }

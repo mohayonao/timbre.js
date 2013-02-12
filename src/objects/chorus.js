@@ -8,7 +8,7 @@
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
-        var chorus = new Chorus(T.samplerate);
+        var chorus = new Chorus(this._.samplerate);
         chorus.setDelayTime(20);
         chorus.setRate(4);
         chorus.depth = 20;
@@ -53,7 +53,7 @@
             set: function(value) {
                 if (typeof value === "number") {
                     if (0 <= value && value <= 100) {
-                        value *= T.samplerate / 44100;
+                        value *= this._.samplerate / 44100;
                         this._.chorus.depth = value;
                     }
                 }

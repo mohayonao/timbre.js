@@ -8,8 +8,8 @@
         T.Object.call(this, 1, _args);
         fn.fixAR(this);
 
-        var bits = Math.ceil(Math.log(T.samplerate) * Math.LOG2E);
         var _ = this._;
+        var bits = Math.ceil(Math.log(_.samplerate) * Math.LOG2E);
         _.buffersize = 1 << bits;
         _.buffermask = _.buffersize - 1;
         _.buffer = new fn.SignalArray(_.buffersize);
@@ -30,7 +30,7 @@
                 if (typeof value === "number" && value > 0) {
                     var _ = this._;
                     _.time = value;
-                    var offset = (value * 0.001 * T.samplerate)|0;
+                    var offset = (value * 0.001 * _.samplerate)|0;
                     if (offset > _.buffermask) {
                         offset = _.buffermask;
                     }

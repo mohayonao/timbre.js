@@ -26,7 +26,7 @@
     var onstart = function() {
         var _ = this._;
         this.playbackState = fn.PLAYING_STATE;
-        _.delaySamples = (T.samplerate * (_.delay * 0.001))|0;
+        _.delaySamples = (_.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
     };
     Object.defineProperty(onstart, "unremovable", {
@@ -57,7 +57,7 @@
                 }
                 if (typeof value === "number" && value >= 0) {
                     this._.delay = value;
-                    this._.delaySamples = (T.samplerate * (value * 0.001))|0;
+                    this._.delaySamples = (this._.samplerate * (value * 0.001))|0;
                 }
             },
             get: function() {
@@ -97,7 +97,7 @@
     $.bang = function() {
         var _ = this._;
         this.playbackState = fn.PLAYING_STATE;
-        _.delaySamples = (T.samplerate * (_.delay * 0.001))|0;
+        _.delaySamples = (_.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
         _.emit("bang");
         return this;
@@ -120,7 +120,7 @@
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;
                 if (_.countSamples <= 0) {
-                    _.countSamples += (T.samplerate * interval * 0.001)|0;
+                    _.countSamples += (_.samplerate * interval * 0.001)|0;
                     var nodes = this.nodes;
                     var count  = _.count;
                     var x = count * _.mul + _.add;

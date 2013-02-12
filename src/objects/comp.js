@@ -16,7 +16,7 @@
         _.knee   = 0; // T(_.prevKnee);
         _.ratio  = T(_.prevRatio);
         
-        _.comp = new Compressor(T.samplerate);
+        _.comp = new Compressor(_.samplerate);
         _.comp.setParams(_.prevThresh, _.prevKnee, _.prevRatio);
     }
     fn.extend(CompressorNode);

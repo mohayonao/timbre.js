@@ -132,7 +132,7 @@
             /*global HTMLAudioElement:true */
             if (src instanceof HTMLAudioElement) {
                 _.src = src;
-                _.istep = T.samplerate / src.mozSampleRate;
+                _.istep = _.samplerate / src.mozSampleRate;
             }
             /*global HTMLAudioElement:false */
         },

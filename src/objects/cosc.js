@@ -10,8 +10,8 @@
         
         var _ = this._;
         _.freq = T(440);
-        _.osc1 = new Oscillator(T.samplerate);
-        _.osc2 = new Oscillator(T.samplerate);
+        _.osc1 = new Oscillator(_.samplerate);
+        _.osc2 = new Oscillator(_.samplerate);
         _.osc1.step = _.cellsize;
         _.osc2.step = _.cellsize;
         _.tmp = new fn.SignalArray(_.cellsize);

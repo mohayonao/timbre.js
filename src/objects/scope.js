@@ -59,7 +59,7 @@
                         _.reservedinterval = value;
                     } else {
                         _.interval    = value;
-                        _.samplesIncr = value * 0.001 * T.samplerate / _.buffer.length;
+                        _.samplesIncr = value * 0.001 * _.samplerate / _.buffer.length;
                         if (_.samplesIncr < 1) {
                             _.samplesIncr = 1;
                         }

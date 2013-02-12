@@ -47,7 +47,7 @@
                 if (typeof value === "number" && value >= 0) {
                     this.playbackState = fn.PLAYING_STATE;
                     _.timeout = value;
-                    _.samplesMax = (T.samplerate * (value * 0.001))|0;
+                    _.samplesMax = (_.samplerate * (value * 0.001))|0;
                     _.samples = _.samplesMax;
                 }
             },
