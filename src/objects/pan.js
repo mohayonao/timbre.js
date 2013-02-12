@@ -9,10 +9,28 @@
         
         var _ = this._;
         _.pos  = T(0);
-        _.panL = 0.5;
-        _.panR = 0.5;
+        _.panL = 0.7071067811865475;
+        _.panR = 0.7071067811865475;
     }
     fn.extend(PanNode);
+
+    var sintable = (function() {
+        var a = new Float32Array(257);
+        for (var i = 0; i < 256; ++i) {
+            a[i] = Math.sin(0.5 * Math.PI * (i/ 256));
+        }
+        a[256] = 1;
+        return a;
+    })();
+
+    var costable = (function() {
+        var a = new Float32Array(257);
+        for (var i = 0; i < 256; ++i) {
+            a[i] = Math.cos(0.5 * Math.PI * (i/ 256));
+        }
+        a[256] = 0;
+        return a;
+    })();
     
     var $ = PanNode.prototype;
     
@@ -35,9 +53,10 @@
             
             var pos = _.pos.process(tickID).cells[0][0];
             if (_.prevPos !== pos) {
+                var index = ((pos + 1) * 128)|0;
+                _.panL = costable[index];
+                _.panR = sintable[index];
                 _.prevPos = pos;
-                _.panL = Math.cos(0.5 * Math.PI * ((pos * 0.5) + 0.5));
-                _.panR = Math.sin(0.5 * Math.PI * ((pos * 0.5) + 0.5));
             }
             
             var nodes = this.nodes;

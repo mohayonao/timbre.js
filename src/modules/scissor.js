@@ -183,7 +183,11 @@
 
     Tape.prototype.pan = function(right_percent) {
         var new_instance = new Tape();
-
+        if (right_percent > 100) {
+            right_percent = 100;
+        } else if (right_percent < 0) {
+            right_percent = 0;
+        }
         for (var i = 0; i < this.fragments.length; i++) {
             var fragment = this.fragments[i].clone();
             fragment.pan = right_percent;
@@ -273,6 +277,23 @@
     };
     Scissor.Fragment = Fragment;
     
+    var sintable = (function() {
+        var a = new Float32Array(257);
+        for (var i = 0; i < 256; ++i) {
+            a[i] = Math.sin(0.5 * Math.PI * (i/ 256));
+        }
+        a[256] = 1;
+        return a;
+    })();
+
+    var costable = (function() {
+        var a = new Float32Array(257);
+        for (var i = 0; i < 256; ++i) {
+            a[i] = Math.cos(0.5 * Math.PI * (i/ 256));
+        }
+        a[256] = 0;
+        return a;
+    })();
     
     function TapeStream(tape, samplerate) {
         this.tape = tape;
@@ -336,9 +357,10 @@
                     bufferIndexIncr = fragment.samplerate / samplerate * fragment.pitch;
                     bufferBeginIndex = fragment.start * fragment.samplerate;
                     bufferEndIndex   = bufferBeginIndex + fragment.original_duration() * fragment.samplerate;
-                    
-                    panL = Math.cos(0.005 * Math.PI * fragment.pan);
-                    panR = Math.sin(0.005 * Math.PI * fragment.pan);
+
+                    var index = ((fragment.pan / 100) * 256)|0;
+                    panL = costable[index];
+                    panR = sintable[index];
                     
                     if (fragment.reverse) {
                         bufferIndexIncr *= -1;
