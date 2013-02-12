@@ -77,9 +77,9 @@
         if (typeof offset === "undefined") {
             offset = 0;
         }
-        var i, imax = Math.min(this.length, array.length - offset);
+        var i, imax = Math.min(this.length - offset, array.length);
         for (i = 0; i < imax; ++i) {
-            this[i] = array[i + offset];
+            this[offset + i] = array[i];
         }
     };
     
@@ -87,12 +87,7 @@
         if (typeof end === "undefined") {
             end = this.length;
         }
-        var i, imax = end - begin;
-        var a = new Array(imax);
-        for (i = 0; i < imax; ++i) {
-            a[i] = this[i + begin];
-        }
-        return new this.__klass(a);
+        return new this.__klass(this.slice(begin, end));
     };
     
     function Int8Array(arg, offset, length) {
