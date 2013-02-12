@@ -1920,10 +1920,8 @@
                         
                         sys.process();
                         for (i = j = 0; i < imax; i += 2, ++j) {
-                            outL[i  ] = inL[j];
-                            outR[i  ] = inR[j];
-                            outL[i+1] = inL[j];
-                            outR[i+1] = inR[j];
+                            outL[i] = outL[i+1] = inL[j];
+                            outR[i] = outR[i+1] = inR[j];
                         }
                     };
                 } else {
