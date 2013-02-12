@@ -31,7 +31,7 @@
             for (i = 0; i < TABLE_SIZE; ++i) {
                 wave[i] = value(i / TABLE_SIZE);
             }
-        } else if (value instanceof Float32Array) {
+        } else if (T.fn.isSignalArray(value)) {
             if (value.length === wave.length) {
                 wave.set(value);
             } else {
@@ -407,7 +407,7 @@
             for (i = 0; i < 1024; ++i) {
                 wave[i] = value(i / 1024);
             }
-        } else if (value instanceof Float32Array) {
+        } else if (T.fn.isSignalArray(value)) {
             if (value.length === wave.length) {
                 wave.set(value);
             } else {

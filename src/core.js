@@ -387,6 +387,17 @@
         return this;
     };
     fn.nop = __nop;
+
+    var __isSignalArray = function(obj) {
+        if (obj instanceof Float32Array || obj instanceof Float64Array) {
+            return true;
+        }
+        if (Array.isArray(obj) && obj.__klass && obj.__klass.type === 2) {
+            return true;
+        }
+        return false;
+    };
+    fn.isSignalArray = __isSignalArray;
     
     // borrowed from coffee-script
     var __extend = function(child, parent) {

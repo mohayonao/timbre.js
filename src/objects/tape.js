@@ -5,6 +5,7 @@
     var Scissor    = T.modules.Scissor;
     var Tape       = Scissor.Tape;
     var TapeStream = Scissor.TapeStream;
+    var isSignalArray = fn.isSignalArray;
     
     function ScissorNode(_args) {
         T.Object.call(this, 2, _args);
@@ -26,7 +27,7 @@
                     this._.tape = tape;
                     this._.tapeStream = new TapeStream(tape, T.samplerate);
                 } else if (typeof tape === "object") {
-                    if (tape.buffer instanceof Float32Array || tape.buffer instanceof Float64Array) {
+                    if (isSignalArray(tape.buffer)) {
                         this.playbackState = fn.PLAYING_STATE;
                         this._.tape = new Scissor(tape);
                         this._.tapeStream = new TapeStream(tape, T.samplerate);

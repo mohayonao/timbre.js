@@ -2,6 +2,7 @@
     "use strict";
     
     var fn = T.fn;
+    var isSignalArray = fn.isSignalArray;
     
     function BufferNode(_args) {
         T.Object.call(this, 1, _args);
@@ -37,13 +38,6 @@
             self._.emit("looped");
         };
     };
-
-    function isSignalArray(obj) {
-        if (obj instanceof Float32Array || obj instanceof Float64Array) {
-            return true;
-        }
-        return false;
-    }
     
     var $ = BufferNode.prototype;
     

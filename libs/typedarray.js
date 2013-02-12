@@ -1,6 +1,6 @@
 (function(window) {
     if (window.Float32Array) return;
-
+    
     var unsigned = 0;
     var signed   = 1;
     var floated  = 2;
@@ -34,31 +34,32 @@
         }
         if (klass.type !== floated) {
             for (i = 0, imax = a.length; i < imax; ++i) {
-                this[i] = (+a[i] || 0) & ((1 << (2 * 8)) - 1);
+                a[i] = (+a[i] || 0) & ((1 << (2 * 8)) - 1);
             }
         } else {
             for (i = 0, imax = a.length; i < imax; ++i) {
-                this[i] = a[i] || 0;
+                a[i] = a[i] || 0;
             }
         }
         if (klass.type === signed) {
             for (i = 0, imax = a.length; i < imax; ++i) {
                 if (a[i] & (1 << ((bits * 8) - 1))) {
-                    this[i] -= 1 << (bits * 8);
+                    a[i] -= 1 << (bits * 8);
                 }
             }
         }
-        this.length   = a.length;
-        this.__klass  = klass;
-        this.set      = set;
-        this.subarray = subarray;
-        this.byteLength = klass.bits * a.length;
-        this.byteOffset = offset || 0;
-        Object.defineProperty(this, "buffer", {
+        
+        a.__klass  = klass;
+        a.set      = set;
+        a.subarray = subarray;
+        a.byteLength = klass.bits * a.length;
+        a.byteOffset = offset || 0;
+        Object.defineProperty(a, "buffer", {
             get: function() {
                 return new ArrayBuffer(this);
             }
-        })
+        });
+        return a;
     }
     
     function ArrayBuffer(_) {
@@ -95,42 +96,42 @@
     };
     
     function Int8Array(arg, offset, length) {
-        TypedArray.call(this, Int8Array, arg, offset, length);
+        return TypedArray.call(this, Int8Array, arg, offset, length);
     }
     Int8Array.bits = 1; Int8Array.type = signed;
     
     function Uint8Array(arg, offset, length) {
-        TypedArray.call(this, Uint8Array, arg, offset, length);
+        return TypedArray.call(this, Uint8Array, arg, offset, length);
     };
     Uint8Array.bits = 1; Uint8Array.type = unsigned;
     
     function Int16Array(arg, offset, length) {
-        TypedArray.call(this, Int16Array, arg, offset, length);
+        return TypedArray.call(this, Int16Array, arg, offset, length);
     };
     Int16Array.bits = 2; Int16Array.type = signed;
     
     function Uint16Array(arg, offset, length) {
-        TypedArray.call(this, Uint16Array, arg, offset, length);
+        return TypedArray.call(this, Uint16Array, arg, offset, length);
     };
     Uint16Array.bits = 2; Uint16Array.type = unsigned;
     
     function Int32Array(arg, offset, length) {
-        TypedArray.call(this, Int32Array, arg, offset, length);
+        return TypedArray.call(this, Int32Array, arg, offset, length);
     };
     Int32Array.bits = 4; Int32Array.type = signed;
     
     function Uint32Array(arg, offset, length) {
-        TypedArray.call(this, Uint32Array, arg, offset, length);
+        return TypedArray.call(this, Uint32Array, arg, offset, length);
     };
     Uint32Array.bits = 4; Uint32Array.type = unsigned;
     
     function Float32Array(arg, offset, length) {
-        TypedArray.call(this, Float32Array, arg, offset, length);
+        return TypedArray.call(this, Float32Array, arg, offset, length);
     };
     Float32Array.bits = 4; Float32Array.type = floated;
     
     function Float64Array(arg, offset, length) {
-        TypedArray.call(this, Float64Array, arg, offset, length);
+        return TypedArray.call(this, Float64Array, arg, offset, length);
     };
     Float64Array.bits = 8; Float64Array.type = floated;
     
