@@ -46,18 +46,17 @@
         if (typeof value === "object") {
             var bufferL, bufferR, samplerate, channels;
             if (isSignalArray(value)) {
-                bufferL = bufferR = value;
+                bufferL  = bufferR = value;
                 channels = 1;
-            } else if (isSignalArray(value.buffer)) {
-                bufferL = bufferR = value.buffer;
-                channels = 1;
-                if (typeof value.samplerate === "number") {
-                    samplerate = value.samplerate;
+            } else if (typeof value === "object") {
+                if (isSignalArray(value.bufferL) && isSignalArray(value.bufferR)) {
+                    channels = 2;
+                    bufferL = value.bufferL;
+                    bufferR = value.bufferR;
+                } else if (isSignalArray(value.buffer)) {
+                    bufferL = bufferR = value.buffer;
+                    channels = 1;
                 }
-            } else if (isSignalArray(value.bufferL) && isSignalArray(value.bufferR)) {
-                channels = 2;
-                bufferL = value.bufferL;
-                bufferR = value.bufferR;
                 if (typeof value.samplerate === "number") {
                     samplerate = value.samplerate;
                 }
