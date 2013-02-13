@@ -44,3 +44,5 @@ T("mouse").start();
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/rec.js
+
+<script src="/timbre.js/src/extras/mouse.js"></script>

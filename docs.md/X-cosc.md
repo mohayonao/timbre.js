@@ -39,4 +39,6 @@ T("cosc", {wave:"saw", freq:440, beats:5, mul:0.25}).play();
 - [`T("osc")`](./osc.html)
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/cosc.js
+https://github.com/mohayonao/timbre.js/blob/master/src/extras/cosc.js
+
+<script src="/timbre.js/src/extras/cosc.js"></script>

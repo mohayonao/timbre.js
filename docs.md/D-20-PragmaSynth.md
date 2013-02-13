@@ -259,3 +259,5 @@ T("keyboard").on("keydown", function(e) {
   }
 }).start();
 ```
+
+<script src="/timbre.js/src/extras/keyboard.js"></script>
