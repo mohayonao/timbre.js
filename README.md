@@ -55,9 +55,14 @@ MIT
 
 
 ## ChangeLog ##
-**WORKING** (341.90KB)
-* Added `T("lag")`
-* Added `T("delay").cross`
+**WORKING** (332.71KB)
+* Added: `T("script")`
+* Added: `T("waveshaper")`
+* Added: `T("lag")`
+* Added: `T("delay").cross`
+* Moved: `T("keyboard")` to extras
+* Moved: `T("mouse")` to extras
+* Moved: `T("cosc)` to extras
 * make it easier to make a stereo object
 
 **13.02.07** (334.61KB)
@@ -67,7 +72,7 @@ MIT
 * performance improvements
 
 **13.02.06** (337.50KB)
-* Workadound for iOS6.1 bug (failure to start processing in a callback of XMLHttpRequest)
+* workadound for iOS6.1 bug (failure to start processing in a callback of XMLHttpRequest)
 
 **13.02.02** (335.97KB)
 * Fixed: decoder for webkit
