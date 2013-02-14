@@ -229,6 +229,11 @@
         }
     });
     
+    timbre.bind = function(Klass, opts) {
+        _sys.bind(Klass, opts);
+        return timbre;
+    };
+    
     timbre.setup = function(opts) {
         _sys.setup(opts);
         return timbre;
