@@ -1,5 +1,17 @@
 (function() {
     "use strict";
+    
+    // get Flash player version numbers. argument requires sub numbers.
+    function getFlashPlayerVersion(subs) {
+        try {
+            return (navigator.plugins && navigator.mimeTypes && navigator.mimeTypes.length) ?
+                navigator.plugins["Shockwave Flash"].description.match(/([0-9]+)/)[subs] :
+                (new ActiveXObject("ShockwaveFlash.ShockwaveFlash")).GetVariable("$version").match(/([0-9]+)/)[subs];
+        } catch (e) {
+            return -1;
+        }
+    }
+    
     var swf, PlayerDivID = "TimbreFlashPlayerDiv";
     var isEnabled = getFlashPlayerVersion(0) >= 10;
     
@@ -94,17 +106,6 @@
             div.innerHTML = o;
         }
         swf = document[swfId];
-    }
-    
-    // get Flash player version numbers. argument requires sub numbers.
-    function getFlashPlayerVersion(subs) {
-        try {
-            return (navigator.plugins && navigator.mimeTypes && navigator.mimeTypes.length) ? 
-                navigator.plugins["Shockwave Flash"].description.match(/([0-9]+)/)[subs] : 
-                (new ActiveXObject("ShockwaveFlash.ShockwaveFlash")).GetVariable("$version").match(/([0-9]+)/)[subs];
-        } catch (e) {
-            return -1;
-        }
     }
     
     Object.defineProperties(TimbreFlashPlayer, {
