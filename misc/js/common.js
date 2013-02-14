@@ -3,10 +3,6 @@ $(function() {
     
     sc.use("prototype");
     
-    if (timbre.env === "nop") {
-        timbre.bind(timbre.FlashPlayer, {src:"/timbre.js/libs/TimbreFlashPlayer.swf"});
-    }
-
     timbre.setup({f64:true});
     if (timbre.envmobile) {
         timbre.setup({samplerate:timbre.samplerate * 0.5});
