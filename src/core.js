@@ -4,6 +4,19 @@
 (function(undefined) {
     "use strict";
     
+    if (typeof Float32Array === "undefined") {
+        /*jshint latedef:true */
+        setupTypedArray();
+        /*jshint latedef:false */
+    }
+    
+    // TypedArray for IE9
+    if (typeof Float32Array === "undefined") {
+        (function() {
+
+        })();
+    }
+    
     var slice = Array.prototype.slice;
     var isArray = Array.isArray;
     var isDictionary = function(object) {
@@ -216,11 +229,6 @@
         }
     });
     
-    timbre.bind = function(Klass, opts) {
-        _sys.bind(Klass, opts);
-        return timbre;
-    };
-
     timbre.setup = function(opts) {
         _sys.setup(opts);
         return timbre;
@@ -1507,15 +1515,10 @@
         $.bind = function(Klass, opts) {
             if (typeof Klass === "function") {
                 var player = new Klass(this, opts);
-                if (typeof player.play  === "function" &&
-                    typeof player.pause === "function")
-                {
-                    this.impl = player;
-                    if (this.impl.defaultSamplerate) {
-                        this.samplerate = this.impl.defaultSamplerate;
-                    }
+                this.impl = player;
+                if (this.impl.defaultSamplerate) {
+                    this.samplerate = this.impl.defaultSamplerate;
                 }
-                
             }
             return this;
         };
@@ -2037,13 +2040,144 @@
             };
         };
     } else {
-        ImplClass = function() {
-            this.maxSamplerate     = 48000;
-            this.defaultSamplerate =  8000;
-            this.env = "nop";
-            this.play  = __nop;
-            this.pause = __nop;
-        };
+        // Flash fallback
+        (function() {
+            if (_envtype !== "browser" || _envmobile) {
+                return;
+            }
+            var nav = navigator;
+            
+            /*jshint latedef:true */
+            if (getFlashPlayerVersion(0) < 10) {
+                return;
+            }
+            /*jshint latedef:false */
+            var swf, PlayerDivID = "TimbreFlashPlayerDiv";
+            var src = (function() {
+                var scripts = document.getElementsByTagName("script");
+                if (scripts && scripts.length) {
+                    for (var m, i = 0, imax = scripts.length; i < imax; ++i) {
+                        if ((m = /^(.*\/)timbre(.*)\.js$/i.exec(scripts[i].src))) {
+                            return m[1] + "TimbreFlashPlayer.swf";
+                        }
+                    }
+                }
+            })();
+            
+            function TimbreFlashPlayer(sys) {
+                var timerId = 0;
+                
+                initialize();
+                
+                this.maxSamplerate     = 44100;
+                this.defaultSamplerate = 44100;
+                this.env = "flash";
+                
+                this.play = function() {
+                    var onaudioprocess;
+                    var interleaved = new Array(sys.streamsize * sys.channels);
+                    var streammsec  = sys.streammsec;
+                    var written = 0;
+                    var writtenIncr = sys.streamsize / sys.samplerate * 1000;
+                    var start = Date.now();
+                    
+                    onaudioprocess = function() {
+                        if (written > Date.now() - start) {
+                            return;
+                        }
+                        var inL = sys.strmL;
+                        var inR = sys.strmR;
+                        var i = interleaved.length;
+                        var j = inL.length;
+                        sys.process();
+                        while (j--) {
+                            interleaved[--i] = (inR[j] * 32768)|0;
+                            interleaved[--i] = (inL[j] * 32768)|0;
+                        }
+                        swf.writeAudio(interleaved.join(" "));
+                        written += writtenIncr;
+                    };
+                    
+                    swf.setup(sys.channels, sys.samplerate);
+                    timerId = setInterval(onaudioprocess, streammsec);
+                };
+                
+                this.pause = function() {
+                    if (timerId !== 0) {
+                        swf.cancel();
+                        clearInterval(timerId);
+                        timerId = 0;
+                    }
+                };
+            }
+            
+            function initialize() {
+                var o, p;
+                var swfSrc  = src;
+                var swfName = swfSrc + "?" + (+new Date());
+                var swfId   = "TimbreFlashPlayer";
+                var div = document.createElement("div");
+                div.id = PlayerDivID;
+                div.style.display = "inline";
+                div.width = div.height = 1;
+                
+                if (nav.plugins && nav.mimeTypes && nav.mimeTypes.length) {
+                    // ns
+                    o = document.createElement("object");
+                    o.id = swfId;
+                    o.classid = "clsid:D27CDB6E-AE6D-11cf-96B8-444553540000";
+                    o.width = o.height = 1;
+                    o.setAttribute("data", swfName);
+                    o.setAttribute("type", "application/x-shockwave-flash");
+                    p = document.createElement("param");
+                    p.setAttribute("name", "allowScriptAccess");
+                    p.setAttribute("value", "always");
+                    o.appendChild(p);
+                    div.appendChild(o);
+                } else {
+                    // ie
+                    /*jshint quotmark:single */
+                    o = '<object id="' + swfId + '" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="1" height="1">';
+                    o += '<param name="movie" value="' + swfName + '" />';
+                    o += '<param name="bgcolor" value="#FFFFFF" />';
+                    o += '<param name="quality" value="high" />';
+                    o += '<param name="allowScriptAccess" value="always" />';
+                    o += '</object>';
+                    /*jshint quotmark:double */
+                    div.innerHTML = o;
+                }
+                
+                window.addEventListener("load", function() {
+                    document.body.appendChild(div);
+                    swf = document[swfId];
+                });
+            }
+            
+            function getFlashPlayerVersion(subs) {
+                /*global ActiveXObject:true */
+                try {
+                    if (nav.plugins && nav.mimeTypes && nav.mimeTypes.length) {
+                        return nav.plugins["Shockwave Flash"].description.match(/([0-9]+)/)[subs];
+                    }
+                    return (new ActiveXObject("ShockwaveFlash.ShockwaveFlash")).GetVariable("$version").match(/([0-9]+)/)[subs];
+                } catch (e) {
+                    return -1;
+                }
+                /*global ActiveXObject:false */
+            }
+            
+            ImplClass = TimbreFlashPlayer;
+        })();
+        
+        if (!ImplClass) {
+            ImplClass = function() {
+                this.maxSamplerate     = 48000;
+                this.defaultSamplerate =  8000;
+                this.env = "nop";
+                this.play  = __nop;
+                this.pause = __nop;
+            };
+        }
     }
     /*global webkitAudioContext:false */
     
@@ -2068,5 +2202,136 @@
         })();
         
         window.timbre = window.T = exports;
+    }
+    
+    function setupTypedArray() {
+        var unsigned = 0;
+        var signed   = 1;
+        var floated  = 2;
+        
+        function ArrayBuffer(_) {
+            var a = new Array(_.byteLength);
+            var bits = _.__klass.bits, shift;
+            for (var i = 0, imax = a.length; i < imax; ++i) {
+                shift = (i % bits) * 8;
+                a[i] = (_[(i / bits)|0] & (0x0FF << shift)) >>> shift;
+            }
+            a.__view = _;
+            return a;
+        }
+        
+        function TypedArray(klass, arg, offset, length) {
+            var a, b, bits, i, imax;
+            if (Array.isArray(arg)) {
+                if (arg.__view) {
+                    if (typeof offset === "undefined") {
+                        offset = 0;
+                    }
+                    if (typeof length === "undefined") {
+                        length = arg.length - offset;
+                    }
+                    bits = klass.bits;
+                    b = arg.slice(offset, offset + length);
+                    a = new Array(b.length / bits);
+                    for (i = 0, imax = a.length; i < imax; ++i) {
+                        a[i] = 0;
+                    }
+                    for (i = 0, imax = b.length; i < imax; ++i) {
+                        a[(i/bits)|0] += (b[i] & 0xFF) << ((i % bits) * 8);
+                    }
+                } else {
+                    a = arg.slice();
+                }
+            } else if (typeof arg === "number" && arg > 0) {
+                a = new Array(arg|0);
+            } else {
+                a = [];
+            }
+            if (klass.type !== floated) {
+                for (i = 0, imax = a.length; i < imax; ++i) {
+                    a[i] = (+a[i] || 0) & ((1 << (2 * 8)) - 1);
+                }
+            } else {
+                for (i = 0, imax = a.length; i < imax; ++i) {
+                    a[i] = a[i] || 0;
+                }
+            }
+            if (klass.type === signed) {
+                for (i = 0, imax = a.length; i < imax; ++i) {
+                    if (a[i] & (1 << ((bits * 8) - 1))) {
+                        a[i] -= 1 << (bits * 8);
+                    }
+                }
+            }
+            
+            a.__klass  = klass;
+            a.set      = set;
+            a.subarray = subarray;
+            a.byteLength = klass.bits * a.length;
+            a.byteOffset = offset || 0;
+            Object.defineProperty(a, "buffer", {
+                get: function() {
+                    return new ArrayBuffer(this);
+                }
+            });
+            return a;
+        }
+        
+        var set = function(array, offset) {
+            if (typeof offset === "undefined") {
+                offset = 0;
+            }
+            var i, imax = Math.min(this.length - offset, array.length);
+            for (i = 0; i < imax; ++i) {
+                this[offset + i] = array[i];
+            }
+        };
+        var subarray = function(begin, end) {
+            if (typeof end === "undefined") {
+                end = this.length;
+            }
+            return new this.__klass(this.slice(begin, end));
+        };
+        function Int8Array(arg, offset, length) {
+            return TypedArray.call(this, Int8Array, arg, offset, length);
+        }
+        Int8Array.bits = 1; Int8Array.type = signed;
+        function Uint8Array(arg, offset, length) {
+            return TypedArray.call(this, Uint8Array, arg, offset, length);
+        }
+        Uint8Array.bits = 1; Uint8Array.type = unsigned;
+        function Int16Array(arg, offset, length) {
+            return TypedArray.call(this, Int16Array, arg, offset, length);
+        }
+        Int16Array.bits = 2; Int16Array.type = signed;
+        function Uint16Array(arg, offset, length) {
+            return TypedArray.call(this, Uint16Array, arg, offset, length);
+        }
+        Uint16Array.bits = 2; Uint16Array.type = unsigned;
+        function Int32Array(arg, offset, length) {
+            return TypedArray.call(this, Int32Array, arg, offset, length);
+        }
+        Int32Array.bits = 4; Int32Array.type = signed;
+        function Uint32Array(arg, offset, length) {
+            return TypedArray.call(this, Uint32Array, arg, offset, length);
+        }
+        Uint32Array.bits = 4; Uint32Array.type = unsigned;
+        function Float32Array(arg, offset, length) {
+            return TypedArray.call(this, Float32Array, arg, offset, length);
+        }
+        Float32Array.bits = 4; Float32Array.type = floated;
+        function Float64Array(arg, offset, length) {
+            return TypedArray.call(this, Float64Array, arg, offset, length);
+        }
+        Float64Array.bits = 8; Float64Array.type = floated;
+        
+        window.Int8Array    = Int8Array;
+        window.Uint8Array   = Uint8Array;
+        window.Int16Array   = Int16Array;
+        window.Uint16Array  = Uint16Array;
+        window.Int32Array   = Int32Array;
+        window.Uint32Array  = Uint32Array;
+        window.Float32Array = Float32Array;
+        window.Float64Array = Float64Array;
     }
 })();
