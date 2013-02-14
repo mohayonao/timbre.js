@@ -2102,9 +2102,13 @@
                         swf.writeAudio(interleaved.join(" "));
                         written += writtenIncr;
                     };
-                    
-                    swf.setup(sys.channels, sys.samplerate);
-                    timerId = setInterval(onaudioprocess, streammsec);
+
+                    if (swf.setup) {
+                        swf.setup(sys.channels, sys.samplerate);
+                        timerId = setInterval(onaudioprocess, streammsec);
+                    } else {
+                        console.warn("Cannot find " + src);
+                    }
                 };
                 
                 this.pause = function() {
@@ -2151,7 +2155,6 @@
                     /*jshint quotmark:double */
                     div.innerHTML = o;
                 }
-                
                 window.addEventListener("load", function() {
                     document.body.appendChild(div);
                     swf = document[swfId];
