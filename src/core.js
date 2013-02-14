@@ -2058,7 +2058,7 @@
                 if (scripts && scripts.length) {
                     for (var m, i = 0, imax = scripts.length; i < imax; ++i) {
                         if ((m = /^(.*\/)timbre(.*)\.js$/i.exec(scripts[i].src))) {
-                            return m[1] + "TimbreFlashPlayer.swf";
+                            return m[1] + "timbre.swf";
                         }
                     }
                 }
