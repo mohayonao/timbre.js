@@ -57,6 +57,7 @@ $(function() {
                 current = {container:container, button:$(this)};
                 playCode(editor.getValue().trim());
             }).append("Play").appendTo(container);
+            container.css("margin-bottom", "50px");
         }
     });
     
