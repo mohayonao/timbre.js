@@ -5,17 +5,17 @@ describe('T("/")', function() {
     it("new", function() {
         assert.equal(T("/").toString(), "DivNode");
     });
-    it("default is audio-rate", function() {
-        assert.isTrue(T("/").isAr);
+    it("default is control-rate", function() {
+        assert.isTrue(T("/").isKr);
     });
-    it("accept control-rate", function() {
-        assert.isTrue(T("/").kr().isKr);
+    it("accept audio-rate", function() {
+        assert.isTrue(T("/").ar().isAr);
     });
     it("process() : ar", function() {
         var sin   = T("cell.sin");
         var pulse = T("cell.pulse", {mul:0.25});
         var tri   = T("cell.tri");
-        var t = T("/", sin, pulse, tri);
+        var t = T("/", sin, pulse, tri).ar();
         var val, cell = t.process(0).cells[0];
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             val = sin.cells[0][i];
@@ -36,7 +36,7 @@ describe('T("/")', function() {
         var sin   = T("cell.sin");
         var pulse = T("cell.pulse", {mul:0.25});
         var tri   = T("cell.tri");
-        var t = T("/", sin, pulse, tri).kr();
+        var t = T("/", sin, pulse, tri);
         var val, cell = t.process(0).cells[0];
         val = sin.cells[0][0] / pulse.cells[0][0] / tri.cells[0][0];
         assert.closeTo(cell[0], val, 1e-6);
