@@ -10,13 +10,6 @@
         /*jshint latedef:false */
     }
     
-    // TypedArray for IE9
-    if (typeof Float32Array === "undefined") {
-        (function() {
-
-        })();
-    }
-    
     var slice = Array.prototype.slice;
     var isArray = Array.isArray;
     var isDictionary = function(object) {
