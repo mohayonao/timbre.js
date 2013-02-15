@@ -965,41 +965,8 @@
         
         return EventEmitter;
     })();
-
+    
     var Deferred = (function() {
-        var isDeferred = function(x) {
-            return x && typeof x.promise === "function";
-        };
-        
-        function Promise(object) {
-            this.context = object.context;
-            this.then = object.then;
-            this.done = function() {
-                object.done.apply(object, arguments);
-                return this;
-            };
-            this.fail = function() {
-                object.fail.apply(object, arguments);
-                return this;
-            };
-            this.pipe = function() {
-                return object.pipe.apply(object, arguments);
-            };
-            this.always = function() {
-                object.always.apply(object, arguments);
-                return this;
-            };
-            this.promise = function() {
-                return this;
-            };
-            this.isResolved = function() {
-                return object.isResolved();
-            };
-            this.isRejected = function() {
-                return object.isRejected();
-            };
-        }
-        
         function Deferred(context) {
             this.context = context || this;
             this._state = "pending";
@@ -1019,6 +986,10 @@
                 }
                 this._doneList = this._failList = null;
             }
+        };
+        
+        var isDeferred = function(x) {
+            return x && typeof x.promise === "function";
         };
         
         $.resolve = function() {
@@ -1172,6 +1143,35 @@
             
             return deferred.promise();
         };
+        
+        function Promise(object) {
+            this.context = object.context;
+            this.then = object.then;
+            this.done = function() {
+                object.done.apply(object, arguments);
+                return this;
+            };
+            this.fail = function() {
+                object.fail.apply(object, arguments);
+                return this;
+            };
+            this.pipe = function() {
+                return object.pipe.apply(object, arguments);
+            };
+            this.always = function() {
+                object.always.apply(object, arguments);
+                return this;
+            };
+            this.promise = function() {
+                return this;
+            };
+            this.isResolved = function() {
+                return object.isResolved();
+            };
+            this.isRejected = function() {
+                return object.isRejected();
+            };
+        }
         
         return Deferred;
     })();
