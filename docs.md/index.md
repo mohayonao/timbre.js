@@ -46,13 +46,19 @@ Include the `timbre.js` file. It will install itself as `timbre`, `T` under the 
 ### Flash fallback (for Opera and IE9)
 Download an additional file (Right-click and use "Save As")
 
-- [timbre.swf](/timbre.js/libs/timbre.swf)
+- [timbre.swf](/timbre.js/timbre.swf)
 
-This file must be set in the same folder as `timbre.js`.
+`timbre.swf` must be set in the same folder as `timbre.js`.
 
 ### node.js
-Install via npm: `npm install timbre`, you can require it as a standard node module.
+Install via npm.
 
+```sh
+$ npm install timbre
+```
+
+You can require it as a standard node module.
+ 
 ```js
 var T = require("timbre");
 
