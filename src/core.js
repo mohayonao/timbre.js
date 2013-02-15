@@ -76,13 +76,10 @@
         }
         
         if (instance === undefined) {
-            instance = new NumberWrapper([0]);
-            instance._.isUndefined = true;
+            instance = new AddNode([]);
             //debug--
             throw new Error("T(\"" + key + "\") is an undefined object");
             //--debug
-        } else {
-            instance._.isUndefined = false;
         }
         
         instance._.originkey = key;
@@ -1182,11 +1179,6 @@
         var $ = TimbreObject.prototype;
         
         Object.defineProperties($, {
-            isUndefined: {
-                get: function() {
-                    return this._.isUndefined;
-                }
-            },
             isAr: {
                 get: function() {
                     return this._.ar;
@@ -1564,6 +1556,34 @@
         return ChannelObject;
     })();
     timbre.ChannelObject = ChannelObject;
+    
+    var AddNode = (function() {
+        function AddNode(_args) {
+            TimbreObject.call(this, 2, _args);
+        }
+        __extend(AddNode);
+        
+        AddNode.prototype.process = function(tickID) {
+            var _ = this._;
+            
+            if (this.tickID !== tickID) {
+                this.tickID = tickID;
+                
+                if (_.ar) {
+                    fn.inputSignalAR(this);
+                    fn.outputSignalAR(this);
+                } else {
+                    this.cells[0][0] = fn.inputSignalKR(this);
+                    fn.outputSignalKR(this);
+                }
+            }
+            
+            return this;
+        };
+        __register("+", AddNode);
+        
+        return AddNode;
+    })();
     
     var NumberWrapper = (function() {
         function NumberWrapper(_args) {
