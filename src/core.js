@@ -24,33 +24,20 @@
     var UNSCHEDULED_STATE = 2; // (not use)
     var SCHEDULED_STATE   = 3; // (not use)
     
+    var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
+    var ACCEPT_CELLSIZES = [32,64,128,256];
+    
     var _ver = "${VERSION}";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
-    var _envtype = (function() {
-        if (typeof module !== "undefined" && module.exports) {
-            return "node";
-        } else if (typeof window !== "undefined") {
-            return "browser";
-        }
-        return "unknown";
-    })();
-    var _envmobile = (function() {
-        if (_envtype === "browser") {
-            if (/(iPhone|iPad|iPod|Android)/i.test(navigator.userAgent)) {
-                return true;
-            }
-        }
-        return false;
-    })();
+    var _envtype = (typeof module !== "undefined" && module.exports) ? "node" :
+        (typeof window !== "undefined") ? "browser" : "unknown";
+    var _envmobile = _envtype === "browser" && /(iPhone|iPad|iPod|Android)/i.test(navigator.userAgent);
     var _f64mode = false;
-    var _usefunc = {};
     
     var T = function() {
-        var args = slice.call(arguments);
-        var key  = args[0];
-        var instance;
+        var args = slice.call(arguments), key = args[0], instance;
         
         switch (typeof key) {
         case "string":
@@ -146,21 +133,9 @@
     
     // properties
     Object.defineProperties(timbre, {
-        version: {
-            get: function() {
-                return _ver;
-            }
-        },
-        envtype: {
-            get: function() {
-                return _envtype;
-            }
-        },
-        envmobile: {
-            get: function() {
-                return _envmobile;
-            }
-        },
+        version  : { value: _ver },
+        envtype  : { value: _envtype },
+        envmobile: { value: _envmobile },
         env: {
             get: function() {
                 return _sys.impl.env;
@@ -264,15 +239,6 @@
         return _sys.rec.apply(_sys, arguments);
     };
     
-    timbre.use = function(name) {
-        if (isArray(_usefunc[name])) {
-            _usefunc[name].forEach(function(func) {
-                func();
-            });
-        }
-        return this;
-    };
-    
     timbre.timevalue = function(str) {
         var m, bpm, ticks, x;
         m = /^(\d+(?:\.\d+)?)Hz$/i.exec(str);
@@ -365,21 +331,13 @@
         return 0;
     };
     
-    fn.use = function(name, func) {
-        if (isArray(_usefunc[name])) {
-            _usefunc[name].push(func);
-        } else {
-            _usefunc[name] = [func];
-        }
-    };
-    
     fn.isDictionary = isDictionary;
     
     var __nop = function() {
         return this;
     };
     fn.nop = __nop;
-
+    
     var __isSignalArray = function(obj) {
         if (obj instanceof Float32Array || obj instanceof Float64Array) {
             return true;
@@ -409,7 +367,7 @@
         return child;
     };
     fn.extend = __extend;
-
+    
     var __constructorof = function(ctor, Klass) {
         var f = ctor && ctor.prototype;
         while (f) {
@@ -430,7 +388,7 @@
         }
     };
     fn.register = __register;
-
+    
     var __alias = function(key, alias) {
         if (_constructors[alias]) {
             _constructors[key] = _constructors[alias];
@@ -475,9 +433,7 @@
             cell[i] = x;
         }
     };
-    Object.defineProperty(__changeWithValue, "unremovable", {
-        value:true, writable:false
-    });
+    __changeWithValue.unremovable = true;
     fn.changeWithValue = __changeWithValue;
     
     var __timer = (function() {
@@ -536,7 +492,6 @@
                 }
             };
         };
-        
         return function(self) {
             var onlisten = make_onlisten(self);
             var onunlisten = make_onunlisten(self);
@@ -789,7 +744,6 @@
             }
             
             var args;
-            
             if (typeof handler === "function") {
                 switch (arguments.length) {
                 case 1:
@@ -845,10 +799,8 @@
                 // Adding the second element, need to change to array.
                 _.events[type] = [_.events[type], listener];
             }
-            
             return this;
         };
-        
         $.on = $.addListener;
         
         $.once = function(type, listener) {
@@ -912,6 +864,7 @@
             
             return this;
         };
+        $.off = $.removeListener;
         
         $.removeAllListeners = function(type) {
             var _ = this._;
@@ -965,6 +918,7 @@
         
         return EventEmitter;
     })();
+    modules.EventEmitter = EventEmitter;
     
     var Deferred = (function() {
         function Deferred(context) {
@@ -1182,7 +1136,7 @@
         function TimbreObject(numChannels, _args) {
             this._ = {}; // private members
             var e = this._.events = new EventEmitter(this);
-            this._.emit   = function() {
+            this._.emit = function() {
                 return e.emit.apply(e, arguments);
             };
             if (isDictionary(_args[0])) {
@@ -1897,13 +1851,6 @@
             };
         };
         
-        var ACCEPT_SAMPLERATES = [
-            8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000
-        ];
-        var ACCEPT_CELLSIZES = [
-            32,64,128,256
-        ];
-        
         var $ = SoundSystem.prototype;
         
         $.bind = function(Klass, opts) {
@@ -1986,14 +1933,14 @@
             this.listeners = [];
             this.events.on("addObject", function() {
                 if (this.status === STATUS_NONE) {
-                    if (this.inlets.length > 0 || this.timers.length > 0 || this.listeners.length > 0) {
+                    if (this.inlets.length + this.timers.length + this.listeners.length > 0) {
                         this.play();
                     }
                 }
             });
             this.events.on("removeObject", function() {
                 if (this.status === STATUS_PLAY) {
-                    if (this.inlets.length === 0 && this.timers.length === 0 && this.listeners.length === 0) {
+                    if (this.inlets.length + this.timers.length + this.listeners.length === 0) {
                         this.pause();
                     }
                 }
