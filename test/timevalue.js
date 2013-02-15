@@ -1,7 +1,7 @@
 var T = require("./timbre.debug.js");
 var assert = require("chai").assert;
 
-describe("timevalue", function() {
+describe.only("timevalue", function() {
     it("hz", function() {
         assert.equal(T.timevalue("1hz"),  1000);
         assert.equal(T.timevalue("100hz"),  10);
@@ -24,10 +24,12 @@ describe("timevalue", function() {
     it("secs", function() {
         assert.equal(T.timevalue("10secs"), 10 * 1000);
         assert.equal(T.timevalue("10.5secs"), 10.5 * 1000);
+        assert.equal(T.timevalue(".5secs"), 0.5 * 1000);
     });
     it("mins", function() {
         assert.equal(T.timevalue("10mins"), 10 * 60 * 1000);
         assert.equal(T.timevalue("10.5mins"), 10.5 * 60 * 1000);
+        assert.equal(T.timevalue(".5mins"), 0.5 * 60 * 1000);
     });
     it("ticks", function() {
         assert.equal(T.timevalue("bpm120 480ticks"), 500);
@@ -39,5 +41,6 @@ describe("timevalue", function() {
     });
     it("ms", function() {
         assert.equal(T.timevalue("50ms"), 50);
+        assert.equal(T.timevalue(".5ms"), 0.5);
     });
 });

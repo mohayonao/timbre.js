@@ -209,97 +209,49 @@
     timbre.rec = function() {
         return _sys.rec.apply(_sys, arguments);
     };
-    timbre.timevalue = function(str) {
-        var m, bpm, ticks, x;
-        m = /^(\d+(?:\.\d+)?)Hz$/i.exec(str);
-        if (m) {
-            var hz = +m[1];
-            if (hz === 0) {
-                return 0;
+    timbre.timevalue = (function() {
+        var getbpm = function(str) {
+            var m, bpm = 120;
+            if ((m = /^bpm(\d+(?:\.\d+)?)/i.exec(str))) {
+                bpm = Math.max(5, Math.min(300, +(m[1]||0)));
             }
-            return 1000 / hz;
-        }
-        m = /^bpm(\d+(?:\.\d+)?)?\s*(?:l(\d+))?(\.*)$/i.exec(str);
-        if (m) {
-            bpm = m[1];
-            if (bpm === undefined) {
-                bpm = 120;
-            } else {
-                bpm = +m[1];
-                if (bpm < 5 || 300 < bpm) {
-                    bpm = 120;
+            return bpm;
+        };
+        return function(str) {
+            var m, ms, x;
+            if ((m = /^(\d+(?:\.\d+)?)Hz$/i.exec(str))) {
+                return +m[1] === 0 ? 0 : 1000 / +m[1];
+            }
+            if ((m = /L(\d+)?(\.*)$/i.exec(str))) {
+                ms = 60 / getbpm(str) * (4 / (m[1]||4)) * 1000;
+                ms *= [1, 1.5, 1.75, 1.875][(m[2]||"").length] || 1;
+                return ms;
+            }
+            if ((m = /^(\d+(?:\.\d+)?|\.(?:\d+))(min|sec|m)s?$/i.exec(str))) {
+                switch (m[2]) {
+                case "min": return +(m[1]||0) * 60 * 1000;
+                case "sec": return +(m[1]||0) * 1000;
+                case "m"  : return +(m[1]||0);
                 }
             }
-            var len = m[2] ? m[2]|0 : 4;
-            if (bpm === 0 || len === 0) {
-                return 0;
+            if ((m = /^(?:([0-5]?[0-9]):)?(?:([0-5]?[0-9]):)(?:([0-5]?[0-9]))(?:\.([0-9]{1,3}))?$/.exec(str))) {
+                x = (m[1]||0) * 3600 + (m[2]||0) * 60 + (m[3]||0);
+                x = x * 1000 + ((((m[4]||"")+"00").substr(0, 3))|0);
+                return x;
             }
-            var ms = 60 / bpm * (4 / len) * 1000;
-            ms *= [1, 1.5, 1.75, 1.875][(m[3]||"").length] || 1;
-            return ms;
-        }
-        m = /^bpm(\d+(?:\.\d+)?)?\s*(\d+)\.(\d+)\.(\d+)$/i.exec(str);
-        if (m) {
-            bpm = m[1];
-            if (bpm === undefined) {
-                bpm = 120;
-            } else {
-                bpm = +m[1];
-                if (bpm < 5 || 300 < bpm) {
-                    bpm = 120;
-                }
+            if ((m = /(\d+)\.(\d+)\.(\d+)$/i.exec(str))) {
+                x = (m[1] * 4 + (+m[2])) * 480 + (+m[3]);
+                return 60 / getbpm(str) * (x / 480) * 1000;
             }
-            var bars  = m[2]|0;
-            var beats = m[3]|0;
-            var units = m[4]|0;
-            ticks = (bars * 4 * 480) + (beats * 480) + units;
-            return 60 / bpm * (ticks / 480) * 1000;
-        }
-        m = /^(\d+(?:\.\d+)?)secs?$/i.exec(str);
-        if (m) {
-            return +m[1] * 1000;
-        }
-        m = /^(\d+(?:\.\d+)?)mins?$/i.exec(str);
-        if (m) {
-            return +m[1] * (60 * 1000);
-        }
-        m = /^(?:([0-5]?[0-9]):)?(?:([0-5]?[0-9]):)(?:([0-5]?[0-9]))(?:\.([0-9]{1,3}))?$/.exec(str);
-        if (m) {
-            x = (m[1]|0) * 3600 + (m[2]|0) * 60 + (m[3]|0);
-            x = x * 1000 + ((((m[4]||"")+"00").substr(0, 3))|0);
-            return x;
-        }
-        m = /^bpm(\d+(?:\.\d+)?)?\s*(?:(\d+)ticks)?$/i.exec(str);
-        if (m) {
-            bpm = m[1];
-            if (bpm === undefined) {
-                bpm = 120;
-            } else {
-                bpm = +m[1];
-                if (bpm < 5 || 300 < bpm) {
-                    bpm = 120;
-                }
+            if ((m = /(\d+)ticks$/i.exec(str))) {
+                return 60 / getbpm(str) * (m[1] / 480) * 1000;
             }
-            ticks = m[2] ? m[2]|0 : 480;
-            if (bpm === 0) {
-                return 0;
+            if ((m = /^(\d+)samples(?:\/(\d+)Hz)?$/i.exec(str))) {
+                return m[1] * 1000 / (m[2] || timbre.samplerate);
             }
-            return 60 / bpm * (ticks / 480) * 1000;
-        }
-        m = /^(\d+)samples(?:\/(\d+)Hz)?$/i.exec(str);
-        if (m) {
-            var sr = m[2] ? m[2]|0 : timbre.samplerate;
-            if (sr === 0) {
-                return 0;
-            }
-            return (m[1]|0) / sr * 1000;
-        }
-        m = /^(\d+)(?:ms)?$/i.exec(str);
-        if (m) {
-            return m[1]|0;
-        }
-        return 0;
-    };
+            return 0;
+        };
+    })();
     
     var fn = timbre.fn = {
         SignalArray: Float32Array,
