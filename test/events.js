@@ -12,11 +12,7 @@ describe("EventEmitter", function() {
         var e = new EventEmitter(this);
         assert.equal(e.context, this);
     });
-    it(".on is an alias of .addListener", function() {
-        var e = new EventEmitter();
-        assert.equal(e.addListener, e.on);
-    });
-    it("addListener", function() {
+    it("on", function() {
         var e = new EventEmitter();
         var emitted = 0;
         e.on("hello", function() {
@@ -40,7 +36,7 @@ describe("EventEmitter", function() {
         e.emit("hello");
         assert.equal(emitted, 1);
     });
-    it("removeListener", function() {
+    it("off", function() {
         var e = new EventEmitter();
         var emitted = 0;
         var f1 = function() {
@@ -55,8 +51,8 @@ describe("EventEmitter", function() {
         e.on("foo", f1);
         e.on("foo", f2);
         e.on("foo", f3);
-        e.removeListener("foo", f1);
-        e.removeListener("foo", f2);
+        e.off("foo", f1);
+        e.off("foo", f2);
         assert.equal(e.listeners("foo").length, 1);
         e.emit("foo");
         assert.equal(emitted, 1);
@@ -76,8 +72,8 @@ describe("EventEmitter", function() {
         e.once("foo", f1);
         e.once("foo", f2);
         e.once("foo", f3);
-        e.removeListener("foo", f1);
-        e.removeListener("foo", f2);
+        e.off("foo", f1);
+        e.off("foo", f2);
         assert.equal(e.listeners("foo").length, 1);
         e.emit("foo");
         e.emit("foo");
@@ -208,8 +204,8 @@ describe("EventEmitter", function() {
             e.on("foo", t1);
             e.on("foo", t2);
             e.on("foo", t3);
-            e.removeListener("foo", t1);
-            e.removeListener("foo", t2);
+            e.off("foo", t1);
+            e.off("foo", t2);
             assert.equal(e.listeners("foo").length, 1);
             e.emit("foo");
             e.emit("foo");
@@ -230,8 +226,8 @@ describe("EventEmitter", function() {
             e.once("foo", t1);
             e.once("foo", t2);
             e.once("foo", t3);
-            e.removeListener("foo", t1);
-            e.removeListener("foo", t2);
+            e.off("foo", t1);
+            e.off("foo", t2);
             assert.equal(e.listeners("foo").length, 1);
             e.emit("foo");
             e.emit("foo");
