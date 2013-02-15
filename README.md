@@ -55,7 +55,7 @@ MIT
 
 
 ## ChangeLog ##
-**WORKING** (332.71KB)
+**WORKING** (339.81KB)
 * Added: `T("script")`
 * Added: `T("waveshaper")`
 * Added: `T("lag")`
@@ -63,12 +63,13 @@ MIT
 * Moved: `T("keyboard")` to extras
 * Moved: `T("mouse")` to extras
 * Moved: `T("cosc)` to extras
+* Fixed: Flash fallback support for Opera, IE9 (changing the installation)
 * make it easier to make a stereo object
 
 **13.02.07** (334.61KB)
 * Added `T.setup({f64:true})` to use Float64Array instead of Float32Array
 * Added Android/Firefox support
-* Added flash support for Opera, IE9
+* Added Flash fallback support for Opera, IE9
 * performance improvements
 
 **13.02.06** (337.50KB)
