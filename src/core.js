@@ -15,10 +15,6 @@
     };
     
     var slice = Array.prototype.slice;
-    var isArray = Array.isArray;
-    var isDictionary = function(object) {
-        return typeof object === "object" && object.constructor === Object;
-    };
     
     var FINISHED_STATE    = 0;
     var PLAYING_STATE     = 1;
@@ -276,8 +272,10 @@
         SCHEDULED_STATE: SCHEDULED_STATE
     };
     
-    fn.isArray = isArray;
-    fn.isDictionary = isDictionary;
+    var isArray = fn.isArray = Array.isArray;
+    var isDictionary = fn.isDictionary = function(object) {
+        return typeof object === "object" && object.constructor === Object;
+    };
     
     fn.nop = function() {
         return this;
