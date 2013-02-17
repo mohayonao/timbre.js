@@ -36,6 +36,7 @@
         (typeof window !== "undefined") ? "browser" : "unknown";
     var _envmobile = _envtype === "browser" && /(iPhone|iPad|iPod|Android)/i.test(navigator.userAgent);
     var _f64mode = false;
+    var _bpm = 120;
     
     var T = function() {
         var args = slice.call(arguments), key = args[0], t;
@@ -163,6 +164,18 @@
             get: function() {
                 return _sys.amp;
             }
+        },
+        bpm: {
+            set: function(value) {
+                if (typeof value === "number") {
+                    if (5 <= value && value <= 300) {
+                        _bpm = value;
+                    }
+                }
+            },
+            get: function() {
+                return _bpm;
+            }
         }
     });
     
@@ -211,7 +224,7 @@
     };
     timbre.timevalue = (function() {
         var getbpm = function(str) {
-            var m, bpm = 120;
+            var m, bpm = _bpm;
             if ((m = /^bpm(\d+(?:\.\d+)?)/i.exec(str))) {
                 bpm = Math.max(5, Math.min(300, +(m[1]||0)));
             }
