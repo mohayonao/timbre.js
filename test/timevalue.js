@@ -1,7 +1,7 @@
 var T = require("./timbre.debug.js");
 var assert = require("chai").assert;
 
-describe.only("timevalue", function() {
+describe("timevalue", function() {
     it("hz", function() {
         assert.equal(T.timevalue("1hz"),  1000);
         assert.equal(T.timevalue("100hz"),  10);
