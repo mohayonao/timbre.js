@@ -8,18 +8,30 @@ module.exports = (grunt)->
         simplemocha:
             options:
                 reporter: 'dot'
-            target: './test/*.js'
+            target: 'test/*.js'
         jshint:
             all: ['src/core.js', 'src/**/*.js']
             options:
-                jshintrc: '.jshintrc'
+                curly   : true
+                eqeqeq  : true
+                latedef : true
+                noarg   : true
+                noempty : true
+                quotmark: 'double'
+                undef   : true
+                strict  : true
+                trailing: true
+                newcap  : false
+                browser : true
+                node    : true
+                predef  : ['timbre']
         uglify:
             all:
                 options:
                     sourceMap: 'timbre.js.map'
                 files:
                     'timbre.js': ['timbre.dev.js']
-        clean: ['timbre.js', 'timbre.js.map', '*.html', './ja/*.html']
+        clean: ['timbre.js', 'timbre.js.map', '*.html', 'ja/*.html']
 
     grunt.loadNpmTasks 'grunt-contrib-jshint'
     grunt.loadNpmTasks 'grunt-contrib-uglify'
@@ -29,7 +41,7 @@ module.exports = (grunt)->
     grunt.registerTask 'build', ->
         build_timbre = require('./build/timbre-builder')
         opts = build_timbre.build()
-        fs.writeFileSync "./timbre.dev.js", opts.source, 'utf-8'
+        fs.writeFileSync "timbre.dev.js", opts.source, 'utf-8'
         console.log "#{opts.version} - #{(opts.size / 1024).toFixed(2)}KB"
 
     grunt.registerTask 'doc', ->
@@ -39,4 +51,5 @@ module.exports = (grunt)->
     grunt.registerTask 'gh-pages', ['clean', 'uglify', 'doc']
 
     grunt.registerTask 'default', ['jshint', 'simplemocha']
+    grunt.registerTask 'test', ['simplemocha']
     grunt.registerTask 'all', ['default', 'build']
