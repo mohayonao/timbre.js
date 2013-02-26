@@ -181,7 +181,7 @@
                     console.log(buffer);
                     bufferL = buffer.getChannelData(0);
                     bufferR = buffer.getChannelData(1);
-                } else {  
+                } else {
                     bufferL = bufferR = buffer.getChannelData(0);
                 }
                 duration = bufferL.length / samplerate;
