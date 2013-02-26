@@ -2,7 +2,7 @@ timbre.js
 =========
 JavaScript library for objective sound programming
 
-Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (formally: Timbre Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web. 
+Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (Timbre-Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web. 
 
 ## Project Page ##
 [English](http://mohayonao.github.com/timbre.js/) | [日本語](http://mohayonao.github.com/timbre.js/ja/)
@@ -11,7 +11,7 @@ Timbre.js provides a functional processing and synthesizing audio in your web ap
 [BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html) | [Chords Work](http://mohayonao.github.com/timbre.js/chord.html) | [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html) | [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html) | [Reich](http://mohayonao.github.com/timbre.js/reich.html)
 
 ## Supports ##
-Timbre.js runs on a modern browser for Windows/Mac/Linux/iOS/Android or node.js.
+Timbre.js runs on modern browsers for Windows/Mac/Linux/iOS/Android or node.js.
 
 ![Chrome 14.0-](http://mohayonao.github.com/timbre.js/misc/img/chrome.png)
 ![Safari 6.0-](http://mohayonao.github.com/timbre.js/misc/img/safari.png)
@@ -55,7 +55,7 @@ MIT
 
 
 ## ChangeLog ##
-**WORKING** (339.81KB)
+**WORKING** (342.92KB)
 * Added: `T("script")`
 * Added: `T("waveshaper")`
 * Added: `T("lag")`
