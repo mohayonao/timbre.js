@@ -66,6 +66,50 @@
         }
     });
     
+    $.on = $.addListener = function(type, listener) {
+        if (type === "mml") {
+            type = "data";
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
+        }
+        this._.events.on(type, listener);
+        return this;
+    };
+    
+    $.once = function(type, listener) {
+        if (type === "mml") {
+            type = "data";
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
+        }
+        this._.events.once(type, listener);
+        return this;
+    };
+    
+    $.off = $.removeListener = function(type, listener) {
+        if (type === "mml") {
+            type = "data";
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
+        }
+        this._.events.off(type, listener);
+        return this;
+    };
+    
+    $.removeAllListeners = function(type) {
+        if (type === "mml") {
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
+            type = "data";
+        }
+        this._.events.removeAllListeners(type);
+        return this;
+    };
+    
+    $.listeners = function(type) {
+        if (type === "mml") {
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
+            type = "data";
+        }
+        return this._.events.listeners(type);
+    };
+    
     $.process = function(tickID) {
         var _ = this._;
         
@@ -89,7 +133,7 @@
                             }
                         }
                         _.remain = nextItem[4];
-                        _.emit("mml", "noteOn", {noteNum:nextItem[1], velocity:nextItem[3]});
+                        _.emit("data", "noteOn", {noteNum:nextItem[1], velocity:nextItem[3]});
                         sched(this);
                     } else {
                         for (i = 0, imax = nodes.length; i < imax; ++i) {
@@ -100,7 +144,7 @@
                                 gen.release();
                             }
                         }
-                        _.emit("mml", "noteOff", {noteNum:nextItem[2], velocity:nextItem[3]});
+                        _.emit("data", "noteOff", {noteNum:nextItem[2], velocity:nextItem[3]});
                     }
                     if (queue.length === 0) {
                         break;

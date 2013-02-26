@@ -21,7 +21,7 @@ var env = T("asr", {a:20, r:150, lv:0.8}, osc);
 
 T("delay", {time:250, fb:0.75, mix:0.4}, env).play();
 
-T("mml", {mml:"o7 q2 l8 $ e>a<c>a< r2"}, osc, env).on("mml", function(type, opts) {
+T("mml", {mml:"o7 q2 l8 $ e>a<c>a< r2"}, osc, env).on("data", function(type, opts) {
   if (type === "noteOn") {
     osc.freq.midi = opts.noteNum;
   }
