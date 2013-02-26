@@ -60,9 +60,11 @@ MIT
 * Added: `T("waveshaper")`
 * Added: `T("lag")`
 * Added: `T("delay").cross`
+* Added: `T("audio.jsonp")` to extras
 * Moved: `T("keyboard")` to extras
 * Moved: `T("mouse")` to extras
 * Moved: `T("cosc)` to extras
+* Renamed: `T("mml")`: `mml` event listener -> `data` event listener
 * Fixed: Flash fallback support for Opera, IE9 (changing the installation)
 * make it easier to make a stereo object
 
