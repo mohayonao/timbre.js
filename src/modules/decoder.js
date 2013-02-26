@@ -163,6 +163,7 @@
             var ctx = T.fn._audioContext;
             var _decode = function(data, onloadedmetadata, onloadeddata) {
                 var samplerate, channels, bufferL, bufferR, duration;
+                
                 if (typeof data === "string") {
                     return onloadeddata(false);
                 }
@@ -177,9 +178,10 @@
                 samplerate = ctx.sampleRate;
                 channels   = buffer.numberOfChannels;
                 if (channels === 2) {
+                    console.log(buffer);
                     bufferL = buffer.getChannelData(0);
                     bufferR = buffer.getChannelData(1);
-                } else {
+                } else {  
                     bufferL = bufferR = buffer.getChannelData(0);
                 }
                 duration = bufferL.length / samplerate;
@@ -213,7 +215,7 @@
                         _decode(data, onloadedmetadata, onloadeddata);
                     });
                 } else {
-                    _decode(src, onloadeddata, onloadeddata);
+                    _decode(src, onloadedmetadata, onloadeddata);
                 }
                 /*global File:false */
             };
