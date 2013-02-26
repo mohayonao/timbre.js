@@ -12,9 +12,21 @@
             } else if (Decoder.mp3_decode && /\.mp3$/.test(src)) {
                 return Decoder.mp3_decode(src, onloadedmetadata, onloadeddata);
             }
+        } else if (typeof src === "object") {
+            if (src.type === "wav") {
+                return Decoder.wav_decode(src.data, onloadedmetadata, onloadeddata);
+            } else if (Decoder.ogg_decode && src.type === "ogg") {
+                return Decoder.ogg_decode(src.data, onloadedmetadata, onloadeddata);
+            } else if (Decoder.mp3_decode && src.type === "mp3") {
+                return Decoder.mp3_decode(src.data, onloadedmetadata, onloadeddata);
+            }
         }
         if (Decoder.webkit_decode) {
-            return Decoder.webkit_decode(src, onloadedmetadata, onloadeddata);
+            if (typeof src === "object") {
+                return Decoder.webkit_decode(src.data, onloadedmetadata, onloadeddata);
+            } else {
+                return Decoder.webkit_decode(src, onloadedmetadata, onloadeddata);
+            }
         } else if (Decoder.moz_decode) {
             return Decoder.moz_decode(src, onloadedmetadata, onloadeddata);
         }
@@ -61,8 +73,8 @@
         return int32;
     };
     
-    Decoder.wav_decode = function(src, onloadedmetadata, onloadeddata) {
-        Decoder.getBinaryWithPath(src, function(data) {
+    Decoder.wav_decode = (function() {
+        var _decode = function(data, onloadedmetadata, onloadeddata) {
             if (String.fromCharCode(data[0], data[1], data[2], data[3]) !== "RIFF") {
                 return onloadedmetadata(false);
             }
@@ -133,9 +145,18 @@
             }
             
             onloadeddata();
-        });
-    };
-    
+        };
+        
+        return function(src, onloadedmetadata, onloadeddata) {
+            if (typeof src === "string") {
+                Decoder.getBinaryWithPath(src, function(data) {
+                    _decode(src, onloadedmetadata, onloadeddata);
+                });
+            } else {
+                _decode(src, onloadedmetadata, onloadeddata);
+            }
+        };
+    })();
     
     Decoder.webkit_decode = (function() {
         if (typeof webkitAudioContext !== "undefined") {
@@ -187,10 +208,12 @@
                                 onloadedmetadata, onloadeddata);
                     };
                     reader.readAsArrayBuffer(src);
-                } else {
+                } else if (typeof src === "string") {
                     Decoder.getBinaryWithPath(src, function(data) {
                         _decode(data, onloadedmetadata, onloadeddata);
                     });
+                } else {
+                    _decode(src, onloadeddata, onloadeddata);
                 }
                 /*global File:false */
             };
