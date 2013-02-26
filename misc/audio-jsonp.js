@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 "use strict";
 
 var fs   = require("fs");
@@ -12,14 +14,15 @@ var function_name = "window.timbrejs_audiojsonp";
 if (opts.get("name")) {
     function_name += "_" + opts.get("name");
 }
+var ext = opts.get("ext");
 
 function generate(buffer) {
     var items = [
         function_name, '(',
         '"' + buffer.toString("base64") + '"',
     ];
-    if (opts.get("ext")) {
-        items.push(',"' + opts.get("ext") + '"');
+    if (ext) {
+        items.push(',"' + ext + '"');
     }
     items.push(');');
     console.log(items.join(""));
@@ -29,7 +32,13 @@ var args = opts.args();
 
 if (args.length) {
     fs.readFile(args[0], function(err, buffer) {
+        var m;
         if (!err) {
+            if (!ext) {
+                if ((m = /\.([\w\d]+)$/.exec(args[0])) !== null) {
+                    ext = m[1];
+                }
+            }
             generate(buffer);
         }
     });
