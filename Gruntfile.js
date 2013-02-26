@@ -50,7 +50,7 @@ module.exports = function(grunt) {
     
     grunt.registerTask("build", function() {
         var build_timbre = require("./build/timbre-builder");
-        opts = build_timbre.build();
+        var opts = build_timbre.build();
         fs.writeFileSync("timbre.dev.js", opts.source, "utf-8")
         console.log("%s - %sKB", opts.version, (opts.size / 1024).toFixed(2));
     });
