@@ -150,7 +150,7 @@
         return function(src, onloadedmetadata, onloadeddata) {
             if (typeof src === "string") {
                 Decoder.getBinaryWithPath(src, function(data) {
-                    _decode(src, onloadedmetadata, onloadeddata);
+                    _decode(data, onloadedmetadata, onloadeddata);
                 });
             } else {
                 _decode(src, onloadedmetadata, onloadeddata);
