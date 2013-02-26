@@ -8,6 +8,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-simple-mocha");
+    grunt.loadNpmTasks("grunt-contrib-watch");
     
     grunt.initConfig({
         simplemocha: {
@@ -38,10 +39,16 @@ module.exports = function(grunt) {
                 files: { "timbre.js": ["timbre.dev.js"] }
             }
         },
+        watch: {
+            src: {
+                files: ["src/core.js", "src/**/*.js"],
+                tasks: ["jshint"]
+            }
+        },
         clean: ["timbre.js", "timbre.js.map", "*.html", "ja/*.html"]
     });
-
-    grunt.registerTask('build', functions() {
+    
+    grunt.registerTask("build", function() {
         var build_timbre = require("./build/timbre-builder");
         opts = build_timbre.build();
         fs.writeFileSync("timbre.dev.js", opts.source, "utf-8")
