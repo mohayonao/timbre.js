@@ -342,6 +342,15 @@
     fn.getClass = function(key) {
         return _constructors[key];
     };
+
+    fn.pointer = function(src, offset, length) {
+        offset = (src.byteOffset + offset) * src.BYTES_PER_ELEMENT;
+        if (typeof length === "number") {
+            return new src.constructor(src.buffer, offset, length);
+        } else {
+            return new src.constructor(src.buffer, offset);
+        }
+    };
     
     fn.nextTick = function(func) {
         _sys.nextTick(func);
@@ -2466,17 +2475,17 @@
         
         function ArrayBuffer(_) {
             var a = new Array(_.byteLength);
-            var bits = _.__klass.bits, shift;
+            var bytes = _.BYTES_PER_ELEMENT, shift;
             for (var i = 0, imax = a.length; i < imax; ++i) {
-                shift = (i % bits) * 8;
-                a[i] = (_[(i / bits)|0] & (0x0FF << shift)) >>> shift;
+                shift = (i % bytes) * 8;
+                a[i] = (_[(i / bytes)|0] & (0x0FF << shift)) >>> shift;
             }
             a.__view = _;
             return a;
         }
         
         function TypedArray(klass, arg, offset, length) {
-            var a, b, bits, i, imax;
+            var a, b, bytes, i, imax;
             if (Array.isArray(arg)) {
                 if (arg.__view) {
                     if (typeof offset === "undefined") {
@@ -2485,14 +2494,18 @@
                     if (typeof length === "undefined") {
                         length = arg.length - offset;
                     }
-                    bits = klass.bits;
-                    b = arg.slice(offset, offset + length);
-                    a = new Array(b.length / bits);
-                    for (i = 0, imax = a.length; i < imax; ++i) {
-                        a[i] = 0;
-                    }
-                    for (i = 0, imax = b.length; i < imax; ++i) {
-                        a[(i/bits)|0] += (b[i] & 0xFF) << ((i % bits) * 8);
+                    bytes = klass.bytes;
+                    if (klass.type === floating) {
+                        a = arg.__view.slice((offset/bytes)|0, ((offset+length)/bytes)|0);
+                    } else {
+                        b = arg.slice(offset, offset + length);
+                        a = new Array((b.length / bytes)|0);
+                        for (i = 0, imax = a.length; i < imax; ++i) {
+                            a[i] = 0;
+                        }
+                        for (i = 0, imax = b.length; i < imax; ++i) {
+                            a[(i/bytes)|0] += (b[i] & 0xFF) << ((i % bytes) * 8);
+                        }
                     }
                 } else {
                     a = arg.slice();
@@ -2513,16 +2526,18 @@
             }
             if (klass.type === signed) {
                 for (i = 0, imax = a.length; i < imax; ++i) {
-                    if (a[i] & (1 << ((bits * 8) - 1))) {
-                        a[i] -= 1 << (bits * 8);
+                    if (a[i] & (1 << ((bytes * 8) - 1))) {
+                        a[i] -= 1 << (bytes * 8);
                     }
                 }
             }
             
             a.__klass  = klass;
+            a.constructor = window[klass.name];
             a.set      = set;
             a.subarray = subarray;
-            a.byteLength = klass.bits * a.length;
+            a.BYTES_PER_ELEMENT = klass.bytes;
+            a.byteLength = klass.bytes * a.length;
             a.byteOffset = offset || 0;
             Object.defineProperty(a, "buffer", {
                 get: function() {
@@ -2551,7 +2566,8 @@
          ["Int32Array", 4, signed], ["Uint32Array", 4, unsigned],
          ["Float32Array", 4, floating], ["Float64Array", 8, floating]
         ].forEach(function(_params) {
-            var name = _params[0], params = { bits:_params[1], type:_params[2] };
+            var name = _params[0];
+            var params = { bytes:_params[1], type:_params[2], name:name };
             window[name] = function(arg, offset, length) {
                 return TypedArray.call(this, params, arg, offset, length);
             };
