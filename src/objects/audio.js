@@ -51,15 +51,14 @@
                 _.samplerate = result.samplerate;
                 _.channels   = result.channels;
                 _.bufferMix  = null;
-                _.bufferL    = result.bufferL;
-                _.bufferR    = result.bufferR;
+                _.buffer     = result.buffer;
                 _.phase      = 0;
                 _.phaseIncr  = result.samplerate / T.samplerate;
                 _.duration   = result.duration * 1000;
                 _.currentTime = 0;
                 if (_.isReversed) {
                     _.phaseIncr *= -1;
-                    _.phase = result.bufferL.length + _.phaseIncr;
+                    _.phase = result.buffer[0].length + _.phaseIncr;
                 }
                 self._.emit("loadedmetadata");
             } else {

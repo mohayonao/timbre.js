@@ -2100,7 +2100,7 @@
                 result = {
                     samplerate: samplerate,
                     channels  : 2,
-                    buffer: mixed, bufferL: L, bufferR: R
+                    buffer: [mixed, L, R]
                 };
                 
             } else {
@@ -2117,7 +2117,7 @@
                 result = {
                     samplerate: samplerate,
                     channels  : 1,
-                    buffer: buffer, bufferL: buffer, bufferR: buffer
+                    buffer: [buffer]
                 };
             }
             

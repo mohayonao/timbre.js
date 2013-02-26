@@ -78,7 +78,7 @@ Decoder.ogg_decode = function(src, onloadedmetadata/*, onloadeddata*/) {
 Decoder.mp3_decode = function(src, onloadedmetadata, onloadeddata) {
     var decoder = new lame.Decoder();
     var bytes = [];
-    var samplerate, channels, bufferL, bufferR, duration;
+    var samplerate, channels, mixdown, bufferL, bufferR, duration;
     var bitDepth;
     
     decoder.on("format", function(format) {
@@ -95,11 +95,10 @@ Decoder.mp3_decode = function(src, onloadedmetadata, onloadeddata) {
         var length = bytes.length / channels / (bitDepth / 8);
         
         duration = length / samplerate;
-        bufferL = new Float32Array(length);
+        mixdown = new Float32Array(length);
         if (channels === 2) {
+            bufferL = new Float32Array(length);
             bufferR = new Float32Array(length);
-        } else {
-            bufferR = bufferL;
         }
         
         var uint8 = new Uint8Array(bytes);
@@ -115,19 +114,19 @@ Decoder.mp3_decode = function(src, onloadedmetadata, onloadeddata) {
         onloadedmetadata({
             samplerate: samplerate,
             channels  : channels,
-            bufferL   : bufferL,
-            bufferR   : bufferR,
+            buffer    :  [mixdown, bufferL, bufferR],
             duration  : duration
         });
         
-        var i, imax, j, k = 1 / ((1 << (bitDepth-1)) - 1);
+        var i, imax, j, k = 1 / ((1 << (bitDepth-1)) - 1), x;
         if (channels === 2) {
-            for (i = j = 0, imax = bufferL.length; i < imax; ++i) {
-                bufferL[i] = data[j++] * k;
-                bufferR[i] = data[j++] * k;
+            for (i = j = 0, imax = mixdown.length; i < imax; ++i) {
+                x  = bufferL[i] = data[j++] * k;
+                x += bufferR[i] = data[j++] * k;
+                mixdown[i] = x * 0.5;
             }
         } else {
-            for (i = 0, imax = bufferL.length; i < imax; ++i) {
+            for (i = 0, imax = mixdown.length; i < imax; ++i) {
                 bufferL[i] = data[i] * k;
             }
         }

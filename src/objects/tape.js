@@ -27,7 +27,7 @@
                     this._.tape = tape;
                     this._.tapeStream = new TapeStream(tape, this._.samplerate);
                 } else if (typeof tape === "object") {
-                    if (isSignalArray(tape.buffer)) {
+                    if (Array.isArray(tape.buffer) && isSignalArray(tape.buffer[0])) {
                         this.playbackState = fn.PLAYING_STATE;
                         this._.tape = new Scissor(tape);
                         this._.tapeStream = new TapeStream(tape, this._.samplerate);

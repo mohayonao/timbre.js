@@ -13,8 +13,7 @@
         _.samplerate = 44100;
         _.channels   = 0;
         _.bufferMix  = null;
-        _.bufferL    = new Float32Array(0);
-        _.bufferR    = _.bufferL;
+        _.buffer     = [];
         _.isLooped   = false;
         _.isReversed = false;
         _.duration    = 0;
@@ -30,10 +29,10 @@
     var make_onlooped = function(self) {
         return function() {
             var _ = self._;
-            if (_.phase >= _.bufferL.length) {
+            if (_.phase >= _.buffer[0].length) {
                 _.phase = 0;
             } else if (_.phase < 0) {
-                _.phase = _.bufferL.length + _.phaseIncr;
+                _.phase = _.buffer[0].length + _.phaseIncr;
             }
             self._.emit("looped");
         };
@@ -44,33 +43,39 @@
     var setBuffer = function(value) {
         var _ = this._;
         if (typeof value === "object") {
-            var bufferL, bufferR, samplerate, channels;
+            var buffer = [], samplerate, channels;
             if (isSignalArray(value)) {
-                bufferL  = bufferR = value;
+                buffer[0] = value;
                 channels = 1;
             } else if (typeof value === "object") {
-                if (isSignalArray(value.bufferL) && isSignalArray(value.bufferR)) {
-                    channels = 2;
-                    bufferL = value.bufferL;
-                    bufferR = value.bufferR;
+                if (Array.isArray(value.buffer)) {
+                    if (isSignalArray(value.buffer[0])) {
+                        if (isSignalArray(value.buffer[1]) &&
+                            isSignalArray(value.buffer[2])) {
+                            channels = 2;
+                            buffer = value.buffer;
+                        } else {
+                            channels = 1;
+                            buffer = [value.buffer[0]];
+                        }
+                    }
                 } else if (isSignalArray(value.buffer)) {
-                    bufferL = bufferR = value.buffer;
                     channels = 1;
+                    buffer = [value.buffer];
                 }
                 if (typeof value.samplerate === "number") {
                     samplerate = value.samplerate;
                 }
             }
-            if (bufferL && bufferR) {
+            if (buffer.length) {
                 if (samplerate > 0) {
                     _.samplerate = value.samplerate;
                 }
                 _.bufferMix = null;
-                _.bufferL = bufferL;
-                _.bufferR = bufferR;
+                _.buffer  = buffer;
                 _.phase     = 0;
                 _.phaseIncr = _.samplerate / T.samplerate;
-                _.duration  = _.bufferL.length * 1000 / _.samplerate;
+                _.duration  = _.buffer[0].length * 1000 / _.samplerate;
                 _.currentTime = 0;
                 _.plotFlush = true;
                 this.reverse(_.isReversed);
@@ -83,28 +88,11 @@
             set: setBuffer,
             get: function() {
                 var _ = this._;
-                if (_.channels === 2) {
-                    if (!_.bufferMix) {
-                        var bufferMix = new Float32Array(_.bufferL);
-                        var bufferR   = _.bufferR;
-                        for (var i = 0, imax = _.bufferMix.length; i < imax; i++) {
-                            bufferMix[i] = (bufferMix[i] + bufferR[i]) * 0.5;
-                        }
-                        _.bufferMix = bufferMix;
-                    }
-                    return _.bufferMix;
-                }
-                return _.bufferL;
-            }
-        },
-        bufferL: {
-            get: function() {
-                return this._.bufferL;
-            }
-        },
-        bufferR: {
-            get: function() {
-                return this._.bufferR;
+                return {
+                    samplerate: _.samplerate,
+                    channels  : _.channels,
+                    buffer    : _.buffer
+                };
             }
         },
         pitch: {
@@ -163,19 +151,12 @@
         var _ = this._;
         var instance = T("buffer");
         
-        if (_.bufferL) {
-            if (_.channels === 2) {
-                setBuffer.call(instance, {
-                    bufferL   : _.bufferL,
-                    bufferR   : _.bufferR,
-                    samplerate: _.samplerate
-                });
-            } else {
-                setBuffer.call(instance, {
-                    buffer    : _.bufferL,
-                    samplerate: _.samplerate
-                });
-            }
+        if (_.buffer.length) {
+            setBuffer.call(instance, {
+                buffer    : _.buffer,
+                samplerate: _.samplerate,
+                channels  : _.channels
+            });
         }
         instance.loop(_.isLooped);
         instance.reverse(_.isReversed);
@@ -186,35 +167,36 @@
     $.slice = function(begin, end) {
         var _ = this._;
         var instance = T(_.originkey);
-        
         var isReversed = _.isReversed;
-        if (typeof begin === "number" ){
-            begin = (begin * 0.001 * _.samplerate)|0;
-        } else {
-            begin = 0;
-        }
-        if (typeof end === "number") {
-            end   = (end   * 0.001 * _.samplerate)|0;
-        } else {
-            end = _.bufferL.length;
-        }
-        if (begin > end) {
-            var tmp = begin;
-            begin = end;
-            end   = tmp;
-            isReversed = !isReversed;
-        }
         
-        if (_.bufferL) {
+        if (_.buffer.length) {
+            if (typeof begin === "number" ){
+                begin = (begin * 0.001 * _.samplerate)|0;
+            } else {
+                begin = 0;
+            }
+            if (typeof end === "number") {
+                end   = (end   * 0.001 * _.samplerate)|0;
+            } else {
+                end = _.buffer[0].length;
+            }
+            if (begin > end) {
+                var tmp = begin;
+                begin = end;
+                end   = tmp;
+                isReversed = !isReversed;
+            }
+            
             if (_.channels === 2) {
                 setBuffer.call(instance, {
-                    bufferL   : fn.pointer(_.bufferL, begin, end-begin),
-                    bufferR   : fn.pointer(_.bufferR, begin, end-begin),
+                    buffer   : [ fn.pointer(_.buffer[0], begin, end-begin),
+                                 fn.pointer(_.buffer[1], begin, end-begin),
+                                 fn.pointer(_.buffer[2], begin, end-begin) ],
                     samplerate: _.samplerate
                 });
             } else {
                 setBuffer.call(instance, {
-                    buffer: fn.pointer(_.bufferL, begin, end-begin),
+                    buffer: fn.pointer(_.buffer[0], begin, end-begin),
                     samplerate: _.samplerate
                 });
             }
@@ -234,8 +216,8 @@
             if (_.phaseIncr > 0) {
                 _.phaseIncr *= -1;
             }
-            if (_.phase === 0 && _.buffer) {
-                _.phase = _.bufferL.length + _.phaseIncr;
+            if (_.phase === 0 && _.buffer.length) {
+                _.phase = _.buffer[0].length + _.phaseIncr;
             }
         } else {
             if (_.phaseIncr < 0) {
@@ -261,7 +243,7 @@
     $.process = function(tickID) {
         var _ = this._;
         
-        if (!_.bufferL) {
+        if (!_.buffer.length) {
             return this;
         }
         
@@ -270,10 +252,16 @@
             
             var cellL = this.cells[1];
             var cellR = this.cells[2];
-            var bufferL = _.bufferL;
-            var bufferR = _.bufferR;
             var phase  = _.phase;
             var i, imax = _.cellsize;
+            
+            var bufferL, bufferR;
+            if (_.channels === 2) {
+                bufferL = _.buffer[1];
+                bufferR = _.buffer[2];
+            } else {
+                bufferL = bufferR = _.buffer[0];
+            }
             
             if (_.currentTimeObj) {
                 var pos = _.currentTimeObj.process(tickID).cells[0];
@@ -323,9 +311,14 @@
     
     $.plot = function(opts) {
         var _ = this._;
-        var bufferL = _.bufferL;
-        var bufferR = _.bufferR;
+        var bufferL, bufferR;
         if (_.plotFlush) {
+            if (_.channels === 2) {
+                bufferL = _.buffer[1];
+                bufferR = _.buffer[2];
+            } else {
+                bufferL = bufferR = _.buffer[0];
+            }
             var data = new Float32Array(2048);
             var x = 0, xIncr = bufferL.length / 2048;
             for (var i = 0; i < 2048; i++) {

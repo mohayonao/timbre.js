@@ -95,19 +95,17 @@
                 return onloadedmetadata(false);
             }
             
-            var bufferL, bufferR;
-            bufferL = new Float32Array((duration * samplerate)|0);
+            var mixdown, bufferL, bufferR;
+            mixdown = new Float32Array((duration * samplerate)|0);
             if (channels === 2) {
-                bufferR = new Float32Array((duration * samplerate)|0);
-            } else {
-                bufferR = bufferL;
+                bufferL = new Float32Array(mixdown.length);
+                bufferR = new Float32Array(mixdown.length);
             }
             
             onloadedmetadata({
                 samplerate: samplerate,
                 channels  : channels,
-                bufferL   : bufferL,
-                bufferR   : bufferR,
+                buffer    : [mixdown, bufferL, bufferR],
                 duration  : duration
             });
             
@@ -121,15 +119,16 @@
                 data = _24bit_to_32bit(new Uint8Array(data.buffer, 44));
             }
             
-            var i, imax, j, k = 1 / ((1 << (bitSize-1)) - 1);
+            var i, imax, j, k = 1 / ((1 << (bitSize-1)) - 1), x;
             if (channels === 2) {
-                for (i = j = 0, imax = bufferL.length; i < imax; ++i) {
-                    bufferL[i] = data[j++] * k;
-                    bufferR[i] = data[j++] * k;
+                for (i = j = 0, imax = mixdown.length; i < imax; ++i) {
+                    x =  bufferL[i] = data[j++] * k;
+                    x += bufferR[i] = data[j++] * k;
+                    mixdown[i] = x * 0.5;
                 }
             } else {
-                for (i = 0, imax = bufferL.length; i < imax; ++i) {
-                    bufferL[i] = data[i] * k;
+                for (i = 0, imax = mixdown.length; i < imax; ++i) {
+                    mixdown[i] = data[i] * k;
                 }
             }
             
@@ -164,11 +163,15 @@
                 }
                 duration = bufferL.length / samplerate;
                 
+                var mixdown = new Float32Array(bufferL);
+                for (var i = 0, imax = mixdown.length; i < imax; ++i) {
+                    mixdown[i] = (mixdown[i] + bufferR[i]) * 0.5;
+                }
+                
                 onloadedmetadata({
                     samplerate: samplerate,
                     channels  : channels,
-                    bufferL   : bufferL,
-                    bufferR   : bufferR,
+                    buffer    : [mixdown, bufferL, bufferR],
                     duration  : duration
                 });
                 
@@ -197,7 +200,7 @@
     Decoder.moz_decode = (function() {
         if (typeof Audio === "function" && typeof new Audio().mozSetup === "function") {
             return function(src, onloadedmetadata, onloadeddata) {
-                var samplerate, channels, bufferL, bufferR, duration;
+                var samplerate, channels, mixdown, bufferL, bufferR, duration;
                 var writeIndex = 0;
                 
                 var audio = new Audio(src);
@@ -206,18 +209,18 @@
                     samplerate = audio.mozSampleRate;
                     channels   = audio.mozChannels;
                     duration   = audio.duration;
-                    bufferL = new Float32Array((audio.duration * samplerate)|0);
+                    mixdown = new Float32Array((audio.duration * samplerate)|0);
                     if (channels === 2) {
+                        bufferL = new Float32Array((audio.duration * samplerate)|0);
                         bufferR = new Float32Array((audio.duration * samplerate)|0);
-                    } else {
-                        bufferR = bufferL;
                     }
                     if (channels === 2) {
                         audio.addEventListener("MozAudioAvailable", function(e) {
-                            var samples = e.frameBuffer;
+                            var x, samples = e.frameBuffer;
                             for (var i = 0, imax = samples.length; i < imax; i += 2) {
-                                bufferL[writeIndex] = samples[i  ];
-                                bufferR[writeIndex] = samples[i+1];
+                                x =  bufferL[writeIndex] = samples[i  ];
+                                x += bufferR[writeIndex] = samples[i+1];
+                                mixdown[writeIndex] = x * 0.5;
                                 writeIndex += 1;
                             }
                         }, false);
@@ -225,7 +228,7 @@
                         audio.addEventListener("MozAudioAvailable", function(e) {
                             var samples = e.frameBuffer;
                             for (var i = 0, imax = samples.length; i < imax; ++i) {
-                                bufferL[writeIndex] = bufferR[writeIndex] = samples[i];
+                                mixdown[i] = samples[i];
                                 writeIndex += 1;
                             }
                         }, false);
@@ -235,8 +238,7 @@
                         onloadedmetadata({
                             samplerate: samplerate,
                             channels  : channels,
-                            bufferL   : bufferL,
-                            bufferR   : bufferR,
+                            buffer    : [mixdown, bufferL, bufferR],
                             duration  : duration
                         });
                     }, 1000);
