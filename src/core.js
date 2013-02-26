@@ -518,7 +518,7 @@
                 for (i = 0; i < imax; ++i) {
                     if (nodes[i].playbackState === PLAYING_STATE) {
                         nodes[i].process(tickID);
-                        cell.set(nodes[i].cells[1]);
+                        cell.set(nodes[i].cells[0]);
                         not_clear = false;
                         ++i;
                         break;
