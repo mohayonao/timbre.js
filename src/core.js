@@ -70,7 +70,7 @@
         }
         
         if (t === undefined) {
-            t = new AddNode([]);
+            t = new AddNode(args.slice(1));
             console.warn("T(\"" + key + "\") is not defined.");
             //debug--
             throw new Error("T(\"" + key + "\") is not defined.");
