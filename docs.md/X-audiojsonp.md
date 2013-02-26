@@ -5,7 +5,7 @@ T("audio.jsonp")
 ## Description ##
 
 ###### en ######
-`T("audio.jsonp")`
+`T("audio.jsonp")` is an instance of `T("buffer")` that reads an audio file via JSONP.
 ###### ja ######
 JSONPで音声ファイルを読みこむ `T("buffer")` オブジェクトです。
 ###### -- ######
@@ -17,6 +17,8 @@ T("audio.jsonp").load(url, function() {
   this.play();
 });
 ```
+
+`_callback` of the query string in the URL is removed before sending request. It is useful when you want to use such as static files with Dropbox. For example, url `"../base64_drum.js?_callback=drum"` is converted `"../base64_drum.js"`, `_callback=drum` is used as a part of callback function name, (ex: `window.timbrejs_audiojsonp_drum` .)
 
 ## Properties ##
 - `isLoaded` _(ReadOnly Boolean)_
@@ -45,10 +47,17 @@ T("audio.jsonp").load(url, function() {
 
 ## JSONP ##
 ```js
-window.timbrejs_audiojsonp_CALLBACK(BASE64, extension_type);
+window.timbrejs_audiojsonp_CALLBACK(BASE64, EXTENSION_TYPE);
 ```
 
 sample(large file): https://dl.dropbox.com/u/645229/tmp/timbre.js/base64_drum.js
+
+## Tool ##
+[convert an audio file to a JSONP script](http://127.0.0.1:3000/timbre.js/misc/audio-jsonp.js)
+
+```sh
+$ node ./audio-jsonp.js [-n CALLBACK] file > audio.js
+```
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/extras/audio-jsonp.js
