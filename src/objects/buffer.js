@@ -208,13 +208,13 @@
         if (_.bufferL) {
             if (_.channels === 2) {
                 setBuffer.call(instance, {
-                    bufferL   : _.bufferL.subarray(begin, end),
-                    bufferR   : _.bufferR.subarray(begin, end),
+                    bufferL   : fn.pointer(_.bufferL, begin, end-begin),
+                    bufferR   : fn.pointer(_.bufferR, begin, end-begin),
                     samplerate: _.samplerate
                 });
             } else {
                 setBuffer.call(instance, {
-                    buffer: _.bufferL.subarray(begin, end),
+                    buffer: fn.pointer(_.bufferL, begin, end-begin),
                     samplerate: _.samplerate
                 });
             }
