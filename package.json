@@ -20,10 +20,6 @@
     "lame": "1.0.0"
   },
   "devDependencies": {
-    "coffee-script": "1.4.0",
-    "express": "*",
-    "jade": "*",
-    "marked": "*",
     "chai": "~1.5.0",
     "grunt": "~0.4.0rc8",
     "grunt-contrib-uglify": "~0.1.1rc6",
