@@ -2559,7 +2559,7 @@
             if (typeof end === "undefined") {
                 end = this.length;
             }
-            return new this.__klass(this.slice(begin, end));
+            return new this.constructor(this.slice(begin, end));
         };
         [["Int8Array" , 1, signed], ["Uint8Array" , 1, unsigned],
          ["Int16Array", 2, signed], ["Uint16Array", 2, unsigned],
