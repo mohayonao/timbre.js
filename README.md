@@ -16,8 +16,8 @@ Timbre.js runs on modern browsers for Windows/Mac/Linux/iOS/Android or node.js.
 ![Chrome 14.0-](http://mohayonao.github.com/timbre.js/misc/img/chrome.png)
 ![Safari 6.0-](http://mohayonao.github.com/timbre.js/misc/img/safari.png)
 ![Firefox 4.0-](http://mohayonao.github.com/timbre.js/misc/img/firefox.png)
-![Opera](/timbre.js/misc/img/opera.png)
-![IE9](/timbre.js/misc/img/ie.png)
+![Opera](http://mohayonao.github.com/timbre.js/misc/img/opera.png)
+![IE9](http://mohayonao.github.com/timbre.js/misc/img/ie.png)
 ![node.js 0.8-](http://mohayonao.github.com/timbre.js/misc/img/nodejs.png)
 
 *IE support is only Internet Exploler 9.*  
