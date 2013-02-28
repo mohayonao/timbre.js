@@ -2,6 +2,16 @@ T("audio.jsonp")
 ================
 {ar}{stereo} Audio from jsonp
 
+## Installation
+
+Download an extra object: [audio-jsonp.js](/timbre.js/src/extras/audio-jsonp.js)
+
+```html
+<script src="timbre.js"></script>
+<script src="audio-jsonp.js"></script>
+```
+
+
 ## Description ##
 
 ###### en ######
@@ -18,7 +28,11 @@ T("audio.jsonp").load(url, function() {
 });
 ```
 
-`_callback` of the query string in the URL is removed before sending request. It is useful when you want to use such as static files with Dropbox. For example, url `"../base64_drum.js?_callback=drum"` is converted `"../base64_drum.js"`, `_callback=drum` is used as a part of callback function name, (ex: `window.timbrejs_audiojsonp_drum` .)
+###### en ######
+`_callback` of the query string (begin with an underscore) in the URL is removed before sending request. It is useful when you want to use such as static files with Dropbox. For example, url `"../base64_drum.js?_callback=drum"` is converted `"../base64_drum.js"`, `_callback=drum` is used as a part of callback function name, (ex: `window.timbrejs_audiojsonp_drum` .)
+###### ja ######
+アンダースコア付きのURLのクエリ `_callback` はサーバーへのリクエスト時に削除されます。これはDropboxなど静的なファイルストレージを使う際に便利です。たとえば `"../base64_drum.js?_callback=drum"` は `"../base64_drum.js"` にアクセスして、`_callback=drum` の部分はコールバック関数名 (`window.timbrejs_audiojsonp_drum`) にのみ使用されます。
+###### -- ######
 
 ## Properties ##
 - `isLoaded` _(ReadOnly Boolean)_

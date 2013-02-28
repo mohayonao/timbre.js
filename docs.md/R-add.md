@@ -46,6 +46,3 @@ T("lpf", {cutoff:cutoff},
   T("saw", {freq:783.99, mul:0.25})
 ).play();
 ```
-
-## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/add.js
