@@ -16,18 +16,13 @@ Timbre.js runs on modern browsers for Windows/Mac/Linux/iOS/Android or node.js.
 ![Chrome 14.0-](http://mohayonao.github.com/timbre.js/misc/img/chrome.png)
 ![Safari 6.0-](http://mohayonao.github.com/timbre.js/misc/img/safari.png)
 ![Firefox 4.0-](http://mohayonao.github.com/timbre.js/misc/img/firefox.png)
+![Opera](/timbre.js/misc/img/opera.png)
+![IE9](/timbre.js/misc/img/ie.png)
 ![node.js 0.8-](http://mohayonao.github.com/timbre.js/misc/img/nodejs.png)
 
+*IE support is only Internet Exploler 9.*  
 *iOS support is only later iOS6.0*  
 *Android support is only [Firefox](https://play.google.com/store/apps/details?id=org.mozilla.firefox) app.*
-
-## Optional Supports ##
-Timbre.js is able to run via Flash Player 10.
-
-![Opera](http://mohayonao.github.com/timbre.js/misc/img/opera.png)
-![IE9](http://mohayonao.github.com/timbre.js/misc/img/ie.png)
-
-*IE support is only Internet Exploler 9.*
 
 ## Installation ##
 ### browser
@@ -39,6 +34,13 @@ Include the `timbre.js` file. It will install itself as `timbre`, `T` under the 
   T("sin", {freq:880, mul:0.5}).play();
 </script>
 ```
+
+### Flash fallback (for Opera and IE9)
+Download an additional file (Right-click and use "Save As")
+
+- [timbre.swf](/timbre.js/timbre.swf)
+
+`timbre.swf` must be set in the same folder as `timbre.js`.
 
 ### node.js
 Install via npm: `npm install timbre`, you can require it as a standard node module.
@@ -53,12 +55,12 @@ T("sin", {freq:880, mul:0.5}).play();
 
 MIT
 
-
 ## ChangeLog ##
-**WORKING** (342.92KB)
+**13.03.01** (355.73KB)
 * Added: `T("script")`
 * Added: `T("waveshaper")`
 * Added: `T("lag")`
+* Added: `T("mono")`
 * Added: `T("delay").cross`
 * Added: `T("audio.jsonp")` to extras
 * Moved: `T("keyboard")` to extras
