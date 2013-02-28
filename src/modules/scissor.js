@@ -277,23 +277,6 @@
     };
     Scissor.Fragment = Fragment;
     
-    var sintable = (function() {
-        var a = new Float32Array(257);
-        for (var i = 0; i < 256; ++i) {
-            a[i] = Math.sin(0.5 * Math.PI * (i/ 256));
-        }
-        a[256] = 1;
-        return a;
-    })();
-
-    var costable = (function() {
-        var a = new Float32Array(257);
-        for (var i = 0; i < 256; ++i) {
-            a[i] = Math.cos(0.5 * Math.PI * (i/ 256));
-        }
-        a[256] = 0;
-        return a;
-    })();
     
     function TapeStream(tape, samplerate) {
         this.tape = tape;
@@ -308,8 +291,8 @@
         this.bufferEndIndex   = 0;
         this.fragment      = null;
         this.fragmentIndex = 0;
-        this.panL = 0.7071067811865475;
-        this.panR = 0.7071067811865475;
+        this.panL = 0.5;
+        this.panR = 0.5;
     }
     Scissor.TapeStream = TapeStream;
     
@@ -322,8 +305,8 @@
         this.bufferEndIndex   = 0;
         this.fragment      = null;
         this.fragmentIndex = 0;
-        this.panL = 0.7071067811865475;
-        this.panR = 0.7071067811865475;
+        this.panL = 0.5;
+        this.panR = 0.5;
         this.isLooped = false;
         return this;
     };
@@ -345,6 +328,7 @@
         var bufferEndIndex   = this.bufferEndIndex;
         var fragment      = this.fragment;
         var fragmentIndex = this.fragmentIndex;
+        var pan;
         var panL = this.panL;
         var panR = this.panR;
         
@@ -358,9 +342,9 @@
                     bufferBeginIndex = fragment.start * fragment.samplerate;
                     bufferEndIndex   = bufferBeginIndex + fragment.original_duration() * fragment.samplerate;
 
-                    var index = ((fragment.pan / 100) * 256)|0;
-                    panL = costable[index];
-                    panR = sintable[index];
+                    pan = (fragment.pan * 0.01);
+                    panL = 1 - pan;
+                    panR = pan;
                     
                     if (fragment.reverse) {
                         bufferIndexIncr *= -1;
