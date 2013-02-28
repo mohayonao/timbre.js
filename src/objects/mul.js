@@ -4,45 +4,53 @@
     var fn = T.fn;
     
     function MulNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
     }
     fn.extend(MulNode);
     
     var $ = MulNode.prototype;
     
     $.process = function(tickID) {
-        var cell = this.cell;
         var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var inputs = this.inputs;
-            var i, imax = inputs.length;
+            var nodes = this.nodes;
+            var cell  = this.cells[0];
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = nodes.length;
             var j, jmax = cell.length;
-            var tmp;
+            var tmp, tmpL, tmpR;
             
             if (_.ar) {
-                if (inputs.length > 0) {
-                    tmp = inputs[0].process(tickID);
-                    cell.set(tmp);
+                if (nodes.length > 0) {
+                    nodes[0].process(tickID);
+                    tmpL = nodes[0].cells[1];
+                    tmpR = nodes[0].cells[2];
+                    cellL.set(tmpL);
+                    cellR.set(tmpR);
                     for (i = 1; i < imax; ++i) {
-                        tmp = inputs[i].process(tickID);
+                        nodes[i].process(tickID);
+                        tmpL = nodes[i].cells[1];
+                        tmpR = nodes[i].cells[2];
                         for (j = 0; j < jmax; ++j) {
-                            cell[j] *= tmp[j];
+                            cellL[j] *= tmpL[j];
+                            cellR[j] *= tmpR[j];
                         }
                     }
                 } else {
                     for (j = 0; j < jmax; ++j) {
-                        cell[j] = 0;
+                        cellL[j] = cellR[j] = 0;
                     }
                 }
                 fn.outputSignalAR(this);
             } else {
-                if (inputs.length > 0) {
-                    tmp = inputs[0].process(tickID)[0];
+                if (nodes.length > 0) {
+                    tmp = nodes[0].process(tickID).cells[0][0];
                     for (i = 1; i < imax; ++i) {
-                        tmp *= inputs[i].process(tickID)[0];
+                        tmp *= nodes[i].process(tickID).cells[0][0];
                     }
                 } else {
                     tmp = 0;
@@ -52,7 +60,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("*", MulNode);

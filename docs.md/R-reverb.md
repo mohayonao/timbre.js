@@ -1,6 +1,6 @@
 T("reverb")
 ==========
-{ar} A reverb
+{ar}{stereo} A reverb
 
 ## Description ##
 Port of the [Freeverb](https://ccrma.stanford.edu/~jos/pasp/Freeverb.html) Schrodoer/Moorer reverb model.

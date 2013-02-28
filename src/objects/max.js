@@ -4,30 +4,30 @@
     var fn = T.fn;
     
     function MaxNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
     }
     fn.extend(MaxNode);
     
     var $ = MaxNode.prototype;
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var inputs = this.inputs;
-            var i, imax = inputs.length;
+            var nodes = this.nodes;
+            var i, imax = nodes.length;
             var j, jmax = cell.length;
             var tmp, val;
             
             if (_.ar) {
-                if (inputs.length > 0) {
-                    tmp = inputs[0].process(tickID);
+                if (nodes.length > 0) {
+                    tmp = nodes[0].process(tickID).cells[0];
                     cell.set(tmp);
                     for (i = 1; i < imax; ++i) {
-                        tmp = inputs[i].process(tickID);
+                        tmp = nodes[i].process(tickID).cells[0];
                         for (j = 0; j < jmax; ++j) {
                             val = tmp[j];
                             if (cell[j] < val) {
@@ -42,10 +42,10 @@
                 }
                 fn.outputSignalAR(this);
             } else {
-                if (inputs.length > 0) {
-                    tmp = inputs[0].process(tickID)[0];
+                if (nodes.length > 0) {
+                    tmp = nodes[0].process(tickID).cells[0][0];
                     for (i = 1; i < imax; ++i) {
-                        val = inputs[i].process(tickID)[0];
+                        val = nodes[i].process(tickID).cells[0][0];
                         if (tmp < val) {
                             tmp = val;
                         }
@@ -58,7 +58,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("max", MaxNode);

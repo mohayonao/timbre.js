@@ -3,10 +3,6 @@ $(function() {
     
     sc.use("prototype");
     
-    if (timbre.env === "nop") {
-        timbre.bind(timbre.FlashPlayer, {src:"/timbre.js/libs/TimbreFlashPlayer.swf"});
-    }
-
     timbre.setup({f64:true});
     if (timbre.envmobile) {
         timbre.setup({samplerate:timbre.samplerate * 0.5});
@@ -30,6 +26,11 @@ $(function() {
     }).on("pause", onreset).on("reset", onreset).amp = 0.6;
     
     function playCode(code) {
+        code = code.split("\n").map(function(line) {
+            return line.replace(/([\d\D])?\/\/[\d\D]*$/, function(m, a, b) {
+                return (a === ":") ? m : ""; // url??
+            });
+        }).join("\n");
         if (timbre.isPlaying && nowPlaying === code) {
             timbre.reset();
             timbre.pause();
@@ -58,6 +59,7 @@ $(function() {
                 current = {container:container, button:$(this)};
                 playCode(editor.getValue().trim());
             }).append("Play").appendTo(container);
+            container.css("margin-bottom", "50px");
         }
     });
     

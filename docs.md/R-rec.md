@@ -1,5 +1,5 @@
-T("record")
-===========
+T("rec")
+========
 {ar}{listener} Recorder
 
 ## Description ##
@@ -42,8 +42,7 @@ T("mouse").start();
 - `T("rec")` での録音は実時間が必要です
 - 前処理として録音データを扱いたい場合は [`timbre.rec`](./RecordingMode.html) を使います
 
-## Alias ##
-`T("rec")`
-
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/objects/rec.js
+
+<script src="/timbre.js/src/extras/mouse.js"></script>

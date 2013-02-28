@@ -15,6 +15,16 @@ T("audio", {load:"/timbre.js/misc/audio/amen.wav"}).on("ended", function() {
 }).play();
 ```
 
+```timbre
+T("audio").load("/timbre.js/misc/audio/amen.wav", function() {
+  var audio = this;
+  var currentTime = T("param", {value:0.01, ar:true}).on("ended", function() {
+    audio.pause();
+  }).sinTo(audio.duration, audio.duration);
+  audio.set({currentTime:currentTime}).play();
+});
+```
+
 ###### en ######
 \* [`T("audio")`](./audio.html) is an instance of `T("buffer")` that can load an audio file and decode it.
 ###### ja ######
@@ -38,7 +48,7 @@ T("audio", {load:"/timbre.js/misc/audio/amen.wav"}).on("ended", function() {
   - 再生時間
 ###### -- ######
 
-- `currentTime` _(Number)_
+- `currentTime` _(T-Object or Number)_
 ###### en ######
   - Sets or returns the current playback position in the receiver (in milliseconds)
 ###### ja ######

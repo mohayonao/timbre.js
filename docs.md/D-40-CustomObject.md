@@ -13,7 +13,7 @@ Customize timbre.js
   "use strict";
   
   function CustomObject(_args) {
-    timbre.Object.call(this, _args);
+    timbre.Object.call(this, 1, _args);
   }
   timbre.fn.extend(CustomObject);
   
@@ -22,38 +22,40 @@ Customize timbre.js
       this.tickID = tickID;
       
       timbre.fn.inputSignalAR(this);
-            
-      for (var i = 0; i < this.cell.length; i++) {
-        this.cell[i] = this.cell[i] * this.cell[i];
+      
+      var cell = this.cells[0];
+      
+      for (var i = 0; i < cell.length; i++) {
+        cell[i] = cell[i] * cell[i];
       }
       
       timbre.fn.outputSignalAR(this);
     }
-    return this.cell;
+    return this;
   };
   
   timbre.fn.register("custom-object", CustomObject);
 })();
- 
+
 T("custom-object", 
     T("audio", {load:"/timbre.js/misc/audio/amen.wav", loop:true})
 ).play();
 ```
 
 ### 必須 ###
-- `timbre.Object.call(this, _args);` _(line:5)_
+- `timbre.Object.call(this, channels, _args);` _(line:5)_
   - インスタンスを T オブジェクト として初期化します
 - `timbre.fn.extend(CustomObject);` _(line:7)_
   - T オブジェクトクラス を継承します
 - `CustomObject.prototype.process = function(tickID)` _(line:9)_
   - 処理で呼ばれる関数です. 処理を行って `this.cell` を返します
-- `timbre.fn.register("custom-object", CustomObject);` _(line:24)_
+- `timbre.fn.register("custom-object", CustomObject);` _(line:26)_
   - クラスを登録する
 
 ### 便利関数 ###
 - `timbre.fn.inputSignalAR(this);` _(line:13)_
   - 入力オブジェクトの値を取得します ( `this.cell`を初期化して入力オブジェクトの値を加算します )
-- `timbre.fn.outputSignalAR(this);` _(line:19)_
+- `timbre.fn.outputSignalAR(this);` _(line:21)_
   - 出力値を調整します ( output * mul + add します )
   
 ### tickID ###
@@ -64,10 +66,22 @@ T("custom-object",
 
 ```js
 function CustomObject(_args) {
-  timbre.Object.call(this, _args);
+  timbre.Object.call(this, 1, _args);
   
   this._.private1 =  0;
   this._.private2 = 10;
+}
+```
+
+### ステレオオブジェクト ###
+ステレオ対応のオブジェクトを生成するには、`timbre.Object.call` の 2番目の引数を `2` にします。
+
+```js
+function CustomObject(_args) {
+  timbre.Object.call(this, 2, _args);
+  
+  var cellL = this.cells[1]; // left channel
+  var cellR = this.cells[2]; // right channel
 }
 ```
 
@@ -98,8 +112,8 @@ like this.
 ```js
 class CustomObject extends timbre.Object
   constructor: (_args)->
-    @super _args
+    @super 1, _args
       
   process: (tickID)->
-    @cell
+    @
 ```

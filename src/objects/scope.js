@@ -5,14 +5,14 @@
     var timevalue = T.timevalue;
     
     function ScopeNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.listener(this);
         fn.fixAR(this);
         
-        this._.samples    = 0;
-        this._.writeIndex = 0;
-        
-        this._.plotFlush = true;
+        var _ = this._;
+        _.samples    = 0;
+        _.writeIndex = 0;
+        _.plotFlush = true;
         
         this.once("init", oninit);
     }
@@ -59,7 +59,7 @@
                         _.reservedinterval = value;
                     } else {
                         _.interval    = value;
-                        _.samplesIncr = value * 0.001 * T.samplerate / _.buffer.length;
+                        _.samplesIncr = value * 0.001 * _.samplerate / _.buffer.length;
                         if (_.samplesIncr < 1) {
                             _.samplesIncr = 1;
                         }
@@ -87,30 +87,31 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
+            fn.outputSignalAR(this);
             
-            var i, imax = cell.length;
+            var cell = this.cells[0];
+            var i, imax = _.cellsize;
             var samples     = _.samples;
             var samplesIncr = _.samplesIncr;
             var buffer      = _.buffer;
             var writeIndex  = _.writeIndex;
             var emit = false;
-            var mul = _.mul, add = _.add;
-            var mask = buffer.length - 1;
+            var bufferlength = buffer.length;
             
             for (i = 0; i < imax; ++i) {
                 if (samples <= 0) {
                     buffer[writeIndex++] = cell[i];
-                    writeIndex &= mask;
+                    if (writeIndex >= bufferlength) {
+                        writeIndex = 0;
+                    }
                     emit = _.plotFlush = true;
                     samples += samplesIncr;
                 }
-                cell[i] = cell[i] * mul + add;
                 --samples;
             }
             _.samples    = samples;
@@ -121,7 +122,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     var super_plot = T.Object.prototype.plot;

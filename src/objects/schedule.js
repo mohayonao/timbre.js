@@ -5,15 +5,14 @@
     var timevalue = T.timevalue;
     
     function ScheduleNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 0, _args);
         fn.timer(this);
         fn.fixKR(this);
         
         var _ = this._;
         _.queue = [];
-        _.currentTime     = 0;
-        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
-        _.maxRemain = 1000;
+        _.currentTime = 0;
+        _.maxRemain   = 1000;
     }
     fn.extend(ScheduleNode);
     
@@ -98,13 +97,8 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
         var _ = this._;
-
-        if (_.isEnded) {
-            return cell;
-        }
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
@@ -122,11 +116,12 @@
                     }
                 }
             }
-            _.currentTime += _.currentTimeIncr;
+            _.currentTime += fn.currentTimeIncr;
             if (emit) {
                 _.emit(emit);
             }
         }
+        return this;
     };
     
     fn.register("schedule", ScheduleNode);

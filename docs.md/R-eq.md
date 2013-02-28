@@ -1,6 +1,6 @@
 T("eq")
 =======
-Equallizer
+{ar}{stereo} Equallizer
 
 (canvas canvas w:240 h:80)
 

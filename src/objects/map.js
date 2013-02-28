@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function MapNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         var _ = this._;
         _.input  = 0;
         _.value = 0;
@@ -54,13 +54,13 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
-            var len = this.inputs.length;
+            var len = this.nodes.length;
             var i, imax = cell.length;
             
             if (_.ar && len) {
@@ -86,7 +86,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("map", MapNode);

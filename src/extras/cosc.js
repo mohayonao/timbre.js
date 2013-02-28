@@ -5,16 +5,16 @@
     var Oscillator = T.modules.Oscillator;
     
     function COscNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.fixAR(this);
         
         var _ = this._;
         _.freq = T(440);
-        _.osc1 = new Oscillator(T.samplerate);
-        _.osc2 = new Oscillator(T.samplerate);
-        _.osc1.step = this.cell.length;
-        _.osc2.step = this.cell.length;
-        _.tmp = new fn.SignalArray(this.cell.length);
+        _.osc1 = new Oscillator(_.samplerate);
+        _.osc2 = new Oscillator(_.samplerate);
+        _.osc1.step = _.cellsize;
+        _.osc2.step = _.cellsize;
+        _.tmp = new fn.SignalArray(_.cellsize);
         _.beats = 0.5;
         
         this.once("init", oninit);
@@ -68,13 +68,13 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             var i, imax = cell.length;
-            var freq = _.freq.process(tickID)[0];
+            var freq = _.freq.process(tickID).cells[0][0];
             var osc1 = _.osc1, osc2 = _.osc2, tmp = _.tmp;
             
             osc1.frequency = freq - (_.beats * 0.5);
@@ -92,7 +92,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("cosc", COscNode);

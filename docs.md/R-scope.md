@@ -1,6 +1,6 @@
 T("scope")
 ==========
-{ar}{listener} Signal oscilloscope
+{ar}{stereo}{listener} Signal oscilloscope
 
 ## Description ##
 

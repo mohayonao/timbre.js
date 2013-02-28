@@ -1,9 +1,8 @@
 T("mediastream")
 ================
-{stereo}{ar} Media Stream
+{ar}{stereo} Media Stream
 
 _* Browser Only_
-
 
 <audio id="audio" src="/timbre.js/misc/audio/amen.wav" controls></audio>
 

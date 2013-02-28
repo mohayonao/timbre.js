@@ -58,4 +58,6 @@ T("mouse").start();
   - 出力カーブの種類 (`"lin"`, `"exp"`, `"sqr"` or `"cub"`)
 
 ## Source ##
-https://github.com/mohayonao/timbre.js/blob/master/src/objects/mouse.js
+https://github.com/mohayonao/timbre.js/blob/master/src/extras/mouse.js
+
+<script src="/timbre.js/src/extras/mouse.js"></script>

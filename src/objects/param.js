@@ -7,12 +7,12 @@
     var EnvelopeValue = T.modules.EnvelopeValue;
     
     function ParamNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         
         var _ = this._;
         _.value = 0;
-        _.env = new EnvelopeValue(T.samplerate);
-        _.env.step = this.cell.length;
+        _.env = new EnvelopeValue(_.samplerate);
+        _.env.step = _.cellsize;
         _.curve   = "lin";
         _.counter = 0;
         _.ar = false;
@@ -23,7 +23,7 @@
     fn.extend(ParamNode);
     
     var onar = function(value) {
-        this._.env.step = (value) ? 1 : this.cell.length;
+        this._.env.step = (value) ? 1 : this._.cellsize;
     };
     
     var $ = ParamNode.prototype;
@@ -104,57 +104,57 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
-            var inputs  = this.inputs;
-            var i, imax = cell.length;
-            var mul = _.mul, add = _.add;
+
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = _.cellsize;
             var env = _.env;
             var counter = _.counter;
+            var value;
             
-            if (inputs.length) {
+            if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = 1;
+                    cellL[i] = cellR[i] = 1;
                 }
             }
             
-            if (counter-- > 0) {
-                if (counter <= 0) {
-                    if (_.curve === "set") {
-                        env.setNext(_.atValue, 0, Envelope.CurveTypeSet);
-                    } else {
-                        env.setNext(env.value, 0, Envelope.CurveTypeSet);
-                    }
-                    fn.nextTick(_.onended);
+            if (counter <= 0) {
+                if (_.curve === "set") {
+                    env.setNext(_.atValue, 0, Envelope.CurveTypeSet);
+                } else {
+                    env.setNext(env.value, 0, Envelope.CurveTypeSet);
                 }
-                _.counter = counter;
+                fn.nextTick(_.onended);
+                _.counter = Infinity;
             }
             
-            var value, emit = null;
             if (_.ar) {
                 for (i = 0; i < imax; ++i) {
                     value = env.next();
-                    cell[i] = (cell[i] * value) * mul + add;
-                    if (emit === null) {
-                        emit = _.env.emit;
-                    }
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
+                _.counter -= _.cellsize;
             } else {
                 value = env.next();
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = (cell[i] * value) * mul + add;
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
-                emit = _.env.emit;
+                _.counter -= 1;
             }
+            
+            fn.outputSignalAR(this);
+            
             _.value = value;
         }
         
-        return cell;
+        return this;
     };
     
     var super_plot = T.Object.prototype.plot;

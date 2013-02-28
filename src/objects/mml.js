@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function MML(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 0, _args);
         fn.timer(this);
         fn.fixKR(this);
         
@@ -15,12 +15,10 @@
         _.index    = 0;
         _.queue    = [];
         _.currentTime     = 0;
-        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
         _.queueTime = 0;
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
-        _.isEnded  = false;
         _.remain   = Infinity;
         _.onended  = fn.make_onended(this);
         
@@ -30,6 +28,7 @@
     
     var onstart = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.commands = compile(_.mml);
         _.index    = 0;
         _.queue    = [];
@@ -38,7 +37,6 @@
         _.segnoIndex  = -1;
         _.loopStack   = [];
         _.prevNote = 0;
-        _.isEnded  = false;
         _.remain   = Infinity;
         
         sched(this);
@@ -65,26 +63,60 @@
             get: function() {
                 return this._.currentTime;
             }
-        },
-        isEnded: {
-            get: function() {
-                return this._.isEnded;
-            }
         }
     });
     
-    $.process = function(tickID) {
-        var cell = this.cell;
-        var _ = this._;
-        
-        if (_.isEnded) {
-            return cell;
+    $.on = $.addListener = function(type, listener) {
+        if (type === "mml") {
+            type = "data";
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
         }
+        this._.events.on(type, listener);
+        return this;
+    };
+    
+    $.once = function(type, listener) {
+        if (type === "mml") {
+            type = "data";
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
+        }
+        this._.events.once(type, listener);
+        return this;
+    };
+    
+    $.off = $.removeListener = function(type, listener) {
+        if (type === "mml") {
+            type = "data";
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
+        }
+        this._.events.off(type, listener);
+        return this;
+    };
+    
+    $.removeAllListeners = function(type) {
+        if (type === "mml") {
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
+            type = "data";
+        }
+        this._.events.removeAllListeners(type);
+        return this;
+    };
+    
+    $.listeners = function(type) {
+        if (type === "mml") {
+            console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
+            type = "data";
+        }
+        return this._.events.listeners(type);
+    };
+    
+    $.process = function(tickID) {
+        var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var inputs = this.inputs;
+            var nodes = this.nodes;
             var queue  = _.queue;
             var gen, i, imax;
             
@@ -92,8 +124,8 @@
                 while (queue[0][0] <= _.currentTime) {
                     var nextItem = _.queue.shift();
                     if (nextItem[1]) {
-                        for (i = 0, imax = inputs.length; i < imax; ++i) {
-                            gen = inputs[i];
+                        for (i = 0, imax = nodes.length; i < imax; ++i) {
+                            gen = nodes[i];
                             if (gen.noteOn) {
                                 gen.noteOn(nextItem[1], nextItem[3]);
                             } else {
@@ -101,41 +133,36 @@
                             }
                         }
                         _.remain = nextItem[4];
-                        _.emit("mml", "noteOn", {noteNum:nextItem[1], velocity:nextItem[3]});
+                        _.emit("data", "noteOn", {noteNum:nextItem[1], velocity:nextItem[3]});
                         sched(this);
                     } else {
-                        for (i = 0, imax = inputs.length; i < imax; ++i) {
-                            gen = inputs[i];
+                        for (i = 0, imax = nodes.length; i < imax; ++i) {
+                            gen = nodes[i];
                             if (gen.noteOff) {
                                 gen.noteOff(nextItem[2], nextItem[3]);
                             } else if (gen.release) {
                                 gen.release();
                             }
                         }
-                        _.emit("mml", "noteOff", {noteNum:nextItem[2], velocity:nextItem[3]});
+                        _.emit("data", "noteOff", {noteNum:nextItem[2], velocity:nextItem[3]});
                     }
                     if (queue.length === 0) {
-                        
                         break;
                     }
                 }
             }
-            _.remain -= _.currentTimeIncr;
+            _.remain -= fn.currentTimeIncr;
             if (queue.length === 0 && _.remain <= 0) {
                 fn.nextTick(_.onended);
             }
-            _.currentTime += _.currentTimeIncr;
+            _.currentTime += fn.currentTimeIncr;
         }
         
-        return cell;
+        return this;
     };
     
     var sched = function(self) {
         var _ = self._;
-        
-        if (_.isEnded) {
-            return;
-        }
         
         var cmd, commands = _.commands;
         var queue  = _.queue;

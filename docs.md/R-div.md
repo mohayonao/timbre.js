@@ -1,6 +1,6 @@
 T("/")
 ======
-{arkr} Divide signals
+{krar}{stereo} Divide signals
 
 ## Description ##
 ###### en ######

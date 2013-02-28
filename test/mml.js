@@ -9,7 +9,7 @@ describe('T("mml")', function() {
         it("tone", function(done) {
             var list = [], prev = null;
             var mml  = "t300 l64 o4 cdefgab<c";
-            T("mml", {mml:mml}).on("mml", function(type, opts) {
+            T("mml", {mml:mml}).on("data", function(type, opts) {
                 if (type === "noteOn") {
                     list.push(opts.noteNum);
                     prev = opts.noteNum;
@@ -25,7 +25,7 @@ describe('T("mml")', function() {
         it("tone sharp/flat", function(done) {
             var list = [];
             var mml  = "t300 l64 o4 cc+dd+ee-dd-c";
-            T("mml", {mml:mml}).on("mml", function(type, opts) {
+            T("mml", {mml:mml}).on("data", function(type, opts) {
                 if (type === "noteOn") {
                     list.push(opts.noteNum);
                 }
@@ -38,7 +38,7 @@ describe('T("mml")', function() {
         it("octave", function(done) {
             var list = [];
             var mml  = "t300 l64 o3 c <c >c o5 c";
-            T("mml", {mml:mml}).on("mml", function(type, opts) {
+            T("mml", {mml:mml}).on("data", function(type, opts) {
                 if (type === "noteOn") {
                     list.push(opts.noteNum);
                 }

@@ -10,9 +10,9 @@
     };
     
     function EQNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
-
+        
         var _ = this._;
         _.biquads = new Array(7);
         
@@ -25,7 +25,7 @@
     var plotBefore = function(context, x, y, width, height) {
         context.lineWidth = 1;
         context.strokeStyle = "rgb(192, 192, 192)";
-        var nyquist = T.samplerate * 0.5;
+        var nyquist = this._.samplerate * 0.5;
         for (var i = 1; i <= 10; ++i) {
             for (var j = 1; j <= 4; j++) {
                 var f = i * Math.pow(10, j);
@@ -84,7 +84,7 @@
                 }
                 var biquad = _.biquads[index];
                 if (!biquad) {
-                    biquad = _.biquads[index] = new Biquad(T.samplerate);
+                    biquad = _.biquads[index] = new Biquad(_.samplerate);
                     switch (index) {
                     case 0:
                         biquad.setType("highpass");
@@ -116,7 +116,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -124,10 +123,12 @@
             fn.inputSignalAR(this);
 
             if (!_.bypassed) {
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
                 var biquads = _.biquads;
                 for (var i = 0, imax = biquads.length; i < imax; ++i) {
                     if (biquads[i]) {
-                        biquads[i].process(cell);
+                        biquads[i].process(cellL, cellR);
                     }
                 }
             }
@@ -135,7 +136,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
 
     var fft = new FFT(2048);
@@ -149,7 +150,7 @@
             for (var i = 0, imax = _.biquads.length; i < imax; ++i) {
                 var params = this.getParams(i);
                 if (params) {
-                    var biquad = new Biquad(T.samplerate);
+                    var biquad = new Biquad(_.samplerate);
                     if (i === 0) {
                         biquad.setType("highpass");
                     } else if (i === imax - 1) {
@@ -158,7 +159,7 @@
                         biquad.setType("peaking");
                     }
                     biquad.setParams(params.freq, params.Q, params.gain);
-                    biquad.process(impluse);
+                    biquad.process(impluse, impluse);
                 }
             }
             
@@ -166,7 +167,7 @@
             
             var size = 512;
             var data = new Float32Array(size);
-            var nyquist  = T.samplerate * 0.5;
+            var nyquist  = _.samplerate * 0.5;
             var spectrum = new Float32Array(size);
             var j, f, index, delta, x0, x1, xx;
             

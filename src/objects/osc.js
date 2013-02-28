@@ -6,14 +6,14 @@
     var Oscillator = T.modules.Oscillator;
     
     function OscNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         
         var _ = this._;
         _.freq  = T(440);
         _.phase = T(0);
-        _.osc = new Oscillator(T.samplerate);
-        _.tmp = new fn.SignalArray(this.cell.length);
-        _.osc.step = this.cell.length;
+        _.osc = new Oscillator(_.samplerate);
+        _.tmp = new fn.SignalArray(_.cellsize);
+        _.osc.step = _.cellsize;
         
         this.once("init", oninit);
     }
@@ -85,25 +85,25 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var inputs  = this.inputs;
-            var i, imax = cell.length;
+            var cellL = this.cells[1];
+            var cellR = this.cells[2];
+            var i, imax = _.cellsize;
             
-            if (inputs.length) {
+            if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
                 for (i = 0; i < imax; ++i) {
-                    cell[i] = 1;
+                    cellL[i] = cellR[i] = 1;
                 }
             }
             
             var osc = _.osc;
-            var freq  = _.freq.process(tickID);
-            var phase = _.phase.process(tickID);
+            var freq  = _.freq.process(tickID).cells[0];
+            var phase = _.phase.process(tickID).cells[0];
             
             osc.frequency = freq[0];
             osc.phase     = phase[0];
@@ -124,18 +124,20 @@
                     }
                 }
                 for (i = 0; i < imax; ++i) {
-                    cell[i] *= tmp[i];
+                    cellL[i] *= tmp[i];
+                    cellR[i] *= tmp[i];
                 }
             } else {
                 var value = osc.next();
                 for (i = 0; i < imax; ++i) {
-                    cell[i] *= value;
+                    cellL[i] *= value;
+                    cellR[i] *= value;
                 }
             }
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
 
     var plotBefore;

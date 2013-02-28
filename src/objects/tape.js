@@ -5,14 +5,14 @@
     var Scissor    = T.modules.Scissor;
     var Tape       = Scissor.Tape;
     var TapeStream = Scissor.TapeStream;
+    var isSignalArray = fn.isSignalArray;
     
     function ScissorNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
-
+        
         var _ = this._;
         _.isLooped = false;
-        _.isEnded  = false;
         _.onended  = fn.make_onended(this, 0);
     }
     fn.extend(ScissorNode);
@@ -23,14 +23,14 @@
         tape: {
             set: function(tape) {
                 if (tape instanceof Tape) {
+                    this.playbackState = fn.PLAYING_STATE;
                     this._.tape = tape;
-                    this._.tapeStream = new TapeStream(tape, T.samplerate);
-                    this._.isEnded = false;
+                    this._.tapeStream = new TapeStream(tape, this._.samplerate);
                 } else if (typeof tape === "object") {
-                    if (tape.buffer instanceof Float32Array || tape.buffer instanceof Float64Array) {
+                    if (Array.isArray(tape.buffer) && isSignalArray(tape.buffer[0])) {
+                        this.playbackState = fn.PLAYING_STATE;
                         this._.tape = new Scissor(tape);
-                        this._.tapeStream = new TapeStream(tape, T.samplerate);
-                        this._.isEnded = false;
+                        this._.tapeStream = new TapeStream(tape, this._.samplerate);
                     }
                 }
             },
@@ -41,11 +41,6 @@
         isLooped: {
             get: function() {
                 return this._.isLooped;
-            }
-        },
-        isEnded: {
-            get: function() {
-                return this._.isEnded;
             }
         }
     });
@@ -59,39 +54,37 @@
     };
     
     $.bang = function() {
+        this.playbackState = fn.PLAYING_STATE;
         if (this._.tapeStream) {
             this._.tapeStream.reset();
         }
-        this._.isEnded = false;
         this._.emit("bang");
         return this;
     };
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell  = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
+            
             var tapeStream = _.tapeStream;
             
             if (tapeStream) {
-                var mul = _.mul, add = _.add;
-                var tmp  = tapeStream.fetch(cell.length);
-                var tmpL = tmp[0];
-                var tmpR = tmp[1];
-                for (var i = 0, imax = cell.length; i < imax; ++i) {
-                    cell[i] = (tmpL[i] + tmpR[i]) * 0.5 * mul + add;
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
+                var tmp  = tapeStream.fetch(cellL.length);
+                cellL.set(tmp[0]);
+                cellR.set(tmp[1]);
+                if (this.playbackState === fn.PLAYING_STATE && tapeStream.isEnded) {
+                    fn.nextTick(_.onended);
                 }
             }
             
-            if (!_.isEnded && tapeStream.isEnded) {
-                fn.nextTick(_.onended);
-            }
+            fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("tape", ScissorNode);

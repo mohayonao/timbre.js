@@ -2,14 +2,22 @@ Pragmatic Synth
 ===============
 Make a Synthesizer
 
-VCO - VCA - VCF モデルの簡単なアナログシンセサイザーを作ります。
+###### en ######
+We make a simple synthesizer VCF - VCO - VCA models.
+###### ja ######
+VCO - VCA - VCF モデルの簡単なシンセサイザーを作ります。
+###### -- ######
 
 ## UI ##
+###### en ######
+The graphical UI omitted because the description is huge, use the following in a simple interface.
+###### ja ######
 グラフィカルな UI は説明が膨大になるため省略し、簡易的に以下の仕様のインターフェースを使用します。
+###### -- ######
 
-- [`T("keyboard")`](./keyboard.html) でキーボードからの入力を取得 _(line:5)_ 
-- [`T("ndict.key")`](./ndict.html) でMIDIノート番号に変換 _(line:6)_
-- [`T("midicps")`](./midicps.html) でMIDIノート番号を周波数に変換 _(line:8)_
+- [`T("keyboard")`](./keyboard.html) gets input from the keyboard _(line:5)_ 
+- [`T("ndict.key")`](./ndict.html) converts from a key code to a MIDI note number _(line:6)_
+- [`T("midicps")`](./midicps.html) converts from a MIDI note number to a frequency _(line:8)_
 
 ![Keymap](/timbre.js/misc/img/keymap.png)
 
@@ -32,14 +40,17 @@ T("keyboard").on("keydown", function(e) {
 }).start();
 ```
 
-## VCO ##
-**Voltage Controlled Oscillator**. timbre.js では [`T("osc")`](./osc.html) を使用します。
+## VCO (Voltage Controlled Oscillator) ## 
 
 ```timbre
 var VCO = T("saw", {freq:880, mul:0.2}).play();
 ```
 
+###### en ######
+Frequency control by keyboard _(line:8)_
+###### ja ######
 キーボードによる周波数の制御 _(line:8)_
+###### -- ######
 
 ```timbre
 var VCO = T("saw", {freq:880, mul:0.2}).play();
@@ -54,9 +65,11 @@ T("keyboard").on("keydown", function(e) {
 }).start();
 ```
 
-
-`T("osc")` の周波数プロパティ ( `.freq` ) は数値以外の T オブジェクトを入力することができます。以下の例では時間変化する T オブジェクト を周波数プロパティの入力にしてビブラートやポルタメントを行なっています。
-
+###### en ######
+The property `T("osc").freq` can be enter the T-object in non-numeric _(line:2)_. In the following example, vibrato and portamento is performed by `.freq` that is the time-varying T-object.
+###### ja ######
+`T("osc").freq` は数値以外の T オブジェクトを入力することができます _(line:2)_。以下の例では時間変化する T オブジェクト を周波数プロパティの入力にしてビブラートやポルタメントを行なっています。
+###### -- ######
 
 ### Vibrato ###
 
@@ -75,8 +88,11 @@ T("keyboard").on("keydown", function(e) {
 ```
 
 ### Portament ###
-
-`T("param")` を使用して周波数を滑かに変化させる _(line:1,2,9)_  
+###### en ######
+It is varied to smooth the frequency by using `T("param")` _(line:1,2,9)_
+###### ja ######
+`T("param")` を使用して周波数を滑かに変化させる _(line:1,2,9)_
+###### -- ######
 
 ```timbre
 var glide = T("param", {value:880});
@@ -93,22 +109,27 @@ T("keyboard").on("keydown", function(e) {
 ```
 
 ### Sound Effect ###
-
+###### en ######
+It directly describes the change in frequency in the envelope object `T("env")`.
+###### ja ######
 エンベロープオブジェクト `T("env")` で周波数の変化を直接記述する。
+###### -- ######
 
 ```timbre
+// Change from 1760Hz to 220Hz in 200ms.
 var table = [1760, [110, "200ms"]];
-var EG    = T("env", {table:table}).on("bang", function() {
+
+var freq = T("env", {table:table}).on("bang", function() {
     VCO.mul = 0.2;
 }).on("ended", function() {
     VCO.mul = 0;
 });
-var VCO = T("saw", {freq:EG, mul:0}).play();
+var VCO = T("saw", {freq:freq, mul:0}).play();
 
 var keydict = T("ndict.key");
 var midicps = T("midicps");
 T("keyboard").on("keydown", function(e) {
-  EG.bang();
+  freq.bang(); // Start the envelope
 }).start();
 ```
 
@@ -259,3 +280,5 @@ T("keyboard").on("keydown", function(e) {
   }
 }).start();
 ```
+
+<script src="/timbre.js/src/extras/keyboard.js"></script>

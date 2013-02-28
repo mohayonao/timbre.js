@@ -196,7 +196,7 @@ th {
 
 .editor {
     clear: both;    
-     margin: 15px 0 50px;
+    margin: 15px 0;
 }
 
 .CodeMirror {

@@ -1,29 +1,31 @@
 {
-    "name": "timbre",
-    "version": "13.02.07",
-    "description": "JavaScript library for objective sound programming",
-    "author": "nao yonamine <mohayonao@gmail.com>",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/mohayonao/timbre.js.git"
-    },
-    "main": "index.js",
-    "licenses": [
-        { "type": "MIT",
-          "url" : "https://raw.github.com/mohayonao/timbre.js/master/LICENSE" }
-    ],
-    "dependencies": {
-        "speaker": ">=0.0.5",
-        "readable-stream": ">=0.0.4",
-        "lame": "1.0.0"
-    },
-    "devDependencies": {
-        "coffee-script": "1.4.0",
-        "uglify-js": "*",
-        "jshint"   : "*",
-        "express"  : "*",
-        "jade"     : "0.27.7",
-        "marked"   : "0.2.6",
-        "mocha"    : "*"
+  "name": "timbre",
+  "version": "13.03.01",
+  "description": "JavaScript library for objective sound programming",
+  "author": "nao yonamine <mohayonao@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mohayonao/timbre.js.git"
+  },
+  "main": "timbre.node.js",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://raw.github.com/mohayonao/timbre.js/master/LICENSE"
     }
+  ],
+  "dependencies": {
+    "speaker": ">=0.0.5",
+    "readable-stream": ">=0.0.4",
+    "lame": "1.0.0"
+  },
+  "devDependencies": {
+    "chai": "~1.5.0",
+    "grunt": "~0.4.0rc8",
+    "grunt-contrib-uglify": "~0.1.1rc6",
+    "grunt-contrib-jshint": "~0.1.1rc6",
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-contrib-watch": "~0.2.0",
+    "grunt-simple-mocha": "~0.3.2"
+  }
 }

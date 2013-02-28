@@ -5,18 +5,19 @@
     var FFT = T.modules.FFT;
     
     function FFTNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.listener(this);
-        fn.stereo(this);
         fn.fixAR(this);
         
-        this.real = this.L;
-        this.imag = this.R;
-
+        this.real = new T.ChannelObject(this);
+        this.imag = new T.ChannelObject(this);
+        this.cells[3] = this.real.cell;
+        this.cells[4] = this.imag.cell;
+        
         var _ = this._;
-        _.fft = new FFT(T.cellsize * 2);
+        _.fft = new FFT(_.cellsize * 2);
         _.fftCell  = new fn.SignalArray(_.fft.length);
-        _.prevCell = new fn.SignalArray(T.cellsize);
+        _.prevCell = new fn.SignalArray(_.cellsize);
         _.freqs    = new fn.SignalArray(_.fft.length>>1);
         
         _.plotFlush = true;
@@ -45,31 +46,27 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
-
+        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
+            fn.outputSignalAR(this);
+            
+            var cell = this.cells[0];
+            var cellsize = _.cellsize;
             
             _.fftCell.set(_.prevCell);
-            _.fftCell.set(cell, cell.length);
+            _.fftCell.set(cell, cellsize);
             _.fft.forward(_.fftCell);
             _.prevCell.set(cell);
+            _.plotFlush = true;
             
-            var real = this.cellL;
-            var imag = this.cellR;
-            var _real = _.fft.real;
-            var _imag = _.fft.imag;
-            
-            for (var i = 0, imax = cell.length; i < imax; ++i) {
-                real[i] = _real[i];
-                imag[i] = _imag[i];
-            }
-            
-            this._.plotFlush = true;
+            this.cells[3].set(_.fft.real.subarray(0, cellsize));
+            this.cells[4].set(_.fft.imag.subarray(0, cellsize));
         }
-        return cell;
+        
+        return this;
     };
     
     var super_plot = T.Object.prototype.plot;

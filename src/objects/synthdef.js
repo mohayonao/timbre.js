@@ -4,17 +4,15 @@
     var fn = T.fn;
     
     function SynthDefNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
 
         var _ = this._;
-
+        this.playbackState = fn.FINISHED_STATE;
         _.poly     = 4;
         _.genList  = [];
         _.genDict  = {};
         _.synthdef = null;
-        _.isEnded  = true;
-        
         _.remGen = make_remGen(this);
         _.onended = fn.make_onended(this);
     }
@@ -97,7 +95,7 @@
             list.push(gen);
             dict[noteNum] = opts.gen = gen;
             
-            _.isEnded = false;
+            this.playbackState = fn.PLAYING_STATE;
             
             if (list.length > _.poly) {
                 _.remGen(list[0]);
@@ -165,29 +163,37 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            fn.inputSignalAR(this);
-            
-            // process
-            if (!_.isEnded) {
-                var list;
+            if (this.playbackState === fn.PLAYING_STATE) {
+                var list = _.genList;
+                var gen;
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
                 var i, imax;
                 var j, jmax = cell.length;
-                var tmp;
+                var tmpL, tmpR;
                 
-                list = _.genList;
-                for (i = 0, imax = list.length; i < imax; ++i) {
-                    tmp = list[i].process(tickID);
-                    for (j = 0; j < jmax; ++j) {
-                        cell[j] += tmp[j];
+                if (list.length) {
+                    gen = list[0];
+                    gen.process(tickID);
+                    cellL.set(gen.cells[1]);
+                    cellR.set(gen.cells[2]);
+                    for (i = 1, imax = list.length; i < imax; ++i) {
+                        gen = list[i];
+                        gen.process(tickID);
+                        tmpL = gen.cells[1];
+                        tmpR = gen.cells[2];
+                        for (j = 0; j < jmax; ++j) {
+                            cellL[j] += tmpL[j];
+                            cellR[j] += tmpR[j];
+                        }
                     }
-                }
-                if (imax === 0) {
+                } else {
                     fn.nextTick(_.onended);
                 }
             }
@@ -195,7 +201,7 @@
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("SynthDef", SynthDefNode);

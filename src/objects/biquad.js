@@ -7,11 +7,11 @@
     var PLOT_LOW_FREQ = 20;
     
     function BiquadNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         var _ = this._;
-        _.biquad = new Biquad(T.samplerate);
+        _.biquad = new Biquad(_.samplerate);
         _.freq = T(340);
         _.band = T(1);
         _.gain = T(0);
@@ -21,11 +21,11 @@
         _.plotFlush  = true;
     }
     fn.extend(BiquadNode);
-
+    
     var plotBefore = function(context, x, y, width, height) {
         context.lineWidth = 1;
         context.strokeStyle = "rgb(192, 192, 192)";
-        var nyquist = T.samplerate * 0.5;
+        var nyquist = this._.samplerate * 0.5;
         for (var i = 1; i <= 10; ++i) {
             for (var j = 1; j <= 4; j++) {
                 var f = i * Math.pow(10, j);
@@ -118,43 +118,31 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
-            var changed = false;
-            
-            var freq = _.freq.process(tickID)[0];
-            if (_.prevFreq !== freq) {
+            var freq = _.freq.process(tickID).cells[0][0];
+            var band = _.band.process(tickID).cells[0][0];
+            var gain = _.gain.process(tickID).cells[0][0];
+            if (_.prevFreq !== freq || _.prevband !== band || _.prevGain !== gain) {
                 _.prevFreq = freq;
-                changed = true;
-            }
-            var band = _.band.process(tickID)[0];
-            if (_.prevband !== band) {
                 _.prevband = band;
-                changed = true;
-            }
-            var gain = _.gain.process(tickID)[0];
-            if (_.prevGain !== gain) {
                 _.prevGain = gain;
-                changed = true;
-            }
-            if (changed) {
                 _.biquad.setParams(freq, band, gain);
                 _.plotFlush = true;
             }
             
             if (!_.bypassed) {
-                _.biquad.process(cell);
+                _.biquad.process(this.cells[1], this.cells[2]);
             }
             
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     var fft = new FFT(2048);
@@ -162,19 +150,19 @@
     
     $.plot = function(opts) {
         if (this._.plotFlush) {
-            var biquad = new Biquad(T.samplerate);
+            var biquad = new Biquad(this._.samplerate);
             biquad.setType(this.type);
             biquad.setParams(this.freq.valueOf(), this.band.valueOf(), this.gain.valueOf());
             
             var impluse = new Float32Array(fft.length);
             impluse[0] = 1;
             
-            biquad.process(impluse);
+            biquad.process(impluse, impluse);
             fft.forward(impluse);
 
             var size = 512;
             var data = new Float32Array(size);
-            var nyquist  = T.samplerate * 0.5;
+            var nyquist  = this._.samplerate * 0.5;
             var spectrum = new Float32Array(size);
             var i, j, f, index, delta, x0, x1, xx;
             
@@ -200,7 +188,6 @@
     };
     
     fn.register("biquad", BiquadNode);
-    
     fn.register("lowpass", function(_args) {
         return new BiquadNode(_args).set("type", "lowpass");
     });

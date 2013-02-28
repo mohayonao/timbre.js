@@ -31,7 +31,7 @@
         this.fragments = [];
         if (soundbuffer) {
             var samplerate = soundbuffer.samplerate || 44100;
-            var duration   = soundbuffer.buffer.length / samplerate;
+            var duration   = soundbuffer.buffer[0].length / samplerate;
             this.fragments.push(
                 new Fragment(soundbuffer, 0, duration)
             );
@@ -183,7 +183,11 @@
 
     Tape.prototype.pan = function(right_percent) {
         var new_instance = new Tape();
-
+        if (right_percent > 100) {
+            right_percent = 100;
+        } else if (right_percent < 0) {
+            right_percent = 0;
+        }
         for (var i = 0; i < this.fragments.length; i++) {
             var fragment = this.fragments[i].clone();
             fragment.pan = right_percent;
@@ -213,7 +217,7 @@
         if (!soundbuffer) {
             soundbuffer = silencebuffer;
         }
-        this.buffer     = soundbuffer.buffer;
+        this.buffer     = soundbuffer.buffer[0];
         this.samplerate = soundbuffer.samplerate || 44100;
         this.start     = start;
         this._duration = duration;
@@ -287,8 +291,8 @@
         this.bufferEndIndex   = 0;
         this.fragment      = null;
         this.fragmentIndex = 0;
-        this.panL = 0.7071067811865475;
-        this.panR = 0.7071067811865475;
+        this.panL = 0.5;
+        this.panR = 0.5;
     }
     Scissor.TapeStream = TapeStream;
     
@@ -301,8 +305,8 @@
         this.bufferEndIndex   = 0;
         this.fragment      = null;
         this.fragmentIndex = 0;
-        this.panL = 0.7071067811865475;
-        this.panR = 0.7071067811865475;
+        this.panL = 0.5;
+        this.panR = 0.5;
         this.isLooped = false;
         return this;
     };
@@ -324,6 +328,7 @@
         var bufferEndIndex   = this.bufferEndIndex;
         var fragment      = this.fragment;
         var fragmentIndex = this.fragmentIndex;
+        var pan;
         var panL = this.panL;
         var panR = this.panR;
         
@@ -336,9 +341,10 @@
                     bufferIndexIncr = fragment.samplerate / samplerate * fragment.pitch;
                     bufferBeginIndex = fragment.start * fragment.samplerate;
                     bufferEndIndex   = bufferBeginIndex + fragment.original_duration() * fragment.samplerate;
-                    
-                    panL = Math.cos(0.005 * Math.PI * fragment.pan);
-                    panR = Math.sin(0.005 * Math.PI * fragment.pan);
+
+                    pan = (fragment.pan * 0.01);
+                    panL = 1 - pan;
+                    panR = pan;
                     
                     if (fragment.reverse) {
                         bufferIndexIncr *= -1;

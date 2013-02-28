@@ -5,7 +5,7 @@
     var timevalue = T.timevalue;
     
     function IntervalNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.timer(this);
         fn.fixKR(this);
         
@@ -15,11 +15,8 @@
         _.delay   = 0;
         _.timeout = Infinity;
         _.currentTime = 0;
-        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
-        
         _.delaySamples = 0;
         _.countSamples = 0;
-        _.isEnded = false;
         _.onended = fn.make_onended(this);
         
         this.on("start", onstart);
@@ -28,9 +25,9 @@
     
     var onstart = function() {
         var _ = this._;
-        _.delaySamples = (T.samplerate * (_.delay * 0.001))|0;
+        this.playbackState = fn.PLAYING_STATE;
+        _.delaySamples = (_.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
-        _.isEnded = false;
     };
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
@@ -60,7 +57,7 @@
                 }
                 if (typeof value === "number" && value >= 0) {
                     this._.delay = value;
-                    this._.delaySamples = (T.samplerate * (value * 0.001))|0;
+                    this._.delaySamples = (this._.samplerate * (value * 0.001))|0;
                 }
             },
             get: function() {
@@ -99,21 +96,17 @@
     
     $.bang = function() {
         var _ = this._;
-        _.delaySamples = (T.samplerate * (_.delay * 0.001))|0;
+        this.playbackState = fn.PLAYING_STATE;
+        _.delaySamples = (_.samplerate * (_.delay * 0.001))|0;
         _.countSamples = _.count = _.currentTime = 0;
-        _.isEnded = false;
         _.emit("bang");
         return this;
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         var _ = this._;
-        
-        if (_.isEnded) {
-            return cell;
-        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -122,31 +115,31 @@
                 _.delaySamples -= cell.length;
             }
             
-            var interval = _.interval.process(tickID)[0];
+            var interval = _.interval.process(tickID).cells[0][0];
             
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;
                 if (_.countSamples <= 0) {
-                    _.countSamples += (T.samplerate * interval * 0.001)|0;
-                    var inputs = this.inputs;
+                    _.countSamples += (_.samplerate * interval * 0.001)|0;
+                    var nodes = this.nodes;
                     var count  = _.count;
                     var x = count * _.mul + _.add;
                     for (var j = 0, jmax = cell.length; j < jmax; ++j) {
                         cell[j] = x;
                     }
-                    for (var i = 0, imax = inputs.length; i < imax; ++i) {
-                        inputs[i].bang(count);
+                    for (var i = 0, imax = nodes.length; i < imax; ++i) {
+                        nodes[i].bang(count);
                     }
                     _.count += 1;
                 }
             }
-            _.currentTime += _.currentTimeIncr;
+            _.currentTime += fn.currentTimeIncr;
 
             if (_.currentTime >= _.timeout) {
                 fn.nextTick(_.onended);
             }
         }
-        return cell;
+        return this;
     };
     
     fn.register("interval", IntervalNode);

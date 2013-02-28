@@ -2,7 +2,7 @@ timbre.js
 =========
 JavaScript library for objective sound programming
 
-Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (formally: Timbre Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web. 
+Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (Timbre-Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web. 
 
 ## Project Page ##
 [English](http://mohayonao.github.com/timbre.js/) | [日本語](http://mohayonao.github.com/timbre.js/ja/)
@@ -11,23 +11,18 @@ Timbre.js provides a functional processing and synthesizing audio in your web ap
 [BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html) | [Chords Work](http://mohayonao.github.com/timbre.js/chord.html) | [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html) | [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html) | [Reich](http://mohayonao.github.com/timbre.js/reich.html)
 
 ## Supports ##
-Timbre.js runs on a modern browser for Windows/Mac/Linux/iOS/Android or node.js.
+Timbre.js runs on modern browsers for Windows/Mac/Linux/iOS/Android or node.js.
 
 ![Chrome 14.0-](http://mohayonao.github.com/timbre.js/misc/img/chrome.png)
 ![Safari 6.0-](http://mohayonao.github.com/timbre.js/misc/img/safari.png)
 ![Firefox 4.0-](http://mohayonao.github.com/timbre.js/misc/img/firefox.png)
-![node.js 0.8-](http://mohayonao.github.com/timbre.js/misc/img/nodejs.png)
-
-*iOS support is only later iOS6.0*  
-*Android support is only [Firefox](https://play.google.com/store/apps/details?id=org.mozilla.firefox) app.*
-
-## Optional Supports ##
-Timbre.js is able to run via Flash Player 10.
-
 ![Opera](/timbre.js/misc/img/opera.png)
 ![IE9](/timbre.js/misc/img/ie.png)
+![node.js 0.8-](http://mohayonao.github.com/timbre.js/misc/img/nodejs.png)
 
-*IE support is only Internet Exploler 9.*
+*IE support is only Internet Exploler 9.*  
+*iOS support is only later iOS6.0*  
+*Android support is only [Firefox](https://play.google.com/store/apps/details?id=org.mozilla.firefox) app.*
 
 ## Installation ##
 ### browser
@@ -39,6 +34,13 @@ Include the `timbre.js` file. It will install itself as `timbre`, `T` under the 
   T("sin", {freq:880, mul:0.5}).play();
 </script>
 ```
+
+### Flash fallback (for Opera and IE9)
+Download an additional file (Right-click and use "Save As")
+
+- [timbre.swf](/timbre.js/timbre.swf)
+
+`timbre.swf` must be set in the same folder as `timbre.js`.
 
 ### node.js
 Install via npm: `npm install timbre`, you can require it as a standard node module.
@@ -53,16 +55,29 @@ T("sin", {freq:880, mul:0.5}).play();
 
 MIT
 
-
 ## ChangeLog ##
+**13.03.01** (355.73KB)
+* Added: `T("script")`
+* Added: `T("waveshaper")`
+* Added: `T("lag")`
+* Added: `T("mono")`
+* Added: `T("delay").cross`
+* Added: `T("audio.jsonp")` to extras
+* Moved: `T("keyboard")` to extras
+* Moved: `T("mouse")` to extras
+* Moved: `T("cosc)` to extras
+* Renamed: `T("mml")`: `mml` event listener -> `data` event listener
+* Fixed: Flash fallback support for Opera, IE9 (changing the installation)
+* make it easier to make a stereo object
+
 **13.02.07** (334.61KB)
 * Added `T.setup({f64:true})` to use Float64Array instead of Float32Array
 * Added Android/Firefox support
-* Added flash support for Opera, IE9
+* Added Flash fallback support for Opera, IE9
 * performance improvements
 
 **13.02.06** (337.50KB)
-* Workadound for iOS6.1 bug (failure to start processing in a callback of XMLHttpRequest)
+* workadound for iOS6.1 bug (failure to start processing in a callback of XMLHttpRequest)
 
 **13.02.02** (335.97KB)
 * Fixed: decoder for webkit

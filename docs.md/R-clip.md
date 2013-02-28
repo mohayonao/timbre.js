@@ -1,6 +1,6 @@
 T("clip")
 ==========
-{arkr} Limit signal amplitude
+{arkr}{stereo} Limit signal amplitude
 
 ## Description ##
 

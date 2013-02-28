@@ -5,10 +5,10 @@
     var Chorus = T.modules.Chorus;
     
     function ChorusNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
-
-        var chorus = new Chorus(T.samplerate);
+        
+        var chorus = new Chorus(this._.samplerate);
         chorus.setDelayTime(20);
         chorus.setRate(4);
         chorus.depth = 20;
@@ -53,7 +53,7 @@
             set: function(value) {
                 if (typeof value === "number") {
                     if (0 <= value && value <= 100) {
-                        value *= T.samplerate / 44100;
+                        value *= this._.samplerate / 44100;
                         this._.chorus.depth = value;
                     }
                 }
@@ -86,7 +86,6 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -94,13 +93,13 @@
             fn.inputSignalAR(this);
             
             if (!_.bypassed) {
-                _.chorus.process(cell);
+                _.chorus.process(this.cells[1], this.cells[2]);
             }
             
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("chorus", ChorusNode);

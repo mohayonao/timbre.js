@@ -10,9 +10,8 @@
     var BUFFER_MASK = BUFFER_SIZE - 1;
     
     function MediaStreamNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
-        fn.stereo(this);
         
         var _ = this._;
         _.src = _.func = null;
@@ -41,49 +40,41 @@
             _impl.unlisten.call(this);
         }
         
-        var cell = this.cell;
-        var i, imax = cell.length;
-        var L = this.cellL, R = this.cellR;
-        for (i = 0; i < imax; ++i) {
-            cell[i] = L[i] = R[i] = 0;
-        }
+        this.cells[0].set(fn.emptycell);
+        this.cells[1].set(fn.emptycell);
+        this.cells[2].set(fn.emptycell);
+        
         var _ = this._;
         var bufferL = _.bufferL, bufferR = _.bufferR;
-        for (i = 0, imax = bufferL.length; i < imax; ++i) {
+        for (var i = 0, imax = bufferL.length; i < imax; ++i) {
             bufferL[i] = bufferR[i] = 0;
         }
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
         var _ = this._;
         
         if (_.src === null) {
-            return cell;
+            return this;
         }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
-            var bufferL = _.bufferL;
-            var bufferR = _.bufferR;
-            var i, imax = cell.length;
-
-            if (_.totalWrite > _.totalRead + cell.length) {
-                var L = this.cellL, R = this.cellR;
-                var readIndex = _.readIndex;
-                for (i = 0; i < imax; ++i, ++readIndex) {
-                    L[i] = bufferL[readIndex];
-                    R[i] = bufferR[readIndex];
-                    cell[i] = (L[i] + R[i]) * 0.5;
-                }
-                _.readIndex = readIndex & BUFFER_MASK;
-                _.totalRead += cell.length;
+            var cellsize = _.cellsize;
+            if (_.totalWrite > _.totalRead + cellsize) {
+                var begin = _.readIndex;
+                var end   = begin + cellsize;
+                this.cells[1].set(_.bufferL.subarray(begin, end));
+                this.cells[2].set(_.bufferR.subarray(begin, end));
+                _.readIndex = end & BUFFER_MASK;
+                _.totalRead += cellsize;
             }
+            
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     var impl = {};
@@ -102,7 +93,7 @@
             var context = fn._audioContext;
             _.gain = context.createGainNode();
             _.gain.gain.value = 0;
-            _.node = context.createJavaScriptNode(1024, 2, 1);
+            _.node = context.createJavaScriptNode(1024, 2, 2);
             _.node.onaudioprocess = onaudioprocess(this);
             _.src.connect(_.node);
             _.node.connect(_.gain);
@@ -124,18 +115,14 @@
     var onaudioprocess = function(self) {
         return function(e) {
             var _ = self._;
-            var i0 = e.inputBuffer.getChannelData(0);
-            var i1 = e.inputBuffer.getChannelData(1);
-            var o0 = _.bufferL;
-            var o1 = _.bufferR;
+            var ins = e.inputBuffer;
+            var length = ins.length;
             var writeIndex = _.writeIndex;
-            var i, imax = i0.length;
-            for (i = 0; i < imax; ++i, ++writeIndex) {
-                o0[writeIndex] = i0[i];
-                o1[writeIndex] = i1[i];
-            }
-            _.writeIndex = writeIndex & BUFFER_MASK;
-            _.totalWrite += i0.length;
+            
+            _.bufferL.set(ins.getChannelData(0), writeIndex);
+            _.bufferR.set(ins.getChannelData(1), writeIndex);
+            _.writeIndex = (writeIndex + length) & BUFFER_MASK;
+            _.totalWrite += length;
         };
     };
     
@@ -145,7 +132,7 @@
             /*global HTMLAudioElement:true */
             if (src instanceof HTMLAudioElement) {
                 _.src = src;
-                _.istep = T.samplerate / src.mozSampleRate;
+                _.istep = _.samplerate / src.mozSampleRate;
             }
             /*global HTMLAudioElement:false */
         },
@@ -168,12 +155,12 @@
                         while (x > 0) {
                             o0[writeIndex] = (samples[i  ] + prev0) * 0.5;
                             o1[writeIndex] = (samples[i+1] + prev1) * 0.5;
-                            prev0 = samples[i  ];
-                            prev1 = samples[i+1];
                             writeIndex = (writeIndex + 1) & BUFFER_MASK;
                             ++totalWrite;
                             x -= 1;
                         }
+                        prev0 = samples[i  ];
+                        prev1 = samples[i+1];
                     }
                     _.x = x;
                     _.writeIndex = writeIndex;
@@ -191,11 +178,12 @@
                     for (i = 0; i < imax; ++i) {
                         x += istep;
                         while (x >= 0) {
-                            o0[writeIndex] = o1[writeIndex] = samples[i];
+                            o0[writeIndex] = o1[writeIndex] = (samples[i] + prev0) * 0.5;
                             writeIndex = (writeIndex + 1) & BUFFER_MASK;
                             ++totalWrite;
                             x -= 1;
                         }
+                        prev0 = samples[i];
                     }
                     _.x = x;
                     _.writeIndex = writeIndex;

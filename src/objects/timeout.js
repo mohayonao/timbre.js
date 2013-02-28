@@ -5,16 +5,15 @@
     var timevalue = T.timevalue;
     
     function TimeoutNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 0, _args);
         fn.timer(this);
         fn.fixKR(this);
         
         var _ = this._;
+        this.playbackState = fn.FINISHED_STATE;
         _.currentTime = 0;
-        _.currentTimeIncr = T.cellsize * 1000 / T.samplerate;
         _.samplesMax = 0;
         _.samples    = 0;
-        _.isEnded = true;
         _.onended = fn.make_onended(this);
         
         this.once("init", oninit);
@@ -30,7 +29,7 @@
     };
     
     var onstart = function() {
-        this._.isEnded = false;
+        this.playbackState = fn.PLAYING_STATE;
     };
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
@@ -46,10 +45,10 @@
                     value = timevalue(value);
                 }
                 if (typeof value === "number" && value >= 0) {
+                    this.playbackState = fn.PLAYING_STATE;
                     _.timeout = value;
-                    _.samplesMax = (T.samplerate * (value * 0.001))|0;
+                    _.samplesMax = (_.samplerate * (value * 0.001))|0;
                     _.samples = _.samplesMax;
-                    _.isEnded = false;
                 }
             },
             get: function() {
@@ -65,20 +64,16 @@
     
     $.bang = function() {
         var _ = this._;
+        this.playbackState = fn.PLAYING_STATE;
         _.samples = _.samplesMax;
         _.currentTime = 0;
-        _.isEnded = false;
         _.emit("bang");
         return this;
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
-
-        if (_.isEnded) {
-            return cell;
-        }
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
@@ -88,15 +83,15 @@
             }
             
             if (_.samples <= 0) {
-                var inputs = this.inputs;
-                for (var i = 0, imax = inputs.length; i < imax; ++i) {
-                    inputs[i].bang();
+                var nodes = this.nodes;
+                for (var i = 0, imax = nodes.length; i < imax; ++i) {
+                    nodes[i].bang();
                 }
                 fn.nextTick(_.onended);
             }
-            _.currentTime += _.currentTimeIncr;
+            _.currentTime += fn.currentTimeIncr;
         }
-        return cell;
+        return this;
     };
     
     fn.register("timeout", TimeoutNode);

@@ -1,6 +1,6 @@
 T("biquad")
 =========
-{ar} Biquad Filter
+{ar}{stereo} Biquad Filter
 
 ## Description ##
 `T("biquad")` is implements a two-pole, two-zero filter.

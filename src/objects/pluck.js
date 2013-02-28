@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function PluckNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         
         this._.freq   = 440;
         this._.buffer = null;
@@ -34,7 +34,7 @@
     $.bang = function() {
         var _ = this._;
         var freq   = _.freq;
-        var size   = (T.samplerate / freq + 0.5)|0;
+        var size   = (_.samplerate / freq + 0.5)|0;
         var buffer = _.buffer = new fn.SignalArray(size << 1);
         for (var i = 0; i < size; ++i) {
             buffer[i] = Math.random() * 2 - 1;
@@ -46,7 +46,7 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
@@ -77,7 +77,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("pluck", PluckNode);

@@ -1,33 +1,27 @@
 (function(T) {
     "use strict";
     
-    var fn = T.fn;
+    var fn  = T.fn;
     
-    function AddNode(_args) {
-        T.Object.call(this, _args);
+    function MonoNode(_args) {
+        T.Object.call(this, 1, _args);
     }
-    fn.extend(AddNode);
+    fn.extend(MonoNode);
     
-    var $ = AddNode.prototype;
-    
-    $.process = function(tickID) {
-        var cell = this.cell;
+    MonoNode.prototype.process = function(tickID) {
         var _ = this._;
-        
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
             if (_.ar) {
                 fn.inputSignalAR(this);
                 fn.outputSignalAR(this);
             } else {
-                cell[0] = fn.inputSignalKR(this);
+                this.cells[0][0] = fn.inputSignalKR(this);
                 fn.outputSignalKR(this);
             }
         }
-        return cell;
+        return this;
     };
-    
-    fn.register("+", AddNode);
+    fn.register("mono", MonoNode);
     
 })(timbre);

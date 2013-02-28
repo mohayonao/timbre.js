@@ -4,7 +4,7 @@
     var fn = T.fn;
 
     function SelectorNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         
         this._.selected   = 0;
         this._.background = false;
@@ -12,16 +12,14 @@
     fn.extend(SelectorNode);
     
     var $ = SelectorNode.prototype;
-
+    
     Object.defineProperties($, {
         selected: {
             set: function(value) {
                 if (typeof value === "number") {
                     this._.selected = value;
-                    var cell = this.cell;
-                    for (var i = 0, imax = cell.length; i < imax; ++i) {
-                        cell[i] = 0;
-                    }
+                    this.cells[1].set(fn.emptycell);
+                    this.cells[2].set(fn.emptycell);
                 }
             },
             get: function() {
@@ -40,29 +38,32 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
-            var inputs = this.inputs;
-            var i, imax = inputs.length;
+            
+            var nodes = this.nodes;
+            var i, imax = nodes.length;
             
             if (_.background) {
                 for (i = 0; i < imax; ++i) {
-                    inputs[i].process(tickID);
+                    nodes[i].process(tickID);
                 }
             }
             
-            var tmp = inputs[_.selected];
+            var tmp = nodes[_.selected];
             if (tmp) {
-                cell.set(tmp.process(tickID));
+                if (!_.background) {
+                    tmp.process(tickID);
+                }
+                this.cells[1].set(tmp.cells[1]);
+                this.cells[2].set(tmp.cells[2]);
             }
             
             fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("selector", SelectorNode);

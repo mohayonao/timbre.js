@@ -4,16 +4,19 @@
     var fn = T.fn;
     
     function DistNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 2, _args);
         fn.fixAR(this);
         
         var _ = this._;
         _.pre  = T( 60);
         _.post = T(-18);
-        _.samplerate = T.samplerate;
-        _.x1 = _.x2 = _.y1 = _.y2 = 0;
+        _.x1L = _.x2L = _.y1L = _.y2L = 0;
+        _.x1R = _.x2R = _.y1R = _.y2R = 0;
         _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
         _.cutoff = 0;
+        _.Q = 1;
+        _.preScale = 0;
+        _.postScale = 0;
     }
     fn.extend(DistNode);
     
@@ -50,30 +53,28 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
             
             fn.inputSignalAR(this);
             
-            var preGain  = -_.pre.process(tickID)[0];
-            var postGain = -_.post.process(tickID)[0];
-
+            var preGain  = -_.pre.process(tickID).cells[0][0];
+            var postGain = -_.post.process(tickID).cells[0][0];
+            
             if (_.prevPreGain !== preGain || _.prevPostGain !== postGain) {
                 _.prevPreGain  = preGain;
                 _.prevPostGain = postGain;
-                var postScale = Math.pow(2, -postGain * 0.166666666);
-                _.preScale = Math.pow(2, -preGain * 0.166666666) * postScale;
-                _.limit = postScale;
+                _.preScale  = Math.pow(10, -preGain  * 0.05);
+                _.postScale = Math.pow(10, -postGain * 0.05);
             }
             
             if (!_.bypassed) {
-                var preScale = _.preScale;
-                var limit    = _.limit;
-                var mul = _.mul, add = _.add;
-                var i, imax;
-                var x0, y0;
+                var cellL = this.cells[1];
+                var cellR = this.cells[2];
+                var preScale  = _.preScale;
+                var postScale = _.postScale;
+                var i, imax, value, x0, y0;
                 
                 if (_.cutoff) {
                     if (_.prevCutoff !== _.cutoff) {
@@ -81,72 +82,77 @@
                         lowpass_params(_);
                     }
                     
-                    var x1 = _.x1, x2 = _.x2, y1 = _.y1, y2 = _.y2;
+                    var x1L = _.x1L, x2L = _.x2L, y1L = _.y1L, y2L = _.y2L;
+                    var x1R = _.x1R, x2R = _.x2R, y1R = _.y1R, y2R = _.y2R;
                     var b0 = _.b0, b1 = _.b1, b2 = _.b2, a1 = _.a1, a2 = _.a2;
                     
-                    for (i = 0, imax = cell.length; i < imax; ++i) {
-                        x0 = cell[i] * preScale;
-                        y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+                    for (i = 0, imax = cellL.length; i < imax; ++i) {
+                        x0 = cellL[i] * preScale;
+                        y0 = b0 * x0 + b1 * x1L + b2 * x2L - a1 * y1L - a2 * y2L;
+                        value = y0 * postScale;
+                        if (value < -1) {
+                            value = -1;
+                        } else if (value > 1) {
+                            value = 1;
+                        }
+                        cellL[i] = value;
+                        x2L = x1L; x1L = x0; y2L = y1L; y1L = y0;
                         
-                        y0 = (y0 > limit) ? limit : (y0 < -limit) ? -limit : y0;
-                        
-                        cell[i] = y0 * mul + add;
-                        
-                        x2 = x1; x1 = x0; y2 = y1; y1 = y0;
+                        x0 = cellR[i] * preScale;
+                        y0 = b0 * x0 + b1 * x1R + b2 * x2R - a1 * y1R - a2 * y2R;
+                        value = y0 * postScale;
+                        if (value < -1) {
+                            value = -1;
+                        } else if (value > 1) {
+                            value = 1;
+                        }
+                        cellR[i] = value;
+                        x2R = x1R; x1R = x0; y2R = y1R; y1R = y0;
                     }
                     
-                    // flushDenormalFloatToZero
-                    if ((x1 > 0 && x1 <  1e-4) || (x1 < 0 && x1 > -1e-4)) {
-                        x1 = 0;
-                    }
-                    if ((y1 > 0 && y1 <  1e-4) || (y1 < 0 && y1 > -1e-4)) {
-                        y1 = 0;
-                    }
-                    
-                    _.x1 = x1; _.x2 = x2; _.y1 = y1; _.y2 = y2;
+                    _.x1L = x1L; _.x2L = x2L; _.y1L = y1L; _.y2L = y2L;
+                    _.x1R = x1R; _.x2R = x2R; _.y1R = y1R; _.y2R = y2R;
                 } else {
-                    for (i = 0, imax = cell.length; i < imax; ++i) {
-                        x0 = cell[i] * preScale;
-                        x0 = (x0 > limit) ? limit : (x0 < -limit) ? -limit : x0;
-                        cell[i] = x0 * mul + add;
+                    for (i = 0, imax = cellL.length; i < imax; ++i) {
+                        value = cellL[i] * preScale * postScale;
+                        if (value < -1) {
+                            value = -1;
+                        } else if (value > 1) {
+                            value = 1;
+                        }
+                        cellL[i] = value;
+                        
+                        value = cellR[i] * preScale * postScale;
+                        if (value < -1) {
+                            value = -1;
+                        } else if (value > 1) {
+                            value = 1;
+                        }
+                        cellR[i] = value;
                     }
                 }
-            } else {
-                fn.outputSignalAR(this);
             }
+
+            fn.outputSignalAR(this);
         }
         
-        return cell;
+        return this;
     };
     
     var lowpass_params = function(_) {
-        var cutoff = _.cutoff / (_.samplerate * 0.5);
-        
-        if (cutoff >= 1) {
-            _.b0 = 1;
-            _.b1 = _.b2 = _.a1 = _.a2 = 0;
-        } else if (cutoff <= 0) {
-            _.b0 = _.b1 = _.b2 = _.a1 = _.a2 = 0;
-        } else {
-            var resonance = 1;
-            var g = Math.pow(10.0, 0.05 * resonance);
-            var d = Math.sqrt((4 - Math.sqrt(16 - 16 / (g * g))) * 0.5);
-            
-            var theta = Math.PI * cutoff;
-            var sn = 0.5 * d * Math.sin(theta);
-            var beta = 0.5 * (1 - sn) / (1 + sn);
-            var gamma = (0.5 + beta) * Math.cos(theta);
-            var alpha = 0.25 * (0.5 + beta - gamma);
-            
-            _.b0 = 2 * alpha;
-            _.b1 = 4 * alpha;
-            _.b2 = _.b0;
-            _.a1 = 2 * -gamma;
-            _.a2 = 2 * beta;
-        }
-    };
+        var w0 = 2 * Math.PI * _.cutoff / _.samplerate;
+        var cos = Math.cos(w0);
+        var sin = Math.sin(w0);
+        var alpha = sin / (2 * _.Q);
 
-    fn.register("distortion", DistNode);
-    fn.alias("dist", "distortion");
+        var ia0 = 1 / (1 + alpha);
+        _.b0 =  (1 - cos) * 0.5 * ia0;
+        _.b1 =   1 - cos * ia0;
+        _.b2 =  (1 - cos) * 0.5 * ia0;
+        _.a1 =  -2 * cos * ia0;
+        _.a2 =   1 - alpha * ia0;
+    };
+    
+    fn.register("dist", DistNode);
     
 })(timbre);

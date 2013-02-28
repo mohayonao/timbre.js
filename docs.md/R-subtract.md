@@ -1,6 +1,6 @@
 T("-")
 ======
-{arkr} Signal subtraction
+{krar}{stereo} Signal subtraction
 
 ## Description ##
 ###### en ######

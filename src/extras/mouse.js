@@ -14,16 +14,16 @@
         }
         instance = this;
         
-        T.Object.call(this, _args);
-        fn.stereo(this);
+        T.Object.call(this, 1, _args);
         
-        this.X = this.L;
-        this.Y = this.R;
+        this.X = new T.ChannelObject(this);
+        this.Y = new T.ChannelObject(this);
+        this.cells[3] = this.X.cell;
+        this.cells[4] = this.Y.cell;
         
         fn.fixKR(this);
     }
     fn.extend(MouseListener);
-    
     
     var mouseX = 0;
     var mouseY = 0;
@@ -38,11 +38,11 @@
         var x = (mouseX = (e.clientX / window.innerWidth));
         var y = (mouseY = (e.clientY / window.innerHeight));
         
-        var cellL = instance.cellL;
-        var cellR = instance.cellR;
-        for (var i = 0, imax = cellL.length; i < imax; ++i) {
-            cellL[i] = x;
-            cellR[i] = y;
+        var cellX = instance.cells[3];
+        var cellY = instance.cells[4];
+        for (var i = 0, imax = cellX.length; i < imax; ++i) {
+            cellX[i] = x;
+            cellY[i] = y;
         }
     };
     var onmouseup = function(e) {
@@ -75,7 +75,7 @@
     
     
     function MouseXY(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         if (!instance) {
             instance = new MouseListener([]);
         }
@@ -133,7 +133,8 @@
         return this;
     };
     MouseXY.prototype.process = function(tickID) {
-        return this._.map.process(tickID);
+        this._.map.process(tickID);
+        return this;
     };
     
     var Curves = {
@@ -166,7 +167,7 @@
             return f(_, x);
         }}, instance.X);
         
-        self.cell = _.map.cell;
+        self.cells[0] = _.map.cells[3];
         
         return self;
     });
@@ -184,7 +185,8 @@
             return f(_, x);
         }}, instance.Y);
         
-        self.cell = _.map.cell;
+        self.cells[0] = _.map.cells[4];
+        
         return self;
     });
 })(timbre);

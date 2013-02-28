@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function MidiRatioNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         var _ = this._;
         _.midi = 0;
         _.value = 0;
@@ -51,13 +51,13 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
-            var len = this.inputs.length;
+            var len = this.nodes.length;
             var i, imax = cell.length;
 
             if (_.ar && len) {
@@ -69,7 +69,7 @@
                 _.value = cell[imax-1];
                 fn.outputSignalAR(this);
             } else {
-                var input = (this.inputs.length) ? fn.inputSignalKR(this) : _.midi;
+                var input = (this.nodes.length) ? fn.inputSignalKR(this) : _.midi;
                 if (_.prev !== input) {
                     _.prev = input;
                     _.value = Math.pow(2, input / _.range);
@@ -81,7 +81,7 @@
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("midiratio", MidiRatioNode);

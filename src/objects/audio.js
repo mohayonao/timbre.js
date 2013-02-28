@@ -8,8 +8,8 @@
         var BufferNode = fn.getClass("buffer");
         var instance = new BufferNode(_args);
         
+        instance.playbackState = fn.FINISHED_STATE;
         instance._.isLoaded = false;
-        instance._.isEnded  = true;
         
         Object.defineProperties(instance, {
             isLoaded: {
@@ -47,16 +47,18 @@
         var onloadedmetadata = function(result, msg) {
             var _ = self._;
             if (result) {
+                self.playbackState = fn.PLAYING_STATE;
                 _.samplerate = result.samplerate;
+                _.channels   = result.channels;
+                _.bufferMix  = null;
                 _.buffer     = result.buffer;
                 _.phase      = 0;
                 _.phaseIncr  = result.samplerate / T.samplerate;
                 _.duration   = result.duration * 1000;
-                _.isEnded    = false;
                 _.currentTime = 0;
                 if (_.isReversed) {
                     _.phaseIncr *= -1;
-                    _.phase = result.buffer.length + _.phaseIncr;
+                    _.phase = result.buffer[0].length + _.phaseIncr;
                 }
                 self._.emit("loadedmetadata");
             } else {

@@ -8,7 +8,7 @@
     var fn = T.fn;
     
     function PinkNoiseNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.fixAR(this);
         
         var whites = new Uint8Array(5);
@@ -23,7 +23,7 @@
     var $ = PinkNoiseNode.prototype;
     
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
@@ -50,7 +50,7 @@
             }
             _.key = key;
         }
-        return cell;
+        return this;
     };
     
     fn.register("pink", PinkNoiseNode);

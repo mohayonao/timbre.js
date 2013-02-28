@@ -1,6 +1,6 @@
 T("tape")
 =========
-{ar} Tape edit
+{ar}{stereo} Tape edit
 
 ## Description ##
 
@@ -21,9 +21,9 @@ timbre.rec(function(output) {
   
   output.send(synth);
   
-}).then(function(buffer) {
+}).then(function(result) {
   
-  var tape = T("tape", {tape:buffer}).tape;
+  var tape = T("tape", {tape:result}).tape;
   
   var tapes = tape.split(32);
   

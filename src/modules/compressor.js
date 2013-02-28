@@ -1,13 +1,15 @@
 (function(T) {
     "use strict";
-    
+
     var MaxPreDelayFrames     = 1024;
     var MaxPreDelayFramesMask = MaxPreDelayFrames - 1;
     var DefaultPreDelayFrames = 256;
     var kSpacingDb = 5;
     
-    function Compressor(samplerate) {
-        this.samplerate = samplerate || 44100;
+    function Compressor(samplerate, channels) {
+        this.samplerate = samplerate;
+        this.channels = channels;
+        
         this.lastPreDelayFrames = 0;
         this.preDelayReadIndex  = 0;
         this.preDelayWriteIndex = DefaultPreDelayFrames;
@@ -35,8 +37,14 @@
         this.detectorAverage = 0;
         this.compressorGain  = 1;
         this.meteringGain    = 1;
-
-        this.preDelayBuffer = new T.fn.SignalArray(MaxPreDelayFrames);
+        
+        this.delayBufferL = new T.fn.SignalArray(MaxPreDelayFrames);
+        if (channels === 2) {
+            this.delayBufferR = new T.fn.SignalArray(MaxPreDelayFrames);
+        } else {
+            this.delayBufferR = this.delayBufferL;
+        }
+        this.preDelayTime = 6;
         this.preDelayReadIndex = 0;
         this.preDelayWriteIndex = DefaultPreDelayFrames;
         this.maxAttackCompressionDiffDb = -1;
@@ -44,11 +52,21 @@
         
         this.setAttackTime(this.attackTime);
         this.setReleaseTime(this.releaseTime);
+        this.setPreDelayTime(this.preDelayTime);
         this.setParams(-24, 30, 12);
     }
     
     var $ = Compressor.prototype;
 
+    $.clone = function() {
+        var new_instance = new Compressor(this.samplerate, this.channels);
+        new_instance.setAttackTime(this.attackTime);
+        new_instance.setReleaseTime(this.releaseTime);
+        new_instance.setPreDelayTime(this.preDelayTime);
+        new_instance.setParams(this.dbThreshold, this.dbKnee, this.ratio);
+        return new_instance;
+    };
+    
     $.setAttackTime = function(value) {
         this.attackTime = Math.max(0.001, value);
         this._attackFrames = this.attackTime * this.samplerate;
@@ -74,14 +92,15 @@
     };
     
     $.setPreDelayTime = function(preDelayTime) {
+        this.preDelayTime = preDelayTime;
         var preDelayFrames = preDelayTime * this.samplerate;
         if (preDelayFrames > MaxPreDelayFrames - 1) {
             preDelayFrames = MaxPreDelayFrames - 1;
         }
         if (this.lastPreDelayFrames !== preDelayFrames) {
             this.lastPreDelayFrames = preDelayFrames;
-            for (var i = 0, imax = this.preDelayBuffer.length; i < imax; ++i) {
-                this.preDelayBuffer[i] = 0;
+            for (var i = 0, imax = this.delayBufferL.length; i < imax; ++i) {
+                this.delayBufferL[i] = this.delayBufferR[i] = 0;
             }
             this.preDelayReadIndex = 0;
             this.preDelayWriteIndex = preDelayFrames;
@@ -122,6 +141,7 @@
         if (x < this.linearThreshold) {
             return 1;
         }
+        
         var x2   = x * 1.001;
         var xDb  = (x ) ? 20 * Math.log(x ) * Math.LOG10E : -1000;
         var x2Db = (x2) ? 20 * Math.log(x2) * Math.LOG10E : -1000;
@@ -148,8 +168,9 @@
             } else {
                 minK = k;
             }
+            k = Math.sqrt(minK * maxK);
         }
-        return Math.sqrt(minK * maxK);
+        return k;
     };
     
     $.updateStaticCurveParameters = function(dbThreshold, dbKnee, ratio) {
@@ -160,37 +181,31 @@
         this.ratio = ratio;
         this.slope = 1 / this.ratio;
         
-        var k = this.kAtSlope(1 / this.ratio);
-        
         this.kneeThresholdDb = dbThreshold + dbKnee;
         this.kneeThreshold   = Math.pow(10, 0.05 * this.kneeThresholdDb);
         
+        var k = this.kAtSlope(1 / this.ratio);
         var y = this.kneeCurve(this.kneeThreshold, k);
-        this.ykneeThresholdDb = (y) ? 20 * Math.log(y ) * Math.LOG10E : -1000;
+        this.ykneeThresholdDb = (y) ? 20 * Math.log(y) * Math.LOG10E : -1000;
         
-        this.K = k;
+        this._k = k;
         
-        return this.K;
+        return this._k;
     };
     
-    $.process = function(cell) {
+    $.process = function(cellL, cellR) {
         var dryMix = 1 - this.effectBlend;
         var wetMix = this.effectBlend;
-        
         var k = this._k;
         var masterLinearGain = this._masterLinearGain;
-        
-        var satReleaseFrames = this._satReleaseFrame;
+        var satReleaseFrames = this._satReleaseFrames;
         var kA = this._kA;
         var kB = this._kB;
         var kC = this._kC;
         var kD = this._kD;
         var kE = this._kE;
-        
         var nDivisionFrames = 64;
-        
-        var nDivisions = cell.length / nDivisionFrames;
-        
+        var nDivisions = cellL.length / nDivisionFrames;
         var frameIndex = 0;
         var desiredGain = this.detectorAverage;
         var compressorGain = this.compressorGain;
@@ -199,8 +214,8 @@
         var preDelayReadIndex = this.preDelayReadIndex;
         var preDelayWriteIndex = this.preDelayWriteIndex;
         var detectorAverage = this.detectorAverage;
-        var delayBuffer = this.preDelayBuffer;
-        var preDelayBuffer = this.preDelayBuffer;
+        var delayBufferL = this.delayBufferL;
+        var delayBufferR = this.delayBufferR;
         var meteringGain = this.meteringGain;
         var meteringReleaseK = this.meteringReleaseK;
         
@@ -211,6 +226,9 @@
             var x = compressorGain / scaledDesiredGain;
             
             var compressionDiffDb = (x) ? 20 * Math.log(x) * Math.LOG10E : -1000;
+            if (compressionDiffDb === Infinity || isNaN(compressionDiffDb)) {
+                compressionDiffDb = -1;
+            }
             
             if (isReleasing) {
                 maxAttackCompressionDiffDb = -1;
@@ -247,8 +265,9 @@
             while (loopFrames--) {
                 var compressorInput = 0;
                 
-                var absUndelayedSource = cell[frameIndex];
-                delayBuffer[preDelayWriteIndex] = absUndelayedSource;
+                var absUndelayedSource = (cellL[frameIndex] + cellR[frameIndex]) * 0.5;
+                delayBufferL[preDelayWriteIndex] = cellL[frameIndex];
+                delayBufferR[preDelayWriteIndex] = cellR[frameIndex];
                 
                 if (absUndelayedSource < 0) {
                     absUndelayedSource *= -1;
@@ -297,13 +316,14 @@
                 } else {
                     meteringGain += (dbRealGain - meteringGain) * meteringReleaseK;
                 }
-                cell[frameIndex] = preDelayBuffer[preDelayReadIndex] * totalGain;
+                cellL[frameIndex] = delayBufferL[preDelayReadIndex] * totalGain;
+                cellR[frameIndex] = delayBufferR[preDelayReadIndex] * totalGain;
                 
                 frameIndex++;
                 preDelayReadIndex  = (preDelayReadIndex  + 1) & MaxPreDelayFramesMask;
                 preDelayWriteIndex = (preDelayWriteIndex + 1) & MaxPreDelayFramesMask;
             }
-
+            
             if (detectorAverage < 1e-6) {
                 detectorAverage = 1e-6;
             }
@@ -324,8 +344,8 @@
         this.compressorGain = 1;
         this.meteringGain = 1;
         
-        for (var i = 0, imax = this.preDelayBuffer.length; i < imax; ++i) {
-            this.preDelayBuffer[i] = 0;
+        for (var i = 0, imax = this.delayBufferL.length; i < imax; ++i) {
+            this.delayBufferL[i] = this.delayBufferR[i] = 0;
         }
         
         this.preDelayReadIndex = 0;

@@ -4,12 +4,11 @@
     var fn = T.fn;
     
     function FNoiseNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         fn.fixAR(this);
         
         var _ = this._;
         _.freq = T(440);
-        _.samplerate = T.samplerate;
         _.reg = 0x8000;
         _.shortFlag = false;
         _.phase     = 0;
@@ -40,14 +39,14 @@
     
     $.process = function(tickID) {
         var _ = this._;
-        var cell = this.cell;
+        var cell = this.cells[0];
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
             var lastValue = _.lastValue;
             var phase     = _.phase;
-            var phaseStep = _.freq.process(tickID)[0] / _.samplerate;
+            var phaseStep = _.freq.process(tickID).cells[0][0] / _.samplerate;
             var reg = _.reg;
             var mul = _.mul, add = _.add;
             var i, imax;
@@ -80,7 +79,7 @@
             _.lastValue = lastValue;
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("fnoise", FNoiseNode);

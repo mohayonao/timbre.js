@@ -4,14 +4,14 @@
     var fn = T.fn;
     
     function NoiseNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
     }
     fn.extend(NoiseNode);
     
     var $ = NoiseNode.prototype;
 
     $.process = function(tickID) {
-        var cell = this.cell;
+        var cell = this.cells[0];
         var _ = this._;
         
         if (this.tickID !== tickID) {
@@ -31,7 +31,7 @@
                 }
             }
         }
-        return cell;
+        return this;
     };
     
     fn.register("noise", NoiseNode);

@@ -1,11 +1,10 @@
 T("WebAudioAPI")
 ================
-{ar} Web Audio API binder
-
+{ar}{stereo} Web Audio API binder
 
 ## Installation
 
-Download an extra object: [webaudioapi.js](http://mohayonao.github.com/timbre.js/src/extra/webaudioapi.js)
+Download an additional script: [webaudioapi.js](http://mohayonao.github.com/timbre.js/src/extra/webaudioapi.js)
 
 ```html
 <script src="timbre.js"></script>

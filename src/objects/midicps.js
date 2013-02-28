@@ -4,7 +4,7 @@
     var fn = T.fn;
     
     function MidiCpsNode(_args) {
-        T.Object.call(this, _args);
+        T.Object.call(this, 1, _args);
         var _ = this._;
         _.midi = 0;
         _.value = 0;
@@ -52,15 +52,15 @@
     };
     
     $.process = function(tickID) {
-        var cell = this.cell;
         var _ = this._;
         
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-
-            var len = this.inputs.length;
+            
+            var cell = this.cells[0];
+            var len  = this.nodes.length;
             var i, imax = cell.length;
-
+            
             if (_.ar && len) {
                 fn.inputSignalAR(this);
                 var a4 = _.a4;
@@ -70,19 +70,17 @@
                 _.value = cell[imax-1];
                 fn.outputSignalAR(this);
             } else {
-                var input = (this.inputs.length) ? fn.inputSignalKR(this) : _.midi;
+                var input = (len) ? fn.inputSignalKR(this) : _.midi;
                 if (_.prev !== input) {
                     _.prev = input;
                     _.value = _.a4 * Math.pow(2, (input - 69) / 12);
                 }
-                var value = _.value * _.mul + _.add;
-                for (i = 0; i < imax; ++i) {
-                    cell[i] = value;
-                }
+                cell[0] = _.value;
+                fn.outputSignalKR(this);
             }
         }
         
-        return cell;
+        return this;
     };
     
     fn.register("midicps", MidiCpsNode);

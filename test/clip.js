@@ -40,7 +40,7 @@ describe('T("clip")', function() {
         assert.equal(t.max, +3.0);
     });
     it("process()", function() {
-        var t = T("clip", T("sin"));
+        var t = T("clip", T("sin", {freq:880}));
         var p = timbre.fn.debug.process(t);
         assert.isFalse(p.isNaN);
         assert.closeTo(p.max, t.max, 1e-5);
