@@ -56,7 +56,7 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
-**13.03.01** (355.73KB)
+**13.03.01** (355.72KB)
 * Added: `T("script")`
 * Added: `T("waveshaper")`
 * Added: `T("lag")`
