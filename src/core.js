@@ -344,7 +344,7 @@
     };
 
     fn.pointer = function(src, offset, length) {
-        offset = (src.byteOffset + offset) * src.BYTES_PER_ELEMENT;
+        offset = src.byteOffset + offset * src.BYTES_PER_ELEMENT;
         if (typeof length === "number") {
             return new src.constructor(src.buffer, offset, length);
         } else {
