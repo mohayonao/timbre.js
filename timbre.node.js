@@ -57,7 +57,15 @@ function TimbreNodePlayer(sys) {
 module.exports = require("./timbre.dev").bind(TimbreNodePlayer);
 
 var fs   = require("fs");
-var lame = require("lame");
+var lame = (function() {
+    try { return require("lame"); } catch (e) {}
+})();
+var ogg = (function() {
+    try { return require("ogg"); } catch (e) {}
+})();
+var vorbis = (function() {
+    try { return require("vorbis"); } catch (e) {}
+})();
 
 var Decoder = timbre.modules.Decoder;
 
@@ -71,11 +79,11 @@ Decoder.getBinaryWithPath = function(path, callback) {
     });
 };
 
-Decoder.ogg_decode = function(src, onloadedmetadata/*, onloadeddata*/) {
+Decoder.ogg_decode = ogg && vorbis && function(src, onloadedmetadata/*, onloadeddata*/) {
     onloadedmetadata(false);
 };
 
-Decoder.mp3_decode = function(src, onloadedmetadata, onloadeddata) {
+Decoder.mp3_decode = lame && function(src, onloadedmetadata, onloadeddata) {
     var decoder = new lame.Decoder();
     var bytes = [];
     var samplerate, channels, mixdown, bufferL, bufferR, duration;
