@@ -15,17 +15,17 @@
     }
   ],
   "dependencies": {
-    "speaker": ">=0.0.5",
-    "readable-stream": ">=0.0.4",
-    "lame": "1.0.0"
+    "speaker": "*",
+    "readable-stream": "*"
   },
   "devDependencies": {
-    "chai": "~1.5.0",
-    "grunt": "~0.4.0rc8",
-    "grunt-contrib-uglify": "~0.1.1rc6",
-    "grunt-contrib-jshint": "~0.1.1rc6",
+    "mocha": "*",
+    "chai": "*",
+    "grunt": ">=0.4.0",
+    "grunt-contrib-uglify": "~0.1.1",
+    "grunt-contrib-jshint": "~0.2.0",
     "grunt-contrib-clean": "~0.4.0",
     "grunt-contrib-watch": "~0.2.0",
-    "grunt-simple-mocha": "~0.3.2"
+    "grunt-simple-mocha": "~0.3.0"
   }
 }
