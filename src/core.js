@@ -282,7 +282,7 @@
     };
 
     fn.isSignalArray = function(obj) {
-        if (obj instanceof Float32Array || obj instanceof Float64Array) {
+        if (obj instanceof fn.SignalArray) {
             return true;
         }
         if (Array.isArray(obj) && obj.__klass && obj.__klass.type === 2) {
@@ -1803,7 +1803,7 @@
                 if (ACCEPT_CELLSIZES.indexOf(params.cellsize) !== -1) {
                     this.cellsize = params.cellsize;
                 }
-                if (typeof params.f64 !== "undefined") {
+                if (typeof Float64Array !== "undefined" && typeof params.f64 !== "undefined") {
                     _f64mode = !!params.f64;
                     if (_f64mode) {
                         fn.SignalArray = Float64Array;
