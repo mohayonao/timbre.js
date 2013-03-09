@@ -4,7 +4,7 @@
 (function(undefined) {
     "use strict";
     
-    if (typeof Float32Array === "undefined") {
+    if (typeof Float32Array === "undefined" || typeof Float64Array === "undefined") {
         /*jshint latedef:true */
         setupTypedArray();
         /*jshint latedef:false */
