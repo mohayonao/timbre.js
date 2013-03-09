@@ -380,7 +380,8 @@
             var sign = m[1], name = m[2], shape = m[3], width = m[4];
             wave = waveshape(sign, name, shape, width);
             if (wave !== undefined) {
-                return Wavetables[key] = wave;
+                Wavetables[key] = wave;
+                return wave;
             }
         }
 

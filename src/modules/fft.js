@@ -182,9 +182,10 @@
                     sintable[i] = Math.sin(PI2 * (i / n));
                     costable[i] = Math.cos(PI2 * (i / n));
                 }
-                return FFTParams[n] = {
+                FFTParams[n] = {
                     bitrev: bitrev, sintable:sintable, costable:costable
                 };
+                return FFTParams[n];
             }());
         }
     };
