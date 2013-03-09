@@ -1,8 +1,8 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     var GateChannelNode = (function() {
         function GateChannelNode(parent) {
             T.Object.call(this, 2, []);
@@ -10,7 +10,7 @@
             this._.parent = parent;
         }
         fn.extend(GateChannelNode);
-        
+
         GateChannelNode.prototype.process = function(tickID) {
             if (this.tickID !== tickID) {
                 this.tickID = tickID;
@@ -18,21 +18,21 @@
             }
             return this;
         };
-        
+
         return GateChannelNode;
     })();
-    
+
     function GateNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
-        
+
         this._.selected = 0;
         this._.outputs  = [];
     }
     fn.extend(GateNode);
-    
+
     var $ = GateNode.prototype;
-    
+
     Object.defineProperties($, {
         selected: {
             set: function(value) {
@@ -54,7 +54,7 @@
             }
         }
     });
-    
+
     $.at = function(index) {
         var _ = this._;
         var output = _.outputs[index];
@@ -63,16 +63,16 @@
         }
         return output;
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             fn.inputSignalAR(this);
             fn.outputSignalAR(this);
-            
+
             var output = _.outputs[_.selected];
             if (output) {
                 output.cells[0].set(this.cells[0]);
@@ -80,10 +80,10 @@
                 output.cells[2].set(this.cells[2]);
             }
         }
-        
+
         return this;
     };
-    
+
     fn.register("gate", GateNode);
-    
+
 })(timbre);

@@ -1,13 +1,13 @@
 (function(T) {
     "use strict";
-    
+
     var fn  = T.fn;
-    
+
     function MonoNode(_args) {
         T.Object.call(this, 1, _args);
     }
     fn.extend(MonoNode);
-    
+
     MonoNode.prototype.process = function(tickID) {
         var _ = this._;
         if (this.tickID !== tickID) {
@@ -23,5 +23,5 @@
         return this;
     };
     fn.register("mono", MonoNode);
-    
+
 })(timbre);

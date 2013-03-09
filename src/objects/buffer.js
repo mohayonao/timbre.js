@@ -1,13 +1,13 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var isSignalArray = fn.isSignalArray;
-    
+
     function BufferNode(_args) {
         T.Object.call(this, 1, _args);
         fn.fixAR(this);
-        
+
         var _ = this._;
         _.pitch      = T(1);
         _.samplerate = 44100;
@@ -25,7 +25,7 @@
         _.onlooped = make_onlooped(this);
     }
     fn.extend(BufferNode);
-    
+
     var make_onlooped = function(self) {
         return function() {
             var _ = self._;
@@ -37,9 +37,9 @@
             self._.emit("looped");
         };
     };
-    
+
     var $ = BufferNode.prototype;
-    
+
     var setBuffer = function(value) {
         var _ = this._;
         if (typeof value === "object") {
@@ -82,7 +82,7 @@
             }
         }
     };
-    
+
     Object.defineProperties($, {
         buffer: {
             set: setBuffer,
@@ -146,11 +146,11 @@
             }
         }
     });
-    
+
     $.clone = function() {
         var _ = this._;
         var instance = T("buffer");
-        
+
         if (_.buffer.length) {
             setBuffer.call(instance, {
                 buffer    : _.buffer,
@@ -160,15 +160,15 @@
         }
         instance.loop(_.isLooped);
         instance.reverse(_.isReversed);
-        
+
         return instance;
     };
-    
+
     $.slice = function(begin, end) {
         var _ = this._;
         var instance = T(_.originkey);
         var isReversed = _.isReversed;
-        
+
         if (_.buffer.length) {
             if (typeof begin === "number" ){
                 begin = (begin * 0.001 * _.samplerate)|0;
@@ -186,7 +186,7 @@
                 end   = tmp;
                 isReversed = !isReversed;
             }
-            
+
             if (_.channels === 2) {
                 setBuffer.call(instance, {
                     buffer   : [ fn.pointer(_.buffer[0], begin, end-begin),
@@ -204,13 +204,13 @@
         }
         instance.loop(_.isLooped);
         instance.reverse(_.isReversed);
-        
+
         return instance;
     };
-    
+
     $.reverse = function(value) {
         var _ = this._;
-        
+
         _.isReversed = !!value;
         if (_.isReversed) {
             if (_.phaseIncr > 0) {
@@ -224,7 +224,7 @@
                 _.phaseIncr *= -1;
             }
         }
-        
+
         return this;
     };
 
@@ -232,29 +232,29 @@
         this._.isLooped = !!value;
         return this;
     };
-    
+
     $.bang = function(value) {
         this.playbackState = (value === false ? fn.FINISHED_STATE : fn.PLAYING_STATE);
         this._.phase = 0;
         this._.emit("bang");
         return this;
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (!_.buffer.length) {
             return this;
         }
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var cellL = this.cells[1];
             var cellR = this.cells[2];
             var phase  = _.phase;
             var i, imax = _.cellsize;
-            
+
             var bufferL, bufferR;
             if (_.channels === 2) {
                 bufferL = _.buffer[1];
@@ -262,7 +262,7 @@
             } else {
                 bufferL = bufferR = _.buffer[0];
             }
-            
+
             if (_.currentTimeObj) {
                 var pos = _.currentTimeObj.process(tickID).cells[0];
                 var t, sr = _.samplerate * 0.001;
@@ -277,13 +277,13 @@
             } else {
                 var pitch  = _.pitch.process(tickID).cells[0][0];
                 var phaseIncr = _.phaseIncr * pitch;
-                
+
                 for (i = 0; i < imax; ++i) {
                     cellL[i] = (bufferL[phase|0] || 0);
                     cellR[i] = (bufferR[phase|0] || 0);
                     phase += phaseIncr;
                 }
-                
+
                 if (phase >= bufferL.length) {
                     if (_.isLooped) {
                         fn.nextTick(_.onlooped);
@@ -300,15 +300,15 @@
                 _.phase = phase;
                 _.currentTime += fn.currentTimeIncr;
             }
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
-    
+
     var super_plot = T.Object.prototype.plot;
-    
+
     $.plot = function(opts) {
         var _ = this._;
         var bufferL, bufferR;
@@ -330,7 +330,7 @@
         }
         return super_plot.call(this, opts);
     };
-    
+
     fn.register("buffer", BufferNode);
-    
+
 })(timbre);

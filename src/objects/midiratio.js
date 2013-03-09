@@ -1,8 +1,8 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function MidiRatioNode(_args) {
         T.Object.call(this, 1, _args);
         var _ = this._;
@@ -13,9 +13,9 @@
         _.ar    = false;
     }
     fn.extend(MidiRatioNode);
-    
+
     var $ = MidiRatioNode.prototype;
-    
+
     Object.defineProperties($, {
         midi: {
             set: function(value) {
@@ -38,22 +38,22 @@
             }
         }
     });
-    
+
     $.bang = function() {
         this._.prev = null;
         this._.emit("bang");
         return this;
     };
-    
+
     $.at = function(midi) {
         var _ = this._;
         return Math.pow(2, midi / _.range);
     };
-    
+
     $.process = function(tickID) {
         var cell = this.cells[0];
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
@@ -80,10 +80,10 @@
                 }
             }
         }
-        
+
         return this;
     };
-    
+
     fn.register("midiratio", MidiRatioNode);
-    
+
 })(timbre);

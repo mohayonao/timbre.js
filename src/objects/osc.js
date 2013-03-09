@@ -1,24 +1,24 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var timevalue  = T.timevalue;
     var Oscillator = T.modules.Oscillator;
-    
+
     function OscNode(_args) {
         T.Object.call(this, 2, _args);
-        
+
         var _ = this._;
         _.freq  = T(440);
         _.phase = T(0);
         _.osc = new Oscillator(_.samplerate);
         _.tmp = new fn.SignalArray(_.cellsize);
         _.osc.step = _.cellsize;
-        
+
         this.once("init", oninit);
     }
     fn.extend(OscNode);
-    
+
     var oninit = function() {
         var _ = this._;
         if (!this.wave) {
@@ -29,9 +29,9 @@
         _.plotCyclic = true;
         _.plotBefore = plotBefore;
     };
-    
+
     var $ = OscNode.prototype;
-    
+
     Object.defineProperties($, {
         wave: {
             set: function(value) {
@@ -76,23 +76,23 @@
             }
         }
     });
-    
+
     $.bang = function() {
         this._.osc.reset();
         this._.emit("bang");
         return this;
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var cellL = this.cells[1];
             var cellR = this.cells[2];
             var i, imax = _.cellsize;
-            
+
             if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
@@ -100,14 +100,14 @@
                     cellL[i] = cellR[i] = 1;
                 }
             }
-            
+
             var osc = _.osc;
             var freq  = _.freq.process(tickID).cells[0];
             var phase = _.phase.process(tickID).cells[0];
-            
+
             osc.frequency = freq[0];
             osc.phase     = phase[0];
-            
+
             if (_.ar) {
                 var tmp  = _.tmp;
                 if (_.freq.isAr) {
@@ -136,7 +136,7 @@
             }
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
 
@@ -152,9 +152,9 @@
             context.stroke();
         };
     }
-    
+
     fn.register("osc", OscNode);
-    
+
     fn.register("sin", function(_args) {
         return new OscNode(_args).set("wave", "sin");
     });
@@ -188,7 +188,7 @@
     fn.register("+saw", function(_args) {
         return new OscNode(_args).set("wave", "+saw").kr();
     });
-    
+
     fn.alias("square", "pulse");
-    
+
 })(timbre);

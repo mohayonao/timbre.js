@@ -56,6 +56,11 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**13.03.10** (345.41KB)
+* Fixed: Checking Float64Array support. See [#2](https://github.com/mohayonao/timbre.js/pull/2)
+* Changed: `lame` support (default -> optional)
+* updated dependencies in package.json
+
 **13.03.01** (355.72KB)
 * Added: `T("script")`
 * Added: `T("waveshaper")`

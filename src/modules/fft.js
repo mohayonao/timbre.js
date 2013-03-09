@@ -1,10 +1,10 @@
 (function(T) {
     "use strict";
-    
+
     function FFT(n) {
         n = (typeof n === "number") ? n : 512;
         n = 1 << Math.ceil(Math.log(n) * Math.LOG2E);
-        
+
         this.length  = n;
         this.buffer  = new T.fn.SignalArray(n);
         this.real    = new T.fn.SignalArray(n);
@@ -12,18 +12,18 @@
         this._real   = new T.fn.SignalArray(n);
         this._imag   = new T.fn.SignalArray(n);
         this.mag     = new T.fn.SignalArray(n>>1);
-        
+
         this.minDecibels =  -30;
         this.maxDecibels = -100;
-        
+
         var params = FFTParams.get(n);
         this._bitrev   = params.bitrev;
         this._sintable = params.sintable;
         this._costable = params.costable;
     }
-    
+
     var $ = FFT.prototype;
-    
+
     $.setWindow = function(key) {
         if (typeof key === "string") {
             var m = /([A-Za-z]+)(?:\(([01]\.?\d*)\))?/.exec(key);
@@ -44,7 +44,7 @@
             }
         }
     };
-    
+
     $.forward = function(_buffer) {
         var buffer   = this.buffer;
         var real   = this.real;
@@ -55,7 +55,7 @@
         var costable = this._costable;
         var n = buffer.length;
         var i, j, k, k2, h, d, c, s, ik, dx, dy;
-        
+
         if (window) {
             for (i = 0; i < n; ++i) {
                 buffer[i] = _buffer[i] * window[i];
@@ -63,12 +63,12 @@
         } else {
             buffer.set(_buffer);
         }
-        
+
         for (i = 0; i < n; ++i) {
             real[i] = buffer[bitrev[i]];
             imag[i] = 0.0;
         }
-        
+
         for (k = 1; k < n; k = k2) {
             h = 0; k2 = k + k; d = n / k2;
             for (j = 0; j < k; j++) {
@@ -84,7 +84,7 @@
                 h += d;
             }
         }
-        
+
         var mag = this.mag;
         var rval, ival;
         for (i = 0; i < n; ++i) {
@@ -92,10 +92,10 @@
             ival = imag[i];
             mag[i] = Math.sqrt(rval * rval + ival * ival);
         }
-        
+
         return {real:real, imag:imag};
     };
-    
+
     $.inverse = function(_real, _imag) {
         var buffer = this.buffer;
         var real   = this._real;
@@ -105,13 +105,13 @@
         var costable = this._costable;
         var n = buffer.length;
         var i, j, k, k2, h, d, c, s, ik, dx, dy;
-        
+
         for (i = 0; i < n; ++i) {
             j = bitrev[i];
             real[i] = +_real[j];
             imag[i] = -_imag[j];
         }
-        
+
         for (k = 1; k < n; k = k2) {
             h = 0; k2 = k + k; d = n / k2;
             for (j = 0; j < k; j++) {
@@ -127,13 +127,13 @@
                 h += d;
             }
         }
-        
+
         for (i = 0; i < n; ++i) {
             buffer[i] = real[i] / n;
         }
         return buffer;
     };
-    
+
     $.getFrequencyData = function(array) {
         var minDecibels  = this.minDecibels;
         var i, imax = Math.min(this.mag.length, array.length);
@@ -150,7 +150,7 @@
         }
         return array;
     };
-    
+
     var FFTParams = {
         get: function(n) {
             return FFTParams[n] || (function() {
@@ -177,18 +177,19 @@
                 var sintable = new T.fn.SignalArray((1<<k)-1);
                 var costable = new T.fn.SignalArray((1<<k)-1);
                 var PI2 = Math.PI * 2;
-                
+
                 for (i = 0, imax = sintable.length; i < imax; ++i) {
                     sintable[i] = Math.sin(PI2 * (i / n));
                     costable[i] = Math.cos(PI2 * (i / n));
                 }
-                return FFTParams[n] = {
+                FFTParams[n] = {
                     bitrev: bitrev, sintable:sintable, costable:costable
                 };
+                return FFTParams[n];
             }());
         }
     };
-    
+
     var WindowFunctions = (function() {
         var PI   = Math.PI;
         var PI2  = Math.PI * 2;
@@ -198,7 +199,7 @@
         var sin  = Math.sin;
         var sinc = function(x) { return sin(PI*x) / (PI*x); };
         var E    = Math.E;
-        
+
         return {
             rectangular: function() {
                 return 1;
@@ -242,7 +243,7 @@
             }
         };
     }());
-    
+
     T.modules.FFT = FFT;
-    
+
 })(timbre);

@@ -1,11 +1,11 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function NDictNode(_args) {
         T.Object.call(this, 1, _args);
-        
+
         var _ = this._;
         _.defaultValue = 0;
         _.index = 0;
@@ -13,9 +13,9 @@
         _.ar    = false;
     }
     fn.extend(NDictNode);
-    
+
     var $ = NDictNode.prototype;
-    
+
     Object.defineProperties($, {
         dict: {
             set: function(value) {
@@ -54,21 +54,21 @@
             }
         }
     });
-    
+
     $.at = function(index) {
         var _ = this._;
         return (_.dict[index|0] || _.defaultValue) * _.mul + _.add;
     };
-    
+
     $.clear = function() {
         this._.dict = {};
         return this;
     };
-    
+
     $.process = function(tickID) {
         var cell = this.cells[0];
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
@@ -77,9 +77,9 @@
             var dict = _.dict, defaultValue = _.defaultValue;
             var mul = _.mul, add = _.add;
             var i, imax = cell.length;
-            
+
             if (_.ar && len) {
-                
+
                 fn.inputSignalAR(this);
                 for (i = 0; i < imax; ++i) {
                     index = cell[i];
@@ -104,10 +104,10 @@
                 }
             }
         }
-        
+
         return this;
     };
-    
+
     fn.register("ndict", NDictNode);
-    
+
 })(timbre);

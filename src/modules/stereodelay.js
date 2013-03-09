@@ -3,7 +3,7 @@
 
     function StereoDelay(samplerate) {
         this.samplerate = samplerate;
-        
+
         var bits = Math.ceil(Math.log(samplerate * 1.5) * Math.LOG2E);
 
         this.buffersize = 1 << bits;
@@ -18,15 +18,15 @@
         this.mix   = null;
         this.prevL = 0;
         this.prevR = 0;
-        
+
         this.readIndex  = 0;
         this.writeIndex = 0;
-        
+
         this.setParams(125, 0.25, false, 0.45);
     }
-    
+
     var $ = StereoDelay.prototype;
-    
+
     $.setParams = function(delaytime, feedback, cross ,mix) {
         if (this.delaytime !== delaytime) {
             this.delaytime = delaytime;
@@ -53,7 +53,7 @@
             this.mix = mix;
         }
     };
-    
+
     $.process = function(cellL, cellR) {
         var readBufferL = this.readBufferL;
         var readBufferR = this.readBufferR;
@@ -66,29 +66,29 @@
         var wet = this.mix, dry = 1 - wet;
         var prevL = this.prevL;
         var prevR = this.prevR;
-        
+
         var x;
         var i, imax = cellL.length;
-        
+
         for (i = 0; i < imax; ++i) {
             x = readBufferL[readIndex];
             writeBufferL[writeIndex] = cellL[i] - x * fb;
             cellL[i] = prevL = ((cellL[i] * dry) + (x * wet) + prevL) * 0.5;
-            
+
             x = readBufferR[readIndex];
             writeBufferR[writeIndex] = cellR[i] - x * fb;
             cellR[i] = prevR = ((cellR[i] * dry) + (x * wet) + prevR) * 0.5;
-            
+
             readIndex  += 1;
             writeIndex = (writeIndex + 1) & mask;
         }
-        
+
         this.readIndex  = readIndex  & this.buffermask;
         this.writeIndex = writeIndex;
         this.prevL = prevL;
         this.prevR = prevR;
     };
-    
+
     T.modules.StereoDelay = StereoDelay;
-    
+
 })(timbre);
