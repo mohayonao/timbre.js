@@ -13,43 +13,43 @@
             return instance;
         }
         instance = this;
-        
+
         T.Object.call(this, 1, _args);
 
         fn.fixKR(this);
     }
     fn.extend(KeyboardListener);
-    
+
     var keyDown  = {};
     var shiftKey = false;
     var ctrlKey  = false;
     var altKey   = false;
-    
+
     var onkeydown = function(e) {
         var _ = instance._;
         var cell = instance.cells[0];
         var value = e.keyCode * _.mul + _.add;
-        
+
         for (var i = 0, imax = cell.length; i < imax; ++i) {
             cell[i] = value;
         }
         shiftKey = e.shiftKey;
         ctrlKey  = e.ctrlKey;
         altKey   = e.altKey;
-        
+
         if (!keyDown[e.keyCode]) {
             keyDown[e.keyCode] = true;
             instance._.emit("keydown", e);
         }
     };
-    
+
     var onkeyup = function(e) {
         delete keyDown[e.keyCode];
         instance._.emit("keyup", e);
     };
-    
+
     var $ = KeyboardListener.prototype;
-    
+
     Object.defineProperties($, {
         shiftKey: {
             get: function() {
@@ -67,7 +67,7 @@
             }
         }
     });
-    
+
     $.start = function() {
         window.addEventListener("keydown", onkeydown, true);
         window.addEventListener("keyup"  , onkeyup  , true);
@@ -83,10 +83,10 @@
     $.play = $.pause = function() {
         return this;
     };
-    
+
     fn.register("keyboard", KeyboardListener);
 
-    
+
     var NDictKey = {
         90 : 48, // Z -> C3
         83 : 49, // S -> C+3
@@ -130,5 +130,5 @@
         instance.dict = NDictKey;
         return instance;
     });
-    
+
 })(timbre);

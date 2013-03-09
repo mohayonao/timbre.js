@@ -1,14 +1,14 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var timevalue = T.timevalue;
     var Compressor = T.modules.Compressor;
-    
+
     function CompressorNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
-        
+
         var _ = this._;
         _.prevThresh = -24;
         _.prevKnee   =  30;
@@ -20,7 +20,7 @@
         _.reduction = 0;
         _.attack = 3;
         _.release = 25;
-        
+
         _.comp = new Compressor(_.samplerate);
         _.comp.dbPostGain = _.postGain;
         _.comp.setAttackTime(_.attack * 0.001);
@@ -29,9 +29,9 @@
         _.comp.setParams(_.prevThresh, _.prevKnee, _.prevRatio);
     }
     fn.extend(CompressorNode);
-    
+
     var $ = CompressorNode.prototype;
-    
+
     Object.defineProperties($, {
         thresh: {
             set: function(value) {
@@ -111,15 +111,15 @@
             }
         }
     });
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             fn.inputSignalAR(this);
-            
+
             var thresh = _.thresh.process(tickID).cells[0][0];
             var knee   = _.knee.process(tickID).cells[0][0];
             var ratio  = _.ratio.process(tickID).cells[0][0];
@@ -129,18 +129,18 @@
                 _.prevRatio  = ratio;
                 _.comp.setParams(thresh, knee, ratio);
             }
-            
+
             if (!_.bypassed) {
                 _.comp.process(this.cells[1], this.cells[2]);
                 _.reduction = _.comp.meteringGain;
             }
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
-    
+
     fn.register("comp", CompressorNode);
-    
+
 })(timbre);

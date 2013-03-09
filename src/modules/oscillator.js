@@ -1,27 +1,27 @@
 (function(T) {
     "use strict";
-    
+
     function Oscillator(samplerate) {
         this.samplerate = samplerate || 44100;
-        
+
         this.wave = null;
         this.step = 1;
         this.frequency = 0;
         this.value = 0;
         this.phase = 0;
         this.feedback = false;
-        
+
         this._x = 0;
         this._lastouts = 0;
         this._coeff = TABLE_SIZE / this.samplerate;
         this._radtoinc = TABLE_SIZE / (Math.PI * 2);
     }
-    
+
     var TABLE_SIZE = 1024;
     var TABLE_MASK = TABLE_SIZE - 1;
-    
+
     var $ = Oscillator.prototype;
-    
+
     $.setWave = function(value) {
         var i, dx, wave = this.wave;
         if (!this.wave) {
@@ -51,11 +51,11 @@
         }
         this.wave[TABLE_SIZE] = this.wave[0];
     };
-    
+
     $.reset = function() {
         this._x = 0;
     };
-    
+
     $.next = function() {
         var x = this._x;
         var index = (x + this.phase * this._radtoinc)|0;
@@ -67,14 +67,14 @@
         this._x = x;
         return this.value;
     };
-    
+
     $.process = function(cell) {
         var wave = this.wave;
         var radtoinc = this._radtoinc;
         var phase, x = this._x;
         var index, frac, x0, x1, dx = this.frequency * this._coeff;
         var i, imax = this.step;
-        
+
         if (this.feedback) {
             var lastouts = this._lastouts;
             radtoinc *= this.phase;
@@ -108,14 +108,14 @@
         this._x = x;
         this.value = cell[cell.length - 1];
     };
-    
+
     $.processWithFreqArray = function(cell, freqs) {
         var wave = this.wave;
         var radtoinc = this._radtoinc;
         var phase, x = this._x;
         var index, frac, x0, x1, dx = this._coeff;
         var i, imax = this.step;
-        
+
         if (this.feedback) {
             var lastouts = this._lastouts;
             radtoinc *= this.phase;
@@ -149,7 +149,7 @@
         this._x = x;
         this.value = cell[cell.length - 1];
     };
-    
+
     $.processWithPhaseArray = function(cell, phases) {
         var wave = this.wave;
         var radtoinc = this._radtoinc;
@@ -189,14 +189,14 @@
         this._x = x;
         this.value = cell[cell.length - 1];
     };
-    
+
     $.processWithFreqAndPhaseArray = function(cell, freqs, phases) {
         var wave = this.wave;
         var radtoinc = this._radtoinc;
         var phase, x = this._x;
         var index, frac, x0, x1, dx = this._coeff;
         var i, imax = this.step;
-        
+
         if (this.feedback) {
             var lastouts = this._lastouts;
             radtoinc *= this.phase;
@@ -229,21 +229,21 @@
         this._x = x;
         this.value = cell[cell.length - 1];
     };
-    
-    
+
+
     function waveshape(sign, name, shape, width) {
         var wave = Wavetables[name];
         var _wave;
         var i, imax, j, jmax;
-        
+
         if (wave === undefined) {
             return;
         }
-        
+
         if (typeof wave === "function") {
             wave = wave();
         }
-        
+
         switch (shape) {
         case "@1":
             for (i = 512; i < 1024; ++i) {
@@ -281,12 +281,12 @@
             wave = _wave;
             break;
         }
-        
+
         // duty-cycle
         if (width !== undefined && width !== 50) {
             width *= 0.01;
             width = (width < 0) ? 0 : (width > 1) ? 1 : width;
-            
+
             _wave = new Float32Array(1024);
             imax = (1024 * width)|0;
             for (i = 0; i < imax; ++i) {
@@ -298,7 +298,7 @@
             }
             wave = _wave;
         }
-        
+
         if (sign === "+") {
             for (i = 0; i < 1024; ++i) {
                 wave[i] = wave[i] * 0.5 + 0.5;
@@ -310,15 +310,15 @@
         }
         return wave;
     }
-    
+
     function wavb(src) {
         var wave = new Float32Array(1024);
         var n = src.length >> 1;
         if ([2,4,8,16,32,64,128,256,512,1024].indexOf(n) !== -1) {
-            
+
             for (var i = 0, k = 0; i < n; ++i) {
                 var x = parseInt(src.substr(i * 2, 2), 16);
-                
+
                 x = (x & 0x80) ? (x-256) / 128.0 : x / 127.0;
                 for (var j = 0, jmax = 1024 / n; j < jmax; ++j) {
                     wave[k++] = x;
@@ -327,7 +327,7 @@
         }
         return wave;
     }
-    
+
     function wavc(src) {
         var wave = new Float32Array(1024);
         if (src.length === 8) {
@@ -340,7 +340,7 @@
                 bar[i+1] = (color & 0x0f) * 0.0625; // 0.0625 = 1/16
                 color >>= 4;
             }
-            
+
             for (i = 0; i < 8; ++i) {
                 var x = 0, dx = (i + 1) / 1024;
                 for (j = 0; j < 1024; ++j) {
@@ -348,7 +348,7 @@
                     x += dx;
                 }
             }
-            
+
             var maxx = 0, absx;
             for (i = 0; i < 1024; ++i) {
                 if (maxx < (absx = Math.abs(wave[i]))) {
@@ -363,7 +363,7 @@
         }
         return wave;
     }
-    
+
     var getWavetable = function(key) {
         var wave = Wavetables[key];
         if (wave !== undefined) {
@@ -372,7 +372,7 @@
             }
             return wave;
         }
-        
+
         var m;
         // wave shaping
         m = /^([\-+]?)(\w+)(?:\((@[0-7])?:?(\d+)?\))?$/.exec(key);
@@ -383,23 +383,23 @@
                 return Wavetables[key] = wave;
             }
         }
-        
+
         // wave bytes
         m = /^wavb\(((?:[0-9a-fA-F][0-9a-fA-F])+)\)$/.exec(key);
         if (m !== null) {
             return wavb(m[1]);
         }
-        
+
         // wave color
         m = /^wavc\(([0-9a-fA-F]{8})\)$/.exec(key);
         if (m !== null) {
             return wavc(m[1]);
         }
-        
+
         // warn message
     };
     Oscillator.getWavetable = getWavetable;
-    
+
     var setWavetable = function(name, value) {
         var dx, wave = new Float32Array(1024);
         var i;
@@ -420,7 +420,7 @@
         Wavetables[name] = wave;
     };
     Oscillator.setWavetable = setWavetable;
-    
+
     var Wavetables = {
         sin: function() {
             var wave = new Float32Array(1024);
@@ -482,7 +482,7 @@
             return wave;
         }
     };
-    
+
     T.modules.Oscillator = Oscillator;
-    
+
 })(timbre);

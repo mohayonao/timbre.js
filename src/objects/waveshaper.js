@@ -2,17 +2,17 @@
     "use strict";
 
     var fn = T.fn;
-    
+
     function WaveShaperNode(_args) {
         T.Object.call(this, 1, _args);
         fn.fixAR(this);
-        
+
         this._.curve = null;
     }
     fn.extend(WaveShaperNode);
-    
+
     var $ = WaveShaperNode.prototype;
-    
+
     Object.defineProperties($, {
         curve: {
             set: function(value) {
@@ -49,13 +49,13 @@
                     cell[i] = curve[x];
                 }
             }
-            
+
             fn.outputSignalAR(this);
         }
 
         return this;
     };
-    
+
     fn.register("waveshaper", WaveShaperNode);
-    
+
 })(timbre);

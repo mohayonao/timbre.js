@@ -1,18 +1,18 @@
 (function(T) {
     "use strict";
-    
+
     if (T.env !== "webkit") {
         return;
     }
-    
+
     var fn = T.fn;
     var context = fn._audioContext;
     var BUFFERSIZE = 1024;
-    
+
     function WebAudioAPINode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
-        
+
         var _ = this._;
         _.mode = "";
         _.bufferL = new fn.SignalArray(BUFFERSIZE << 2);
@@ -26,9 +26,9 @@
         _.totalWrite = 0;
     }
     fn.extend(WebAudioAPINode);
-    
+
     var $ = WebAudioAPINode.prototype;
-    
+
     Object.defineProperties($, {
         context: {
             get: function() {
@@ -41,7 +41,7 @@
             }
         }
     });
-    
+
     $.cancel = function() {
         var _ = this._;
         var cell = this.cells[0];
@@ -50,11 +50,11 @@
         }
         _.node = null;
     };
-    
+
     (function() {
         function WebAudioAPIRecvNode(_args) {
             WebAudioAPINode.call(this, _args);
-            
+
             var _ = this._;
             _.mode = "recv";
             _.script.onaudioprocess = make_recv_process(this);
@@ -63,7 +63,7 @@
             _.script.connect(_.gain);
         }
         fn.extend(WebAudioAPIRecvNode, WebAudioAPINode);
-        
+
         var make_recv_process = function(self) {
             return function(e) {
                 var _ = self._;
@@ -78,9 +78,9 @@
                 _.totalWrite += length;
             };
         };
-        
+
         var $ = WebAudioAPIRecvNode.prototype;
-        
+
         $.cancel = function() {
             WebAudioAPINode.prototype.cancel.call(this);
             this._.gain.disconnect();
@@ -88,7 +88,7 @@
                 this._.node.disconnect();
             }
         };
-        
+
         $.recv = function(node) {
             var _ = this._;
             try {
@@ -104,21 +104,21 @@
             _.totalRead  = 0;
             return this;
         };
-        
+
         $.process = function(tickID) {
             var _ = this._;
-            
+
             if (_.node === null) {
                 return this;
             }
-            
+
             if (this.tickID !== tickID) {
                 this.tickID = tickID;
 
                 var cellsize = _.cellsize;
                 var bufferL = _.bufferL;
                 var bufferR = _.bufferR;
-                
+
                 if (_.totalWrite > _.totalRead + cellsize) {
                     var begin = _.readIndex;
                     var end = begin + cellsize;
@@ -131,28 +131,28 @@
             }
             return this;
         };
-        
+
         fn.register("WebAudioAPI:recv", WebAudioAPIRecvNode);
     })();
-    
+
     (function() {
         function WebAudioAPISendNode(_args) {
             WebAudioAPINode.call(this, _args);
             fn.listener(this);
-            
+
             var _ = this._;
             _.mode = "send";
             _.script.onaudioprocess = make_send_process(this);
             _.connectIndex = null;
         }
         fn.extend(WebAudioAPISendNode, WebAudioAPINode);
-        
+
         var make_send_process = function(self) {
             return function(e) {
                 var _ = self._;
                 var outs = e.outputBuffer;
                 var length  = outs.length;
-                
+
                 if (_.totalWrite > _.totalRead + length) {
                     var begin = _.readIndex;
                     var end = begin + length;
@@ -163,9 +163,9 @@
                 }
             };
         };
-        
+
         var $ = WebAudioAPISendNode.prototype;
-        
+
         $.cancel = function() {
             WebAudioAPINode.prototype.cancel.call(this);
             var _ = this._;
@@ -176,7 +176,7 @@
             }
             this.unlisten();
         };
-        
+
         $.send = function(node, index) {
             var _ = this._;
             try {
@@ -198,35 +198,35 @@
             _.totalRead  = 0;
             return this;
         };
-        
+
         $.process = function(tickID) {
             var _ = this._;
-            
+
             if (_.script === null) {
                 return this;
             }
-            
+
             if (this.tickID !== tickID) {
                 this.tickID = tickID;
-                
+
                 var cellL = this.cells[1];
                 var cellR = this.cells[2];
                 var cellsize = _.cellsize;
                 var writeIndex = _.writeIndex;
-                
+
                 fn.inputSignalAR(this);
-                
+
                 _.bufferL.set(cellL, writeIndex);
                 _.bufferR.set(cellR, writeIndex);
                 _.writeIndex = (writeIndex + cellsize) & _.buffermask;
                 _.totalWrite += cellsize;
-                
+
                 fn.outputSignalAR(this);
             }
             return this;
         };
-        
+
         fn.register("WebAudioAPI:send", WebAudioAPISendNode);
     })();
-    
+
 })(timbre);

@@ -1,6 +1,6 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var FFT = T.modules.FFT;
     var Biquad = T.modules.Biquad;
@@ -8,20 +8,20 @@
     var PARAM_NAMES = {
         hpf:0, lf:1, lmf:2, mf:3, hmf:4, hf:5, lpf:6
     };
-    
+
     function EQNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
-        
+
         var _ = this._;
         _.biquads = new Array(7);
-        
+
         _.plotBefore = plotBefore;
         _.plotRange  = [-18, 18];
         _.plotFlush  = true;
     }
     fn.extend(EQNode);
-    
+
     var plotBefore = function(context, x, y, width, height) {
         context.lineWidth = 1;
         context.strokeStyle = "rgb(192, 192, 192)";
@@ -40,7 +40,7 @@
                 context.stroke();
             }
         }
-        
+
         var h = height / 6;
         for (i = 1; i < 6; i++) {
             context.beginPath();
@@ -50,9 +50,9 @@
             context.stroke();
         }
     };
-    
+
     var $ = EQNode.prototype;
-    
+
     Object.defineProperties($, {
         params: {
             set: function(value) {
@@ -70,7 +70,7 @@
             }
         }
     });
-    
+
     $.setParams = function(index, freq, Q, gain) {
         var _ = this._;
         if (typeof index === "string") {
@@ -105,7 +105,7 @@
         }
         return this;
     };
-    
+
     $.getParams = function(index) {
         var _ = this._;
         var biquad = _.biquads[index|0];
@@ -113,13 +113,13 @@
             return {freq:biquad.frequency, Q:biquad.Q, gain:biquad.gain};
         }
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             fn.inputSignalAR(this);
 
             if (!_.bypassed) {
@@ -132,16 +132,16 @@
                     }
                 }
             }
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
 
     var fft = new FFT(2048);
     var super_plot = T.Object.prototype.plot;
-    
+
     $.plot = function(opts) {
         if (this._.plotFlush) {
             var _ = this._;
@@ -162,15 +162,15 @@
                     biquad.process(impluse, impluse);
                 }
             }
-            
+
             fft.forward(impluse);
-            
+
             var size = 512;
             var data = new Float32Array(size);
             var nyquist  = _.samplerate * 0.5;
             var spectrum = new Float32Array(size);
             var j, f, index, delta, x0, x1, xx;
-            
+
             fft.getFrequencyData(spectrum);
             for (i = 0; i < size; ++i) {
                 f = Math.pow(nyquist / PLOT_LOW_FREQ, i / size) * PLOT_LOW_FREQ;
@@ -191,7 +191,7 @@
         }
         return super_plot.call(this, opts);
     };
-    
+
     fn.register("eq", EQNode);
-    
+
 })(timbre);

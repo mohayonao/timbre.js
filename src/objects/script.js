@@ -2,7 +2,7 @@
     "use strict";
 
     var fn = T.fn;
-    
+
     function ScriptProcessorNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
@@ -35,9 +35,9 @@
             this.bufferSize = 1024;
         }
     };
-    
+
     var $ = ScriptProcessorNode.prototype;
-    
+
     Object.defineProperties($, {
         numberOfInputs: {
             set: function(value) {
@@ -91,7 +91,7 @@
             }
         }
     });
-    
+
     function AudioBuffer(self, buffers) {
         this.samplerate = self._.samplerate;
         this.length     = self._.bufferSize;
@@ -101,7 +101,7 @@
             return buffers[n];
         };
     }
-    
+
     function AudioProcessingEvent(self) {
         var _ = self._;
         this.node = self;
@@ -117,10 +117,10 @@
             this.outputBuffer = new AudioBuffer(self, [_.outputBufferL]);
         }
     }
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
@@ -131,9 +131,9 @@
             var buffer;
             var cellL  = this.cells[1];
             var cellR  = this.cells[2];
-            
+
             fn.inputSignalAR(this);
-            
+
             if (_.numberOfInputs === 2) {
                 _.inputBufferL.set(cellL, begin);
                 _.inputBufferR.set(cellR, begin);
@@ -143,25 +143,25 @@
                     buffer[begin + i] = (cellL[i] + cellR[i]) * 0.5;
                 }
             }
-            
+
             cellL.set(_.outputBufferL.subarray(begin, end));
             cellR.set(_.outputBufferR.subarray(begin, end));
-            
+
             _.index = end & bufferMask;
-            
+
             if (_.index === 0 && _.onaudioprocess) {
                 _.onaudioprocess(new AudioProcessingEvent(this));
                 if (_.numberOfOutputs === 1) {
                     _.outputBufferR.set(_.outputBufferL);
                 }
             }
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
-    
+
     fn.register("script", ScriptProcessorNode);
-    
+
 })(timbre);

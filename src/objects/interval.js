@@ -1,14 +1,14 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var timevalue = T.timevalue;
-    
+
     function IntervalNode(_args) {
         T.Object.call(this, 1, _args);
         fn.timer(this);
         fn.fixKR(this);
-        
+
         var _ = this._;
         _.interval = T(1000);
         _.count = 0;
@@ -18,11 +18,11 @@
         _.delaySamples = 0;
         _.countSamples = 0;
         _.onended = fn.make_onended(this);
-        
+
         this.on("start", onstart);
     }
     fn.extend(IntervalNode);
-    
+
     var onstart = function() {
         var _ = this._;
         this.playbackState = fn.PLAYING_STATE;
@@ -32,9 +32,9 @@
     Object.defineProperty(onstart, "unremovable", {
         value:true, writable:false
     });
-    
+
     var $ = IntervalNode.prototype;
-    
+
     Object.defineProperties($, {
         interval: {
             set: function(value) {
@@ -93,7 +93,7 @@
             }
         }
     });
-    
+
     $.bang = function() {
         var _ = this._;
         this.playbackState = fn.PLAYING_STATE;
@@ -102,21 +102,21 @@
         _.emit("bang");
         return this;
     };
-    
+
     $.process = function(tickID) {
         var cell = this.cells[0];
-        
+
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             if (_.delaySamples > 0) {
                 _.delaySamples -= cell.length;
             }
-            
+
             var interval = _.interval.process(tickID).cells[0][0];
-            
+
             if (_.delaySamples <= 0) {
                 _.countSamples -= cell.length;
                 if (_.countSamples <= 0) {
@@ -141,7 +141,7 @@
         }
         return this;
     };
-    
+
     fn.register("interval", IntervalNode);
-    
+
 })(timbre);

@@ -1,12 +1,12 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function DistNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
-        
+
         var _ = this._;
         _.pre  = T( 60);
         _.post = T(-18);
@@ -19,9 +19,9 @@
         _.postScale = 0;
     }
     fn.extend(DistNode);
-    
+
     var $ = DistNode.prototype;
-    
+
     Object.defineProperties($, {
         cutoff: {
             set: function(value) {
@@ -50,42 +50,42 @@
             }
         }
     });
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             fn.inputSignalAR(this);
-            
+
             var preGain  = -_.pre.process(tickID).cells[0][0];
             var postGain = -_.post.process(tickID).cells[0][0];
-            
+
             if (_.prevPreGain !== preGain || _.prevPostGain !== postGain) {
                 _.prevPreGain  = preGain;
                 _.prevPostGain = postGain;
                 _.preScale  = Math.pow(10, -preGain  * 0.05);
                 _.postScale = Math.pow(10, -postGain * 0.05);
             }
-            
+
             if (!_.bypassed) {
                 var cellL = this.cells[1];
                 var cellR = this.cells[2];
                 var preScale  = _.preScale;
                 var postScale = _.postScale;
                 var i, imax, value, x0, y0;
-                
+
                 if (_.cutoff) {
                     if (_.prevCutoff !== _.cutoff) {
                         _.prevCutoff = _.cutoff;
                         lowpass_params(_);
                     }
-                    
+
                     var x1L = _.x1L, x2L = _.x2L, y1L = _.y1L, y2L = _.y2L;
                     var x1R = _.x1R, x2R = _.x2R, y1R = _.y1R, y2R = _.y2R;
                     var b0 = _.b0, b1 = _.b1, b2 = _.b2, a1 = _.a1, a2 = _.a2;
-                    
+
                     for (i = 0, imax = cellL.length; i < imax; ++i) {
                         x0 = cellL[i] * preScale;
                         y0 = b0 * x0 + b1 * x1L + b2 * x2L - a1 * y1L - a2 * y2L;
@@ -97,7 +97,7 @@
                         }
                         cellL[i] = value;
                         x2L = x1L; x1L = x0; y2L = y1L; y1L = y0;
-                        
+
                         x0 = cellR[i] * preScale;
                         y0 = b0 * x0 + b1 * x1R + b2 * x2R - a1 * y1R - a2 * y2R;
                         value = y0 * postScale;
@@ -109,7 +109,7 @@
                         cellR[i] = value;
                         x2R = x1R; x1R = x0; y2R = y1R; y1R = y0;
                     }
-                    
+
                     _.x1L = x1L; _.x2L = x2L; _.y1L = y1L; _.y2L = y2L;
                     _.x1R = x1R; _.x2R = x2R; _.y1R = y1R; _.y2R = y2R;
                 } else {
@@ -121,7 +121,7 @@
                             value = 1;
                         }
                         cellL[i] = value;
-                        
+
                         value = cellR[i] * preScale * postScale;
                         if (value < -1) {
                             value = -1;
@@ -135,10 +135,10 @@
 
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
-    
+
     var lowpass_params = function(_) {
         var w0 = 2 * Math.PI * _.cutoff / _.samplerate;
         var cos = Math.cos(w0);
@@ -152,7 +152,7 @@
         _.a1 =  -2 * cos * ia0;
         _.a2 =   1 - alpha * ia0;
     };
-    
+
     fn.register("dist", DistNode);
-    
+
 })(timbre);

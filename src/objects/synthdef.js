@@ -1,8 +1,8 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function SynthDefNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
@@ -17,9 +17,9 @@
         _.onended = fn.make_onended(this);
     }
     fn.extend(SynthDefNode);
-    
+
     var $ = SynthDefNode.prototype;
-    
+
     Object.defineProperties($, {
         def: {
             set: function(value) {
@@ -44,13 +44,13 @@
             }
         }
     });
-    
+
     var make_doneAction = function(self, opts) {
         return function() {
             self._.remGen(opts.gen);
         };
     };
-    
+
     var make_remGen = function(self) {
         return function(gen) {
             var _ = self._;
@@ -61,7 +61,7 @@
             _.genDict[gen.noteNum] = null;
         };
     };
-    
+
     var noteOn = function(noteNum, freq, velocity, _opts) {
         velocity |= 0;
         if (velocity <= 0) {
@@ -75,7 +75,7 @@
         if (gen) {
             _.remGen(gen);
         }
-        
+
         var opts = {
             freq    : freq,
             noteNum : noteNum,
@@ -87,22 +87,22 @@
             }
         }
         opts.doneAction = make_doneAction(this, opts);
-        
+
         gen = this._.synthdef.call(this, opts);
-        
+
         if (gen instanceof T.Object) {
             gen.noteNum = noteNum;
             list.push(gen);
             dict[noteNum] = opts.gen = gen;
-            
+
             this.playbackState = fn.PLAYING_STATE;
-            
+
             if (list.length > _.poly) {
                 _.remGen(list[0]);
             }
         }
     };
-    
+
     var midicps = (function() {
         var table = new Float32Array(128);
         for (var i = 0; i < 128; ++i) {
@@ -118,13 +118,13 @@
             return 0;
         }
     };
-    
+
     $.noteOn = function(noteNum, velocity, _opts) {
         var freq = midicps[noteNum] || (440 * Math.pow(2, (noteNum - 69) / 12));
         noteOn.call(this, (noteNum + 0.5)|0, freq, velocity, _opts);
         return this;
     };
-    
+
     $.noteOff = function(noteNum) {
         var gen = this._.genDict[noteNum];
         if (gen && gen.release) {
@@ -132,18 +132,18 @@
         }
         return this;
     };
-    
+
     $.noteOnWithFreq = function(freq, velocity, _opts) {
         var noteNum = cpsmidi(freq);
         noteOn.call(this, (noteNum + 0.5)|0, freq, velocity, _opts);
         return this;
     };
-    
+
     $.noteOffWithFreq = function(freq) {
         var noteNum = cpsmidi(freq);
         return this.noteOff((noteNum + 0.5)|0);
     };
-    
+
     $.allNoteOff = function() {
         var list = this._.genList;
         for (var i = 0, imax = list.length; i < imax; ++i) {
@@ -152,7 +152,7 @@
             }
         }
     };
-    
+
     $.allSoundOff = function() {
         var _ = this._;
         var list = _.genList;
@@ -161,14 +161,14 @@
             delete dict[list.shift().noteNum];
         }
     };
-    
+
     $.process = function(tickID) {
         var cell = this.cells[0];
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             if (this.playbackState === fn.PLAYING_STATE) {
                 var list = _.genList;
                 var gen;
@@ -177,7 +177,7 @@
                 var i, imax;
                 var j, jmax = cell.length;
                 var tmpL, tmpR;
-                
+
                 if (list.length) {
                     gen = list[0];
                     gen.process(tickID);
@@ -197,16 +197,16 @@
                     fn.nextTick(_.onended);
                 }
             }
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
-    
+
     fn.register("SynthDef", SynthDefNode);
-    
-    
+
+
     var env_desc = {
         set: function(value) {
             if (fn.isDictionary(value)) {
@@ -221,7 +221,7 @@
             return this._.env;
         }
     };
-    
+
     fn.register("OscGen", (function() {
 
         var wave_desc = {
@@ -234,14 +234,14 @@
                 return this._.wave;
             }
         };
-        
+
         var synthdef = function(opts) {
             var _ = this._;
             var synth, env, envtype;
-            
+
             env = _.env || {};
             envtype = env.type || "perc";
-            
+
             synth = T("osc", {wave:_.wave, freq:opts.freq, mul:opts.velocity/128});
             if (env instanceof T.Object) {
                 if (typeof env.clone === "function") {
@@ -251,34 +251,34 @@
                 synth = T(envtype, env, synth);
             }
             synth.on("ended", opts.doneAction).bang();
-            
+
             return synth;
         };
-        
+
         return function(_args) {
             var instance = new SynthDefNode(_args);
-            
+
             instance._.wave = "sin";
-            
+
             Object.defineProperties(instance, {
                 env: env_desc, wave: wave_desc
             });
-            
+
             instance.def = synthdef;
-            
+
             return instance;
         };
     })());
-    
+
     fn.register("PluckGen", (function() {
-        
+
         var synthdef = function(opts) {
             var _ = this._;
             var synth, env, envtype;
-            
+
             env = _.env || {};
             envtype = env.type || "perc";
-            
+
             synth = T("pluck", {freq:opts.freq, mul:opts.velocity/128}).bang();
             if (env instanceof T.Object) {
                 if (typeof env.clone === "function") {
@@ -288,21 +288,21 @@
                 synth = T(envtype, env, synth);
             }
             synth.on("ended", opts.doneAction).bang();
-            
+
             return synth;
         };
-        
+
         return function(_args) {
             var instance = new SynthDefNode(_args);
-            
+
             Object.defineProperties(instance, {
                 env: env_desc
             });
-            
+
             instance.def = synthdef;
-            
+
             return instance;
         };
     })());
-    
+
 })(timbre);

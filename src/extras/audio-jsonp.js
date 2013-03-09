@@ -1,10 +1,10 @@
 (function(T) {
     "use strict";
-    
+
     if (T.envtype !== "browser") {
         return;
     }
-    
+
     var fn = T.fn;
     var modules = T.modules;
 
@@ -25,31 +25,31 @@
 
         instance.load     = load;
         instance.loadthis = loadthis;
-        
+
         return instance;
     });
 
     var re = /(_)?callback=([_\w\d]+)/;
-    
+
     var load = function(url) {
         var self = this, _ = this._;
         var dfd = new modules.Deferred(this);
-        
+
         var args = arguments, i = 1;
-        
+
         dfd.done(function() {
             self._.emit("done");
         });
-        
+
         if (typeof args[i] === "function") {
             dfd.done(args[i++]);
             if (typeof args[i] === "function") {
                 dfd.fail(args[i++]);
             }
         }
-        
+
         var m, callback, script;
-        
+
         if (_.script) {
             dfd.reject();
         } else {
@@ -83,19 +83,19 @@
                     dfd.reject(msg);
                 }
             };
-            
+
             var onloadeddata = function() {
                 self._.isLoaded  = true;
                 self._.plotFlush = true;
                 self._.emit("loadeddata");
                 dfd.resolveWith(self);
             };
-            
+
             window[callback] = function(base64, ext) {
-                
+
                 var src = { type:ext, data:base64decode(base64) };
                 new modules.Decoder().decode(src, onloadedmetadata, onloadeddata);
-                
+
                 delete window[callback];
                 _.script = null;
             };
@@ -104,10 +104,10 @@
             document.body.appendChild(script);
             _.script = script;
         }
-        
+
         return dfd.promise();
     };
-    
+
     var loadthis = function() {
         load.apply(this, arguments);
         return this;
@@ -143,7 +143,7 @@
                 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30,
                 0x31, 0x32, 0x33, 0x00, 0x00, 0x00, 0x00, 0x00
             ]);
-            
+
             return function(src) {
                 var a = new Uint8Array(src.length);
                 var len, sidx, didx;
@@ -162,7 +162,7 @@
                 if (!len) {
                     return null;
                 }
-                
+
                 sidx = 0;
                 didx = 0;
                 if (len > 1) {
@@ -182,8 +182,8 @@
                 }
                 return a.subarray(0, len);
             };
-            
+
         })();
     }
-    
+
 })(timbre);

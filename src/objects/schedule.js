@@ -1,23 +1,23 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var timevalue = T.timevalue;
-    
+
     function ScheduleNode(_args) {
         T.Object.call(this, 0, _args);
         fn.timer(this);
         fn.fixKR(this);
-        
+
         var _ = this._;
         _.queue = [];
         _.currentTime = 0;
         _.maxRemain   = 1000;
     }
     fn.extend(ScheduleNode);
-    
+
     var $ = ScheduleNode.prototype;
-    
+
     Object.defineProperties($, {
         queue: {
             get: function() {
@@ -50,7 +50,7 @@
             }
         }
     });
-    
+
     $.sched = function(delta, item) {
         if (typeof delta === "string") {
             delta = timevalue(delta);
@@ -60,7 +60,7 @@
         }
         return this;
     };
-    
+
     $.schedAbs = function(time, item) {
         if (typeof time === "string") {
             time = timevalue(time);
@@ -80,7 +80,7 @@
         }
         return this;
     };
-    
+
     $.advance = function(delta) {
         if (typeof delta === "string") {
             delta = timevalue(delta);
@@ -90,21 +90,21 @@
         }
         return this;
     };
-    
+
     $.clear = function() {
         this._.queue.splice(0);
         return this;
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var emit = null;
             var queue = _.queue;
-            
+
             if (queue.length) {
                 while (queue[0][0] < _.currentTime) {
                     var nextItem = _.queue.shift();
@@ -123,8 +123,8 @@
         }
         return this;
     };
-    
+
     fn.register("schedule", ScheduleNode);
     fn.alias("sche", "schedule");
-    
+
 })(timbre);

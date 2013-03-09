@@ -1,8 +1,8 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function ZMapNode(_args) {
         T.Object.call(this, 1, _args);
 
@@ -12,19 +12,19 @@
         _.outMin = 0;
         _.outMax = 1;
         _.ar     = false;
-        
+
         this.once("init", oninit);
     }
     fn.extend(ZMapNode);
-    
+
     var oninit = function() {
         if (!this._.warp) {
             this.warp = "linlin";
         }
     };
-    
+
     var $ = ZMapNode.prototype;
-    
+
     Object.defineProperties($, {
         inMin: {
             set: function(value) {
@@ -81,22 +81,22 @@
             }
         }
     });
-    
+
     $.process = function(tickID) {
         var _ = this._;
         var cell = this.cells[0];
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
             var inMin  = _.inMin, inMax   = _.inMax;
             var outMin = _.outMin, outMax = _.outMax;
             var warp   = _.warp;
-            
+
             var len = this.nodes.length;
             var mul = _.mul, add = _.add;
             var i, imax = cell.length;
-            
+
             if (_.ar && len) {
                 fn.inputSignalAR(this);
                 for (i = 0; i < imax; ++i) {
@@ -111,10 +111,10 @@
                 }
             }
         }
-        
+
         return this;
     };
-    
+
     var WarpFunctions = {
         linlin: function(x, inMin, inMax, outMin, outMax) {
             if (x < inMin) {
@@ -164,7 +164,7 @@
             return Math.pow(outMax/outMin, Math.log(x/inMin) / Math.log(inMax/inMin)) * outMin;
         }
     };
-    
+
     fn.register("zmap", ZMapNode);
-    
+
 })(timbre);
