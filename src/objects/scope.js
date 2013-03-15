@@ -1,23 +1,23 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var timevalue = T.timevalue;
-    
+
     function ScopeNode(_args) {
         T.Object.call(this, 2, _args);
         fn.listener(this);
         fn.fixAR(this);
-        
+
         var _ = this._;
         _.samples    = 0;
         _.writeIndex = 0;
         _.plotFlush = true;
-        
+
         this.once("init", oninit);
     }
     fn.extend(ScopeNode);
-    
+
     var oninit = function() {
         if (!this._.buffer) {
             this.size = 1024;
@@ -26,9 +26,9 @@
             this.interval = 1000;
         }
     };
-    
+
     var $ = ScopeNode.prototype;
-    
+
     Object.defineProperties($, {
         size: {
             set: function(value) {
@@ -71,11 +71,11 @@
             }
         }
     });
-    
+
     $.bang = function() {
         var _ = this._;
         var buffer = _.buffer;
-        
+
         for (var i = 0, imax = buffer.length; i < imax; ++i) {
             buffer[i] = 0;
         }
@@ -84,16 +84,16 @@
         this._.emit("bang");
         return this;
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             fn.inputSignalAR(this);
             fn.outputSignalAR(this);
-            
+
             var cell = this.cells[0];
             var i, imax = _.cellsize;
             var samples     = _.samples;
@@ -102,7 +102,7 @@
             var writeIndex  = _.writeIndex;
             var emit = false;
             var bufferlength = buffer.length;
-            
+
             for (i = 0; i < imax; ++i) {
                 if (samples <= 0) {
                     buffer[writeIndex++] = cell[i];
@@ -116,17 +116,17 @@
             }
             _.samples    = samples;
             _.writeIndex = writeIndex;
-            
+
             if (emit) {
                 this._.emit("data");
             }
         }
-        
+
         return this;
     };
-    
+
     var super_plot = T.Object.prototype.plot;
-    
+
     $.plot = function(opts) {
         var _ = this._;
         if (_.plotFlush) {
@@ -142,7 +142,7 @@
         }
         return super_plot.call(this, opts);
     };
-    
+
     fn.register("scope", ScopeNode);
-    
+
 })(timbre);

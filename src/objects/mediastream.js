@@ -4,15 +4,15 @@
     if (T.envtype !== "browser") {
         return;
     }
-    
+
     var fn = T.fn;
     var BUFFER_SIZE = 4096;
     var BUFFER_MASK = BUFFER_SIZE - 1;
-    
+
     function MediaStreamNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
-        
+
         var _ = this._;
         _.src = _.func = null;
         _.bufferL = new fn.SignalArray(BUFFER_SIZE);
@@ -23,9 +23,9 @@
         _.totalWrite = 0;
     }
     fn.extend(MediaStreamNode);
-    
+
     var $ = MediaStreamNode.prototype;
-    
+
     $.listen = function(audio) {
         var _impl = impl[T.env];
         if (_impl) {
@@ -33,34 +33,34 @@
             _impl.listen.call(this);
         }
     };
-    
+
     $.unlisten = function() {
         var _impl = impl[T.env];
         if (_impl) {
             _impl.unlisten.call(this);
         }
-        
+
         this.cells[0].set(fn.emptycell);
         this.cells[1].set(fn.emptycell);
         this.cells[2].set(fn.emptycell);
-        
+
         var _ = this._;
         var bufferL = _.bufferL, bufferR = _.bufferR;
         for (var i = 0, imax = bufferL.length; i < imax; ++i) {
             bufferL[i] = bufferR[i] = 0;
         }
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (_.src === null) {
             return this;
         }
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var cellsize = _.cellsize;
             if (_.totalWrite > _.totalRead + cellsize) {
                 var begin = _.readIndex;
@@ -70,13 +70,13 @@
                 _.readIndex = end & BUFFER_MASK;
                 _.totalRead += cellsize;
             }
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
-    
+
     var impl = {};
     impl.webkit = {
         set: function(src) {
@@ -118,14 +118,14 @@
             var ins = e.inputBuffer;
             var length = ins.length;
             var writeIndex = _.writeIndex;
-            
+
             _.bufferL.set(ins.getChannelData(0), writeIndex);
             _.bufferR.set(ins.getChannelData(1), writeIndex);
             _.writeIndex = (writeIndex + length) & BUFFER_MASK;
             _.totalWrite += length;
         };
     };
-    
+
     impl.moz = {
         set: function(src) {
             var _ = this._;
@@ -200,7 +200,7 @@
             }
         }
     };
-    
+
     fn.register("mediastream", MediaStreamNode);
-    
+
 })(timbre);

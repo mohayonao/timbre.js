@@ -1,13 +1,13 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function MML(_args) {
         T.Object.call(this, 0, _args);
         fn.timer(this);
         fn.fixKR(this);
-        
+
         var _ = this._;
         _.mml = "";
         _.status = {t:120, l:4, o:4, v:12, q:6, dot:0, tie:false};
@@ -21,11 +21,11 @@
         _.prevNote = 0;
         _.remain   = Infinity;
         _.onended  = fn.make_onended(this);
-        
+
         this.on("start", onstart);
     }
     fn.extend(MML);
-    
+
     var onstart = function() {
         var _ = this._;
         this.playbackState = fn.PLAYING_STATE;
@@ -38,15 +38,15 @@
         _.loopStack   = [];
         _.prevNote = 0;
         _.remain   = Infinity;
-        
+
         sched(this);
     };
     Object.defineProperty(onstart, "unremoved", {
         value:true, writable:false
     });
-    
+
     var $ = MML.prototype;
-    
+
     Object.defineProperties($, {
         mml: {
             set: function(value) {
@@ -65,7 +65,7 @@
             }
         }
     });
-    
+
     $.on = $.addListener = function(type, listener) {
         if (type === "mml") {
             type = "data";
@@ -74,7 +74,7 @@
         this._.events.on(type, listener);
         return this;
     };
-    
+
     $.once = function(type, listener) {
         if (type === "mml") {
             type = "data";
@@ -83,7 +83,7 @@
         this._.events.once(type, listener);
         return this;
     };
-    
+
     $.off = $.removeListener = function(type, listener) {
         if (type === "mml") {
             type = "data";
@@ -92,7 +92,7 @@
         this._.events.off(type, listener);
         return this;
     };
-    
+
     $.removeAllListeners = function(type) {
         if (type === "mml") {
             console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
@@ -101,7 +101,7 @@
         this._.events.removeAllListeners(type);
         return this;
     };
-    
+
     $.listeners = function(type) {
         if (type === "mml") {
             console.warn("A 'mml' event listener was deprecated in ~v13.03.01. use 'data' event listener.");
@@ -109,17 +109,17 @@
         }
         return this._.events.listeners(type);
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var nodes = this.nodes;
             var queue  = _.queue;
             var gen, i, imax;
-            
+
             if (queue.length) {
                 while (queue[0][0] <= _.currentTime) {
                     var nextItem = _.queue.shift();
@@ -157,13 +157,13 @@
             }
             _.currentTime += fn.currentTimeIncr;
         }
-        
+
         return this;
     };
-    
+
     var sched = function(self) {
         var _ = self._;
-        
+
         var cmd, commands = _.commands;
         var queue  = _.queue;
         var index  = _.index;
@@ -174,9 +174,9 @@
         var duration, quantize, pending, _queueTime;
         var peek;
         var i, imax;
-        
+
         pending = [];
-        
+
         outer:
         while (true) {
             if (commands.length <= index) {
@@ -187,7 +187,7 @@
                 }
             }
             cmd = commands[index++];
-            
+
             switch (cmd.name) {
             case "n":
                 tempo = status.t || 120;
@@ -200,7 +200,7 @@
                 }
                 duration = (60 / tempo) * (4 / len) * 1000;
                 duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
-                
+
                 vel = status.v << 3;
                 if (status.tie) {
                     for (i = queue.length; i--; ) {
@@ -214,7 +214,7 @@
                     val = _.prevNote = (cmd.val) + (status.o + 1) * 12;
                     queue.push([queueTime, val, null, vel, duration]);
                 }
-                
+
                 if (len > 0) {
                     quantize = status.q / 8;
                     // noteOff
@@ -324,13 +324,13 @@
         _.index = index;
         _.queueTime = queueTime;
     };
-    
+
     var compile = function(mml) {
         var def, re, m, cmd;
         var i, imax, j, jmax;
         var checked = new Array(mml.length);
         var commands = [];
-        
+
         for (i = 0, imax = MMLCommands.length; i < imax; ++i) {
             def = MMLCommands[i];
             re  = def.re;
@@ -363,7 +363,7 @@
         });
         return commands;
     };
-    
+
     var MMLCommands = [
         { re:/([cdefgab])([\-+]?)(\d*)(\.*)/g, func: function(m) {
             return {
@@ -424,7 +424,7 @@
         }},
         { re:/\$/g }
     ];
-    
+
     fn.register("mml", MML);
-    
+
 })(timbre);

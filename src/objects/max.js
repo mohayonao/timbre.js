@@ -1,27 +1,27 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function MaxNode(_args) {
         T.Object.call(this, 1, _args);
     }
     fn.extend(MaxNode);
-    
+
     var $ = MaxNode.prototype;
-    
+
     $.process = function(tickID) {
         var cell = this.cells[0];
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var nodes = this.nodes;
             var i, imax = nodes.length;
             var j, jmax = cell.length;
             var tmp, val;
-            
+
             if (_.ar) {
                 if (nodes.length > 0) {
                     tmp = nodes[0].process(tickID).cells[0];
@@ -57,10 +57,10 @@
                 fn.outputSignalKR(this);
             }
         }
-        
+
         return this;
     };
-    
+
     fn.register("max", MaxNode);
-    
+
 })(timbre);

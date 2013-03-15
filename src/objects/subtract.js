@@ -1,22 +1,22 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function SubtractNode(_args) {
         T.Object.call(this, 2, _args);
         this._.ar = false;
     }
     fn.extend(SubtractNode);
-    
+
     var $ = SubtractNode.prototype;
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var nodes = this.nodes;
             var cell  = this.cells[0];
             var cellL = this.cells[1];
@@ -24,7 +24,7 @@
             var i, imax = nodes.length;
             var j, jmax = cell.length;
             var tmp, tmpL, tmpR;
-            
+
             if (_.ar) {
                 if (nodes.length > 0) {
                     nodes[0].process(tickID);
@@ -60,10 +60,10 @@
                 fn.outputSignalKR(this);
             }
         }
-        
+
         return this;
     };
-    
+
     fn.register("-", SubtractNode);
-    
+
 })(timbre);

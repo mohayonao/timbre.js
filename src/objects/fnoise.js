@@ -1,12 +1,12 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function FNoiseNode(_args) {
         T.Object.call(this, 1, _args);
         fn.fixAR(this);
-        
+
         var _ = this._;
         _.freq = T(440);
         _.reg = 0x8000;
@@ -15,9 +15,9 @@
         _.lastValue = 0;
     }
     fn.extend(FNoiseNode);
-    
+
     var $ = FNoiseNode.prototype;
-    
+
     Object.defineProperties($, {
         shortFlag: {
             set: function(value) {
@@ -36,11 +36,11 @@
             }
         }
     });
-    
+
     $.process = function(tickID) {
         var _ = this._;
         var cell = this.cells[0];
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
@@ -50,7 +50,7 @@
             var reg = _.reg;
             var mul = _.mul, add = _.add;
             var i, imax;
-            
+
             if (_.shortFlag) {
                 for (i = 0, imax = cell.length; i < imax; ++i) {
                     if (phase >= 1) {
@@ -78,10 +78,10 @@
             _.phase     = phase;
             _.lastValue = lastValue;
         }
-        
+
         return this;
     };
-    
+
     fn.register("fnoise", FNoiseNode);
-    
+
 })(timbre);

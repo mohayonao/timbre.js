@@ -1,19 +1,19 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function ClipNode(_args) {
         T.Object.call(this, 2, _args);
-        
+
         var _ = this._;
         _.min = -0.8;
         _.max = +0.8;
     }
     fn.extend(ClipNode);
-    
+
     var $ = ClipNode.prototype;
-    
+
     Object.defineProperties($, {
         minmax: {
             set: function(value) {
@@ -58,10 +58,10 @@
             }
         }
     });
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
@@ -70,7 +70,7 @@
             var i, imax = cellL.length;
             var min = _.min, max = _.max;
             var value;
-            
+
             if (_.ar) {
                 fn.inputSignalAR(this);
                 for (i = 0; i < imax; ++i) {
@@ -103,7 +103,7 @@
         }
         return this;
     };
-    
+
     fn.register("clip", ClipNode);
-    
+
 })(timbre);

@@ -1,8 +1,8 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function MidiCpsNode(_args) {
         T.Object.call(this, 1, _args);
         var _ = this._;
@@ -13,9 +13,9 @@
         _.ar    = false;
     }
     fn.extend(MidiCpsNode);
-    
+
     var $ = MidiCpsNode.prototype;
-    
+
     Object.defineProperties($, {
         midi: {
             set: function(value) {
@@ -45,22 +45,22 @@
         this._.emit("bang");
         return this;
     };
-    
+
     $.at = function(midi) {
         var _ = this._;
         return _.a4 * Math.pow(2, (midi - 69) / 12);
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var cell = this.cells[0];
             var len  = this.nodes.length;
             var i, imax = cell.length;
-            
+
             if (_.ar && len) {
                 fn.inputSignalAR(this);
                 var a4 = _.a4;
@@ -79,10 +79,10 @@
                 fn.outputSignalKR(this);
             }
         }
-        
+
         return this;
     };
-    
+
     fn.register("midicps", MidiCpsNode);
-    
+
 })(timbre);

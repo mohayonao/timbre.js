@@ -1,17 +1,17 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var timevalue = T.timevalue;
-    
+
     var STATUS_WAIT = 0;
     var STATUS_REC  = 1;
-    
+
     function RecNode(_args) {
         T.Object.call(this, 1, _args);
         fn.listener(this);
         fn.fixAR(this);
-        
+
         var _ = this._;
         _.timeout    = 5000;
         _.status     = STATUS_WAIT;
@@ -22,25 +22,25 @@
         _.onended = make_onended(this);
     }
     fn.extend(RecNode);
-    
+
     var make_onended = function(self) {
         return function() {
             var _ = self._;
-            
+
             var buffer = new fn.SignalArray(_.buffer.subarray(0, _.writeIndex|0));
-            
+
             _.status      = STATUS_WAIT;
             _.writeIndex  = 0;
             _.currentTime = 0;
-            
+
             _.emit("ended", {
                 buffer:buffer, samplerate:_.samplerate
             });
         };
     };
-    
+
     var $ = RecNode.prototype;
-    
+
     Object.defineProperties($, {
         timeout: {
             set: function(value) {
@@ -73,7 +73,7 @@
             }
         }
     });
-    
+
     $.start = function() {
         var _ = this._, len;
         if (_.status === STATUS_WAIT) {
@@ -90,7 +90,7 @@
         }
         return this;
     };
-    
+
     $.stop = function() {
         var _ = this._;
         if (_.status === STATUS_REC) {
@@ -101,7 +101,7 @@
         }
         return this;
     };
-    
+
     $.bang = function() {
         if (this._.status === STATUS_WAIT) {
             this.srart();
@@ -111,7 +111,7 @@
         this._.emit("bang");
         return this;
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
         var cell = this.cells[0];
@@ -120,7 +120,7 @@
             this.tickID = tickID;
 
             fn.inputSignalAR(this);
-            
+
             if (_.status === STATUS_REC) {
                 var i, imax = cell.length;
                 var buffer  = _.buffer;
@@ -129,11 +129,11 @@
                 var writeIndexIncr  = _.writeIndexIncr;
                 var currentTime     = _.currentTime;
                 var currentTimeIncr = _.currentTimeIncr;
-                
+
                 for (i = 0; i < imax; ++i) {
                     buffer[writeIndex|0] = cell[i];
                     writeIndex += writeIndexIncr;
-                    
+
                     currentTime += currentTimeIncr;
                     if (timeout <= currentTime) {
                         fn.nextTick(_.onended);
@@ -142,13 +142,13 @@
                 _.writeIndex  = writeIndex;
                 _.currentTime = currentTime;
             }
-            
+
             fn.outputSignalAR(this);
         }
         return this;
     };
-        
+
     fn.register("record", RecNode);
     fn.alias("rec", "record");
-    
+
 })(timbre);

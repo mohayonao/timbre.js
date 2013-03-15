@@ -1,14 +1,14 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var timevalue = T.timevalue;
     var Envelope      = T.modules.Envelope;
     var EnvelopeValue = T.modules.EnvelopeValue;
-    
+
     function ParamNode(_args) {
         T.Object.call(this, 2, _args);
-        
+
         var _ = this._;
         _.value = 0;
         _.env = new EnvelopeValue(_.samplerate);
@@ -17,17 +17,17 @@
         _.counter = 0;
         _.ar = false;
         _.onended = fn.make_onended(this);
-        
+
         this.on("ar", onar);
     }
     fn.extend(ParamNode);
-    
+
     var onar = function(value) {
         this._.env.step = (value) ? 1 : this._.cellsize;
     };
-    
+
     var $ = ParamNode.prototype;
-    
+
     Object.defineProperties($, {
         value: {
             set: function(value) {
@@ -40,7 +40,7 @@
             }
         }
     });
-    
+
     $.to = function(nextValue, time, curve) {
         var _ = this._;
         var env = _.env;
@@ -64,47 +64,47 @@
         _.plotFlush = true;
         return this;
     };
-    
+
     $.setAt = function(nextValue, time) {
         var _ = this._;
         this.to(_.env.value, time, "set");
         _.atValue = nextValue;
         return this;
     };
-    
+
     $.linTo = function(nextValue, time) {
         return this.to(nextValue, time, "lin");
     };
-    
+
     $.expTo = function(nextValue, time) {
         return this.to(nextValue, time, "exp");
     };
-    
+
     $.sinTo = function(nextValue, time) {
         return this.to(nextValue, time, "sin");
     };
-    
+
     $.welTo = function(nextValue, time) {
         return this.to(nextValue, time, "wel");
     };
-    
+
     $.sqrTo = function(nextValue, time) {
         return this.to(nextValue, time, "sqr");
     };
-    
+
     $.cubTo = function(nextValue, time) {
         return this.to(nextValue, time, "cub");
     };
-    
+
     $.cancel = function() {
         var _ = this._;
         _.counter = _.env.setNext(_.env.value, 0, Envelope.CurveTypeSet);
         return this;
     };
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
@@ -114,7 +114,7 @@
             var env = _.env;
             var counter = _.counter;
             var value;
-            
+
             if (this.nodes.length) {
                 fn.inputSignalAR(this);
             } else {
@@ -122,7 +122,7 @@
                     cellL[i] = cellR[i] = 1;
                 }
             }
-            
+
             if (counter <= 0) {
                 if (_.curve === "set") {
                     env.setNext(_.atValue, 0, Envelope.CurveTypeSet);
@@ -132,7 +132,7 @@
                 fn.nextTick(_.onended);
                 _.counter = Infinity;
             }
-            
+
             if (_.ar) {
                 for (i = 0; i < imax; ++i) {
                     value = env.next();
@@ -148,17 +148,17 @@
                 }
                 _.counter -= 1;
             }
-            
+
             fn.outputSignalAR(this);
-            
+
             _.value = value;
         }
-        
+
         return this;
     };
-    
+
     var super_plot = T.Object.prototype.plot;
-    
+
     $.plot = function(opts) {
         var _ = this._;
         if (_.plotFlush) {
@@ -176,7 +176,7 @@
                 } else {
                     env.setNext(1, 1000, curve);
                 }
-                
+
                 for (i = 0, imax = data.length; i < imax; ++i) {
                     data[i] = env.next();
                 }
@@ -189,5 +189,5 @@
     };
 
     fn.register("param", ParamNode);
-    
+
 })(timbre);

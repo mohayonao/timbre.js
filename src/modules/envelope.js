@@ -1,6 +1,6 @@
 (function(T) {
     "use strict";
-    
+
     function Envelope(samplerate) {
         this.samplerate = samplerate || 44100;
         this.value  = ZERO;
@@ -10,9 +10,9 @@
         this.releaseNode = null;
         this.loopNode    = null;
         this.emit = null;
-        
+
         this._envValue = new EnvelopeValue(samplerate);
-        
+
         this._table  = [];
         this._initValue  = ZERO;
         this._curveValue = 0;
@@ -20,7 +20,7 @@
         this._index   = 0;
         this._counter = 0;
     }
-    
+
     var ZERO           = Envelope.ZERO = 1e-6;
     var CurveTypeSet   = Envelope.CurveTypeSet   = 0;
     var CurveTypeLin   = Envelope.CurveTypeLin   = 1;
@@ -30,7 +30,7 @@
     var CurveTypeCurve = Envelope.CurveTypeCurve = 5;
     var CurveTypeSqr   = Envelope.CurveTypeSqr   = 6;
     var CurveTypeCub   = Envelope.CurveTypeCub   = 7;
-    
+
     var StatusWait    = Envelope.StatusWait    = 0;
     var StatusGate    = Envelope.StatusGate    = 1;
     var StatusSustain = Envelope.StatusSustain = 2;
@@ -47,9 +47,9 @@
         cub:CurveTypeCub, cubed      :CurveTypeCub
     };
     Envelope.CurveTypeDict = CurveTypeDict;
-    
+
     var $ = Envelope.prototype;
-    
+
     $.clone = function() {
         var new_instance = new Envelope(this.samplerate);
         new_instance._table = this._table;
@@ -127,7 +127,7 @@
                 }
                 releaseBeginTime = totalDuration;
             }
-            
+
             var items = table[i];
             if (Array.isArray(items)) {
                 totalDuration += items[1];
@@ -137,7 +137,7 @@
             totalDuration += sustainTime;
             isEndlessLoop = true;
         }
-        
+
         return {
             totalDuration   : totalDuration,
             loopBeginTime   : loopBeginTime,
@@ -151,14 +151,14 @@
         var table   = this._table;
         var index   = this._index;
         var counter = this._counter;
-        
+
         var curveValue = this._curveValue;
         var defaultCurveType = this._defaultCurveType;
         var loopNode    = this.loopNode;
         var releaseNode = this.releaseNode;
         var envValue = this._envValue;
         var items, endValue, time, curveType, emit = null;
-        
+
         switch (status) {
         case StatusWait:
         case StatusEnd:
@@ -188,7 +188,7 @@
                     continue;
                 }
                 items = table[index++];
-                
+
                 endValue = items[0];
                 if (items[2] === null) {
                     curveType = defaultCurveType;
@@ -202,20 +202,20 @@
                     }
                 }
                 time = items[1];
-                
+
                 counter = envValue.setNext(endValue, time, curveType, curveValue);
             }
             break;
         }
-        
+
         this.status = status;
         this.emit   = emit;
         this._index = index;
         this._counter = counter;
-        
+
         return status;
     };
-    
+
     $.next = function() {
         if (this.calcStatus() & 1) {
             this.value  = this._envValue.next() || ZERO;
@@ -223,11 +223,11 @@
         this._counter -= 1;
         return this.value;
     };
-    
+
     $.process = function(cell) {
         var envValue = this._envValue;
         var i, imax = cell.length;
-        
+
         if (this.calcStatus() & 1) {
             for (i = 0; i < imax; ++i) {
                 cell[i] = envValue.next() || ZERO;
@@ -239,21 +239,21 @@
             }
         }
         this.value = cell[imax-1];
-        
+
         this._counter -= cell.length;
     };
-    
-    
+
+
     function EnvelopeValue(samplerate) {
         this.samplerate = samplerate;
         this.value = ZERO;
         this.step  = 1;
-        
+
         this._curveType  = CurveTypeLin;
         this._curveValue = 0;
-        
+
         this._grow = 0;
-        
+
         this._a2 = 0;
         this._b1 = 0;
         this._y1 = 0;
@@ -263,13 +263,13 @@
         var n = this.step;
         var value = this.value;
         var grow, w, a1, a2, b1, y1, y2;
-        
+
         var counter = ((time * 0.001 * this.samplerate) / n)|0;
         if (counter < 1) {
             counter   = 1;
             curveType = CurveTypeSet;
         }
-        
+
         switch (curveType) {
         case CurveTypeSet:
             this.value = endValue;
@@ -325,17 +325,17 @@
             grow = (y2 - y1) / counter;
             break;
         }
-        
+
         this.next = NextFunctions[curveType];
         this._grow = grow;
         this._a2 = a2;
         this._b1 = b1;
         this._y1 = y1;
         this._y2 = y2;
-        
+
         return counter;
     };
-    
+
     var NextFunctions = [];
     NextFunctions[CurveTypeSet] = function() {
         return this.value;
@@ -377,10 +377,10 @@
         this.value = this._y1 * this._y1 * this._y1;
         return this.value;
     };
-    
+
     EnvelopeValue.prototype.next = NextFunctions[CurveTypeSet];
-    
+
     T.modules.Envelope      = Envelope;
     T.modules.EnvelopeValue = EnvelopeValue;
-    
+
 })(timbre);

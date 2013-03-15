@@ -5,14 +5,14 @@
 
     function SelectorNode(_args) {
         T.Object.call(this, 2, _args);
-        
+
         this._.selected   = 0;
         this._.background = false;
     }
     fn.extend(SelectorNode);
-    
+
     var $ = SelectorNode.prototype;
-    
+
     Object.defineProperties($, {
         selected: {
             set: function(value) {
@@ -35,22 +35,22 @@
             }
         }
     });
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var nodes = this.nodes;
             var i, imax = nodes.length;
-            
+
             if (_.background) {
                 for (i = 0; i < imax; ++i) {
                     nodes[i].process(tickID);
                 }
             }
-            
+
             var tmp = nodes[_.selected];
             if (tmp) {
                 if (!_.background) {
@@ -59,13 +59,13 @@
                 this.cells[1].set(tmp.cells[1]);
                 this.cells[2].set(tmp.cells[2]);
             }
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
-    
+
     fn.register("selector", SelectorNode);
-    
+
 })(timbre);

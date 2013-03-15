@@ -1,8 +1,8 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
-    
+
     function MapNode(_args) {
         T.Object.call(this, 1, _args);
         var _ = this._;
@@ -13,13 +13,13 @@
         _.map    = defaultFunction;
     }
     fn.extend(MapNode);
-    
+
     var defaultFunction = function(x) {
         return x;
     };
-    
+
     var $ = MapNode.prototype;
-    
+
     Object.defineProperties($, {
         input: {
             set: function(value) {
@@ -48,21 +48,21 @@
         this._.emit("bang");
         return this;
     };
-    
+
     $.at = function(input) {
         return (this._.map) ? this._.map(input) : 0;
     };
-    
+
     $.process = function(tickID) {
         var cell = this.cells[0];
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
 
             var len = this.nodes.length;
             var i, imax = cell.length;
-            
+
             if (_.ar && len) {
                 fn.inputSignalAR(this);
                 var map = _.map;
@@ -85,10 +85,10 @@
                 }
             }
         }
-        
+
         return this;
     };
-    
+
     fn.register("map", MapNode);
-    
+
 })(timbre);

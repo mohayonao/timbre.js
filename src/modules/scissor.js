@@ -1,32 +1,32 @@
 (function(T) {
     "use strict";
-    
+
     var DummyBuffer = new Float32Array(60);
-    
+
     function Scissor(soundbuffer) {
         return new Tape(soundbuffer);
     }
-    
+
     var silencebuffer = {
         buffer:DummyBuffer, samplerate:1
     };
-    
+
     Scissor.silence = function(duration) {
         return new Scissor(silencebuffer).slice(0, 1).fill(duration);
     };
-    
+
     Scissor.join = function(tapes) {
         var new_instance = new Tape();
-        
+
         for (var i = 0; i < tapes.length; i++) {
             if (tapes[i] instanceof Tape) {
                 new_instance.add_fragments(tapes[i].fragments);
             }
         }
-        
+
         return new_instance;
     };
-    
+
     function Tape(soundbuffer) {
         this.fragments = [];
         if (soundbuffer) {
@@ -38,12 +38,12 @@
         }
     }
     Scissor.Tape = Tape;
-    
+
     Tape.prototype.add_fragment = function(fragment) {
         this.fragments.push(fragment);
         return this;
     };
-    
+
     Tape.prototype.add_fragments = function(fragments) {
         for (var i = 0; i < fragments.length; i++) {
             this.fragments.push(fragments[i]);
@@ -58,17 +58,17 @@
         }
         return result;
     };
-    
+
     Tape.prototype.slice = function(start, length) {
         var duration = this.duration();
         if (start + length > duration) {
             length = duration - start;
         }
-        
+
         var new_instance  = new Tape();
         var remainingstart  = start;
         var remaininglength = length;
-        
+
         for (var i = 0; i < this.fragments.length; i++) {
             var fragment = this.fragments[i];
             var items = fragment.create(remainingstart, remaininglength);
@@ -82,18 +82,18 @@
                 break;
             }
         }
-        
+
         return new_instance;
     };
     Tape.prototype.cut = Tape.prototype.slice;
-    
+
     Tape.prototype.concat = function(other) {
         var new_instance = new Tape();
         new_instance.add_fragments(this.fragments);
         new_instance.add_fragments(other.fragments);
         return new_instance;
     };
-    
+
     Tape.prototype.loop = function(count) {
         var i;
         var orig_fragments = [];
@@ -106,7 +106,7 @@
         }
         return new_instance;
     };
-    
+
     Tape.prototype.times = Tape.prototype.loop;
 
     Tape.prototype.split = function(count) {
@@ -117,7 +117,7 @@
         }
         return results;
     };
-    
+
     Tape.prototype.fill = function(filled_duration) {
         var duration = this.duration();
         if (duration === 0) {
@@ -125,10 +125,10 @@
         }
         var loop_count = (filled_duration / duration)|0;
         var remain = filled_duration % duration;
-        
+
         return this.loop(loop_count).plus(this.slice(0, remain));
     };
-    
+
     Tape.prototype.replace = function(start, length, replaced) {
         var new_instance = new Tape();
         var offset = start + length;
@@ -139,14 +139,14 @@
         if (new_instance_duration < start) {
             new_instance = new_instance.plus(Scissor.silence(start-new_instance_duration));
         }
-        
+
         new_instance = new_instance.plus(replaced);
-        
+
         var duration = this.duration();
         if (duration > offset) {
             new_instance = new_instance.plus(this.slice(offset, duration - offset));
         }
-        
+
         return new_instance;
     };
 
@@ -158,13 +158,13 @@
             fragment.reverse = !fragment.isReversed();
             new_instance.add_fragment(fragment);
         }
-        
+
         return new_instance;
     };
-    
+
     Tape.prototype.pitch = function(pitch, stretch) {
         var new_instance = new Tape();
-        
+
         stretch = stretch || false;
         for (var i = 0; i < this.fragments.length; i++) {
             var fragment = this.fragments[i].clone();
@@ -172,7 +172,7 @@
             fragment.stretch = stretch;
             new_instance.add_fragment(fragment);
         }
-        
+
         return new_instance;
     };
 
@@ -193,26 +193,26 @@
             fragment.pan = right_percent;
             new_instance.add_fragment(fragment);
         }
-        
+
         return new_instance;
     };
-    
+
     Tape.prototype.silence = function() {
         return Scissor.silence(this.duration());
     };
-    
+
     Tape.prototype.join = function(tapes) {
         var new_instance = new Tape();
-        
+
         for (var i = 0; i < tapes.length; i++) {
             if (tapes[i] instanceof Tape) {
                 new_instance.add_fragments(tapes[i].fragments);
             }
         }
-        
+
         return new_instance;
     };
-    
+
     function Fragment(soundbuffer, start, duration, reverse, pitch, stretch, pan) {
         if (!soundbuffer) {
             soundbuffer = silencebuffer;
@@ -226,7 +226,7 @@
         this.stretch = stretch || false;
         this.pan     = pan     || 50;
     }
-    
+
     Fragment.prototype.duration = function() {
         return this._duration * (100 / this.pitch);
     };
@@ -244,9 +244,9 @@
         if (remaining_start >= duration) {
             return [null, remaining_start - duration, remaining_length];
         }
-        
+
         var have_remain_to_retuen = (remaining_start + remaining_length) >= duration;
-        
+
         var new_length;
         if (have_remain_to_retuen) {
             new_length = duration - remaining_start;
@@ -255,7 +255,7 @@
             new_length = remaining_length;
             remaining_length = 0;
         }
-        
+
         var new_fragment = this.clone();
         new_fragment.start     = this.start + remaining_start * this.pitch * 0.01;
         new_fragment._duration = new_length * this.pitch * 0.01;
@@ -276,13 +276,13 @@
         return new_instance;
     };
     Scissor.Fragment = Fragment;
-    
-    
+
+
     function TapeStream(tape, samplerate) {
         this.tape = tape;
         this.fragments  = tape.fragments;
         this.samplerate = samplerate || 44100;
-        
+
         this.isEnded = false;
         this.buffer  = null;
         this.bufferIndex = 0;
@@ -295,7 +295,7 @@
         this.panR = 0.5;
     }
     Scissor.TapeStream = TapeStream;
-    
+
     TapeStream.prototype.reset = function() {
         this.isEnded = false;
         this.buffer  = null;
@@ -310,16 +310,16 @@
         this.isLooped = false;
         return this;
     };
-    
+
     TapeStream.prototype.fetch = function(n) {
         var cellL = new T.fn.SignalArray(n);
         var cellR = new T.fn.SignalArray(n);
         var fragments     = this.fragments;
-        
+
         if (fragments.length === 0) {
             return [cellL, cellR];
         }
-        
+
         var samplerate  = this.samplerate * 100;
         var buffer      = this.buffer;
         var bufferIndex = this.bufferIndex;
@@ -331,7 +331,7 @@
         var pan;
         var panL = this.panL;
         var panR = this.panR;
-        
+
         for (var i = 0; i < n; i++) {
             while (!buffer ||
                    bufferIndex < bufferBeginIndex || bufferIndex >= bufferEndIndex) {
@@ -345,7 +345,7 @@
                     pan = (fragment.pan * 0.01);
                     panL = 1 - pan;
                     panR = pan;
-                    
+
                     if (fragment.reverse) {
                         bufferIndexIncr *= -1;
                         bufferIndex = bufferEndIndex + bufferIndexIncr;
@@ -383,10 +383,10 @@
         this.fragmentIndex = fragmentIndex;
         this.panL = panL;
         this.panR = panR;
-        
+
         return [cellL, cellR];
     };
-    
+
     T.modules.Scissor = Scissor;
-    
+
 })(timbre);

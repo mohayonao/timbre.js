@@ -3,7 +3,7 @@
 
     var fn = T.fn;
     var timevalue = T.timevalue;
-    
+
     function LagNode(_args) {
         T.Object.call(this, 1, _args);
         fn.fixAR(this);
@@ -18,7 +18,7 @@
         _.writeIndex = 0;
     }
     fn.extend(LagNode);
-    
+
     var $ = LagNode.prototype;
 
     Object.defineProperties($, {
@@ -45,10 +45,10 @@
 
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             fn.inputSignalAR(this);
 
             var cell = this.cells[0];
@@ -57,7 +57,7 @@
             var readIndex  = _.readIndex;
             var writeIndex = _.writeIndex;
             var i, imax = cell.length;
-            
+
             for (i = 0; i < imax; ++i) {
                 buffer[writeIndex] = cell[i];
                 cell[i] = buffer[readIndex];
@@ -65,16 +65,16 @@
                 readIndex  += 1;
                 writeIndex = (writeIndex + 1) & mask;
             }
-            
+
             _.readIndex  = readIndex & mask;
             _.writeIndex = writeIndex;
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
 
     fn.register("lag", LagNode);
-    
+
 })(timbre);

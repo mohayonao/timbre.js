@@ -1,8 +1,7 @@
 {
-  "global-dependencies": {
-    "coffee-script": "1.4.0",
+  "dependencies": {
     "express": "*",
     "jade": "*",
-    "marked": "*"
+    "marked": "0.2.6"
   }
 }

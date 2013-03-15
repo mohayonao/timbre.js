@@ -1,10 +1,10 @@
 (function(T) {
     "use strict";
-    
+
     var fn = T.fn;
     var timevalue = T.timevalue;
     var StereoDelay = T.modules.StereoDelay;
-    
+
     function DelayNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
@@ -14,13 +14,13 @@
         _.fb    = T(0.2);
         _.cross = T(false);
         _.mix   = 0.33;
-        
+
         _.delay = new StereoDelay(_.samplerate);
     }
     fn.extend(DelayNode);
-    
+
     var $ = DelayNode.prototype;
-    
+
     Object.defineProperties($, {
         time: {
             set: function(value) {
@@ -64,15 +64,15 @@
 
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             var time  = _.time.process(tickID).cells[0][0];
             var fb    = _.fb.process(tickID).cells[0][0];
             var cross = _.cross.process(tickID).cells[0][0] !== 0;
             var mix   = _.mix;
-            
+
             if (_.prevTime !== time || _.prevFb !== fb || _.prevCross !== cross || _.prevMix !== mix) {
                 _.prevTime  = time;
                 _.prevFb    = fb;
@@ -80,19 +80,19 @@
                 _.prevMix   = mix;
                 _.delay.setParams(time, fb, cross, mix);
             }
-            
+
             fn.inputSignalAR(this);
-            
+
             if (!_.bypassed) {
                 _.delay.process(this.cells[1], this.cells[2]);
             }
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
-    
+
     fn.register("delay", DelayNode);
-    
+
 })(timbre);

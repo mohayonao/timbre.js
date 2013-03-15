@@ -1,13 +1,13 @@
 (function(T) {
     "use strict";
-    
+
     var fn  = T.fn;
     var Chorus = T.modules.Chorus;
-    
+
     function ChorusNode(_args) {
         T.Object.call(this, 2, _args);
         fn.fixAR(this);
-        
+
         var chorus = new Chorus(this._.samplerate);
         chorus.setDelayTime(20);
         chorus.setRate(4);
@@ -17,7 +17,7 @@
         this._.chorus = chorus;
     }
     fn.extend(ChorusNode);
-    
+
     var $ = ChorusNode.prototype;
 
     Object.defineProperties($, {
@@ -83,25 +83,25 @@
             }
         }
     });
-    
+
     $.process = function(tickID) {
         var _ = this._;
-        
+
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            
+
             fn.inputSignalAR(this);
-            
+
             if (!_.bypassed) {
                 _.chorus.process(this.cells[1], this.cells[2]);
             }
-            
+
             fn.outputSignalAR(this);
         }
-        
+
         return this;
     };
-    
+
     fn.register("chorus", ChorusNode);
-    
+
 })(timbre);
