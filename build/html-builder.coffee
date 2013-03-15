@@ -97,16 +97,13 @@ class HTMLBuilder
         title.replace /T\("?([\w\W]+?)"?\)/, '$1'
 
     marked_with_filtering_by_lang = (filepath, lang)->
-        items = marked.lexer fs.readFileSync(filepath, 'utf-8')
-        tokens = []
-        skip = false
-        for item in items
-            if item.type is 'heading' and item.depth is 6
-                skip = item.text != lang and item.text != '--'
-                continue
-            if skip then continue
-            tokens.push item
-        marked.parser tokens
+        items = []
+        for line in fs.readFileSync(filepath, 'utf-8').split '\n'
+            if not (m = /^(en|ja):/.exec line)
+                items.push line
+            else if m[1] is lang
+                items.push line.substr(3).replace /^\s+/, ''
+        marked.parser marked.lexer items.join '\n'
 
     lang_process = (doc)->
         re  = /<pre><code class="lang-(timbre|js|html|sh)">([\w\W]+?)<\/code><\/pre>/g
