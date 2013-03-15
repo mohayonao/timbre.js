@@ -3,8 +3,8 @@ T("mml")
 {kr}{timer} MML Based Scheduler
 
 ## Description ##
-MMLスタイルのスケジューラ。  
-入力オブジェクトには `T("OscGen")` などの音源オブジェクトか `T("env")` を指定します。`noteOn` 時に `noteOn()` か `bang()` が呼ばれ、`noteOff` 時に `noteOff()` か `release()` が呼ばれる。
+ja: MMLスタイルのスケジューラ。  
+ja: 入力オブジェクトには `T("OscGen")` などの音源オブジェクトか `T("env")` を指定します。`noteOn` 時に `noteOn()` か `bang()` が呼ばれ、`noteOff` 時に `noteOff()` か `release()` が呼ばれる。
 
 ```timbre
 var mml = "l8 q7 $";
@@ -33,15 +33,16 @@ T("mml", {mml:"o7 q2 l8 $ e>a<c>a< r2"}, osc, env).on("data", function(type, opt
 - `currentTime` _(ReadOnly Number)_
 
 ## Events ##
-- `mml`
-  - MMLコマンドを実行したときに発生する。コールバック関数には `type, opts` が渡される。
+- `data`
+ja:  - MMLコマンドを実行したときに発生する。コールバック関数には `type, opts` が渡される。
 - `ended`
-  - 終端に達したときに発生する。
+ja:  - 終端に達したときに発生する。
 
 ## MML Commands Reference ##
 
 ### `cdefgab` ###
-**ノート** c-bがそれぞれド-シに対応。 `+` を続けるとシャープ, `-` でフラット。数字を続けると長さ指定。数字省略時は `l` コマンドの指定値を採用。
+en: note
+ja: **ノート** c-bがそれぞれド-シに対応。 `+` を続けるとシャープ, `-` でフラット。数字を続けると長さ指定。数字省略時は `l` コマンドの指定値を採用。
 
 ```timbre
 var mml = "l8 c4c+d d+4ef f+4gg+ a4a+b <c>bb-aa-gg-fee-dd-c2.";
@@ -54,7 +55,8 @@ T("mml", {mml:mml}, gen).on("ended", function() {
 }).start();
 ```
 
-長さを 0 にした場合は後に続く音の長さを基準に和音になる。
+en: chord
+ja: 長さを 0 にした場合は後に続く音の長さを基準に和音になる。
 
 ```timbre
 var mml = "l2 g0<c0e> f0g0<d> e0g0<c1";
@@ -68,7 +70,8 @@ T("mml", {mml:mml}, gen).on("ended", function() {
 ```
 
 ### `r` ###
-**休符** 数値で音長指定
+en: rest
+ja: **休符** 数値で音長指定
 
 ```timbre
 var mml = "l16 o2 [ a r aa ]16";
@@ -82,7 +85,8 @@ T("mml", {mml:mml}, gen).on("ended", function() {
 ```
 
 ### `&` ###
-**タイ** 直前の音とつなげる
+en: tie
+ja: **タイ** 直前の音とつなげる
 
 ```timbre
 var mml = "l8 cc ee ff g&g ee dd c2";
@@ -96,25 +100,32 @@ T("mml", {mml:mml}, gen).on("ended", function() {
 ```
 
 ### `t` ###
-**テンポ** テンポを指定する。値を省略したときは `timbre.bpm` の値
+en: tempo
+ja: **テンポ** テンポを指定する。値を省略したときは `timbre.bpm` の値
 
 ### `l` ###
-**音長** _(4)_ ノート/休符で音長を省略したときの値
+en: note length
+ja: **音長** _(4)_ ノート/休符で音長を省略したときの値
 
 ### `o` ###
-**オクターブ** _(4)_ 中央が 4。略記 `<>` で上下できる。
+en: octave
+ja: **オクターブ** _(4)_ 中央が 4。略記 `<>` で上下できる。
 
 ### `v` ###
-**ベロシティ** _(0-15)_ 略記 `()` で上下できる。
+en: velocity
+ja: **ベロシティ** _(0-15)_ 略記 `()` で上下できる。
 
 ### `q` ###
-**クォンタイズ** _(0-8)_ キーオフのタイミング。0 だと即時キーオフ. 8 でキーオフなし。
+en: quantize
+ja: **クォンタイズ** _(0-8)_ キーオフのタイミング。0 だと即時キーオフ. 8 でキーオフなし。
 
 ### `[|]` ###
-**ループ** _(2)_ 指定区間を繰り返す。末尾で繰り返し回数を指定できる。 `|` は最終ループ時に以降をスキップする。
+en: loop
+ja: **ループ** _(2)_ 指定区間を繰り返す。末尾で繰り返し回数を指定できる。 `|` は最終ループ時に以降をスキップする。
 
 ### `$` ###
-**無限ループ** MMLの終端に達したとき、この位置に戻る。
+en: infinite loop
+ja: **無限ループ** MMLの終端に達したとき、この位置に戻る。
 
 ```timbre
 var mml = "$ cf+d+f";

@@ -3,8 +3,7 @@ T("env")
 {krar} Envelope
 
 ## Description ##
-
-エンベロープを定義し、`bang()`を受けて動作します。インプットがない場合はエンベロープ値のみを、インプットがある場合はインプットを加算したものにエンベロープ値を積算して出力します。
+ja: エンベロープを定義し、`bang()`を受けて動作します。インプットがない場合はエンベロープ値のみを、インプットがある場合はインプットを加算したものにエンベロープ値を積算して出力します。
 
 ```timbre
 var table = [0.8, [0, 1500]];
@@ -13,7 +12,7 @@ T("env", {table:table}, T("sin")).on("ended", function() {
 }).bang().play();
 ```
 
-エンベロープの形状は `table` プロパティで指定します。`table` は `初期値` に続いて `[次の値, 時間(ms), カーブの種類]` の子配列を要素に持つ配列です。以下の例では 440Hzから 0.5秒かけて 880Hzに上昇し、0.25秒で 660Hzに遷移するエンベロープをオシレーターの周波数の入力として 3回動作させています。
+ja: エンベロープの形状は `table` プロパティで指定します。`table` は `初期値` に続いて `[次の値, 時間(ms), カーブの種類]` の子配列を要素に持つ配列です。以下の例では 440Hzから 0.5秒かけて 880Hzに上昇し、0.25秒で 660Hzに遷移するエンベロープをオシレーターの周波数の入力として 3回動作させています。
 
 ```timbre
 var table = [440, [880, 500], [660, 250]];
@@ -31,7 +30,7 @@ var i = T("interval", {interval:1000}, function(count) {
 
 (canvas releaseNode w:240 h:80)
 
-`releaseNode` プロパティを指定すると、 `release()` メソッドをトリガするまで持続するエンベロープを作成できます。以下の例では 3番目の要素をリリースノードとすることで直前の値 0.6 まで遷移した後、持続して `release()` がトリガされてから 1秒かけて 0 に遷移するエンベロープを動作させています。
+ja: `releaseNode` プロパティを指定すると、 `release()` メソッドをトリガするまで持続するエンベロープを作成できます。以下の例では 3番目の要素をリリースノードとすることで直前の値 0.6 まで遷移した後、持続して `release()` がトリガされてから 1秒かけて 0 に遷移するエンベロープを動作させています。
 
 ```timbre
 var table = [0, [1, 100], [0.6, 100], [0, 1000]];
@@ -50,7 +49,7 @@ var t = T("timeout", {timeout:2000}, function() {
 
 (canvas loopNode w:240 h:80)
 
-`loopNode` プロパティを指定すると、エンベロープの末尾まで到達した後、リリースノード以降を繰り返すエンベロープを作成できます。以下の例では 1番目の要素をループノードとすることで周期的に変化するエンベロープを作成して、オシレーターの周波数の入力とすることでビブラートを行っています。`releaseNode` と合わせて使用した場合、ループノードとリリースノードの間でループします。
+ja: `loopNode` プロパティを指定すると、エンベロープの末尾まで到達した後、リリースノード以降を繰り返すエンベロープを作成できます。以下の例では 1番目の要素をループノードとすることで周期的に変化するエンベロープを作成して、オシレーターの周波数の入力とすることでビブラートを行っています。`releaseNode` と合わせて使用した場合、ループノードとリリースノードの間でループします。
 
 ```timbre
 var table = [440, [460, 50], [430, 150]];
@@ -73,26 +72,26 @@ var t = T("timeout", {timeout:2000}, function() {
 
 ## Methods ##
 - `bang()`
-  - エンベロープを起動します
+ja:  - エンベロープを起動します
 - `release()`
-  - リリースフェーズに移行します
+ja:  - リリースフェーズに移行します
 
 ## Events ##
 - `sustained`
-  - エンベロープが持続フェーズに入ったときに発生します
+ja:  - エンベロープが持続フェーズに入ったときに発生します
 - `released`
-  - リリースメソッドが呼ばれたときに発生します
+ja:  - リリースメソッドが呼ばれたときに発生します
 - `ended`
-  - エンベロープが終了したときに発生します
+ja:  - エンベロープが終了したときに発生します
 
 ## Tips ##
 
 (canvas plot w:240 h:80)
 
-- カーブの種類は `"lin"` か `"exp"` を指定できます。
-- `curve` プロパティでデフォルトのカーブの種類を設定できます。
-- `plot()` メソッドでエンベロープの形状を描画します。
-- 時間は **timevalue形式**の文字列でも指定できます。
+ja:- カーブの種類は `"lin"` か `"exp"` を指定できます。
+ja:- `curve` プロパティでデフォルトのカーブの種類を設定できます。
+ja:- `plot()` メソッドでエンベロープの形状を描画します。
+ja:- 時間は **timevalue形式**の文字列でも指定できます。
 
 ```timbre
 var table = [0, [0.8, "BPM120 L8"], [0.4, "BPM120 L16"],
@@ -111,14 +110,13 @@ var t = T("timeout", {timeout:2000}, function() {
 }).start();
 ```
 
-
-## 便利なコンストラクタ ##
-`T("env")` クラスには便利なコンストラクタが用意されています。それらを使えば、最小限のパラメータでエンベロープテーブルを作成することができます。
+## Constructors ##
+ja: `T("env")` クラスには便利なコンストラクタが用意されています。それらを使えば、最小限のパラメータでエンベロープテーブルを作成することができます。
 
 ### T("perc") ###
 (canvas perc w:240 h:80)
 
-`T("perc")` はパーカッシブなエンベロープを作ります。
+ja: `T("perc")` はパーカッシブなエンベロープを作ります。
 
 - a, attackTime: 10
 - d, decayTime: 300
@@ -135,7 +133,7 @@ env.plot({target:perc});
 ### T("adsr") ###
 (canvas adsr w:240 h:80) 
 
-`T("adsr")` はADSRタイプの持続エンベロープを作ります。
+ja: `T("adsr")` はADSRタイプの持続エンベロープを作ります。
 
 - a, attackTime : 10
 - d, decayTime : 300
@@ -159,7 +157,7 @@ var t = T("timeout", {timeout:1500}, function() {
 ### T("adshr") ###
 (canvas adshr w:240 h:80) 
 
-`T("adshr")` はADSHRタイプのエンベロープを作ります。
+ja: `T("adshr")` はADSHRタイプのエンベロープを作ります。
 
 - a, attackTime : 10
 - d, decayTime : 300
@@ -179,7 +177,7 @@ env.plot({target:adshr});
 ### T("asr") ###
 (canvas asr w:240 h:80) 
 
-`T("asr")` はASRタイプの持続エンベロープを作ります。
+ja: `T("asr")` はASRタイプの持続エンベロープを作ります。
 
 - a, attackTime : 10
 - s, sustainLevel : 0.5
@@ -202,7 +200,7 @@ var t = T("timeout", {timeout:1500}, function() {
 ### T("dadsr") ###
 (canvas dadsr w:240 h:80) 
 
-`T("dadsr")` は DADSRタイプの持続エンベロープを作ります。
+ja: `T("dadsr")` は DADSRタイプの持続エンベロープを作ります。
 
 - dl, delayTime : 100
 - a, attackTime : 10
@@ -226,7 +224,7 @@ var t = T("timeout", {timeout:1500}, function() {
 ### T("ahdsfr") ###
 (canvas ahdsfr w:240 h:80) 
 
-`T("ahdsfr")` は AHDSFRタイプの持続エンベロープを作ります。
+ja: `T("ahdsfr")` は AHDSFRタイプの持続エンベロープを作ります。
 
 - a, attackTime : 10
 - h, holdTime : 10
@@ -252,7 +250,7 @@ var t = T("timeout", {timeout:1500}, function() {
 ### T("linen") ###
 (canvas linen w:240 h:80) 
 
-`T("linen")` は台形エンベロープを作ります。
+ja: `T("linen")` は台形エンベロープを作ります。
 
 - a, attackTime : 10
 - s, sustainTime : 1000
@@ -270,7 +268,7 @@ env.plot({target:linen});
 ### T("env.tri") ###
 (canvas env_tri w:240 h:80) 
 
-`T("env.tri")` は三角エンベロープを作ります。
+ja: `T("env.tri")` は三角エンベロープを作ります。
 
 - dur, duration : 1000
 - lv, totalLevel : 1
@@ -286,7 +284,7 @@ env.plot({target:env_tri});
 ### T("env.cutoff") ###
 (canvas env_cutoff w:240 h:80) 
 
-`T("env.cutoff")` はカットオフエンベロープを作ります。
+ja: `T("env.cutoff")` はカットオフエンベロープを作ります。
 
 - r, releaseTime : 100
 - lv, totalLevel : 1

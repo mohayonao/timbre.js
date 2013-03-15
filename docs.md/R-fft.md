@@ -6,7 +6,7 @@ T("fft")
 
 (canvas canvas w:240 h:80)
 
-フーリエ変換を行なうリスナーオブジェクトです。処理の結果は `real` と `imag` プロパティに格納されます。このプロパティ値は他の T オブジェクトの入力として使用することができ、逆変換オブジェク `T("ifft")` と合わせてスペクトル合成の用途に使えます。
+ja: フーリエ変換を行なうリスナーオブジェクトです。処理の結果は `real` と `imag` プロパティに格納されます。このプロパティ値は他の T オブジェクトの入力として使用することができ、逆変換オブジェク `T("ifft")` と合わせてスペクトル合成の用途に使えます。
 
 ```timbre
 var saw = T("saw", {freq:440, mul:0.25}).play();
@@ -30,11 +30,8 @@ T("interval", {interval:100}, function() {
 - `plot(opts)`
 
 ## Note ##
-###### en ######
-When it is the purpose to display a spectrum. `T("spectrum")` is suitable. 
-###### ja ######
-スペクトルを表示することが目的の場合は `T("spectrum")` オブジェクトのほうが適しています。
-###### -- ######
+en: When it is the purpose to display a spectrum. `T("spectrum")` is suitable. 
+ja: スペクトルを表示することが目的の場合は `T("spectrum")` オブジェクトのほうが適しています。
 
 ## See Also ##
 - [T("ifft")](./ifft.html)

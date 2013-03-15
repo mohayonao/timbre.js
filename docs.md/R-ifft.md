@@ -4,7 +4,7 @@ T("ifft")
 
 ## Description ##
 
-`T("fft")` の `real` と `imag` プロパティを `T("ifft")` のプロパティに入力することで逆変換を行ないます。
+ja: `T("fft")` の `real` と `imag` プロパティを `T("ifft")` のプロパティに入力することで逆変換を行ないます。
 
 ```timbre
 var saw = T("saw", {freq:880, mul:0.15});

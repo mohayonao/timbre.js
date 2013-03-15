@@ -3,11 +3,8 @@ T("delay")
 {ar}{stereo} Delay signal
 
 ## Description ##
-###### en ######
-`T("delay")` delays a signal by a certain amount of time.
-###### ja ######
-`T("delay")` は信号を遅延させます。
-###### -- ######
+en: `T("delay")` delays a signal by a certain amount of time.
+ja: `T("delay")` は信号を遅延させます。
 
 ```timbre
 var src = window.getDraggedFile() || "/timbre.js/misc/audio/guitar.wav";

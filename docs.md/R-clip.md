@@ -6,11 +6,8 @@ T("clip")
 
 (canvas canvas w:240 h:80)
 
-###### en ######
-`T("clip")` constrains input signals between two specified values.
-###### ja ######
-`T("clip")` は入力シグナルをクリップして出力します
-###### -- ######
+en: `T("clip")` constrains input signals between two specified values.
+ja: `T("clip")` は入力シグナルをクリップして出力します
 
 ```timbre
 var env  = T("env", {table:[0, [2, 2000], [0.2, 2000]], loopNode:1}).bang();
@@ -24,11 +21,8 @@ T("scope", {interval:500, size:256}).on("data", function() {
 
 ## Properties ##
 - `minmax` _(WriteOnly Number)_
-###### en ######
-  - Sets both a minimum and a maximum value.
-###### ja ######
-  - 最小値と最小値をセットします
-###### -- ######
+en:  - Sets both a minimum and a maximum value.
+ja:  - 最小値と最小値をセットします
 
 - `min` _(Number)_
   - The low threshold of clipping. Its default value is **0**

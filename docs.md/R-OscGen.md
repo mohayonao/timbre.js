@@ -3,7 +3,7 @@ T("OscGen")
 {ar} Oscillator x Envelope
 
 ## Description ##
-[`T("osc")`](./osc.html) と [`T("env")`](./env.html) を組み合わせた音源インターフェースです。
+ja: [`T("osc")`](./osc.html) と [`T("env")`](./env.html) を組み合わせた音源インターフェースです。
 
 ```timbre
 var env = T("perc", {a:50, r:2500});
@@ -18,11 +18,11 @@ T("interval", {interval:500}, function(count) {
 
 ## Properties ##
 - `wave`
-  - 波形の種類
+ja:  - 波形の種類
 - `env`  
-  - エンベロープのパラメーター
+ja:  - エンベロープのパラメーター
 - `poly`
-  - 同時発音数 (1から 64まで、デフォルトは 4)
+ja:  - 同時発音数 (1から 64まで、デフォルトは 4)
 
 ## Methods ##
 - `noteOn(noteNum, velocity, opts)`

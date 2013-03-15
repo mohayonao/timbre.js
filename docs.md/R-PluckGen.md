@@ -3,7 +3,7 @@ T("PluckGen")
 {ar} Karplus–Strong string synthesis
 
 ## Description ##
-[`T("pluck")`](./pluck.html) と [`T("env")`](./env.html) を組み合わせた音源インターフェースです。
+ja: [`T("pluck")`](./pluck.html) と [`T("env")`](./env.html) を組み合わせた音源インターフェースです。
 
 ```timbre
 var env = T("perc", {a:50, r:2500});
@@ -18,9 +18,9 @@ T("interval", {interval:500}, function(count) {
 
 ## Properties ##
 - `env`  
-  - エンベロープのパラメーター
+ja:  - エンベロープのパラメーター
 - `poly`
-  - 同時発音数 (1から 64まで、デフォルトは 4)
+ja:  - 同時発音数 (1から 64まで、デフォルトは 4)
 
 ## Methods ##
 - `noteOn(noteNum, velocity, opts)`

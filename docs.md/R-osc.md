@@ -3,7 +3,7 @@ T("osc")
 {arkr} Interpolating wavetable oscillator
 
 ## Description ##
-基本的な波形を出力します。
+ja: 基本的な波形を出力します。
 
 ```timbre
 T("osc", {wave:"sin", freq:880}).play();
@@ -20,7 +20,7 @@ T("osc", {wave:"sin", freq:880}).play();
   - Amplitude of phase feedback in radians.
 
 ## Note ##
-- 入力オブジェクトが指定されている場合はそれらを合成した後、オシレーターの値で積算します。以下の例では 440Hzのサイン波に 1秒ごとに on/off するパルス波を入力しています。
+ja:- 入力オブジェクトが指定されている場合はそれらを合成した後、オシレーターの値で積算します。以下の例では 440Hzのサイン波に 1秒ごとに on/off するパルス波を入力しています。
   
 ```timbre
 T("sin", {freq:440, mul:0.5}, T("+pulse", {freq:"1sec"})).play();
@@ -50,11 +50,11 @@ T("sin", {freq:800, fb:xline, mul:0.25}).play();
 ```
 
 ## Wave Functions ##
-`wave` プロパティで様々な波形を選択/作成することができます。
+ja: `wave` プロパティで様々な波形を選択/作成することができます。
 
 (canvas wave w:240 h:80)
 
-まず基本の波形として **サイン波**、**のこぎり波**、**三角波**、**矩形波**、**ファミコン三角波** を選択できます。これらは良く使われるので `T("sin")` のように直接生成することもできます。
+ja: まず基本の波形として **サイン波**、**のこぎり波**、**三角波**、**矩形波**、**ファミコン三角波** を選択できます。これらは良く使われるので `T("sin")` のように直接生成することもできます。
 
 ```timbre
 var osc = T("osc", {mul:0.25}).play();
@@ -69,7 +69,7 @@ T("interval", {interval:1000}, function(count) {
 
 (canvas width w:240 h:80)
 
-`基本波形名(整数)` と書くことで波形のデューティー比を指定できます。以下の例では矩形波を基本にデューティー比を変更することで音色を変更しています。
+ja: `基本波形名(整数)` と書くことで波形のデューティー比を指定できます。以下の例では矩形波を基本にデューティー比を変更することで音色を変更しています。
 
 ```timbre
 var osc = T("osc", {mul:0.15}).play();
@@ -85,7 +85,7 @@ T("interval", {interval:1000}, function(count) {
 
 (canvas plus w:240 h:80)
 
-`+基本波形名` と書くことで波形の形の範囲を 0-1 に矯正できます。`T("+sin")` のように生成した場合は自動的に Control Rateとなります。これはトレモロなどに使うときに便利です。
+ja: `+基本波形名` と書くことで波形の形の範囲を 0-1 に矯正できます。`T("+sin")` のように生成した場合は自動的に Control Rateとなります。これはトレモロなどに使うときに便利です。
 
 ```timbre
 T("osc", {wave:"+sin"}).plot({target:plus});
@@ -93,7 +93,7 @@ T("osc", {wave:"+sin"}).plot({target:plus});
 
 (canvas minus w:240 h:80)
 
-`-基本波形名` と書くことで波形の上下を反転することができます。
+ja: `-基本波形名` と書くことで波形の上下を反転することができます。
 
 ```timbre
 T("osc", {wave:"saw"}).plot({target:minus, width:120});
@@ -103,11 +103,11 @@ T("osc", {wave:"-saw"}).plot({target:minus, width:120, x:120, background:"#edede
 - - -
 
 ### SiON記法 ###
-[SiON](http://mmltalks.appspot.com/document/siopm_mml_ref_05.html) のテーブル定義の書き方で波形を作成します。
+ja: [SiON](http://mmltalks.appspot.com/document/siopm_mml_ref_05.html) のテーブル定義の書き方で波形を作成します。
 
 (canvas wavc w:240 h:80)
 
-`wavc(0FFFFFFF)` と書くことで基音より整数倍のサイン波を合成した波形を作ることができます。値は下位から 4ビット単位で設定します。
+ja: `wavc(0FFFFFFF)` と書くことで基音より整数倍のサイン波を合成した波形を作ることができます。値は下位から 4ビット単位で設定します。
 
 
 ```timbre
@@ -118,7 +118,7 @@ T("osc", {wave:"wavc(0200080f)", mul:0.15}).plot({target:wavc}).play();
 
 (canvas wavb w:240 h:80)
 
-`wavb(00112233..)` と書くことで波形を 16進数で定義できます。
+ja: `wavb(00112233..)` と書くことで波形を 16進数で定義できます。
 
 ```timbre
 var src = "wavb(36454d4b41362f303639332309efd9cc362f220df2d9c8c3c6cbccc6bab0aeb7)";

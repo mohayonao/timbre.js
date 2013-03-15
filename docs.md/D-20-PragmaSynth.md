@@ -2,18 +2,12 @@ Pragmatic Synth
 ===============
 Make a Synthesizer
 
-###### en ######
-We make a simple synthesizer VCF - VCO - VCA models.
-###### ja ######
-VCO - VCA - VCF モデルの簡単なシンセサイザーを作ります。
-###### -- ######
+en: We make a simple synthesizer VCF - VCO - VCA models.
+ja: VCO - VCA - VCF モデルの簡単なシンセサイザーを作ります。
 
 ## UI ##
-###### en ######
-The graphical UI omitted because the description is huge, use the following in a simple interface.
-###### ja ######
-グラフィカルな UI は説明が膨大になるため省略し、簡易的に以下の仕様のインターフェースを使用します。
-###### -- ######
+en: The graphical UI omitted because the description is huge, use the following in a simple interface.
+ja: グラフィカルな UI は説明が膨大になるため省略し、簡易的に以下の仕様のインターフェースを使用します。
 
 - [`T("keyboard")`](./keyboard.html) gets input from the keyboard _(line:5)_ 
 - [`T("ndict.key")`](./ndict.html) converts from a key code to a MIDI note number _(line:6)_
@@ -46,11 +40,8 @@ T("keyboard").on("keydown", function(e) {
 var VCO = T("saw", {freq:880, mul:0.2}).play();
 ```
 
-###### en ######
-Frequency control by keyboard _(line:8)_
-###### ja ######
-キーボードによる周波数の制御 _(line:8)_
-###### -- ######
+en: Frequency control by keyboard _(line:8)_
+ja: キーボードによる周波数の制御 _(line:8)_
 
 ```timbre
 var VCO = T("saw", {freq:880, mul:0.2}).play();
@@ -65,11 +56,8 @@ T("keyboard").on("keydown", function(e) {
 }).start();
 ```
 
-###### en ######
-The property `T("osc").freq` can be enter the T-object in non-numeric _(line:2)_. In the following example, vibrato and portamento is performed by `.freq` that is the time-varying T-object.
-###### ja ######
-`T("osc").freq` は数値以外の T オブジェクトを入力することができます _(line:2)_。以下の例では時間変化する T オブジェクト を周波数プロパティの入力にしてビブラートやポルタメントを行なっています。
-###### -- ######
+en: The property `T("osc").freq` can be enter the T-object in non-numeric _(line:2)_. In the following example, vibrato and portamento is performed by `.freq` that is the time-varying T-object.
+ja: `T("osc").freq` は数値以外の T オブジェクトを入力することができます _(line:2)_。以下の例では時間変化する T オブジェクト を周波数プロパティの入力にしてビブラートやポルタメントを行なっています。
 
 ### Vibrato ###
 
@@ -88,11 +76,8 @@ T("keyboard").on("keydown", function(e) {
 ```
 
 ### Portament ###
-###### en ######
-It is varied to smooth the frequency by using `T("param")` _(line:1,2,9)_
-###### ja ######
-`T("param")` を使用して周波数を滑かに変化させる _(line:1,2,9)_
-###### -- ######
+en: It is varied to smooth the frequency by using `T("param")` _(line:1,2,9)_
+ja: `T("param")` を使用して周波数を滑かに変化させる _(line:1,2,9)_
 
 ```timbre
 var glide = T("param", {value:880});
@@ -109,11 +94,8 @@ T("keyboard").on("keydown", function(e) {
 ```
 
 ### Sound Effect ###
-###### en ######
-It directly describes the change in frequency in the envelope object `T("env")`.
-###### ja ######
-エンベロープオブジェクト `T("env")` で周波数の変化を直接記述する。
-###### -- ######
+en: It directly describes the change in frequency in the envelope object `T("env")`.
+ja: エンベロープオブジェクト `T("env")` で周波数の変化を直接記述する。
 
 ```timbre
 // Change from 1760Hz to 220Hz in 200ms.
@@ -135,7 +117,7 @@ T("keyboard").on("keydown", function(e) {
 
 
 ## VCF ##
-**Voltage Controlled Filter**. timbre.js では [`T("biquad")`](./biquad.html) を使用します。
+ja: **Voltage Controlled Filter**. timbre.js では [`T("biquad")`](./biquad.html) を使用します。
 
 ```timbre
 var VCO = T("saw", {mul:0.2});
@@ -152,8 +134,7 @@ T("keyboard").on("keydown", function(e) {
 ```
 
 ### Envelope Filtering ###
-
-エンベロープオブジェクト `T("env")` でカットオフ周波数を時間変化させる。
+ja: エンベロープオブジェクト `T("env")` でカットオフ周波数を時間変化させる。
 
 _(line:1,2,12,13)_
 
@@ -176,8 +157,7 @@ T("keyboard").on("keydown", function(e) {
 ```
 
 ### Auto Wah ###
-
-LFOでカットオフ周波数を時間変化させる。
+ja: LFOでカットオフ周波数を時間変化させる。
 
 _(line:1,13,14)_
 
@@ -201,11 +181,11 @@ T("keyboard").on("keydown", function(e) {
 ```
 
 ## VCA ##
-**Voltage Controlled Amplifier**. timbre.js では [`T("env")`](./env.html) や [`T("param")`](./param.html) を使います。
+ja: **Voltage Controlled Amplifier**. timbre.js では [`T("env")`](./env.html) や [`T("param")`](./param.html) を使います。
 
 ### Amplitude Envelope ###
 
-一般的な ADSRエンベロープ。
+ja: 一般的な ADSRエンベロープ。
 _(line:2,10,15)_
 
 ```timbre
@@ -230,7 +210,7 @@ T("keyboard").on("keydown", function(e) {
 
 ### Tremolo ###
 
-LFOでトレモロ効果。
+ja: LFOでトレモロ効果。
 _(line:2,3)_
 
 ```timbre
@@ -250,7 +230,7 @@ T("keyboard").on("keydown", function(e) {
 
 ## Polyphonic ##
 
-今までの例ではモノフォニックだったが、`T("SynthDef")` オブジェクトを使用すると最低限の記述でポリフォニックシンセを作成できる。
+ja: 今までの例ではモノフォニックだったが、`T("SynthDef")` オブジェクトを使用すると最低限の記述でポリフォニックシンセを作成できる。
 
 ```timbre
 var synth = T("SynthDef").play();
