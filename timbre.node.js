@@ -80,6 +80,29 @@ Decoder.getBinaryWithPath = function(path, callback) {
 };
 
 Decoder.ogg_decode = ogg && vorbis && function(src, onloadedmetadata/*, onloadeddata*/) {
+    /*
+    var decoder = new ogg.Decoder();
+    
+    decoder.on("stream", function (stream) {
+        var vd = new vorbis.Decoder();
+        
+        // the "format" event contains the raw PCM format
+        vd.on('format', function (format) {
+            // send the raw PCM data to stdout
+            vd.pipe(process.stdout);
+        });
+
+        // an "error" event will get emitted if the stream is not a Vorbis stream
+        // (i.e. it could be a Theora video stream instead)
+        vd.on('error', function (err) {
+            // maybe try another decoder...
+        });
+        
+        stream.pipe(vd);
+    });
+    
+    fs.createReadStream(src).pipe(decoder);
+    */
     onloadedmetadata(false);
 };
 
