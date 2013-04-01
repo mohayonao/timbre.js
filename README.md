@@ -56,7 +56,7 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
-**WORKING** (344.96KB)
+**13.04.01** (344.95KB)
 * Bugfix: `T("buffer").slice()`
 * Bugfix: `fn.pointer()` for Opera
 * Fixed: Flash fallback
