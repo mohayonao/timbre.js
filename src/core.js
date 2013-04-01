@@ -2316,7 +2316,7 @@
 
     // Flash fallback
     (function() {
-        if (_envtype !== "browser" || _envmobile) {
+        if (_sys.impl.env !== "nop" || _envtype !== "browser" || _envmobile) {
             return;
         }
         var nav = navigator;
