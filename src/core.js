@@ -2303,34 +2303,67 @@
             };
         };
     } else {
-        // Flash fallback
-        (function() {
-            if (_envtype !== "browser" || _envmobile) {
-                return;
-            }
-            var nav = navigator;
+        ImplClass = function(sys) {
+            this.maxSamplerate     = 48000;
+            this.defaultSamplerate = 44100;
+            this.env = "nop";
+            this.play  = function() {};
+            this.pause = function() {};
+        };
+    }
+    /*global webkitAudioContext:false */
 
-            /*jshint latedef:true */
-            if (getFlashPlayerVersion(0) < 10) {
-                return;
-            }
-            /*jshint latedef:false */
-            var swf, PlayerDivID = "TimbreFlashPlayerDiv";
-            var src = (function() {
-                var scripts = document.getElementsByTagName("script");
-                if (scripts && scripts.length) {
-                    for (var m, i = 0, imax = scripts.length; i < imax; ++i) {
-                        if ((m = /^(.*\/)timbre(.*)\.js$/i.exec(scripts[i].src))) {
-                            return m[1] + "timbre.swf";
-                        }
+    _sys = new SoundSystem().bind(ImplClass);
+
+    var exports = timbre;
+
+    if (_envtype === "node") {
+        module.exports = global.timbre = exports;
+    } else if (_envtype === "browser") {
+        exports.noConflict = (function() {
+           var _t = window.timbre, _T = window.T;
+            return function(deep) {
+                if (window.T === exports) {
+                    window.T = _T;
+                }
+                if (deep && window.timbre === exports) {
+                    window.timbre = _t;
+                }
+                return exports;
+            };
+        })();
+
+        window.timbre = window.T = exports;
+    }
+
+    // Flash fallback
+    (function() {
+        if (_envtype !== "browser" || _envmobile) {
+            return;
+        }
+        var nav = navigator;
+
+        /*jshint latedef:true */
+        if (getFlashPlayerVersion(0) < 10) {
+            return;
+        }
+        /*jshint latedef:false */
+
+        var swf, PlayerDivID = "TimbreFlashPlayerDiv";
+        var src = (function() {
+            var scripts = document.getElementsByTagName("script");
+            if (scripts && scripts.length) {
+                for (var m, i = 0, imax = scripts.length; i < imax; ++i) {
+                    if ((m = /^(.*\/)timbre(?:\.dev)?\.js$/i.exec(scripts[i].src))) {
+                        return m[1] + "timbre.swf";
                     }
                 }
-            })();
+            }
+        })();
 
+        window.timbrejs_flashfallback_init = function() {
             function TimbreFlashPlayer(sys) {
                 var timerId = 0;
-
-                initialize();
 
                 this.maxSamplerate     = 44100;
                 this.defaultSamplerate = 44100;
@@ -2377,98 +2410,56 @@
                     }
                 };
             }
+            _sys.bind(TimbreFlashPlayer);
+            delete window.timbrejs_flashfallback_init;
+        };
 
-            function initialize() {
-                var o, p;
-                var swfSrc  = src;
-                var swfName = swfSrc + "?" + (+new Date());
-                var swfId   = "TimbreFlashPlayer";
-                var div = document.createElement("div");
-                div.id = PlayerDivID;
-                div.style.display = "inline";
-                div.width = div.height = 1;
+        var o, p;
+        var swfSrc  = src;
+        var swfName = swfSrc + "?" + (+new Date());
+        var swfId   = "TimbreFlashPlayer";
+        var div = document.createElement("div");
+        div.id = PlayerDivID;
+        div.style.display = "inline";
+        div.width = div.height = 1;
 
-                if (nav.plugins && nav.mimeTypes && nav.mimeTypes.length) {
-                    // ns
-                    o = document.createElement("object");
-                    o.id = swfId;
-                    o.classid = "clsid:D27CDB6E-AE6D-11cf-96B8-444553540000";
-                    o.width = o.height = 1;
-                    o.setAttribute("data", swfName);
-                    o.setAttribute("type", "application/x-shockwave-flash");
-                    p = document.createElement("param");
-                    p.setAttribute("name", "allowScriptAccess");
-                    p.setAttribute("value", "always");
-                    o.appendChild(p);
-                    div.appendChild(o);
-                } else {
-                    // ie
-                    /*jshint quotmark:single */
-                    o = '<object id="' + swfId + '" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="1" height="1">';
-                    o += '<param name="movie" value="' + swfName + '" />';
-                    o += '<param name="bgcolor" value="#FFFFFF" />';
-                    o += '<param name="quality" value="high" />';
-                    o += '<param name="allowScriptAccess" value="always" />';
-                    o += '</object>';
-                    /*jshint quotmark:double */
-                    div.innerHTML = o;
-                }
-                window.addEventListener("load", function() {
-                    document.body.appendChild(div);
-                    swf = document[swfId];
-                });
-            }
-
-            function getFlashPlayerVersion(subs) {
-                /*global ActiveXObject:true */
-                try {
-                    if (nav.plugins && nav.mimeTypes && nav.mimeTypes.length) {
-                        return nav.plugins["Shockwave Flash"].description.match(/([0-9]+)/)[subs];
-                    }
-                    return (new ActiveXObject("ShockwaveFlash.ShockwaveFlash")).GetVariable("$version").match(/([0-9]+)/)[subs];
-                } catch (e) {
-                    return -1;
-                }
-                /*global ActiveXObject:false */
-            }
-
-            ImplClass = TimbreFlashPlayer;
-        })();
-
-        if (!ImplClass) {
-            ImplClass = function() {
-                this.maxSamplerate     = 48000;
-                this.defaultSamplerate =  8000;
-                this.env = "nop";
-                this.play  = fn.nop;
-                this.pause = fn.nop;
-            };
+        if (nav.plugins && nav.mimeTypes && nav.mimeTypes.length) {
+            // ns
+            o = document.createElement("object");
+            o.id = swfId;
+            o.classid = "clsid:D27CDB6E-AE6D-11cf-96B8-444553540000";
+            o.width = o.height = 1;
+            o.setAttribute("data", swfName);
+            o.setAttribute("type", "application/x-shockwave-flash");
+            p = document.createElement("param");
+            p.setAttribute("name", "allowScriptAccess");
+            p.setAttribute("value", "always");
+            o.appendChild(p);
+            div.appendChild(o);
+        } else {
+            // ie
+            /*jshint quotmark:single */
+            div.innerHTML = '<object id="' + swfId + '" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="1" height="1"><param name="movie" value="' + swfName + '" /><param name="bgcolor" value="#FFFFFF" /><param name="quality" value="high" /><param name="allowScriptAccess" value="always" /></object>';
+            /*jshint quotmark:double */
         }
-    }
-    /*global webkitAudioContext:false */
+        window.addEventListener("load", function() {
+            document.body.appendChild(div);
+            swf = document[swfId];
+        });
 
-    _sys = new SoundSystem().bind(ImplClass);
-
-    var exports = timbre;
-
-    if (_envtype === "node") {
-        module.exports = global.timbre = exports;
-    } else if (_envtype === "browser") {
-        exports.noConflict = (function() {
-           var _t = window.timbre, _T = window.T;
-            return function(deep) {
-                if (window.T === exports) {
-                    window.T = _T;
+        function getFlashPlayerVersion(subs) {
+            /*global ActiveXObject:true */
+            try {
+                if (nav.plugins && nav.mimeTypes && nav.mimeTypes.length) {
+                    return nav.plugins["Shockwave Flash"].description.match(/([0-9]+)/)[subs];
                 }
-                if (deep && window.timbre === exports) {
-                    window.timbre = _t;
-                }
-                return exports;
-            };
-        })();
-
-        window.timbre = window.T = exports;
-    }
+                return (new ActiveXObject("ShockwaveFlash.ShockwaveFlash")).GetVariable("$version").match(/([0-9]+)/)[subs];
+            } catch (e) {
+                return -1;
+            }
+            /*global ActiveXObject:false */
+        }
+    })();
 
     function setupTypedArray() {
         var unsigned = 0, signed = 1, floating  = 2;
