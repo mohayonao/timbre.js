@@ -72,9 +72,6 @@
         if (t === undefined) {
             t = new AddNode(args.slice(1));
             console.warn("T(\"" + key + "\") is not defined.");
-            //debug--
-            throw new Error("T(\"" + key + "\") is not defined.");
-            //--debug
         }
 
         var _ = t._;
@@ -637,26 +634,7 @@
     fn.fix_iOS6_1_problem = function(flag) {
         _sys.fix_iOS6_1_problem(flag);
     };
-
-    //debug--
-    fn.debug = {};
-    fn.debug.process = function(self) {
-        var cell = self.process(Date.now()).cells[0];
-        var min = +Infinity, max = -Infinity, nan = false;
-        for (var i = 0, imax = cell.length; i < imax; ++i) {
-            if (isNaN(cell[i])) {
-                nan = true;
-            }
-            if (cell[i] < min) {
-                min = cell[i];
-            } else if (cell[i] > max) {
-                max = cell[i];
-            }
-        }
-        return { min:min, max:max, isNaN:nan };
-    };
-    //--debug
-
+    
     var modules = timbre.modules = {};
 
     // EventEmitter

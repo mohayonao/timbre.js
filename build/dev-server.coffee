@@ -14,10 +14,9 @@ app.get /^\/timbre\.js\/(?:(ja)\/)?(?:([.\w]+)\.html)?$/, (req, res)->
     html = builder.build(name)
     res.send html
 
-app.get /^\/timbre\.js\/timbre(?:\.(dev|debug))?.js$/, (req, res)->
-    debug = req.params[0] is 'debug'
+app.get /^\/timbre\.js\/timbre(?:\.dev)?.js$/, (req, res)->
     res.type '.js'
-    res.send timbre_builder.build(debug:debug).source
+    res.send timbre_builder.build().source
 
 app.get '/timbre.js/*', (req, res)->
     filename = req.url.replace '/timbre.js/', ''
