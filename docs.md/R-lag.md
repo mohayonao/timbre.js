@@ -3,11 +3,8 @@ T("lag")
 {ar} Delay signal
 
 ## Description ##
-###### en ######
-`T("lag")` delays a signal by a certain amount of time.
-###### ja ######
-`T("lag")` は信号を遅延させます。
-###### -- ######
+en: `T("lag")` delays a signal by a certain amount of time.
+ja: `T("lag")` は信号を遅延させます。
 
 ```timbre
 var scale = [0,2,4,5,7,9,11,12];

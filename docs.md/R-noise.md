@@ -6,11 +6,8 @@ T("noise")
 
 (canvas canvas w:240 h:80)
 
-###### en ######
-`T("noise")` generates white noise.
-###### ja ######
-`T("noise")` はホワイトノイズを出力します。
-###### -- ######
+en: `T("noise")` generates white noise.
+ja: `T("noise")` はホワイトノイズを出力します。
 
 ```timbre
 var noise = T("noise", {mul:0.15}).play();

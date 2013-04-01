@@ -3,7 +3,7 @@ T("map")
 {krar} Mapping
 
 ## Description ##
-入力値を変換して出力します
+ja: 入力値を変換して出力します
 
 ```timbre
 T("map", {map:Math.sin});
@@ -11,13 +11,13 @@ T("map", {map:Math.sin});
 
 ## Properties ##
 - `input` _(Number)_
-  - 入力オブジェクトがない場合には, この値が入力値となる
+ja:  - 入力オブジェクトがない場合には, この値が入力値となる
 - `map` _(Function)_
-  - マッピング関数
+ja:  - マッピング関数
   
 ## Methods ##
 - `bang()`
-  - 再計算
+ja:  - 再計算
 
 ## See Also ##
 - [`T("zmap")`](./zmap.html)

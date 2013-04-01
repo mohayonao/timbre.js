@@ -3,8 +3,7 @@ T("tape")
 {ar}{stereo} Tape edit
 
 ## Description ##
-
-磁気テープを切り貼りする要領で音声データを編集します。
+ja: 磁気テープを切り貼りする要領で音声データを編集します。
 
 ```timbre
 timbre.rec(function(output) {

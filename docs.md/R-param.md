@@ -3,9 +3,7 @@ T("param")
 {krar} Parameter
 
 ## Description ##
-
-時間変化する値を出力します。
-
+ja: 時間変化する値を出力します。
 
 ```timbre
 var freq  = T("param", {value:440}).to(880, 10000);
@@ -102,7 +100,7 @@ freq.plot({target:cubTo});
 
 (canvas to w:240 h:80)
 
-3番目の引数でカーブを指定できます。
+ja: 3番目の引数でカーブを指定できます。
 
 - `lin`, `exp`, `sin`, `wel`, `sqr`, `cub`, `数値`
 
@@ -116,12 +114,12 @@ freq.plot({target:to});
 
 ### cancel ##
 
-値の変化を停止します。
+ja: 値の変化を停止します。
 
 
 ## Events ##
 - `ended`  
-  目標の値に到達したときに発生します
+ja:  目標の値に到達したときに発生します
   
 ## See Also ##
 - [`T("env")`](./R-env.html)

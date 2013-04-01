@@ -5,7 +5,7 @@ T("mouse")
 _* Browser Only_
 
 ## Description ##
-マウスイベントを追跡して出力します
+ja: マウスイベントを追跡して出力します
 
 ```timbre
 var mouse = T("mouse");
@@ -18,15 +18,15 @@ mouse.start();
 
 ## Properties ##
 - `X`
-  - X 座標を出力します
+ja:  - X 座標を出力します
 - `Y`
-  - Y 座標を出力します
+ja:  - Y 座標を出力します
   
 ## Methods ##
 - `start()`
-  - トラッキングを開始する
+ja:  - トラッキングを開始する
 - `stop()`
-  - トラッキングを終了する
+ja:  - トラッキングを終了する
 
 ## Events ##
 - `click`
@@ -39,7 +39,7 @@ mouse.start();
 Tracking Mouse Position
 
 ## Description ##
-マウスカーソルの座標を変換して出力します。
+ja: マウスカーソルの座標を変換して出力します。
 
 ```timbre
 var freq = T("mouse.y", {min:220, max:1760});
@@ -51,11 +51,11 @@ T("mouse").start();
 
 ## Properties ##
 - `min`  
-  - マウス最小値のときの値 _(0)_
+ja:  - マウス最小値のときの値 _(0)_
 - `max`  
-  - マウス最大値のときの値 _(1)_
+ja:  - マウス最大値のときの値 _(1)_
 - `curve` _("lin")_
-  - 出力カーブの種類 (`"lin"`, `"exp"`, `"sqr"` or `"cub"`)
+ja:  - 出力カーブの種類 (`"lin"`, `"exp"`, `"sqr"` or `"cub"`)
 
 ## Source ##
 https://github.com/mohayonao/timbre.js/blob/master/src/extras/mouse.js

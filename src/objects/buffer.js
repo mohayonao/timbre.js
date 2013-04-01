@@ -2,8 +2,10 @@
     "use strict";
 
     var fn = T.fn;
-    var isSignalArray = fn.isSignalArray;
-
+    var isSignalArray = function(obj) {
+        return fn.isSignalArray(obj) || obj instanceof Float32Array;
+    }
+    
     function BufferNode(_args) {
         T.Object.call(this, 1, _args);
         fn.fixAR(this);
@@ -44,6 +46,7 @@
         var _ = this._;
         if (typeof value === "object") {
             var buffer = [], samplerate, channels;
+
             if (isSignalArray(value)) {
                 buffer[0] = value;
                 channels = 1;

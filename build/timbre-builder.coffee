@@ -25,10 +25,6 @@ build_timbre = (opts={})->
     source = source.concat from "#{SRC_DIR}/modules"
     source = source.concat from "#{SRC_DIR}/objects"
     source = source.join ''
-
-    if not opts.debug
-        source = source.replace /\/\/debug--[\w\W]+?\/\/--debug/g, ''
-
     source = source.replace /\${VERSION}/g, version
 
     source:source, version:version, size:source.length

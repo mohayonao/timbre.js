@@ -12,7 +12,7 @@ Download an additional script: [webaudioapi.js](http://mohayonao.github.com/timb
 ```
 
 ## T("WebAudioAPI:recv") ##
-Web Audio API からデータを入力します。
+ja: Web Audio API からデータを入力します。
 
 ### Properties ###
 - `context` _(Readonly AudioContext)_
@@ -20,7 +20,7 @@ Web Audio API からデータを入力します。
 
 ### Methods ###
 - `recv (AudioNode)`
-  - 引数に指定した `AudioNode` の出力を自身の出力とします。
+ja:  - 引数に指定した `AudioNode` の出力を自身の出力とします。
 
 ```timbre
 var api = T("WebAudioAPI:recv");
@@ -36,7 +36,7 @@ T("+sin", {freq:2}, api).play();
 ```
 
 ## T("WebAudioAPI:send") ##
-Web Audio API にデータを出力します。
+ja: Web Audio API にデータを出力します。
 
 ### Properties ###
 - `context` _(Readonly AudioContext)_
@@ -44,7 +44,7 @@ Web Audio API にデータを出力します。
 
 ### Methods ###
 - `send (AudioNode)`
-  - 自身への入力を引数に指定した `AudioNode` に出力します。
+ja:  - 自身への入力を引数に指定した `AudioNode` に出力します。
 
 ```timbre
 var api = T("WebAudioAPI:send");

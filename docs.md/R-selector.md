@@ -3,7 +3,7 @@ T("selector")
 {ar}{stereo} Assign one of several inputs to an outlet
 
 ## Description ##
-処理を行う入力オブジェクトを選択します。
+ja: 処理を行う入力オブジェクトを選択します。
 
 ```timbre
 var a = T("audio", {loop:true}).load("/timbre.js/misc/audio/amen.wav");
@@ -18,9 +18,9 @@ var t = T("interval", {interval:1000}, function(count) {
 
 ## Properties ##
 - `selected` _(Number)_
-  - 処理を行う入力オブジェクトのインデックス。 デフォルト値は **0**
+ja:  - 処理を行う入力オブジェクトのインデックス。 デフォルト値は **0**
 - `background` _(Boolean)_
-  - `true` のとき、選択中でないオブジェクトも処理を行う。 デフォルト値は **false**
+ja:  - `true` のとき、選択中でないオブジェクトも処理を行う。 デフォルト値は **false**
 
 ## See Also ##
 - [`T("gate")`](./gate.html)

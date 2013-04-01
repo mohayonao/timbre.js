@@ -15,6 +15,7 @@ package {
             ExternalInterface.addCallback("setup", _setup);
             ExternalInterface.addCallback("cancel", _cancel);
             ExternalInterface.addCallback("writeAudio", _writeAudio);
+            ExternalInterface.call("timbrejs_flashfallback_init");
         }
         
         private function _setup(channels:int, samplerate:int):void {

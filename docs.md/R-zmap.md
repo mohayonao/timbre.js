@@ -3,7 +3,7 @@ T("zmap")
 {krar} Maps input range of values to output range
 
 ## Description ##
-入力値を変換して出力します
+ja: 入力値を変換して出力します
 
 ## Properties ##
 - `inMin` _(Number)_

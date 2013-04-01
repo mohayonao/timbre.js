@@ -3,11 +3,8 @@ T("mono")
 {arkr} Mixdown in mono
 
 ## Description ##
-###### en ######
-`T("mono")` is same as `T("+")`, but mixdown in mono.
-###### ja ######
-`T("mono")` はモノラルミックスダウンします。
-###### -- ######
+en: `T("mono")` is same as `T("+")`, but mixdown in mono.
+ja: `T("mono")` はモノラルミックスダウンします。
 
 ```timbre
 var lfo = T("sin", {freq:0.5}).kr();

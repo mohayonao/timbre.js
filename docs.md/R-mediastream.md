@@ -7,7 +7,7 @@ _* Browser Only_
 <audio id="audio" src="/timbre.js/misc/audio/amen.wav" controls></audio>
 
 ## Description ##
-HTMLAudioElement (Chromeの場合は HTMLVideoElement も含む) の出力を自身の出力とします。
+ja: HTMLAudioElement (Chromeの場合は HTMLVideoElement も含む) の出力を自身の出力とします。
 
 ```timbre
 var audio = document.getElementById("audio");

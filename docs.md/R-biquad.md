@@ -30,7 +30,7 @@ T("audio", {loop:true}).load(src, function(res) {
   - Draw filter characteristics
 
 ## Filter Types ##
-`type` プロパティで指定できるフィルターの種類です。エイリアスが設定されているので `T("lowpass")` や `T("lpf")` のように直接生成することもできます。
+ja: `type` プロパティで指定できるフィルターの種類です。エイリアスが設定されているので `T("lowpass")` や `T("lpf")` のように直接生成することもできます。
 
 ### Low-Pass Filter ###
 

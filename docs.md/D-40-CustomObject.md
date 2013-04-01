@@ -3,12 +3,13 @@ Custom Object
 Customize timbre.js
 
 ## Description ##
-自作のオブジェクトの作り方について解説します。  
-標準の T オブジェクトもすべて同じように書かれているので、詳しくは[ソースコード](https://github.com/mohayonao/timbre.js/blob/master/src/objects/)を参照してください。
+ja: 自作のオブジェクトの作り方について解説します。  
+ja: 標準の T オブジェクトもすべて同じように書かれているので、詳しくは[ソースコード](https://github.com/mohayonao/timbre.js/blob/master/src/objects/)を参照してください。
 
-以下の例は入力値を 2乗して出力する _(line:16)_ カスタムオブジェクトです。
+ja: 以下の例は入力値を 2乗して出力する _(line:16)_ カスタムオブジェクトです。
 
 ```timbre
+// define
 (function() {
   "use strict";
   
@@ -37,32 +38,31 @@ Customize timbre.js
   timbre.fn.register("custom-object", CustomObject);
 })();
 
+// usage
 T("custom-object", 
     T("audio", {load:"/timbre.js/misc/audio/amen.wav", loop:true})
 ).play();
 ```
 
-### 必須 ###
-- `timbre.Object.call(this, channels, _args);` _(line:5)_
-  - インスタンスを T オブジェクト として初期化します
-- `timbre.fn.extend(CustomObject);` _(line:7)_
-  - T オブジェクトクラス を継承します
+### Util functions ###
+- `timbre.Object.call(this, channels, _args)` _(line:5)_
+ja:  - インスタンスを T オブジェクト として初期化します
+- `timbre.fn.extend(CustomObject)` _(line:7)_
+ja:  - T オブジェクトクラス を継承します
 - `CustomObject.prototype.process = function(tickID)` _(line:9)_
-  - 処理で呼ばれる関数です. 処理を行って `this.cell` を返します
-- `timbre.fn.register("custom-object", CustomObject);` _(line:26)_
-  - クラスを登録する
-
-### 便利関数 ###
-- `timbre.fn.inputSignalAR(this);` _(line:13)_
-  - 入力オブジェクトの値を取得します ( `this.cell`を初期化して入力オブジェクトの値を加算します )
-- `timbre.fn.outputSignalAR(this);` _(line:21)_
-  - 出力値を調整します ( output * mul + add します )
+ja:  - 処理で呼ばれる関数です. 処理を行って `this.cell` を返します
+- `timbre.fn.register("custom-object", CustomObject)` _(line:26)_
+ja:  - クラスを登録する
+- `timbre.fn.inputSignalAR(this)` _(line:13)_
+ja:  - 入力オブジェクトの値を取得します ( `this.cell`を初期化して入力オブジェクトの値を加算します )
+- `timbre.fn.outputSignalAR(this)` _(line:21)_
+ja:  - 出力値を調整します ( output * mul + add します )
   
 ### tickID ###
-通番をチェックすることで、ひとつのオブジェクトが複数のオブジェクトに入力されているときに起こる 二重処理を防止しています。
+ja: 通番をチェックすることで、ひとつのオブジェクトが複数のオブジェクトに入力されているときに起こる 二重処理を防止しています。
   
-### プライベート変数 ###
-歴史的な理由で `this._` 以下に設置しています。
+### Private members ###
+ja: 歴史的な理由で `this._` 以下に設置しています。
 
 ```js
 function CustomObject(_args) {
@@ -73,8 +73,8 @@ function CustomObject(_args) {
 }
 ```
 
-### ステレオオブジェクト ###
-ステレオ対応のオブジェクトを生成するには、`timbre.Object.call` の 2番目の引数を `2` にします。
+### StereoObject ###
+ja: ステレオ対応のオブジェクトを生成するには、`timbre.Object.call` の 2番目の引数を `2` にします。
 
 ```js
 function CustomObject(_args) {
@@ -85,8 +85,8 @@ function CustomObject(_args) {
 }
 ```
 
-### プロパティ ###
-`set()`, `get()` で扱えるプロパティを作成するときは `defineProperties` します。
+### Properties ###
+ja: `set()`, `get()` で扱えるプロパティを作成するときは `defineProperties` します。
 ```js
 Object.defineProperties(CustomObject.prototype, {
   property: {
@@ -102,13 +102,7 @@ Object.defineProperties(CustomObject.prototype, {
 T("custom-object", {property:1});
 ```
 
-###### en ######
 ### Case of Coffee-Script ###
-like this.
-###### ja ######
-### Coffee-Scriptの場合 ###
-同じように書けます。
-###### -- ######
 ```js
 class CustomObject extends timbre.Object
   constructor: (_args)->
