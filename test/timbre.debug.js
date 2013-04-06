@@ -47,6 +47,23 @@ function DummyPlayer(sys) {
 
 timbre.bind(DummyPlayer);
 
+timbre.fn.debug = {};
+timbre.fn.debug.process = function(self) {
+    var cell = self.process(Date.now()).cells[0];
+    var min = +Infinity, max = -Infinity, nan = false;
+    for (var i = 0, imax = cell.length; i < imax; ++i) {
+        if (isNaN(cell[i])) {
+            nan = true;
+        }
+        if (cell[i] < min) {
+            min = cell[i];
+        } else if (cell[i] > max) {
+            max = cell[i];
+        }
+    }
+    return { min:min, max:max, isNaN:nan };
+};
+
 function CellNode(_args) {
     timbre.Object.call(this, 1, _args);
 }

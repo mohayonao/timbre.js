@@ -35,12 +35,12 @@
         var _ = this._;
         var freq   = _.freq;
         var size   = (_.samplerate / freq + 0.5)|0;
-        var buffer = _.buffer = new fn.SignalArray(size << 1);
+        var buffer = _.buffer = new fn.SignalArray(size);
         for (var i = 0; i < size; ++i) {
             buffer[i] = Math.random() * 2 - 1;
         }
         _.readIndex  = 0;
-        _.writeIndex = size;
+        _.writeIndex = 0;
         _.emit("bang");
         return this;
     };
