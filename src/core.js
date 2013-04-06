@@ -634,7 +634,7 @@
     fn.fix_iOS6_1_problem = function(flag) {
         _sys.fix_iOS6_1_problem(flag);
     };
-    
+
     var modules = timbre.modules = {};
 
     // EventEmitter

@@ -4,8 +4,8 @@
     var fn = T.fn;
     var isSignalArray = function(obj) {
         return fn.isSignalArray(obj) || obj instanceof Float32Array;
-    }
-    
+    };
+
     function BufferNode(_args) {
         T.Object.call(this, 1, _args);
         fn.fixAR(this);
