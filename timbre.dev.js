@@ -24,7 +24,7 @@
     var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
     var ACCEPT_CELLSIZES = [32,64,128,256];
 
-    var _ver = "13.04.01";
+    var _ver = "13.04.06";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -634,7 +634,7 @@
     fn.fix_iOS6_1_problem = function(flag) {
         _sys.fix_iOS6_1_problem(flag);
     };
-    
+
     var modules = timbre.modules = {};
 
     // EventEmitter
@@ -5673,8 +5673,8 @@
     var fn = T.fn;
     var isSignalArray = function(obj) {
         return fn.isSignalArray(obj) || obj instanceof Float32Array;
-    }
-    
+    };
+
     function BufferNode(_args) {
         T.Object.call(this, 1, _args);
         fn.fixAR(this);
@@ -9817,12 +9817,12 @@
         var _ = this._;
         var freq   = _.freq;
         var size   = (_.samplerate / freq + 0.5)|0;
-        var buffer = _.buffer = new fn.SignalArray(size << 1);
+        var buffer = _.buffer = new fn.SignalArray(size);
         for (var i = 0; i < size; ++i) {
             buffer[i] = Math.random() * 2 - 1;
         }
         _.readIndex  = 0;
-        _.writeIndex = size;
+        _.writeIndex = 0;
         _.emit("bang");
         return this;
     };
