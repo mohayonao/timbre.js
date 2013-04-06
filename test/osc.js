@@ -48,10 +48,5 @@ describe("Oscillator", function() {
                 });
             });
         });
-        it("invalid wavc", function() {
-            assert.throws(function() {
-                osc.setWave("wavc(0123456)");
-            });
-        });
     });
 });
