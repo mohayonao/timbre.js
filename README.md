@@ -56,6 +56,9 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**13.04.17** (344.94KB)
+* Updated: readable stream api (node.js)
+
 **13.04.06** (344.94KB)
 * Fixed: `T("pluck)` buffer size
 
