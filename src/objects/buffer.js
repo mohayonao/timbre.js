@@ -152,7 +152,7 @@
 
     $.clone = function() {
         var _ = this._;
-        var instance = T("buffer");
+        var instance = fn.clone(this);
 
         if (_.buffer.length) {
             setBuffer.call(instance, {

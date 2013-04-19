@@ -42,8 +42,12 @@ function TimbreNodePlayer(sys) {
                     j += 2;
                 }
             }
-            
-            fn(null, buf);
+
+            if (fn) {
+                fn(null, buf);
+            } else {
+                this.push(buf);
+            }
         };
         this.node.pipe(new Speaker({sampleRate:sys.samplerate}));
     };

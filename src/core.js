@@ -377,6 +377,15 @@
     };
     fn.changeWithValue.unremovable = true;
 
+    fn.clone = function(src) {
+        var new_instance = new src.constructor([]);
+        new_instance._.ar  = src._.ar;
+        new_instance._.mul = src._.mul;
+        new_instance._.add = src._.add;
+        new_instance._.bypassed = src._.bypassed;
+        return new_instance;
+    };
+
     fn.timer = (function() {
         var make_onstart = function(self) {
             return function() {
