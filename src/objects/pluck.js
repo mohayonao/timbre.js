@@ -8,8 +8,7 @@
 
         this._.freq   = 440;
         this._.buffer = null;
-        this._.readIndex  = 0;
-        this._.writeIndex = 0;
+        this._.index  = 0;
     }
     fn.extend(PluckNode);
 
@@ -39,8 +38,7 @@
         for (var i = 0; i < size; ++i) {
             buffer[i] = Math.random() * 2 - 1;
         }
-        _.readIndex  = 0;
-        _.writeIndex = 0;
+        _.index = 0;
         _.emit("bang");
         return this;
     };
@@ -55,25 +53,21 @@
             var buffer = _.buffer;
             if (buffer) {
                 var bufferLength = buffer.length;
-                var readIndex  = _.readIndex;
-                var writeIndex = _.writeIndex;
+                var index = _.index, write;
                 var mul = _.mul, add = _.add;
                 var x, i, imax = cell.length;
 
                 for (i = 0; i < imax; ++i) {
-                    x = buffer[readIndex++];
-                    if (readIndex >= bufferLength) {
-                        readIndex = 0;
+                    write = index;
+                    x = buffer[index++];
+                    if (index >= bufferLength) {
+                        index = 0;
                     }
-                    x = (x + buffer[readIndex]) * 0.5;
-                    buffer[writeIndex++] = x;
-                    if (writeIndex >= bufferLength) {
-                        writeIndex = 0;
-                    }
+                    x = (x + buffer[index]) * 0.5;
+                    buffer[write] = x;
                     cell[i] = x * mul + add;
                 }
-                _.readIndex  = readIndex;
-                _.writeIndex = writeIndex;
+                _.index = index;
             }
         }
 
