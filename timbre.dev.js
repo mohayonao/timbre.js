@@ -24,7 +24,7 @@
     var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
     var ACCEPT_CELLSIZES = [32,64,128,256];
 
-    var _ver = "13.04.06";
+    var _ver = "13.04.19";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -376,6 +376,15 @@
         }
     };
     fn.changeWithValue.unremovable = true;
+
+    fn.clone = function(src) {
+        var new_instance = new src.constructor([]);
+        new_instance._.ar  = src._.ar;
+        new_instance._.mul = src._.mul;
+        new_instance._.add = src._.add;
+        new_instance._.bypassed = src._.bypassed;
+        return new_instance;
+    };
 
     fn.timer = (function() {
         var make_onstart = function(self) {
@@ -4265,6 +4274,17 @@
         this.wave[TABLE_SIZE] = this.wave[0];
     };
 
+    $.clone = function() {
+        var new_instance = new Oscillator(this.samplerate);
+        new_instance.wave      = this.wave;
+        new_instance.step      = this.step;
+        new_instance.frequency = this.frequency;
+        new_instance.value     = this.value;
+        new_instance.phase     = this.phase;
+        new_instance.feedback  = this.feedback;
+        return new_instance;
+    };
+
     $.reset = function() {
         this._x = 0;
     };
@@ -5821,7 +5841,7 @@
 
     $.clone = function() {
         var _ = this._;
-        var instance = T("buffer");
+        var instance = fn.clone(this);
 
         if (_.buffer.length) {
             setBuffer.call(instance, {
@@ -6770,9 +6790,8 @@
     });
 
     $.clone = function() {
-        var instance = new EnvNode([]);
+        var instance = fn.clone(this);
         instance._.env = this._.env.clone();
-        instance._.ar  = this._.ar;
         return instance;
     };
 
@@ -9239,6 +9258,14 @@
         }
     });
 
+    $.clone = function() {
+        var instance = fn.clone(this);
+        instance._.osc = this._.osc.clone();
+        instance._.freq  = this._.freq;
+        instance._.phase = this._.phase;
+        return instance;
+    };
+
     $.bang = function() {
         this._.osc.reset();
         this._.emit("bang");
@@ -9454,11 +9481,26 @@
         _.curve   = "lin";
         _.counter = 0;
         _.ar = false;
-        _.onended = fn.make_onended(this);
+        _.onended = make_onended(this);
 
         this.on("ar", onar);
     }
     fn.extend(ParamNode);
+
+    var make_onended = function(self, lastValue) {
+        return function() {
+            if (typeof lastValue === "number") {
+                var cell  = self.cells[0];
+                var cellL = self.cells[1];
+                var cellR = self.cells[2];
+                var value = self._.env.value;
+                for (var i = 0, imax = cellL.length; i < imax; ++i) {
+                    cell[0] = cellL[i] = cellR[i] = value;
+                }
+            }
+            self._.emit("ended");
+        };
+    };
 
     var onar = function(value) {
         this._.env.step = (value) ? 1 : this._.cellsize;
@@ -9790,8 +9832,7 @@
 
         this._.freq   = 440;
         this._.buffer = null;
-        this._.readIndex  = 0;
-        this._.writeIndex = 0;
+        this._.index  = 0;
     }
     fn.extend(PluckNode);
 
@@ -9821,8 +9862,7 @@
         for (var i = 0; i < size; ++i) {
             buffer[i] = Math.random() * 2 - 1;
         }
-        _.readIndex  = 0;
-        _.writeIndex = 0;
+        _.index = 0;
         _.emit("bang");
         return this;
     };
@@ -9837,25 +9877,21 @@
             var buffer = _.buffer;
             if (buffer) {
                 var bufferLength = buffer.length;
-                var readIndex  = _.readIndex;
-                var writeIndex = _.writeIndex;
+                var index = _.index, write;
                 var mul = _.mul, add = _.add;
                 var x, i, imax = cell.length;
 
                 for (i = 0; i < imax; ++i) {
-                    x = buffer[readIndex++];
-                    if (readIndex >= bufferLength) {
-                        readIndex = 0;
+                    write = index;
+                    x = buffer[index++];
+                    if (index >= bufferLength) {
+                        index = 0;
                     }
-                    x = (x + buffer[readIndex]) * 0.5;
-                    buffer[writeIndex++] = x;
-                    if (writeIndex >= bufferLength) {
-                        writeIndex = 0;
-                    }
+                    x = (x + buffer[index]) * 0.5;
+                    buffer[write] = x;
                     cell[i] = x * mul + add;
                 }
-                _.readIndex  = readIndex;
-                _.writeIndex = writeIndex;
+                _.index = index;
             }
         }
 
@@ -11086,6 +11122,17 @@
 
     fn.register("OscGen", (function() {
 
+        var osc_desc = {
+            set: function(value) {
+                if (value instanceof T.Object) {
+                    this._.osc = value;
+                }
+            },
+            get: function() {
+                return this._.osc;
+            }
+        };
+
         var wave_desc = {
             set: function(value) {
                 if (typeof value === "string") {
@@ -11099,12 +11146,24 @@
 
         var synthdef = function(opts) {
             var _ = this._;
-            var synth, env, envtype;
+            var synth, osc, env, envtype;
 
+            osc = _.osc || null;
             env = _.env || {};
             envtype = env.type || "perc";
 
-            synth = T("osc", {wave:_.wave, freq:opts.freq, mul:opts.velocity/128});
+            if (osc instanceof T.Object) {
+                if (typeof osc.clone === "function") {
+                    osc = osc.clone();
+                }
+            }
+            if (!osc) {
+                osc = T("osc", {wave:_.wave});
+            }
+            osc.freq = opts.freq;
+            osc.mul  = osc.mul * opts.velocity/128;
+
+            synth = osc;
             if (env instanceof T.Object) {
                 if (typeof env.clone === "function") {
                     synth = env.clone().append(synth);
@@ -11123,7 +11182,7 @@
             instance._.wave = "sin";
 
             Object.defineProperties(instance, {
-                env: env_desc, wave: wave_desc
+                env: env_desc, osc: osc_desc, wave: wave_desc
             });
 
             instance.def = synthdef;

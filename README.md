@@ -56,6 +56,9 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**13.04.19** (346.63KB)
+* Bugfix: end process of `T("params")`
+
 **13.04.17** (344.94KB)
 * Updated: readable stream api (node.js)
 
