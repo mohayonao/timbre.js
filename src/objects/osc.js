@@ -77,6 +77,14 @@
         }
     });
 
+    $.clone = function() {
+        var instance = fn.clone(this);
+        instance._.osc = this._.osc.clone();
+        instance._.freq  = this._.freq;
+        instance._.phase = this._.phase;
+        return instance;
+    };
+
     $.bang = function() {
         this._.osc.reset();
         this._.emit("bang");

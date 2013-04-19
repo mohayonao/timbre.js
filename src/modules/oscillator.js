@@ -48,6 +48,17 @@
         this.wave[TABLE_SIZE] = this.wave[0];
     };
 
+    $.clone = function() {
+        var new_instance = new Oscillator(this.samplerate);
+        new_instance.wave      = this.wave;
+        new_instance.step      = this.step;
+        new_instance.frequency = this.frequency;
+        new_instance.value     = this.value;
+        new_instance.phase     = this.phase;
+        new_instance.feedback  = this.feedback;
+        return new_instance;
+    };
+
     $.reset = function() {
         this._x = 0;
     };

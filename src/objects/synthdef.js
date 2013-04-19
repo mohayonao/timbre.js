@@ -224,6 +224,17 @@
 
     fn.register("OscGen", (function() {
 
+        var osc_desc = {
+            set: function(value) {
+                if (value instanceof T.Object) {
+                    this._.osc = value;
+                }
+            },
+            get: function() {
+                return this._.osc;
+            }
+        };
+
         var wave_desc = {
             set: function(value) {
                 if (typeof value === "string") {
@@ -237,12 +248,24 @@
 
         var synthdef = function(opts) {
             var _ = this._;
-            var synth, env, envtype;
+            var synth, osc, env, envtype;
 
+            osc = _.osc || null;
             env = _.env || {};
             envtype = env.type || "perc";
 
-            synth = T("osc", {wave:_.wave, freq:opts.freq, mul:opts.velocity/128});
+            if (osc instanceof T.Object) {
+                if (typeof osc.clone === "function") {
+                    osc = osc.clone();
+                }
+            }
+            if (!osc) {
+                osc = T("osc", {wave:_.wave});
+            }
+            osc.freq = opts.freq;
+            osc.mul  = osc.mul * opts.velocity/128;
+
+            synth = osc;
             if (env instanceof T.Object) {
                 if (typeof env.clone === "function") {
                     synth = env.clone().append(synth);
@@ -261,7 +284,7 @@
             instance._.wave = "sin";
 
             Object.defineProperties(instance, {
-                env: env_desc, wave: wave_desc
+                env: env_desc, osc: osc_desc, wave: wave_desc
             });
 
             instance.def = synthdef;
