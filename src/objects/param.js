@@ -16,11 +16,26 @@
         _.curve   = "lin";
         _.counter = 0;
         _.ar = false;
-        _.onended = fn.make_onended(this);
+        _.onended = make_onended(this);
 
         this.on("ar", onar);
     }
     fn.extend(ParamNode);
+
+    var make_onended = function(self, lastValue) {
+        return function() {
+            if (typeof lastValue === "number") {
+                var cell  = self.cells[0];
+                var cellL = self.cells[1];
+                var cellR = self.cells[2];
+                var value = self._.env.value;
+                for (var i = 0, imax = cellL.length; i < imax; ++i) {
+                    cell[0] = cellL[i] = cellR[i] = value;
+                }
+            }
+            self._.emit("ended");
+        };
+    };
 
     var onar = function(value) {
         this._.env.step = (value) ? 1 : this._.cellsize;
