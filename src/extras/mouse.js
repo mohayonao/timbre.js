@@ -167,7 +167,7 @@
             return f(_, x);
         }}, instance.X);
 
-        self.cells[0] = _.map.cells[3];
+        self.cells[0] = _.map.cells[0];
 
         return self;
     });
@@ -185,7 +185,7 @@
             return f(_, x);
         }}, instance.Y);
 
-        self.cells[0] = _.map.cells[4];
+        self.cells[0] = _.map.cells[0];
 
         return self;
     });
