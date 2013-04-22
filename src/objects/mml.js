@@ -145,6 +145,10 @@
             sched(this);
         }
 
+        var NOTEON  = 1;
+        var NOTEOFF = 2;
+        var COMMAND = 3;
+
         MMLTrack.prototype.process = function() {
             var _ = this._;
             var sequencer = _.sequencer;
@@ -154,12 +158,18 @@
             if (queue.length) {
                 while (queue[0][0] <= _.currentTime) {
                     var nextItem = _.queue.shift();
-                    if (nextItem[1]) {
-                        noteOn(sequencer, trackNum, nextItem[1], nextItem[3]);
+                    switch (nextItem[1]) {
+                    case NOTEON:
+                        noteOn(sequencer, trackNum, nextItem[2], nextItem[3]);
                         _.remain = nextItem[4];
                         sched(this);
-                    } else {
+                        break;
+                    case NOTEOFF:
                         noteOff(sequencer, trackNum, nextItem[2], nextItem[3]);
+                        break;
+                    case COMMAND:
+                        command(sequencer, nextItem[2]);
+                        break;
                     }
                     if (queue.length === 0) {
                         break;
@@ -205,9 +215,16 @@
             });
         };
 
+        var command = function(sequencer, cmd) {
+            sequencer._.emit("data", "command", {
+                command: cmd
+            });
+        };
+
         var sched = function(self) {
             var _ = self._;
 
+            var sequencer = _.sequencer;
             var cmd, commands = _.commands;
             var queue  = _.queue;
             var index  = _.index;
@@ -233,6 +250,9 @@
                 cmd = commands[index++];
 
                 switch (cmd.name) {
+                case "@":
+                    queue.push([queueTime, COMMAND, cmd.val]);
+                    break;
                 case "n":
                     tempo = status.t || 120;
                     if (cmd.len !== null) {
@@ -256,7 +276,7 @@
                         val = _.prevNote;
                     } else {
                         val = _.prevNote = (cmd.val) + (status.o + 1) * 12;
-                        queue.push([queueTime, val, null, vel, duration]);
+                        queue.push([queueTime, NOTEON, val, vel, duration]);
                     }
 
                     if (len > 0) {
@@ -264,9 +284,9 @@
                         // noteOff
                         if (quantize < 1) {
                             _queueTime = queueTime + (duration * quantize);
-                            queue.push([_queueTime, null, val, vel]);
+                            queue.push([_queueTime, NOTEOFF, val, vel]);
                             for (i = 0, imax = pending.length; i < imax; ++i) {
-                                queue.push([_queueTime, null, pending[i], vel]);
+                                queue.push([_queueTime, NOTEOFF, pending[i], vel]);
                             }
                         }
                         pending = [];
@@ -409,6 +429,12 @@
         };
 
         var MMLCommands = [
+            { re:/@(\d*)/g, func: function(m) {
+                return {
+                    name: "@",
+                    val: m[1] || null
+                };
+            }},
             { re:/([cdefgab])([\-+]?)(\d*)(\.*)/g, func: function(m) {
                 return {
                     name: "n",
