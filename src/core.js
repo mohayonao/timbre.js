@@ -393,6 +393,7 @@
                     _sys.timers.push(self);
                     _sys.events.emit("addObject");
                     self._.emit("start");
+                    fn.buddies_start(self);
                 }
             };
         };
@@ -403,12 +404,14 @@
                     _sys.timers.splice(i, 1);
                     self._.emit("stop");
                     _sys.events.emit("removeObject");
+                    fn.buddies_stop(self);
                 }
             };
         };
         return function(self) {
             var onstart = make_onstart(self);
             var onstop  = make_onstop(self);
+            self.nodeType = TimbreObject.TIMER;
             self.start = function() {
                 _sys.nextTick(onstart);
                 return self;
@@ -428,6 +431,7 @@
                     _sys.listeners.push(self);
                     _sys.events.emit("addObject");
                     self._.emit("listen");
+                    fn.buddies_start(self);
                 }
             };
         };
@@ -438,13 +442,15 @@
                     _sys.listeners.splice(i, 1);
                     self._.emit("unlisten");
                     _sys.events.emit("removeObject");
+                    fn.buddies_stop(self);
                 }
             };
         };
         return function(self) {
             var onlisten = make_onlisten(self);
             var onunlisten = make_onunlisten(self);
-            self.listen = function() {
+            self.nodeType = TimbreObject.LISTENER;
+            self.listen = function(buddies) {
                 if (arguments.length) {
                     self.append.apply(self, arguments);
                 }
@@ -636,6 +642,44 @@
             for (i = cell.length; i; ) {
                 i -= 8;
                 cell[i] = cell[i+1] = cell[i+2] = cell[i+3] = cell[i+4] = cell[i+5] = cell[i+6] = cell[i+7] = value;
+            }
+        }
+    };
+
+    fn.buddies_start = function(self) {
+        var buddies = self._.buddies;
+        var node, i, imax;
+        for (i = 0, imax = buddies.length; i < imax; ++i) {
+            node = buddies[i];
+            switch (node.nodeType) {
+            case TimbreObject.DSP:
+                node.play();
+                break;
+            case TimbreObject.TIMER:
+                node.start();
+                break;
+            case TimbreObject.LISTENER:
+                node.listen();
+                break;
+            }
+        }
+    };
+
+    fn.buddies_stop = function(self) {
+        var buddies = self._.buddies;
+        var node, i, imax;
+        for (i = 0, imax = buddies.length; i < imax; ++i) {
+            node = buddies[i];
+            switch (node.nodeType) {
+            case TimbreObject.DSP:
+                node.pause();
+                break;
+            case TimbreObject.TIMER:
+                node.stop();
+                break;
+            case TimbreObject.LISTENER:
+                node.unlisten();
+                break;
             }
         }
     };
@@ -1072,6 +1116,7 @@
                 break;
             }
             this.playbackState = PLAYING_STATE;
+            this.nodeType = TimbreObject.DSP;
 
             this._.ar  = true;
             this._.mul = 1;
@@ -1081,7 +1126,11 @@
             this._.meta = {};
             this._.samplerate = _sys.samplerate;
             this._.cellsize   = _sys.cellsize;
+            this._.buddies    = [];
         }
+        TimbreObject.DSP      = 1;
+        TimbreObject.TIMER    = 2;
+        TimbreObject.LISTENER = 3;
 
         var $ = TimbreObject.prototype;
 
@@ -1126,6 +1175,19 @@
                 },
                 get: function() {
                     return this._.add;
+                }
+            },
+            buddies: {
+                set: function(value) {
+                    if (!isArray(value)) {
+                        value = [value];
+                    }
+                    this._.buddies = value.filter(function(node) {
+                        return node instanceof TimbreObject;
+                    });
+                },
+                get: function() {
+                    return this._.buddies;
                 }
             }
         });
@@ -1283,6 +1345,7 @@
                 dac.play();
                 this._.emit.apply(this, ["play"].concat(slice.call(arguments)));
             }
+            fn.buddies_start(this);
             return this;
         };
 
@@ -1293,6 +1356,7 @@
                 this._.dac = null;
                 this._.emit("pause");
             }
+            fn.buddies_stop(this);
             return this;
         };
 
