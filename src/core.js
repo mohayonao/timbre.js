@@ -1256,6 +1256,11 @@
             return this;
         };
 
+        $.postMessage = function(message) {
+            this._.emit("message", message);
+            return this;
+        };
+
         // EventEmitter
         $.on = $.addListener = function(type, listener) {
             this._.events.on(type, listener);
