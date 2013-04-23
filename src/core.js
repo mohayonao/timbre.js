@@ -35,7 +35,7 @@
     var _bpm = 120;
 
     var T = function() {
-        var args = slice.call(arguments), key = args[0], t;
+        var args = slice.call(arguments), key = args[0], t, m;
 
         switch (typeof key) {
         case "string":
@@ -43,6 +43,19 @@
                 t = new _constructors[key](args.slice(1));
             } else if (_factories[key]) {
                 t = _factories[key](args.slice(1));
+            } else {
+                m = /^(.+?)(?:\.(ar|kr))?$/.exec(key);
+                if (m) {
+                    key = m[1];
+                    if (_constructors[key]) {
+                        t = new _constructors[key](args.slice(1));
+                    } else if (_factories[key]) {
+                        t = _factories[key](args.slice(1));
+                    }
+                    if (m[2]) {
+                        t[m[2]]();
+                    }
+                }
             }
             break;
         case "number":
