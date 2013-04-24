@@ -1705,7 +1705,11 @@
     var ArrayWrapper = (function() {
         function ArrayWrapper(_args) {
             TimbreObject.call(this, 1, []);
-            fn.fixKR(this);
+
+            var i, imax;
+            for (i = 0, imax = _args[0].length; i < imax; ++i) {
+              this.append(_args[0][i]);
+            }
 
             if (isDictionary(_args[1])) {
                 var params = _args[1];
@@ -1721,6 +1725,40 @@
         Object.defineProperties($, {
 
         });
+
+        $.bang = function() {
+            var args = ["bang"].concat(slice.call(arguments));
+            var nodes = this.nodes;
+            var i, imax;
+            for (i = 0, imax = nodes.length; i < imax; ++i) {
+                nodes[i].bang.apply(nodes[i], args);
+            }
+            return this;
+        };
+
+        $.postMessage = function(message) {
+            var nodes = this.nodes;
+            var i, imax;
+            for (i = 0, imax = nodes.length; i < imax; ++i) {
+                nodes[i].postMessage(message);
+            }
+            return this;
+        };
+
+        $.process = function(tickID) {
+            var _ = this._;
+            if (this.tickID !== tickID) {
+                this.tickID = tickID;
+                if (_.ar) {
+                    fn.inputSignalAR(this);
+                    fn.outputSignalAR(this);
+                } else {
+                    this.cells[0][0] = fn.inputSignalKR(this);
+                    fn.outputSignalKR(this);
+                }
+            }
+            return this;
+        };
 
         return ArrayWrapper;
     })();
