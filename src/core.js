@@ -52,7 +52,7 @@
                     } else if (_factories[key]) {
                         t = _factories[key](args.slice(1));
                     }
-                    if (m[2]) {
+                    if (t && m[2]) {
                         t[m[2]]();
                     }
                 }
