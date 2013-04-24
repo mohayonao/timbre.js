@@ -278,8 +278,8 @@
         }
 
         var opts = _args[0];
-        var a  = envValue(opts,   10,   10, "a" , "attackTime", timevalue);
-        var r  = envValue(opts,   10, 1000, "r" , "decayTime" , timevalue);
+        var a  = envValue(opts,   10,   10, "a" , "attackTime" , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "releaseTime", timevalue);
         var lv = envValue(opts, ZERO,    1, "lv", "level"     );
 
         opts.table = [ZERO, [lv, a], [ZERO, r]];
