@@ -1102,8 +1102,16 @@
             };
             if (isDictionary(_args[0])) {
                 var params = _args.shift();
+                var _in = params["in"];
                 this.once("init", function() {
                     this.set(params);
+                    if (_in) {
+                        if (isArray(_in)) {
+                            this.append.apply(this, _in);
+                        } else if (_in instanceof TimbreObject) {
+                            this.append(_in);
+                        }
+                    }
                 });
             }
 
