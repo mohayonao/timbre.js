@@ -1282,6 +1282,21 @@
             return this;
         };
 
+        $.to = function(object) {
+            if (object instanceof TimbreObject) {
+                object.append(this);
+            } else {
+                var args = slice.call(arguments);
+                if (isDictionary(args[1])) {
+                    args.splice(2, 0, this);
+                } else {
+                    args.splice(1, 0, this);
+                }
+                object = T.apply(null, args);
+            }
+            return object;
+        };
+
         // EventEmitter
         $.on = $.addListener = function(type, listener) {
             this._.events.on(type, listener);
