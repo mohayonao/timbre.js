@@ -1282,16 +1282,6 @@
             return this;
         };
 
-        $.op = function() {
-            var args = slice.call(arguments);
-            if (isDictionary(args[1])) {
-                args.splice(2, 0, this);
-            } else {
-                args.splice(1, 0, this);
-            }
-            return T.apply(null, args);
-        };
-
         // EventEmitter
         $.on = $.addListener = function(type, listener) {
             this._.events.on(type, listener);
