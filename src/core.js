@@ -1296,6 +1296,29 @@
             }
             return object;
         };
+        
+        $.splice = function(ins, obj, rem) {
+            var i;
+            if (!obj) {
+                obj = this._.dac;
+            }
+            if (obj instanceof TimbreObject) {
+                i = obj.nodes.indexOf(rem);
+                if (i !== -1) {
+                    console.log("rem");
+                    obj.nodes.splice(i, 1);
+                }
+                if (ins instanceof TimbreObject) {
+                    console.log("ins");
+                    ins.nodes.push(this);
+                    obj.nodes.push(ins);
+                } else {
+                    console.log("ins this");
+                    obj.nodes.push(this);
+                }
+            }
+            return this;
+        };
 
         // EventEmitter
         $.on = $.addListener = function(type, listener) {
