@@ -1296,25 +1296,47 @@
             }
             return object;
         };
-        
+
         $.splice = function(ins, obj, rem) {
             var i;
             if (!obj) {
-                obj = this._.dac;
-            }
-            if (obj instanceof TimbreObject) {
-                i = obj.nodes.indexOf(rem);
-                if (i !== -1) {
-                    console.log("rem");
-                    obj.nodes.splice(i, 1);
+                if (this._.dac) {
+                    if (ins instanceof TimbreObject) {
+                        if (rem instanceof TimbreObject) {
+                            if (rem._.dac) {
+                                rem._.dac._.node = ins;
+                                ins._.dac = rem._.dac;
+                                rem._.dac = null;
+                                ins.nodes.push(this);
+                            }
+                        } else {
+                            if (this._.dac) {
+                                this._.dac._.node = ins;
+                                ins._.dac = this._.dac;
+                                this._.dac = null;
+                                ins.nodes.push(this);
+                            }
+                        }
+                    } else if (rem instanceof TimbreObject) {
+                        if (rem._.dac) {
+                            rem._.dac._.node = this;
+                            this._.dac = rem._.dac;
+                            rem._.dac = null;
+                        }
+                    }
                 }
-                if (ins instanceof TimbreObject) {
-                    console.log("ins");
-                    ins.nodes.push(this);
-                    obj.nodes.push(ins);
-                } else {
-                    console.log("ins this");
-                    obj.nodes.push(this);
+            } else {
+                if (obj instanceof TimbreObject) {
+                    i = obj.nodes.indexOf(rem);
+                    if (i !== -1) {
+                        obj.nodes.splice(i, 1);
+                    }
+                    if (ins instanceof TimbreObject) {
+                        ins.nodes.push(this);
+                        obj.nodes.push(ins);
+                    } else {
+                        obj.nodes.push(this);
+                    }
                 }
             }
             return this;
@@ -1878,8 +1900,7 @@
         };
 
         $.process = function(tickID) {
-            var node  = this._.node;
-
+            var node = this._.node;
             if (node.playbackState & 1) {
                 node.process(tickID);
                 this.cells[1].set(node.cells[1]);
