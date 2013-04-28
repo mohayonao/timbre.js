@@ -81,7 +81,8 @@
         var opts = {
             freq    : freq,
             noteNum : noteNum,
-            velocity: velocity
+            velocity: velocity,
+            mul     : velocity * 0.0078125
         };
         if (_opts) {
             for (var key in _opts) {
