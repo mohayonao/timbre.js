@@ -213,6 +213,19 @@
         return new_instance;
     };
 
+    Tape.prototype.getBuffer = function() {
+        var samplerate = 44100;
+        if (this.fragments.length > 0) {
+            samplerate = this.fragments[0].samplerate;
+        }
+        var stream = new TapeStream(this, samplerate);
+        var total_samples = (this.duration() * samplerate)|0;
+        return {
+            samplerate: samplerate,
+            buffer    : stream.fetch(total_samples)
+        };
+    };
+
     function Fragment(soundbuffer, start, duration, reverse, pitch, stretch, pan) {
         if (!soundbuffer) {
             soundbuffer = silencebuffer;

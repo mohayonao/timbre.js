@@ -51,6 +51,13 @@
             get: function() {
                 return this._.isLooped;
             }
+        },
+        buffer: {
+            get: function() {
+                if (this._.tape) {
+                    return this._.tape.getBuffer();
+                }
+            }
         }
     });
 
@@ -69,6 +76,12 @@
         }
         this._.emit("bang");
         return this;
+    };
+
+    $.getBuffer = function() {
+        if (this._.tape) {
+            return this._.tape.getBuffer();
+        }
     };
 
     $.process = function(tickID) {
