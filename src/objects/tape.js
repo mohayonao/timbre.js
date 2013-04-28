@@ -26,11 +26,20 @@
                     this.playbackState = fn.PLAYING_STATE;
                     this._.tape = tape;
                     this._.tapeStream = new TapeStream(tape, this._.samplerate);
-                } else if (typeof tape === "object") {
-                    if (Array.isArray(tape.buffer) && isSignalArray(tape.buffer[0])) {
-                        this.playbackState = fn.PLAYING_STATE;
-                        this._.tape = new Scissor(tape);
-                        this._.tapeStream = new TapeStream(tape, this._.samplerate);
+                    this._.tapeStream.isLooped = this._.isLooped;
+                } else {
+                    if (tape instanceof T.Object) {
+                        if (tape.buffer) {
+                            tape = tape.buffer;
+                        }
+                    }
+                    if (typeof tape === "object") {
+                        if (Array.isArray(tape.buffer) && isSignalArray(tape.buffer[0])) {
+                            this.playbackState = fn.PLAYING_STATE;
+                            this._.tape = new Scissor(tape);
+                            this._.tapeStream = new TapeStream(this._.tape, this._.samplerate);
+                            this._.tapeStream.isLooped = this._.isLooped;
+                        }
                     }
                 }
             },
