@@ -1427,8 +1427,7 @@
             if (dac === null) {
                 dac = this._.dac = new SystemInlet(this);
             }
-            if (dac.playbackState === FINISHED_STATE) {
-                dac.play();
+            if (dac.play()) {
                 this._.emit.apply(this, ["play"].concat(slice.call(arguments)));
             }
             fn.buddies_start(this);
@@ -1893,6 +1892,7 @@
 
         $.play = function() {
             _sys.nextTick(this._.onplay);
+            return (_sys.inlets.indexOf(this) === -1);
         };
 
         $.pause = function() {
