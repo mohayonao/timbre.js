@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Base Object</title><link rel="stylesheet" href="/timbre.js/misc/css/codemirror.css" type="text/css"><link rel="stylesheet" href="/timbre.js/misc/css/common.css" type="text/css"><link rel="shortcut icon" href="/timbre.js/favicon.ico"><script src="/timbre.js/timbre.dev.js"></script><script>var _gaq = _gaq || [];
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>TimbreObject</title><link rel="stylesheet" href="/timbre.js/misc/css/codemirror.css" type="text/css"><link rel="stylesheet" href="/timbre.js/misc/css/common.css" type="text/css"><link rel="shortcut icon" href="/timbre.js/favicon.ico"><script src="/timbre.js/timbre.dev.js"></script><script>var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-21613416-10']);
 _gaq.push(['_trackPageview']);
 
@@ -7,107 +7,156 @@ _gaq.push(['_trackPageview']);
   ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 })();
-</script></head><body><div class="container"><div class="row"><div id="sidebar"><h1>timbre.js</h1><div id="index"><div id="list"><h2>Download (13.04.19)</h2><ul><li><a href="/timbre.js/timbre.js">timbre.js</a></li><li><a href="/timbre.js/timbre.dev.js">timbre.dev.js</a></li></ul><h2>Documents</h2><ul><li><a href="./">Introduction</a></li><li><a href="./GettingStarted.html">Getting Started</a></li><li><a href="./PragmaSynth.html">Pragmatic Synth</a></li><li><a href="./RecordingMode.html">Recording Mode</a></li><li><a href="./CustomObject.html">Custom Object</a></li><li><a href="./ForDevelopers.html">For Developers</a></li><li><a href="./timevalue.html">timevalue</a></li></ul><h2>Examples</h2><ul><li><a href="./beatbox.html">BeatBox</a></li><li><a href="./chord.html">ChordWork</a></li><li><a href="./satie.html">Gymnopedie</a></li><li><a href="./khoomii.html">Khoomii</a></li><li><a href="./reich.html">Reich</a></li></ul><h2>References</h2><ul><li><a href="./BaseObject.html">Base Object</a></li><li><a href="./Number.html">Number</a></li><li><a href="./Array.html">Array</a></li><li><a href="./Function.html">Function</a></li><li><a href="./Boolean.html">Boolean</a></li><li><a href="./Object.html">Object</a></li><li><a href="./SynthDef.html">SynthDef</a></li><li><a href="./soundbuffer.html">SoundBuffer</a></li><li><a href="./mul.html">*</a></li><li><a href="./add.html">+</a></li><li><a href="./subtract.html">-</a></li><li><a href="./div.html">/</a></li><li><a href="./audio.html">audio</a></li><li><a href="./biquad.html">biquad</a></li><li><a href="./buffer.html">buffer</a></li><li><a href="./chorus.html">chorus</a></li><li><a href="./clip.html">clip</a></li><li><a href="./comp.html">comp</a></li><li><a href="./delay.html">delay</a></li><li><a href="./dist.html">dist</a></li><li><a href="./env.html">env</a></li><li><a href="./eq.html">eq</a></li><li><a href="./fft.html">fft</a></li><li><a href="./fnoise.html">fnoise</a></li><li><a href="./gate.html">gate</a></li><li><a href="./ifft.html">ifft</a></li><li><a href="./interval.html">interval</a></li><li><a href="./lag.html">lag</a></li><li><a href="./map.html">map</a></li><li><a href="./max.html">max</a></li><li><a href="./mediastream.html">mediastream</a></li><li><a href="./midicps.html">midicps</a></li><li><a href="./midiratio.html">midiratio</a></li><li><a href="./min.html">min</a></li><li><a href="./mml.html">mml</a></li><li><a href="./mono.html">mono</a></li><li><a href="./ndict.html">ndict</a></li><li><a href="./noise.html">noise</a></li><li><a href="./osc.html">osc</a></li><li><a href="./OscGen.html">OscGen</a></li><li><a href="./pan.html">pan</a></li><li><a href="./param.html">param</a></li><li><a href="./phaser.html">phaser</a></li><li><a href="./pink.html">pink</a></li><li><a href="./pluck.html">pluck</a></li><li><a href="./PluckGen.html">PluckGen</a></li><li><a href="./rec.html">rec</a></li><li><a href="./reverb.html">reverb</a></li><li><a href="./schedule.html">schedule</a></li><li><a href="./scope.html">scope</a></li><li><a href="./script.html">script</a></li><li><a href="./selector.html">selector</a></li><li><a href="./spectrum.html">spectrum</a></li><li><a href="./tape.html">tape</a></li><li><a href="./timeout.html">timeout</a></li><li><a href="./waveshaper.html">waveshaper</a></li><li><a href="./zmap.html">zmap</a></li></ul><h2>Extra objects</h2><ul><li><a href="./audiojsonp.html">audio.jsonp</a></li><li><a href="./cosc.html">cosc</a></li><li><a href="./keyboard.html">keyboard</a></li><li><a href="./MoogFF.html">MoogFF</a></li><li><a href="./mouse.html">mouse</a></li><li><a href="./webaudioapi.html">WebAudioAPI</a></li></ul></div></div><hr><div id="footer"><a href="/timbre.js/">English</a><a href="/timbre.js/ja/">日本語</a></div></div><div id="main"><h1>Base Object</h1>
-<p>The Base Object of Timbre Objects
+</script></head><body><div id="sidebar"><h1>timbre.js</h1><div id="index"><div id="list"><h2>Download (13.05.01)</h2><ul><li><a href="/timbre.js/timbre.js">timbre.js</a></li><li><a href="/timbre.js/timbre.dev.js">timbre.dev.js</a></li></ul><h2>Documents</h2><ul><li><a href="./">Introduction</a></li><li><a href="./GettingStarted.html">Getting Started</a></li><li><a href="./PragmaSynth.html">Pragmatic Synth</a></li><li><a href="./RecordingMode.html">Recording Mode</a></li><li><a href="./CustomObject.html">Custom Object</a></li><li><a href="./ForDevelopers.html">For Developers</a></li><li><a href="./timevalue.html">timevalue</a></li></ul><h2>Examples</h2><ul><li><a href="./beatbox.html">BeatBox</a></li><li><a href="./chord.html">ChordWork</a></li><li><a href="./satie.html">Gymnopedie</a></li><li><a href="./khoomii.html">Khoomii</a></li><li><a href="./reich.html">Reich</a></li></ul><h2>References</h2><ul><li><a href="./BaseObject.html">TimbreObject</a></li><li><a href="./Number.html">Number</a></li><li><a href="./Array.html">Array</a></li><li><a href="./Function.html">Function</a></li><li><a href="./Boolean.html">Boolean</a></li><li><a href="./Object.html">Object</a></li><li><a href="./SynthDef.html">SynthDef</a></li><li><a href="./soundbuffer.html">SoundBuffer</a></li><li><a href="./mul.html">*</a></li><li><a href="./add.html">+</a></li><li><a href="./subtract.html">-</a></li><li><a href="./div.html">/</a></li><li><a href="./audio.html">audio</a></li><li><a href="./biquad.html">biquad</a></li><li><a href="./buffer.html">buffer</a></li><li><a href="./chorus.html">chorus</a></li><li><a href="./clip.html">clip</a></li><li><a href="./comp.html">comp</a></li><li><a href="./delay.html">delay</a></li><li><a href="./dist.html">dist</a></li><li><a href="./env.html">env</a></li><li><a href="./eq.html">eq</a></li><li><a href="./fft.html">fft</a></li><li><a href="./fnoise.html">fnoise</a></li><li><a href="./gate.html">gate</a></li><li><a href="./ifft.html">ifft</a></li><li><a href="./interval.html">interval</a></li><li><a href="./lag.html">lag</a></li><li><a href="./map.html">map</a></li><li><a href="./max.html">max</a></li><li><a href="./mediastream.html">mediastream</a></li><li><a href="./midicps.html">midicps</a></li><li><a href="./midiratio.html">midiratio</a></li><li><a href="./min.html">min</a></li><li><a href="./mml.html">mml</a></li><li><a href="./mono.html">mono</a></li><li><a href="./ndict.html">ndict</a></li><li><a href="./noise.html">noise</a></li><li><a href="./osc.html">osc</a></li><li><a href="./OscGen.html">OscGen</a></li><li><a href="./pan.html">pan</a></li><li><a href="./param.html">param</a></li><li><a href="./phaser.html">phaser</a></li><li><a href="./pink.html">pink</a></li><li><a href="./pluck.html">pluck</a></li><li><a href="./PluckGen.html">PluckGen</a></li><li><a href="./rec.html">rec</a></li><li><a href="./reverb.html">reverb</a></li><li><a href="./schedule.html">schedule</a></li><li><a href="./scope.html">scope</a></li><li><a href="./script.html">script</a></li><li><a href="./selector.html">selector</a></li><li><a href="./spectrum.html">spectrum</a></li><li><a href="./tape.html">tape</a></li><li><a href="./task.html">task</a></li><li><a href="./timeout.html">timeout</a></li><li><a href="./waveshaper.html">waveshaper</a></li><li><a href="./zmap.html">zmap</a></li></ul><h2>Extra objects</h2><ul><li><a href="./audiojsonp.html">audio.jsonp</a></li><li><a href="./cosc.html">cosc</a></li><li><a href="./keyboard.html">keyboard</a></li><li><a href="./MoogFF.html">MoogFF</a></li><li><a href="./mouse.html">mouse</a></li><li><a href="./webaudioapi.html">WebAudioAPI</a></li></ul></div></div><hr><div id="footer"><a href="/timbre.js/">English</a><a href="/timbre.js/ja/">日本語</a></div></div><div id="main"><h1>TimbreObject</h1>
+<p>The Base Class of Timbre Objects
 
 </p>
 <h2>Description</h2>
-<p>T-オブジェクトのベースとなるオブジェクト
+<p> T-オブジェクトのベースとなるオブジェクト
 
 </p>
 <h2>Properties</h2>
 <ul>
-<li><code>mul</code> <em>(Number)</em></li>
-<li><p>出力値を調整します。最終出力値は 出力値 * mul + add になります。</p>
+<li><p><code>mul</code> <em>(Number)</em></p>
+<ul>
+<li>出力値を調整します。最終出力値は 出力値 * mul + add になります。</li>
+</ul>
 </li>
 <li><p><code>add</code> <em>(Number)</em></p>
+<ul>
+<li>出力値を調整します。最終出力値は 出力値 * mul + add になります。</li>
+</ul>
 </li>
-<li><p>出力値を調整します。最終出力値は 出力値 * mul + add になります。</p>
+<li><p><code>buddies</code> <em>(list of TimbreObject)</em></p>
+<ul>
+<li><em>todo</em></li>
+</ul>
 </li>
 <li><p><code>isAr</code> <em>(ReadOnly Boolean)</em></p>
-</li>
-<li><p><strong>オーディオレート</strong>のとき <code>true</code> を返す</p>
+<ul>
+<li><strong>オーディオレート</strong>のとき <code>true</code> を返す</li>
+</ul>
 </li>
 <li><p><code>isKr</code> <em>(ReadOnly Boolean)</em></p>
-</li>
+<ul>
 <li><strong>コントロールレート</strong>のとき <code>true</code> を返す</li>
+</ul>
+</li>
+<li><p><code>isEnded</code> <em>(ReadOnly boolean)</em></p>
+<ul>
+<li><em>todo</em></li>
+</ul>
+</li>
 </ul>
 <h2>Methods</h2>
 <ul>
-<li><code>play()</code></li>
-<li><p>再生を開始します</p>
+<li><p><code>play()</code></p>
+<ul>
+<li>再生を開始します</li>
+</ul>
 </li>
 <li><p><code>pause()</code></p>
-</li>
-<li><p>再生を停止します</p>
+<ul>
+<li>再生を停止します</li>
+</ul>
 </li>
 <li><p><code>bypass()</code></p>
-</li>
-<li><p>エフェクト系オブジェクトで入力をそのまま出力します。</p>
+<ul>
+<li>エフェクト系オブジェクトで入力をそのまま出力します。</li>
+</ul>
 </li>
 <li><p><code>append(...)</code>  </p>
-</li>
-<li><p>入力オブジェクトを追加します</p>
+<ul>
+<li>入力オブジェクトを追加します</li>
+</ul>
 </li>
 <li><p><code>appendTo(target)</code></p>
-</li>
-<li><p>targetの入力オブジェクトに自分自身を追加します</p>
+<ul>
+<li>targetの入力オブジェクトに自分自身を追加します</li>
+</ul>
 </li>
 <li><p><code>remove(...)</code></p>
-</li>
-<li><p>入力オブジェクトを削除します</p>
+<ul>
+<li>入力オブジェクトを削除します</li>
+</ul>
 </li>
 <li><p><code>removeFrom(target)</code></p>
-</li>
-<li><p>targetの入力オブジェクトから自分自身を削除します</p>
+<ul>
+<li>targetの入力オブジェクトから自分自身を削除します</li>
+</ul>
 </li>
 <li><p><code>removeAll()</code></p>
-</li>
-<li><p>すべての入力オブジェクトを削除します</p>
+<ul>
+<li>すべての入力オブジェクトを削除します</li>
+</ul>
 </li>
 <li><p><code>on(type, listener)</code></p>
-</li>
-<li><p>イベントリスナーを登録します</p>
+<ul>
+<li>イベントリスナーを登録します</li>
+</ul>
 </li>
 <li><p><code>once(type, listener)</code></p>
-</li>
-<li><p>一度だけ実行するイベントリスナーを登録します</p>
+<ul>
+<li>一度だけ実行するイベントリスナーを登録します</li>
+</ul>
 </li>
 <li><p><code>removeListener(type, listener)</code></p>
-</li>
-<li><p>イベントリスナーを削除します</p>
+<ul>
+<li>イベントリスナーを削除します</li>
+</ul>
 </li>
 <li><p><code>removeAllListeners(type)</code>  </p>
-</li>
-<li><p>指定した type のすべてのイベントリスナーを削除します</p>
+<ul>
+<li>指定した type のすべてのイベントリスナーを削除します</li>
+</ul>
 </li>
 <li><p><code>set(key, value)</code> / <code>set(dict)</code></p>
-</li>
-<li><p>プロパティをセットします。<code>key</code> がメソッド名のとき、<code>value</code> を引数にメソッドを呼び出します。</p>
+<ul>
+<li>プロパティをセットします。<code>key</code> がメソッド名のとき、<code>value</code> を引数にメソッドを呼び出します。</li>
+</ul>
 </li>
 <li><p><code>get(key)</code></p>
-</li>
-<li><p>プロパティをゲットする</p>
+<ul>
+<li>プロパティをゲットする</li>
+</ul>
 </li>
 <li><p><code>bang(args...)</code></p>
-</li>
-<li><p>オブジェクトごとに何らかの動作をします。詳細は各オブジェクトのドキュメントを参照してください。</p>
+<ul>
+<li>オブジェクトごとに何らかの動作をします。詳細は各オブジェクトのドキュメントを参照してください。</li>
+</ul>
 </li>
 <li><p><code>ar()</code></p>
-</li>
-<li><p>オーディオレートに切り換えします</p>
+<ul>
+<li>オーディオレートに切り換えします</li>
+</ul>
 </li>
 <li><p><code>kr()</code></p>
-</li>
-<li><p>コントロールレートに切り換えします</p>
+<ul>
+<li>コントロールレートに切り換えします</li>
+</ul>
 </li>
 <li><p><code>plot(opts)</code></p>
-</li>
+<ul>
 <li>オブジェクトの状態を描画します</li>
+</ul>
+</li>
+<li><p><code>postMessage()</code></p>
+<ul>
+<li><em>todo</em></li>
+</ul>
+</li>
 </ul>
 <h2>Events</h2>
 <ul>
-<li><code>bang</code></li>
+<li><p><code>bang</code></p>
+<ul>
 <li><code>bang()</code> が呼ばれたとき</li>
 </ul>
-</div></div></div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/xml.js"></script><script src="/timbre.js/misc/js/htmlmixed.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>
+</li>
+<li><p><code>message</code></p>
+<ul>
+<li><em>todo</em></li>
+</ul>
+</li>
+</ul>
+</div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/xml.js"></script><script src="/timbre.js/misc/js/htmlmixed.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>
