@@ -19,33 +19,31 @@ html(lang=lang)
       })();
 
   body
-    .container
-      .row
-        #sidebar
-          h1 timbre.js
-          #index
-            #list
-              h2 Download (#{version})
+    #sidebar
+      h1 timbre.js
+      #index
+        #list
+          h2 Download (#{version})
+          ul
+            li
+              a(href="/timbre.js/timbre.js") timbre.js
+            li
+              a(href="/timbre.js/timbre.dev.js") timbre.dev.js
+          for items in categories
+            if indexes[items.key] && indexes[items.key].length
+              h2 #{items.caption}
               ul
-                li
-                  a(href="/timbre.js/timbre.js") timbre.js
-                li
-                  a(href="/timbre.js/timbre.dev.js") timbre.dev.js
-              for items in categories
-                if indexes[items.key] && indexes[items.key].length
-                  h2 #{items.caption}
-                  ul
-                    each o in indexes[items.key]
-                      li
-                        a(href=o.url) #{o.title}
-                      if o.dev
-                        span(class="dev") dev
-          hr
-          #footer
-            a(href="/timbre.js/") English
-            a(href="/timbre.js/ja/") 日本語
-        #main
-          !{main}
+                each o in indexes[items.key]
+                  li
+                    a(href=o.url) #{o.title}
+                  if o.dev
+                    span(class="dev") dev
+      hr
+      #footer
+        a(href="/timbre.js/") English
+        a(href="/timbre.js/ja/") 日本語
+    #main
+      !{main}
     script(src="/timbre.js/misc/js/jquery.js")
     script(src="/timbre.js/misc/js/codemirror.js")
     script(src="/timbre.js/misc/js/javascript.js")

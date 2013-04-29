@@ -1,9 +1,9 @@
-Base Object
-===========
-The Base Object of Timbre Objects
+TimbreObject
+======-=====
+The Base Class of Timbre Objects
 
 ## Description ##
-en: The base object of timbre objects
+en: The base class of all timbre objects
 ja: T-オブジェクトのベースとなるオブジェクト
 
 ## Properties ##
@@ -15,6 +15,9 @@ ja:  - 出力値を調整します。最終出力値は 出力値 * mul + add �
 en:  - adjust the output _(lastout\[i\] = out\[i\] * mul + add)_
 ja:  - 出力値を調整します。最終出力値は 出力値 * mul + add になります。
 
+- `buddies` _(list of TimbreObject)_
+  - _todo_
+
 - `isAr` _(ReadOnly Boolean)_
 en:  - returns `true` if receiver is an **audio rate**
 ja:  - **オーディオレート**のとき `true` を返す
@@ -22,6 +25,9 @@ ja:  - **オーディオレート**のとき `true` を返す
 - `isKr` _(ReadOnly Boolean)_
 en:  - returns `true` if receiver is a **control rate**
 ja:  - **コントロールレート**のとき `true` を返す
+
+- `isEnded` _(ReadOnly boolean)_
+  - _todo_
 
 ## Methods ##
 - `play()`
@@ -96,7 +102,13 @@ ja:  - コントロールレートに切り換えします
 en:  - Plots receiver's status.
 ja:  - オブジェクトの状態を描画します
 
+- `postMessage()`
+  - _todo_
+
 ## Events ##
 - `bang`
 en:  - This event is emitted any time someone calls `bang()`.
 ja:  - `bang()` が呼ばれたとき
+
+- `message`
+  - _todo_

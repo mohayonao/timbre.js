@@ -117,11 +117,11 @@ ja: `T("env")` クラスには便利なコンストラクタが用意されて�
 ja: `T("perc")` はパーカッシブなエンベロープを作ります。
 
 - a, attackTime: 10
-- d, decayTime: 300
+- r, releaseTime: 300
 - lv, level: 0
 
 ```timbre
-var env = T("perc", {d:500}, T("sin")).on("ended", function() {
+var env = T("perc", {r:500}, T("sin")).on("ended", function() {
   this.pause();
 }).bang().play();
 
