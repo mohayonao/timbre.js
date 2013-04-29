@@ -18,8 +18,9 @@
         _.jmax  = 0;
         _.wait  = 0;
         _.count = 0;
-        _.args  = 0;
+        _.args  = {};
         _.doNum = 1;
+        _.initFunc = fn.nop;
         _.onended = make_onended(this);
 
         this.on("start", onstart);
@@ -27,7 +28,7 @@
     fn.extend(TaskNode);
 
     var onstart = function() {
-        var _ = this._;
+        var _ = this._, args;
         this.playbackState = fn.PLAYING_STATE;
         _.task = this.nodes.map(function(x) {
             return x instanceof FunctionWrapper ? x.func : false;
@@ -37,7 +38,11 @@
         _.i = _.j = 0;
         _.imax = _.doNum;
         _.jmax = _.task.length;
-        _.args  = 0;
+        args = _.initFunc();
+        if (!fn.isDictionary(args)) {
+            args = {param:args};
+        }
+        _.args = args;
     };
 
     var make_onended = function(self) {
@@ -63,11 +68,21 @@
         "do": {
             set: function(value) {
                 if (typeof value === "number" && value > 0) {
-                    this._.doNum = value|0;
+                    this._.doNum = value === Infinity ? Infinity : value|0;
                 }
             },
             get: function() {
                 return this._.doNum;
+            }
+        },
+        init: {
+            set: function(value) {
+                if (typeof value === "function") {
+                    this._.initFunc = value;
+                }
+            },
+            get: function() {
+                return this._.initFunc;
             }
         }
     });
@@ -96,31 +111,23 @@
 
         if (this.tickID !== tickID) {
             this.tickID = tickID;
-            while (_.count <= 0) {
-                if (_.j >= _.jmax) {
-                    ++_.i;
-                    if (_.i >= _.imax) {
-                        fn.nextTick(_.onended);
-                        break;
+            if (_.i < _.imax) {
+                while (_.count <= 0) {
+                    if (_.j >= _.jmax) {
+                        ++_.i;
+                        if (_.i >= _.imax) {
+                            fn.nextTick(_.onended);
+                            break;
+                        }
+                        _.j = 0;
                     }
-                    _.args = 0;
-                    _.j    = 0;
-                }
-                func = _.task[_.j++];
-                if (func) {
-                    args = [_.i];
-                    if (Array.isArray(_.args)) {
-                        args = args.concat(_.args);
-                    } else {
-                        args.push(_.args);
-                    }
-                    args = func.apply(this, args);
-                    if (typeof args !== "undefined") {
-                        _.args = args;
+                    func = _.task[_.j++];
+                    if (func) {
+                        func.call(this, _.i, _.args);
                     }
                 }
+                _.count -= cell.length;
             }
-            _.count -= cell.length;
         }
 
         return this;
