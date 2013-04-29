@@ -102,7 +102,7 @@ class HTMLBuilder
             if not (m = /^(en|ja):/.exec line)
                 items.push line
             else if m[1] is lang
-                items.push line.substr(3).replace /^\s+/, ''
+                items.push line.substr 3
         marked.parser marked.lexer items.join '\n'
 
     lang_process = (doc)->

@@ -2,6 +2,7 @@
     "use strict";
 
     var fn = T.fn;
+    var Tape = T.modules.Scissor.Tape;
     var isSignalArray = function(obj) {
         return fn.isSignalArray(obj) || obj instanceof Float32Array;
     };
@@ -51,6 +52,11 @@
                 buffer[0] = value;
                 channels = 1;
             } else if (typeof value === "object") {
+                if (value instanceof T.Object) {
+                    value = value.buffer;
+                } else if (value instanceof Tape) {
+                    value = value.getBuffer();
+                }
                 if (Array.isArray(value.buffer)) {
                     if (isSignalArray(value.buffer[0])) {
                         if (isSignalArray(value.buffer[1]) &&

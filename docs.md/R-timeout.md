@@ -6,12 +6,11 @@ T("timeout")
 ja: 指定した時間後に入力オブジェクトに対して `bang()` します。
 
 ```timbre
-var osc = T("sin", {freq:880, mul:0.5}).play();
+var osc = T("sin", {freq:880, mul:0.5});
 
 T("timeout", {timeout:1000}).on("ended", function() {
-  osc.pause();
   this.stop();
-}).start();
+}).set({buddies:osc}).start();
 ```
 
 ## Properties

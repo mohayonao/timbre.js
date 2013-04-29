@@ -56,6 +56,15 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**13.05.01** (361.75KB)
+* Added: `T("task")`
+* Added: `TimbreObject.to()`
+* Added: `TimbreObject.splice()`
+* Added: `TimbreObject.postMessage()`
+* Updated: `T("mml")` support multi tracks, command token
+* Updated: `TimbreObject` support buddies interface
+* Bugfix: `T("mouse.x")`, `T("mouse.y")`
+
 **13.04.19** (346.63KB)
 * Bugfix: end process of `T("params")`
 

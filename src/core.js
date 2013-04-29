@@ -35,7 +35,7 @@
     var _bpm = 120;
 
     var T = function() {
-        var args = slice.call(arguments), key = args[0], t;
+        var args = slice.call(arguments), key = args[0], t, m;
 
         switch (typeof key) {
         case "string":
@@ -43,6 +43,19 @@
                 t = new _constructors[key](args.slice(1));
             } else if (_factories[key]) {
                 t = _factories[key](args.slice(1));
+            } else {
+                m = /^(.+?)(?:\.(ar|kr))?$/.exec(key);
+                if (m) {
+                    key = m[1];
+                    if (_constructors[key]) {
+                        t = new _constructors[key](args.slice(1));
+                    } else if (_factories[key]) {
+                        t = _factories[key](args.slice(1));
+                    }
+                    if (t && m[2]) {
+                        t[m[2]]();
+                    }
+                }
             }
             break;
         case "number":
@@ -393,6 +406,7 @@
                     _sys.timers.push(self);
                     _sys.events.emit("addObject");
                     self._.emit("start");
+                    fn.buddies_start(self);
                 }
             };
         };
@@ -403,12 +417,14 @@
                     _sys.timers.splice(i, 1);
                     self._.emit("stop");
                     _sys.events.emit("removeObject");
+                    fn.buddies_stop(self);
                 }
             };
         };
         return function(self) {
             var onstart = make_onstart(self);
             var onstop  = make_onstop(self);
+            self.nodeType = TimbreObject.TIMER;
             self.start = function() {
                 _sys.nextTick(onstart);
                 return self;
@@ -428,6 +444,7 @@
                     _sys.listeners.push(self);
                     _sys.events.emit("addObject");
                     self._.emit("listen");
+                    fn.buddies_start(self);
                 }
             };
         };
@@ -438,13 +455,15 @@
                     _sys.listeners.splice(i, 1);
                     self._.emit("unlisten");
                     _sys.events.emit("removeObject");
+                    fn.buddies_stop(self);
                 }
             };
         };
         return function(self) {
             var onlisten = make_onlisten(self);
             var onunlisten = make_onunlisten(self);
-            self.listen = function() {
+            self.nodeType = TimbreObject.LISTENER;
+            self.listen = function(buddies) {
                 if (arguments.length) {
                     self.append.apply(self, arguments);
                 }
@@ -636,6 +655,44 @@
             for (i = cell.length; i; ) {
                 i -= 8;
                 cell[i] = cell[i+1] = cell[i+2] = cell[i+3] = cell[i+4] = cell[i+5] = cell[i+6] = cell[i+7] = value;
+            }
+        }
+    };
+
+    fn.buddies_start = function(self) {
+        var buddies = self._.buddies;
+        var node, i, imax;
+        for (i = 0, imax = buddies.length; i < imax; ++i) {
+            node = buddies[i];
+            switch (node.nodeType) {
+            case TimbreObject.DSP:
+                node.play();
+                break;
+            case TimbreObject.TIMER:
+                node.start();
+                break;
+            case TimbreObject.LISTENER:
+                node.listen();
+                break;
+            }
+        }
+    };
+
+    fn.buddies_stop = function(self) {
+        var buddies = self._.buddies;
+        var node, i, imax;
+        for (i = 0, imax = buddies.length; i < imax; ++i) {
+            node = buddies[i];
+            switch (node.nodeType) {
+            case TimbreObject.DSP:
+                node.pause();
+                break;
+            case TimbreObject.TIMER:
+                node.stop();
+                break;
+            case TimbreObject.LISTENER:
+                node.unlisten();
+                break;
             }
         }
     };
@@ -1045,8 +1102,16 @@
             };
             if (isDictionary(_args[0])) {
                 var params = _args.shift();
+                var _in = params["in"];
                 this.once("init", function() {
                     this.set(params);
+                    if (_in) {
+                        if (isArray(_in)) {
+                            this.append.apply(this, _in);
+                        } else if (_in instanceof TimbreObject) {
+                            this.append(_in);
+                        }
+                    }
                 });
             }
 
@@ -1072,6 +1137,7 @@
                 break;
             }
             this.playbackState = PLAYING_STATE;
+            this.nodeType = TimbreObject.DSP;
 
             this._.ar  = true;
             this._.mul = 1;
@@ -1081,7 +1147,11 @@
             this._.meta = {};
             this._.samplerate = _sys.samplerate;
             this._.cellsize   = _sys.cellsize;
+            this._.buddies    = [];
         }
+        TimbreObject.DSP      = 1;
+        TimbreObject.TIMER    = 2;
+        TimbreObject.LISTENER = 3;
 
         var $ = TimbreObject.prototype;
 
@@ -1126,6 +1196,19 @@
                 },
                 get: function() {
                     return this._.add;
+                }
+            },
+            buddies: {
+                set: function(value) {
+                    if (!isArray(value)) {
+                        value = [value];
+                    }
+                    this._.buddies = value.filter(function(node) {
+                        return node instanceof TimbreObject;
+                    });
+                },
+                get: function() {
+                    return this._.buddies;
                 }
             }
         });
@@ -1190,6 +1273,71 @@
             if (item) {
                 this.nodes.splice(index, 1);
                 this._.emit("remove", [item]);
+            }
+            return this;
+        };
+
+        $.postMessage = function(message) {
+            this._.emit("message", message);
+            return this;
+        };
+
+        $.to = function(object) {
+            if (object instanceof TimbreObject) {
+                object.append(this);
+            } else {
+                var args = slice.call(arguments);
+                if (isDictionary(args[1])) {
+                    args.splice(2, 0, this);
+                } else {
+                    args.splice(1, 0, this);
+                }
+                object = T.apply(null, args);
+            }
+            return object;
+        };
+
+        $.splice = function(ins, obj, rem) {
+            var i;
+            if (!obj) {
+                if (this._.dac) {
+                    if (ins instanceof TimbreObject) {
+                        if (rem instanceof TimbreObject) {
+                            if (rem._.dac) {
+                                rem._.dac._.node = ins;
+                                ins._.dac = rem._.dac;
+                                rem._.dac = null;
+                                ins.nodes.push(this);
+                            }
+                        } else {
+                            if (this._.dac) {
+                                this._.dac._.node = ins;
+                                ins._.dac = this._.dac;
+                                this._.dac = null;
+                                ins.nodes.push(this);
+                            }
+                        }
+                    } else if (rem instanceof TimbreObject) {
+                        if (rem._.dac) {
+                            rem._.dac._.node = this;
+                            this._.dac = rem._.dac;
+                            rem._.dac = null;
+                        }
+                    }
+                }
+            } else {
+                if (obj instanceof TimbreObject) {
+                    i = obj.nodes.indexOf(rem);
+                    if (i !== -1) {
+                        obj.nodes.splice(i, 1);
+                    }
+                    if (ins instanceof TimbreObject) {
+                        ins.nodes.push(this);
+                        obj.nodes.push(ins);
+                    } else {
+                        obj.nodes.push(this);
+                    }
+                }
             }
             return this;
         };
@@ -1279,10 +1427,10 @@
             if (dac === null) {
                 dac = this._.dac = new SystemInlet(this);
             }
-            if (dac.playbackState === FINISHED_STATE) {
-                dac.play();
+            if (dac.play()) {
                 this._.emit.apply(this, ["play"].concat(slice.call(arguments)));
             }
+            fn.buddies_start(this);
             return this;
         };
 
@@ -1293,6 +1441,7 @@
                 this._.dac = null;
                 this._.emit("pause");
             }
+            fn.buddies_stop(this);
             return this;
         };
 
@@ -1623,7 +1772,11 @@
     var ArrayWrapper = (function() {
         function ArrayWrapper(_args) {
             TimbreObject.call(this, 1, []);
-            fn.fixKR(this);
+
+            var i, imax;
+            for (i = 0, imax = _args[0].length; i < imax; ++i) {
+              this.append(_args[0][i]);
+            }
 
             if (isDictionary(_args[1])) {
                 var params = _args[1];
@@ -1639,6 +1792,40 @@
         Object.defineProperties($, {
 
         });
+
+        $.bang = function() {
+            var args = ["bang"].concat(slice.call(arguments));
+            var nodes = this.nodes;
+            var i, imax;
+            for (i = 0, imax = nodes.length; i < imax; ++i) {
+                nodes[i].bang.apply(nodes[i], args);
+            }
+            return this;
+        };
+
+        $.postMessage = function(message) {
+            var nodes = this.nodes;
+            var i, imax;
+            for (i = 0, imax = nodes.length; i < imax; ++i) {
+                nodes[i].postMessage(message);
+            }
+            return this;
+        };
+
+        $.process = function(tickID) {
+            var _ = this._;
+            if (this.tickID !== tickID) {
+                this.tickID = tickID;
+                if (_.ar) {
+                    fn.inputSignalAR(this);
+                    fn.outputSignalAR(this);
+                } else {
+                    this.cells[0][0] = fn.inputSignalKR(this);
+                    fn.outputSignalKR(this);
+                }
+            }
+            return this;
+        };
 
         return ArrayWrapper;
     })();
@@ -1705,6 +1892,7 @@
 
         $.play = function() {
             _sys.nextTick(this._.onplay);
+            return (_sys.inlets.indexOf(this) === -1);
         };
 
         $.pause = function() {
@@ -1712,8 +1900,7 @@
         };
 
         $.process = function(tickID) {
-            var node  = this._.node;
-
+            var node = this._.node;
             if (node.playbackState & 1) {
                 node.process(tickID);
                 this.cells[1].set(node.cells[1]);

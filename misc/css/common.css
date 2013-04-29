@@ -9,6 +9,7 @@ body {
     line-height: 18px;
     color: #333;
     background: white;
+    letter-spacing: 2px;
 }
 
 ul {
@@ -40,18 +41,16 @@ th {
 #sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
-    width: 175px;
+    width: 200px;
     overflow-y: auto;
     overflow-x: hidden;
     
     padding: 15px 0 30px 15px;
     border-right: 1px solid #BBB;
-    box-shadow: 0 0 20px #CCC;
-    -webkit-box-shadow: 0 0 20px #CCC;
 
     font-size: 14px;
 
-    background: #DBF0F6;
+    background: #f7fcfe;
 }
 
 #sidebar h1 {
@@ -91,20 +90,22 @@ th {
 
 #main {
     width: 700px;
-    margin: 40px 0 50px 220px;
+    margin: 40px 0 50px 245px;
     font-size: 14px;
     line-height: 24px;
+    letter-spacing: 1px;
 }
 
 #main h1 {
+    color: #666;
     padding-bottom: 8px;
     margin-bottom: 0;
     font-family: 'Arial';
     font-size: 32px;
+    font-weight: normal;
     text-shadow: 0 0 1px #ccc;
     border: solid 0 #E1E1E8;
     border-width: 0 0 1px 0;
-    letter-spacing: 2px;
 }
 
 #main h1 + p {
@@ -124,8 +125,11 @@ th {
 }
 
 #main h2 {
-    font-size: 20px;
-    margin: 15px 0 5px;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 40px 0 15px;
+
+    letter-spacing: 8px;
 }
 
 #main h3 {
@@ -157,16 +161,18 @@ th {
 }
 
 #main ul {
+    margin: 0;
+    list-style-type: none;
     line-height: 20px;
 }
 
 #main ul ul {
-    margin: 0 0 10px 5px;
+    margin: 0 0 10px 15px;
     list-style-type: none;
 }
 
 #main code {
-    color: #BF1E56;
+    color: #028760;
     font-family: 'Courier', monospace;
 }
 

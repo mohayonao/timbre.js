@@ -17,15 +17,14 @@ ja: エンベロープの形状は `table` プロパティで指定します。`
 ```timbre
 var table = [440, [880, 500], [660, 250]];
 var env   = T("env", {table:table}).bang();
-var synth = T("saw", {freq:env, mul:0.25}).play();
+var synth = T("saw", {freq:env, mul:0.25});
 
-var i = T("interval", {interval:1000}, function(count) {
+var interval = T("interval", {interval:1000}, function(count) {
   if (count === 3) {
-    synth.pause();
-    i.stop();
+    interval.stop();
   }
   env.bang();
-}).start();
+}).set({buddies:synth}).start();
 ```
 
 (canvas releaseNode w:240 h:80)
@@ -41,9 +40,9 @@ var env   = T("env", {table:table, releaseNode:3}, synth).on("ended", function()
 
 env.plot({target:releaseNode});
 
-var t = T("timeout", {timeout:2000}, function() {
+var timeout = T("timeout", {timeout:2000}, function() {
   env.release();
-  t.stop();
+  timeout.stop();
 }).start();
 ```
 
@@ -54,14 +53,13 @@ ja: `loopNode` プロパティを指定すると、エンベロープの末尾�
 ```timbre
 var table = [440, [460, 50], [430, 150]];
 var env   = T("env", {table:table, loopNode:1}).bang();
-var synth = T("tri", {freq:env, mul:0.25}).play();
+var synth = T("tri", {freq:env, mul:0.25});
 
 env.plot({target:loopNode});
 
-var t = T("timeout", {timeout:2000}, function() {
-  synth.pause();
-  t.stop();
-}).start();
+var timeout = T("timeout", {timeout:2000}, function() {
+  timeout.stop();
+}).set({buddies:synth}).start();
 ```
 
 ## Properties ##
@@ -104,9 +102,9 @@ env.append(T("pulse", {mul:0.25})).on("ended", function() {
     this.pause();
 }).bang().play();
 
-var t = T("timeout", {timeout:2000}, function() {
+var timeout = T("timeout", {timeout:2000}, function() {
   env.release();
-  t.stop();
+  timeout.stop();
 }).start();
 ```
 
@@ -119,11 +117,11 @@ ja: `T("env")` クラスには便利なコンストラクタが用意されて�
 ja: `T("perc")` はパーカッシブなエンベロープを作ります。
 
 - a, attackTime: 10
-- d, decayTime: 300
+- r, releaseTime: 300
 - lv, level: 0
 
 ```timbre
-var env = T("perc", {d:500}, T("sin")).on("ended", function() {
+var env = T("perc", {r:500}, T("sin")).on("ended", function() {
   this.pause();
 }).bang().play();
 
@@ -148,9 +146,9 @@ var env = T("adsr", {a:100,d:250,s:0.6,r:500}, T("sin")).on("ended", function() 
 
 env.plot({target:adsr});
 
-var t = T("timeout", {timeout:1500}, function() {
+var timeout = T("timeout", {timeout:1500}, function() {
   env.release();
-  t.stop();
+  timeout.stop();
 }).start();
 ```
 
@@ -191,9 +189,9 @@ var env = T("asr", {a:100,s:0.8,r:500}, T("sin")).on("ended", function() {
 
 env.plot({target:asr});
 
-var t = T("timeout", {timeout:1500}, function() {
+var timeout = T("timeout", {timeout:1500}, function() {
   env.release();
-  t.stop();
+  timeout.stop();
 }).start();
 ```
 
@@ -215,9 +213,9 @@ var env = T("dadsr", {dl:500,r:500}, T("sin")).on("ended", function() {
 
 env.plot({target:dadsr});
 
-var t = T("timeout", {timeout:1500}, function() {
+var timeout = T("timeout", {timeout:1500}, function() {
   env.release();
-  t.stop();
+  timeout.stop();
 }).start();
 ```
 
@@ -241,9 +239,9 @@ var env = T("ahdsfr", {a:100, h:150, s:0.8, f:5000, r:500}, T("sin")).on("ended"
 
 env.plot({target:ahdsfr});
 
-var t = T("timeout", {timeout:1500}, function() {
+var timeout = T("timeout", {timeout:1500}, function() {
   env.release();
-  t.stop();
+  timeout.stop();
 }).start();
 ```
 

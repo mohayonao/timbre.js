@@ -58,7 +58,9 @@
             if (i !== -1) {
                 _.genList.splice(i, 1);
             }
-            _.genDict[gen.noteNum] = null;
+            if (typeof gen.noteNum !== "undefined") {
+                _.genDict[gen.noteNum] = null;
+            }
         };
     };
 
@@ -79,7 +81,8 @@
         var opts = {
             freq    : freq,
             noteNum : noteNum,
-            velocity: velocity
+            velocity: velocity,
+            mul     : velocity * 0.0078125
         };
         if (_opts) {
             for (var key in _opts) {
@@ -88,7 +91,7 @@
         }
         opts.doneAction = make_doneAction(this, opts);
 
-        gen = this._.synthdef.call(this, opts);
+        gen = _.synthdef.call(this, opts);
 
         if (gen instanceof T.Object) {
             gen.noteNum = noteNum;
@@ -160,6 +163,33 @@
         while (list.length) {
             delete dict[list.shift().noteNum];
         }
+    };
+
+    $.synth = function(_opts) {
+        var _ = this._;
+        var list = _.genList;
+        var gen, opts = {};
+
+        if (_opts) {
+            for (var key in _opts) {
+                opts[key] = _opts[key];
+            }
+        }
+        opts.doneAction = make_doneAction(this, opts);
+
+        gen = _.synthdef.call(this, opts);
+
+        if (gen instanceof T.Object) {
+            list.push(gen);
+            opts.gen = gen;
+            this.playbackState = fn.PLAYING_STATE;
+
+            if (list.length > _.poly) {
+                _.remGen(list[0]);
+            }
+        }
+
+        return this;
     };
 
     $.process = function(tickID) {

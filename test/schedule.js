@@ -26,14 +26,14 @@ describe('T("schedule")', function() {
         
         t.sched(10, t1);
         assert.deepEqual(t.queue,
-                         [ [10, t1] ]);
+                         [ [10, t1, undefined] ]);
         
-        t.sched(30, t3);
+        t.sched(30, t3, 100);
         assert.deepEqual(t.queue,
-                         [ [10, t1], [30, t3] ]);
-        t.sched(20, t2);
+                         [ [10, t1, undefined], [30, t3, 100] ]);
+        t.sched(20, t2, 200);
         assert.deepEqual(t.queue,
-                         [ [10, t1], [20, t2], [30, t3] ]);
+                         [ [10, t1, undefined], [20, t2, 200], [30, t3, 100] ]);
     });
     it("clear()", function() {
         var t = T("schedule");

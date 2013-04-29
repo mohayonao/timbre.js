@@ -51,17 +51,17 @@
         }
     });
 
-    $.sched = function(delta, item) {
+    $.sched = function(delta, item, args) {
         if (typeof delta === "string") {
             delta = timevalue(delta);
         }
         if (typeof delta === "number") {
-            this.schedAbs(this._.currentTime + delta, item);
+            this.schedAbs(this._.currentTime + delta, item, args);
         }
         return this;
     };
 
-    $.schedAbs = function(time, item) {
+    $.schedAbs = function(time, item, args) {
         if (typeof time === "string") {
             time = timevalue(time);
         }
@@ -76,7 +76,7 @@
                     break;
                 }
             }
-            queue.splice(i + 1, 0, [time, T(item)]);
+            queue.splice(i + 1, 0, [time, T(item), args]);
         }
         return this;
     };
@@ -108,7 +108,7 @@
             if (queue.length) {
                 while (queue[0][0] < _.currentTime) {
                     var nextItem = _.queue.shift();
-                    nextItem[1].bang(); // TODO: args?
+                    nextItem[1].bang(nextItem[2]);
                     emit = "sched";
                     if (queue.length === 0) {
                         emit = "empty";
@@ -125,6 +125,6 @@
     };
 
     fn.register("schedule", ScheduleNode);
-    fn.alias("sche", "schedule");
+    fn.alias("sched", "schedule");
 
 })(timbre);

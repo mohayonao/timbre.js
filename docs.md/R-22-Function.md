@@ -19,6 +19,7 @@ T("interval", {interval:100}, func).start();
 ## Properties ##
 - `func` _(Function)_
 en:  - A function contained. Its default value is **NOP**.
+en:    Return value is the output value.
 ja:  - 格納している関数
   
 - `args` _(Array)_

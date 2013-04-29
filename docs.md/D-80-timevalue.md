@@ -42,12 +42,11 @@ ja: `T("interval")` の `interval` などのプロパティは **timevalue形式
 ```timbre
 timbre.bpm = 180;
 
-var synth = T("OscGen", {wave:"tri", mul:0.2}).play();
+var synth = T("OscGen", {wave:"tri", mul:0.2});
 
 T("interval", {interval:"L4", timeout:"5sec"}, function() {
     synth.noteOn(69, 80);
 }).on("ended", function() {
-    synth.pause();
     this.stop();
-}).start();
+}).set({buddies:synth}).start();
 ```
