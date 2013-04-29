@@ -12,24 +12,23 @@ _gaq.push(['_trackPageview']);
 
 </p>
 <h2>Description</h2>
-<div class="codemirror" lang="timbre" source="T(&quot;task&quot;, {do:5
-}, function(count) {
-  var synth = T(&quot;fami&quot;, {freq:880, mul:0.5});
-  var adsr  = T(&quot;adsr&quot;, {a:100, d:100, s:0.5, r:1000}, synth).bang().play();
+<div class="codemirror" lang="timbre" source="T(&quot;task&quot;, {do:5, init:function() {
+  return { freq:[440, 466, 493, 523, 554] };
+}
+}, function(count, args) {
+  args.synth = T(&quot;fami&quot;, {freq:args.freq[count], mul:0.5});
+  args.adsr  = T(&quot;adsr&quot;, {a:100, d:100, s:0.8, r:1000}, args.synth).bang().play();
   this.wait(250);
-  return [synth, adsr];
-}, function(count, synth, adsr) {
-  synth.freq.value *= Math.random() + 0.5;
+}, function(count, args) {
+  args.synth.freq.value *= 2;
   this.wait(400);
-}, function(count, synth, adsr) {
-  synth.freq = T(&quot;sin.kr&quot;, {freq:5, mul:10, add:synth.freq.value});
-  adsr.release();
+}, function(count, args) {
+  args.synth.freq = T(&quot;sin.kr&quot;, {freq:5, mul:10, add:args.synth.freq.value});
+  args.adsr.release();
   this.wait(800);
-}, function(count, synth, adsr) {
-  adsr.pause();
-  return 10;
-}).on(&quot;ended&quot;, function(result) {
-  console.log(result);
+}, function(count, args) {
+  args.adsr.pause();
+}).on(&quot;ended&quot;, function() {
   this.stop();
 }).start();"></div>
 <h2>See Also</h2>
