@@ -141,10 +141,11 @@
             _.loopStack   = [];
             _.prevNote = 0;
             _.remain   = Infinity;
-            this.ended    = false;
+            this.ended = false;
             sched(this);
         }
 
+        var EOF     = 0;
         var NOTEON  = 1;
         var NOTEOFF = 2;
         var COMMAND = 3;
@@ -154,6 +155,7 @@
             var sequencer = _.sequencer;
             var trackNum  = _.trackNum;
             var queue  = _.queue;
+            var eof = false;
 
             if (queue.length) {
                 while (queue[0][0] <= _.currentTime) {
@@ -170,6 +172,9 @@
                     case COMMAND:
                         command(sequencer, nextItem[2]);
                         break;
+                    case EOF:
+                        eof = true;
+                        break;
                     }
                     if (queue.length === 0) {
                         break;
@@ -177,7 +182,7 @@
                 }
             }
             _.remain -= fn.currentTimeIncr;
-            if (queue.length === 0 && _.remain <= 0) {
+            if (eof) {
                 this.ended = true;
             }
             _.currentTime += fn.currentTimeIncr;
@@ -383,6 +388,9 @@
                 case "t":
                     status.t = (cmd.val === null) ? 120 : cmd.val;
                     break;
+                case "EOF":
+                    queue.push([queueTime, EOF]);
+                    break;
                 }
             }
             _.index = index;
@@ -425,6 +433,7 @@
             commands.sort(function(a, b) {
                 return a.index - b.index;
             });
+            commands.push({name:"EOF"});
             return commands;
         };
 
