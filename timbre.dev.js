@@ -24,7 +24,7 @@
     var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
     var ACCEPT_CELLSIZES = [32,64,128,256];
 
-    var _ver = "13.05.01";
+    var _ver = "13.05.03";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -3596,14 +3596,23 @@
             var samplerate = data[24] + (data[25]<<8) + (data[26]<<16) + (data[27]<<24);
             var bitSize    = data[34] + (data[35]<<8);
 
-            if (String.fromCharCode(data[36], data[37], data[38], data[39]) !== "data") {
+            var i = 36;
+            while (i < data.length) {
+                if (String.fromCharCode(data[i], data[i+1], data[i+2], data[i+3]) === "data") {
+                    break;
+                }
+                i += 1;
+            }
+            if (i >= data.length) {
                 return onloadedmetadata(false);
             }
+            i += 4;
 
-            var l2 = data[40] + (data[41]<<8) + (data[42]<<16) + (data[43]<<24);
+            var l2 = data[i] + (data[i+1]<<8) + (data[i+2]<<16) + (data[i+3]<<24);
             var duration = ((l2 / channels) >> 1) / samplerate;
+            i += 4;
 
-            if (l2 > data.length - 44) {
+            if (l2 > data.length - i) {
                 return onloadedmetadata(false);
             }
 
@@ -3622,16 +3631,16 @@
             });
 
             if (bitSize === 8) {
-                data = new Int8Array(data.buffer, 44);
+                data = new Int8Array(data.buffer, i);
             } else if (bitSize === 16) {
-                data = new Int16Array(data.buffer, 44);
+                data = new Int16Array(data.buffer, i);
             } else if (bitSize === 32) {
-                data = new Int32Array(data.buffer, 44);
+                data = new Int32Array(data.buffer, i);
             } else if (bitSize === 24) {
-                data = _24bit_to_32bit(new Uint8Array(data.buffer, 44));
+                data = _24bit_to_32bit(new Uint8Array(data.buffer, i));
             }
 
-            var i, imax, j, k = 1 / ((1 << (bitSize-1)) - 1), x;
+            var imax, j, k = 1 / ((1 << (bitSize-1)) - 1), x;
             if (channels === 2) {
                 for (i = j = 0, imax = mixdown.length; i < imax; ++i) {
                     x =  bufferL[i] = data[j++] * k;
