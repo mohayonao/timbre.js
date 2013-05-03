@@ -56,7 +56,7 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
-**13.05.03** (361.97KB)
+**13.05.03** (361.93KB)
 * Bugfix: wav decoder. See [#3](https://github.com/mohayonao/timbre.js/issues/3)
 
 **13.05.01** (361.75KB)

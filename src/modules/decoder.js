@@ -23,7 +23,7 @@
         }
         if (Decoder.webkit_decode) {
             if (typeof src === "object") {
-                return Decoder.webkit_decode(src.data, onloadedmetadata, onloadeddata);
+                return Decoder.webkit_decode(src.data||src, onloadedmetadata, onloadeddata);
             } else {
                 return Decoder.webkit_decode(src, onloadedmetadata, onloadeddata);
             }
@@ -187,7 +187,6 @@
                 samplerate = ctx.sampleRate;
                 channels   = buffer.numberOfChannels;
                 if (channels === 2) {
-                    console.log(buffer);
                     bufferL = buffer.getChannelData(0);
                     bufferR = buffer.getChannelData(1);
                 } else {
