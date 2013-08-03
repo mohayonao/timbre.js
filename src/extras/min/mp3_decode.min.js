@@ -1,0 +1,8 @@
+/*!
+ * timbre.mp3_decode.js
+ * http://skratchdot.com/projects/timbre.mp3_decode.js/
+ *
+ * Copyright (c) 2013 skratchdot
+ * Licensed under the MIT license.
+ */
+"undefined"!=typeof timbre&&"undefined"!=typeof Mad&&"browser"===timbre.envtype&&function(e){e.modules.Decoder.mp3_decode=function(){var t=function(e,t,n){var r,i,s,o,a,c,u,f,l,d,p,m,h,v,w,b,y=0,g=[],_=0;try{for(o=new Mad.ArrayBuffers.ArrayStream(e),a=new Mad.MP3File(o),c=a.getMpegStream(),u=new Mad.Synth,f=new Mad.Frame,f=Mad.Frame.decode(f,c);null!==f;){if(u.frame(f),b||(l=u.pcm.channels,d=u.pcm.samplerate,b=!0),y+=u.pcm.length,g.push({mixdown:void 0,bufferL:void 0,bufferR:void 0}),g[_].mixdown=new Float32Array(u.pcm.length),2===l)for(g[_].bufferL=new Float32Array(u.pcm.length),g[_].bufferR=new Float32Array(u.pcm.length),r=0;u.pcm.length>r;r++)s=g[_].bufferL[r]=u.pcm.samples[0][r],s+=g[_].bufferR[r]=u.pcm.samples[1][r],g[_].mixdown[r]=.5*s;else if(1===l)for(r=0;u.pcm.length>r;r++)g[_].mixdown[r]=u.pcm.samples[0][r];f=Mad.Frame.decode(f,c),_++}}catch(x){}if(0===y||1>l||l>2)return t(!1);for(h=new Float32Array(y),2===l&&(v=new Float32Array(y),w=new Float32Array(y)),t({samplerate:d,channels:l,buffer:[h,v,w],duration:y/d}),m=0,r=0;g.length>r;r++)for(p=g[r],i=0;p.mixdown.length>i;i++)h[m]=p.mixdown[i],2===l&&(v[m]=p.bufferL[i],w[m]=p.bufferR[i]),m++;n()};return function(n,r,i){"string"==typeof n?e.modules.Decoder.getBinaryWithPath(n,function(e){t(e,r,i)}):t(n,r,i)}}()}(timbre);
