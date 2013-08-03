@@ -37,6 +37,20 @@ module.exports = function(grunt) {
             all: {
                 options: { sourceMap: "timbre.js.map" },
                 files: { "timbre.js": ["timbre.dev.js"] }
+            },
+            extras: {
+    		    options: { preserveComments: 'some' },
+    		    files: {
+    		        "src/extras/min/audio-jsonp.min.js": ["src/extras/audio-jsonp.js"],
+    		        "src/extras/min/cosc.min.js": ["src/extras/cosc.js"],
+    		        "src/extras/min/keyboard.min.js": ["src/extras/keyboard.js"],
+    		        "src/extras/min/MoogFF.min.js": ["src/extras/MoogFF.js"],
+    		        "src/extras/min/mouse.min.js": ["src/extras/mouse.js"],
+    		        "src/extras/min/mp3_decode.min.js": ["src/extras/mp3_decode.js"],
+    		        "src/extras/min/pico-binder.min.js": ["src/extras/pico-binder.js"],
+    		        "src/extras/min/soundfont.min.js": ["src/extras/soundfont.js"],
+    		        "src/extras/min/webaudioapi.min.js": ["src/extras/webaudioapi.js"]
+    		    }
             }
         },
         watch: {
