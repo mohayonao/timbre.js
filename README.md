@@ -56,6 +56,10 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**13.08.03** (361.93KB)
+* Adding Extra: mp3_decode. See [mp3_decode](http://mohayonao.github.io/timbre.js/mp3_decode.html)
+* Adding Extra: soundfont. See [soundfont](http://mohayonao.github.io/timbre.js/soundfont.html)
+
 **13.05.03** (361.93KB)
 * Bugfix: wav decoder. See [#3](https://github.com/mohayonao/timbre.js/issues/3)
 
