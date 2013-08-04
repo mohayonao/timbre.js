@@ -24,7 +24,7 @@
     var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
     var ACCEPT_CELLSIZES = [32,64,128,256];
 
-    var _ver = "13.05.03";
+    var _ver = "13.08.03";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
