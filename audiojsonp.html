@@ -8,19 +8,27 @@ _gaq.push(['_trackPageview']);
   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 })();
 </script></head><body><div id="sidebar"><h1>timbre.js</h1><div id="index"><div id="list"><h2>Download (13.08.03)</h2><ul><li><a href="/timbre.js/timbre.js">timbre.js</a></li><li><a href="/timbre.js/timbre.dev.js">timbre.dev.js</a></li></ul><h2>Documents</h2><ul><li><a href="./">Introduction</a></li><li><a href="./GettingStarted.html">Getting Started</a></li><li><a href="./PragmaSynth.html">Pragmatic Synth</a></li><li><a href="./RecordingMode.html">Recording Mode</a></li><li><a href="./CustomObject.html">Custom Object</a></li><li><a href="./ForDevelopers.html">For Developers</a></li><li><a href="./timevalue.html">timevalue</a></li></ul><h2>Examples</h2><ul><li><a href="./beatbox.html">BeatBox</a></li><li><a href="./chord.html">ChordWork</a></li><li><a href="./satie.html">Gymnopedie</a></li><li><a href="./khoomii.html">Khoomii</a></li><li><a href="./reich.html">Reich</a></li></ul><h2>References</h2><ul><li><a href="./BaseObject.html">TimbreObject</a></li><li><a href="./Number.html">Number</a></li><li><a href="./Array.html">Array</a></li><li><a href="./Function.html">Function</a></li><li><a href="./Boolean.html">Boolean</a></li><li><a href="./Object.html">Object</a></li><li><a href="./SynthDef.html">SynthDef</a></li><li><a href="./soundbuffer.html">SoundBuffer</a></li><li><a href="./mul.html">*</a></li><li><a href="./add.html">+</a></li><li><a href="./subtract.html">-</a></li><li><a href="./div.html">/</a></li><li><a href="./audio.html">audio</a></li><li><a href="./biquad.html">biquad</a></li><li><a href="./buffer.html">buffer</a></li><li><a href="./chorus.html">chorus</a></li><li><a href="./clip.html">clip</a></li><li><a href="./comp.html">comp</a></li><li><a href="./delay.html">delay</a></li><li><a href="./dist.html">dist</a></li><li><a href="./env.html">env</a></li><li><a href="./eq.html">eq</a></li><li><a href="./fft.html">fft</a></li><li><a href="./fnoise.html">fnoise</a></li><li><a href="./gate.html">gate</a></li><li><a href="./ifft.html">ifft</a></li><li><a href="./interval.html">interval</a></li><li><a href="./lag.html">lag</a></li><li><a href="./map.html">map</a></li><li><a href="./max.html">max</a></li><li><a href="./mediastream.html">mediastream</a></li><li><a href="./midicps.html">midicps</a></li><li><a href="./midiratio.html">midiratio</a></li><li><a href="./min.html">min</a></li><li><a href="./mml.html">mml</a></li><li><a href="./mono.html">mono</a></li><li><a href="./ndict.html">ndict</a></li><li><a href="./noise.html">noise</a></li><li><a href="./osc.html">osc</a></li><li><a href="./OscGen.html">OscGen</a></li><li><a href="./pan.html">pan</a></li><li><a href="./param.html">param</a></li><li><a href="./phaser.html">phaser</a></li><li><a href="./pink.html">pink</a></li><li><a href="./pluck.html">pluck</a></li><li><a href="./PluckGen.html">PluckGen</a></li><li><a href="./rec.html">rec</a></li><li><a href="./reverb.html">reverb</a></li><li><a href="./schedule.html">schedule</a></li><li><a href="./scope.html">scope</a></li><li><a href="./script.html">script</a></li><li><a href="./selector.html">selector</a></li><li><a href="./spectrum.html">spectrum</a></li><li><a href="./tape.html">tape</a></li><li><a href="./task.html">task</a></li><li><a href="./timeout.html">timeout</a></li><li><a href="./waveshaper.html">waveshaper</a></li><li><a href="./zmap.html">zmap</a></li></ul><h2>Extra objects</h2><ul><li><a href="./mp3_decode.html">mp3_decode</a></li><li><a href="./soundfont.html">soundfont</a></li><li><a href="./audiojsonp.html">audio.jsonp</a></li><li><a href="./cosc.html">cosc</a></li><li><a href="./keyboard.html">keyboard</a></li><li><a href="./MoogFF.html">MoogFF</a></li><li><a href="./mouse.html">mouse</a></li><li><a href="./webaudioapi.html">WebAudioAPI</a></li></ul></div></div><hr><div id="footer"><a href="/timbre.js/">English</a><a href="/timbre.js/ja/">日本語</a></div></div><div id="main"><h1>T(&quot;audio.jsonp&quot;)</h1>
-<p><span class="label ar">AR</span><span class="label stereo">STEREO</span> Audio from jsonp</p>
+<p><span class="label ar">AR</span><span class="label stereo">STEREO</span> Audio from jsonp
+
+</p>
 <h2>Installation</h2>
-<p>Download an extra object: <a href="/timbre.js/src/extras/audio-jsonp.js">audio-jsonp.js</a></p>
+<p>Download an extra object: <a href="/timbre.js/src/extras/audio-jsonp.js">audio-jsonp.js</a>
+
+</p>
 <div class="codemirror" lang="html" source="&lt;script src=&quot;timbre.js&quot;&gt;&lt;/script&gt;
 &lt;script src=&quot;audio-jsonp.js&quot;&gt;&lt;/script&gt;"></div>
 <h2>Description</h2>
-<p> <code>T(&quot;audio.jsonp&quot;)</code> is an instance of <code>T(&quot;buffer&quot;)</code> that reads an audio file via JSONP.</p>
+<p> <code>T(&quot;audio.jsonp&quot;)</code> is an instance of <code>T(&quot;buffer&quot;)</code> that reads an audio file via JSONP.
+
+</p>
 <div class="codemirror" lang="timbre" source="var url = &quot;https://dl.dropbox.com/u/645229/tmp/timbre.js/base64_drum.js?_callback=drum&quot;;
 
 T(&quot;audio.jsonp&quot;).load(url, function() {
   this.play();
 });"></div>
-<p> <code>_callback</code> of the query string (begin with an underscore) in the URL is removed before sending request. It is useful when you want to use such as static files with Dropbox. For example, url <code>&quot;../base64_drum.js?_callback=drum&quot;</code> is converted <code>&quot;../base64_drum.js&quot;</code>, <code>_callback=drum</code> is used as a part of callback function name, (ex: <code>window.timbrejs_audiojsonp_drum</code> .)</p>
+<p> <code>_callback</code> of the query string (begin with an underscore) in the URL is removed before sending request. It is useful when you want to use such as static files with Dropbox. For example, url <code>&quot;../base64_drum.js?_callback=drum&quot;</code> is converted <code>&quot;../base64_drum.js&quot;</code>, <code>_callback=drum</code> is used as a part of callback function name, (ex: <code>window.timbrejs_audiojsonp_drum</code> .)
+
+</p>
 <h2>Properties</h2>
 <ul>
 <li><code>isLoaded</code> <em>(ReadOnly Boolean)</em><ul>
@@ -41,11 +49,17 @@ T(&quot;audio.jsonp&quot;).load(url, function() {
 </ul>
 <h2>JSONP</h2>
 <div class="codemirror" lang="js" source="window.timbrejs_audiojsonp_CALLBACK(BASE64, EXTENSION_TYPE);"></div>
-<p>sample(large file): <a href="https://dl.dropbox.com/u/645229/tmp/timbre.js/base64_drum.js">https://dl.dropbox.com/u/645229/tmp/timbre.js/base64_drum.js</a></p>
+<p>sample(large file): <a href="https://dl.dropbox.com/u/645229/tmp/timbre.js/base64_drum.js">https://dl.dropbox.com/u/645229/tmp/timbre.js/base64_drum.js</a>
+
+</p>
 <h2>Tool</h2>
-<p><a href="http://127.0.0.1:3000/timbre.js/misc/audio-jsonp.js">convert an audio file to a JSONP script</a></p>
+<p><a href="http://127.0.0.1:3000/timbre.js/misc/audio-jsonp.js">convert an audio file to a JSONP script</a>
+
+</p>
 <div class="codemirror" lang="sh" source="$ node ./audio-jsonp.js [-n CALLBACK] file &gt; audio.js"></div>
 <h2>Source</h2>
-<p><a href="https://github.com/mohayonao/timbre.js/blob/master/src/extras/audio-jsonp.js">https://github.com/mohayonao/timbre.js/blob/master/src/extras/audio-jsonp.js</a></p>
+<p><a href="https://github.com/mohayonao/timbre.js/blob/master/src/extras/audio-jsonp.js">https://github.com/mohayonao/timbre.js/blob/master/src/extras/audio-jsonp.js</a>
+
+</p>
 <script src="/timbre.js/src/extras/audio-jsonp.js"></script>
 </div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/xml.js"></script><script src="/timbre.js/misc/js/htmlmixed.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>
