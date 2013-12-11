@@ -7,16 +7,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-clean");
-    grunt.loadNpmTasks("grunt-simple-mocha");
     grunt.loadNpmTasks("grunt-contrib-watch");
     
     grunt.initConfig({
-        simplemocha: {
-            options: { reporter: "dot" },
-            target: "test/*.js"
-        },
         jshint: {
-            all: ["src/core.js", "src/**/*.js"],
+            all: ["src/core.js", "src/modules/*.js", "src/objects/*.js"],
             options: {
                 curly   : true,
                 eqeqeq  : true,
@@ -76,7 +71,6 @@ module.exports = function(grunt) {
 
     grunt.registerTask("gh-pages", ["clean", "uglify", "doc"]);
 
-    grunt.registerTask("default", ["jshint", "simplemocha"]);
-    grunt.registerTask("test", ["simplemocha"]);
+    grunt.registerTask("default", ["jshint"]);
     grunt.registerTask("all", ["default", "build"]);
 };

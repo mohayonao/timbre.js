@@ -69,6 +69,11 @@
             get: function() {
                 return this._.interval;
             }
+        },
+        buffer: {
+            get: function() {
+                return this._.buffer;
+            }
         }
     });
 
