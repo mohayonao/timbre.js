@@ -2326,7 +2326,6 @@
     if (typeof window !== "undefined") {
       AudioContext = window.AudioContext || window.webkitAudioContext;
     }
-  console.log(typeof AudioContext);
 
     if (typeof AudioContext !== "undefined") {
         ImplClass = function(sys) {
