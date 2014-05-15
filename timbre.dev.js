@@ -4,12 +4,6 @@
 (function(undefined) {
     "use strict";
 
-    if (typeof Float32Array === "undefined") {
-        /*jshint latedef:true */
-        setupTypedArray();
-        /*jshint latedef:false */
-    }
-
     var timbre = function() {
         return T.apply(null, arguments);
     };
@@ -24,7 +18,7 @@
     var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
     var ACCEPT_CELLSIZES = [32,64,128,256];
 
-    var _ver = "13.08.03";
+    var _ver = "14.05.15";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -2327,12 +2321,17 @@
     })();
 
     // player
-    var ImplClass = null;
-    /*global webkitAudioContext:true */
-    if (typeof webkitAudioContext !== "undefined") {
+    var ImplClass    = null;
+    var AudioContext = null;
+    if (typeof window !== "undefined") {
+      AudioContext = window.AudioContext || window.webkitAudioContext;
+    }
+  console.log(typeof AudioContext);
+
+    if (typeof AudioContext !== "undefined") {
         ImplClass = function(sys) {
-            var context = new webkitAudioContext();
-            var bufSrc, jsNode;
+            var context = new AudioContext();
+            var jsNode;
 
             fn._audioContext = context;
 
@@ -2399,16 +2398,12 @@
                     };
                 }
 
-                bufSrc = context.createBufferSource();
-                jsNode = context.createJavaScriptNode(jsn_streamsize, 2, sys.channels);
+                jsNode = context.createScriptProcessor(jsn_streamsize, 2, sys.channels);
                 jsNode.onaudioprocess = onaudioprocess;
-                bufSrc.noteOn(0);
-                bufSrc.connect(jsNode);
                 jsNode.connect(context.destination);
             };
 
             this.pause = function() {
-                bufSrc.disconnect();
                 jsNode.disconnect();
             };
 
@@ -2426,56 +2421,6 @@
                 };
             }
         };
-    } else if (typeof Audio === "function" &&
-               typeof (new Audio()).mozSetup === "function") {
-        ImplClass = function(sys) {
-            /*global URL:true */
-            var timer = (function() {
-                var source = "var t=0;onmessage=function(e){if(t)t=clearInterval(t),0;if(typeof e.data=='number'&&e.data>0)t=setInterval(function(){postMessage(0);},e.data);};";
-                var blob = new Blob([source], {type:"text/javascript"});
-                var path = URL.createObjectURL(blob);
-                return new Worker(path);
-            })();
-            /*global URL:false */
-
-            this.maxSamplerate     = 48000;
-            this.defaultSamplerate = 44100;
-            this.env = "moz";
-
-            this.play = function() {
-                var audio = new Audio();
-                var interleaved = new Float32Array(sys.streamsize * sys.channels);
-                var streammsec  = sys.streammsec;
-                var written     = 0;
-                var writtenIncr = sys.streamsize / sys.samplerate * 1000;
-                var start = Date.now();
-
-                var onaudioprocess = function() {
-                    if (written > Date.now() - start) {
-                        return;
-                    }
-                    var inL = sys.strmL;
-                    var inR = sys.strmR;
-                    var i = interleaved.length;
-                    var j = inL.length;
-                    sys.process();
-                    while (j--) {
-                        interleaved[--i] = inR[j];
-                        interleaved[--i] = inL[j];
-                    }
-                    audio.mozWriteAudio(interleaved);
-                    written += writtenIncr;
-                };
-
-                audio.mozSetup(sys.channels, sys.samplerate);
-                timer.onmessage = onaudioprocess;
-                timer.postMessage(streammsec);
-            };
-
-            this.pause = function() {
-                timer.postMessage(0);
-            };
-        };
     } else {
         ImplClass = function(sys) {
             this.maxSamplerate     = 48000;
@@ -2485,7 +2430,6 @@
             this.pause = function() {};
         };
     }
-    /*global webkitAudioContext:false */
 
     _sys = new SoundSystem().bind(ImplClass);
 
@@ -2635,109 +2579,6 @@
         }
     })();
 
-    function setupTypedArray() {
-        var unsigned = 0, signed = 1, floating  = 2;
-
-        function ArrayBuffer(_) {
-            var a = new Array(_.byteLength);
-            var bytes = _.BYTES_PER_ELEMENT, shift;
-            for (var i = 0, imax = a.length; i < imax; ++i) {
-                shift = (i % bytes) * 8;
-                a[i] = (_[(i / bytes)|0] & (0x0FF << shift)) >>> shift;
-            }
-            a.__view = _;
-            return a;
-        }
-
-        function TypedArray(klass, arg, offset, length) {
-            var a, b, bytes, i, imax;
-            if (Array.isArray(arg)) {
-                if (arg.__view) {
-                    if (typeof offset === "undefined") {
-                        offset = 0;
-                    }
-                    if (typeof length === "undefined") {
-                        length = arg.length - offset;
-                    }
-                    bytes = klass.bytes;
-                    if (klass.type === floating) {
-                        a = arg.__view.slice((offset/bytes)|0, ((offset+length)/bytes)|0);
-                    } else {
-                        b = arg.slice(offset, offset + length);
-                        a = new Array((b.length / bytes)|0);
-                        for (i = 0, imax = a.length; i < imax; ++i) {
-                            a[i] = 0;
-                        }
-                        for (i = 0, imax = b.length; i < imax; ++i) {
-                            a[(i/bytes)|0] += (b[i] & 0xFF) << ((i % bytes) * 8);
-                        }
-                    }
-                } else {
-                    a = arg.slice();
-                }
-            } else if (typeof arg === "number" && arg > 0) {
-                a = new Array(arg|0);
-            } else {
-                a = [];
-            }
-            if (klass.type !== floating) {
-                for (i = 0, imax = a.length; i < imax; ++i) {
-                    a[i] = (+a[i] || 0) & ((1 << (2 * 8)) - 1);
-                }
-            } else {
-                for (i = 0, imax = a.length; i < imax; ++i) {
-                    a[i] = a[i] || 0;
-                }
-            }
-            if (klass.type === signed) {
-                for (i = 0, imax = a.length; i < imax; ++i) {
-                    if (a[i] & (1 << ((bytes * 8) - 1))) {
-                        a[i] -= 1 << (bytes * 8);
-                    }
-                }
-            }
-
-            a.__klass  = klass;
-            a.constructor = window[klass.name];
-            a.set      = set;
-            a.subarray = subarray;
-            a.BYTES_PER_ELEMENT = klass.bytes;
-            a.byteLength = klass.bytes * a.length;
-            a.byteOffset = offset || 0;
-            Object.defineProperty(a, "buffer", {
-                get: function() {
-                    return new ArrayBuffer(this);
-                }
-            });
-            return a;
-        }
-        var set = function(array, offset) {
-            if (typeof offset === "undefined") {
-                offset = 0;
-            }
-            var i, imax = Math.min(this.length - offset, array.length);
-            for (i = 0; i < imax; ++i) {
-                this[offset + i] = array[i];
-            }
-        };
-        var subarray = function(begin, end) {
-            if (typeof end === "undefined") {
-                end = this.length;
-            }
-            return new this.constructor(this.slice(begin, end));
-        };
-        [["Int8Array" , 1, signed], ["Uint8Array" , 1, unsigned],
-         ["Int16Array", 2, signed], ["Uint16Array", 2, unsigned],
-         ["Int32Array", 4, signed], ["Uint32Array", 4, unsigned],
-         ["Float32Array", 4, floating], ["Float64Array", 8, floating]
-        ].forEach(function(_params) {
-            var name = _params[0];
-            var params = { bytes:_params[1], type:_params[2], name:name };
-            window[name] = function(arg, offset, length) {
-                return TypedArray.call(this, params, arg, offset, length);
-            };
-        });
-    }
 })();
 (function(T) {
     "use strict";
@@ -3668,7 +3509,7 @@
     })();
 
     Decoder.webkit_decode = (function() {
-        if (typeof webkitAudioContext !== "undefined") {
+        if (typeof T.fn._audioContext !== "undefined") {
             var ctx = T.fn._audioContext;
             var _decode = function(data, onloadedmetadata, onloadeddata) {
                 var samplerate, channels, bufferL, bufferR, duration;

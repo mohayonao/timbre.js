@@ -168,7 +168,7 @@
     })();
 
     Decoder.webkit_decode = (function() {
-        if (typeof webkitAudioContext !== "undefined") {
+        if (typeof T.fn._audioContext !== "undefined") {
             var ctx = T.fn._audioContext;
             var _decode = function(data, onloadedmetadata, onloadeddata) {
                 var samplerate, channels, bufferL, bufferR, duration;
