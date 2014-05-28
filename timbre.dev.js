@@ -18,12 +18,12 @@
     var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
     var ACCEPT_CELLSIZES = [32,64,128,256];
 
-    var _ver = "14.05.15";
+    var _ver = "14.05.28";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
-    var _envtype = (typeof module !== "undefined" && module.exports) ? "node" :
-        (typeof window !== "undefined") ? "browser" : "unknown";
+    var _envtype = (typeof window !== "undefined") ? "browser" :
+        (typeof module !== "undefined" && module.exports) ? "node" : "unknown";
     var _envmobile = _envtype === "browser" && /(iPhone|iPad|iPod|Android)/i.test(navigator.userAgent);
     var _f64mode = false;
     var _bpm = 120;

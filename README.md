@@ -51,6 +51,9 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**14.05.28** (355.91KB)
+* Fixed: [#19](https://github.com/mohayonao/timbre.js/issues/19)
+
 **14.05.15** (355.95KB)
 * Fixed: [#15](https://github.com/mohayonao/timbre.js/issues/15)
 * Excluded support of Audio Data API. use Web Audio API instead.
