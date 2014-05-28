@@ -22,8 +22,8 @@
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
-    var _envtype = (typeof module !== "undefined" && module.exports) ? "node" :
-        (typeof window !== "undefined") ? "browser" : "unknown";
+    var _envtype = (typeof window !== "undefined") ? "browser" :
+        (typeof module !== "undefined" && module.exports) ? "node" : "unknown";
     var _envmobile = _envtype === "browser" && /(iPhone|iPad|iPod|Android)/i.test(navigator.userAgent);
     var _f64mode = false;
     var _bpm = 120;
