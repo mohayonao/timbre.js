@@ -18,7 +18,7 @@
     var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
     var ACCEPT_CELLSIZES = [32,64,128,256];
 
-    var _ver = "14.05.28";
+    var _ver = "14.05.29";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -2434,7 +2434,7 @@
 
     var exports = timbre;
 
-    if (_envtype === "node") {
+    if (_envtype === "node" || typeof module !== "undefined" && module.exports) {
         module.exports = global.timbre = exports;
     } else if (_envtype === "browser") {
         exports.noConflict = (function() {

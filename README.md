@@ -51,6 +51,9 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**14.05.29** (355.96KB)
+* Fixed: Export for CommonJS env [#19](https://github.com/mohayonao/timbre.js/issues/19)
+
 **14.05.28** (355.91KB)
 * Fixed: [#19](https://github.com/mohayonao/timbre.js/issues/19)
 
