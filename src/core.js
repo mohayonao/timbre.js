@@ -2322,7 +2322,7 @@
 
     // player
     var ImplClass    = null;
-    var AudioContext = null;
+    var AudioContext = undefined;
     if (typeof window !== "undefined") {
       AudioContext = window.AudioContext || window.webkitAudioContext;
     }
@@ -2330,7 +2330,7 @@
     if (typeof AudioContext !== "undefined") {
         ImplClass = function(sys) {
             var context = new AudioContext();
-            var jsNode;
+            var bufSrc, jsNode;
 
             fn._audioContext = context;
 
@@ -2397,12 +2397,18 @@
                     };
                 }
 
+                bufSrc = context.createBufferSource();
                 jsNode = context.createScriptProcessor(jsn_streamsize, 2, sys.channels);
                 jsNode.onaudioprocess = onaudioprocess;
+                if (bufSrc.noteOn) {
+                    bufSrc.noteOn(0);
+                }
+                bufSrc.connect(jsNode);
                 jsNode.connect(context.destination);
             };
 
             this.pause = function() {
+                bufSrc.disconnect();
                 jsNode.disconnect();
             };
 
