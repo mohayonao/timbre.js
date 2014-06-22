@@ -2,7 +2,7 @@ timbre.js
 =========
 JavaScript library for objective sound programming
 
-Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (Timbre-Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web. 
+Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (Timbre-Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web.
 
 ## Project Page ##
 [English](http://mohayonao.github.com/timbre.js/) | [日本語](http://mohayonao.github.com/timbre.js/ja/)
@@ -51,6 +51,10 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**14.06.23** (356.14KB)
+* Fixed: [#23](https://github.com/mohayonao/timbre.js/issues/23) fix to work on an iOS device
+* Fixed: fix to work on node.js
+
 **14.05.28** (355.91KB)
 * Fixed: [#19](https://github.com/mohayonao/timbre.js/issues/19)
 
