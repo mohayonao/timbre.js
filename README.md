@@ -2,7 +2,7 @@ timbre.js
 =========
 JavaScript library for objective sound programming
 
-Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (Timbre-Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web. 
+Timbre.js provides a functional processing and synthesizing audio in your web apps with modern JavaScript's way like jQuery or node.js. It has many **T-Object** (Timbre-Object) that connected together to define the graph-based routing for overall audio rendering. It is a goal of this project to approach the next generation audio processing for web.
 
 ## Project Page ##
 [English](http://mohayonao.github.com/timbre.js/) | [日本語](http://mohayonao.github.com/timbre.js/ja/)
@@ -17,12 +17,7 @@ Timbre.js runs on modern browsers for Windows/Mac/Linux/iOS/Android or node.js.
 ![Safari 6.0-](http://mohayonao.github.com/timbre.js/misc/img/safari.png)
 ![Firefox 4.0-](http://mohayonao.github.com/timbre.js/misc/img/firefox.png)
 ![Opera](http://mohayonao.github.com/timbre.js/misc/img/opera.png)
-![IE9](http://mohayonao.github.com/timbre.js/misc/img/ie.png)
 ![node.js 0.8-](http://mohayonao.github.com/timbre.js/misc/img/nodejs.png)
-
-*IE support is only Internet Exploler 9.*  
-*iOS support is only later iOS6.0*  
-*Android support is only [Firefox](https://play.google.com/store/apps/details?id=org.mozilla.firefox) app.*
 
 ## Installation ##
 ### browser
@@ -35,7 +30,7 @@ Include the `timbre.js` file. It will install itself as `timbre`, `T` under the 
 </script>
 ```
 
-### Flash fallback (for Opera and IE9)
+### Flash fallback (for Opera and IE10)
 Download an additional file (Right-click and use "Save As")
 
 - [timbre.swf](/timbre.js/timbre.swf)
@@ -56,6 +51,17 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**14.06.23** (356.14KB)
+* Fixed: [#23](https://github.com/mohayonao/timbre.js/issues/23) fix to work on an iOS device
+* Fixed: fix to work on node.js
+
+**14.05.28** (355.91KB)
+* Fixed: [#19](https://github.com/mohayonao/timbre.js/issues/19)
+
+**14.05.15** (355.95KB)
+* Fixed: [#15](https://github.com/mohayonao/timbre.js/issues/15)
+* Excluded support of Audio Data API. use Web Audio API instead.
+
 **13.08.03** (361.93KB)
 * Adding Extra: mp3_decode. See [mp3_decode](http://mohayonao.github.io/timbre.js/mp3_decode.html)
 * Adding Extra: soundfont. See [soundfont](http://mohayonao.github.io/timbre.js/soundfont.html)
