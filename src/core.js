@@ -2322,7 +2322,7 @@
 
     // player
     var ImplClass    = null;
-    var AudioContext = null;
+    var AudioContext = undefined;
     if (typeof window !== "undefined") {
       AudioContext = window.AudioContext || window.webkitAudioContext;
     }
