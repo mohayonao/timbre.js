@@ -8,7 +8,7 @@ Timbre.js provides a functional processing and synthesizing audio in your web ap
 [English](http://mohayonao.github.com/timbre.js/) | [日本語](http://mohayonao.github.com/timbre.js/ja/)
 
 ## Examples ##
-[BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html) | [Chords Work](http://mohayonao.github.com/timbre.js/chord.html) | [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html) | [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html) | [Reich](http://mohayonao.github.com/timbre.js/reich.html)
+[BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html) | [Chords Work](http://mohayonao.github.com/timbre.js/chord.html) | [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html) | [Khoomii](http://mohayonao.github.com/timbre.js/khoomii.html) | [Reich](http://mohayonao.github.com/timbre.js/reich.html)
 
 ## Supports ##
 Timbre.js runs on modern browsers for Windows/Mac/Linux/iOS/Android or node.js.
