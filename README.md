@@ -51,6 +51,9 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**14.08.07** (356.19KB)
+* Fixed: Export for CommonJS env [#19](https://github.com/mohayonao/timbre.js/issues/19)
+
 **14.06.23** (356.14KB)
 * Fixed: [#23](https://github.com/mohayonao/timbre.js/issues/23) fix to work on an iOS device
 * Fixed: fix to work on node.js
