@@ -28,7 +28,7 @@ Timbre.js runs on a modern browser for Windows/Mac/Linux/iOS/Android or node.js.
 ![IE9](/timbre.js/misc/img/ie.png)
 ![node.js 0.8-](/timbre.js/misc/img/nodejs.png)
 
-*IE support is only Internet Exploler 9.*  
+*IE support is only Internet Explorer 9.*  
 *iOS support is only later iOS6.0*  
 *Android support is only [Firefox](https://play.google.com/store/apps/details?id=org.mozilla.firefox) app.*
 

@@ -8,7 +8,7 @@ Timbre.js provides a functional processing and synthesizing audio in your web ap
 [English](http://mohayonao.github.com/timbre.js/) | [日本語](http://mohayonao.github.com/timbre.js/ja/)
 
 ## Examples ##
-[BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html) | [Chords Work](http://mohayonao.github.com/timbre.js/chord.html) | [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html) | [Khoomii](http://mohayonao.github.com/timbre.js/koomii.html) | [Reich](http://mohayonao.github.com/timbre.js/reich.html)
+[BeatBox](http://mohayonao.github.com/timbre.js/beatbox.html) | [Chords Work](http://mohayonao.github.com/timbre.js/chord.html) | [Gymnopedie](http://mohayonao.github.com/timbre.js/satie.html) | [Khoomii](http://mohayonao.github.com/timbre.js/khoomii.html) | [Reich](http://mohayonao.github.com/timbre.js/reich.html)
 
 ## Supports ##
 Timbre.js runs on modern browsers for Windows/Mac/Linux/iOS/Android or node.js.
@@ -51,6 +51,9 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**14.08.07** (356.19KB)
+* Fixed: Export for CommonJS env [#19](https://github.com/mohayonao/timbre.js/issues/19)
+
 **14.06.23** (356.14KB)
 * Fixed: [#23](https://github.com/mohayonao/timbre.js/issues/23) fix to work on an iOS device
 * Fixed: fix to work on node.js

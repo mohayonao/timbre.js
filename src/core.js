@@ -2440,7 +2440,7 @@
 
     var exports = timbre;
 
-    if (_envtype === "node") {
+    if (_envtype === "node" || typeof module !== "undefined" && module.exports) {
         module.exports = global.timbre = exports;
     } else if (_envtype === "browser") {
         exports.noConflict = (function() {
