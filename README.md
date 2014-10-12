@@ -51,6 +51,10 @@ T("sin", {freq:880, mul:0.5}).play();
 MIT
 
 ## ChangeLog ##
+**14.10.12** (356.28KB)
+* Fixed: Decoding wav file
+* Fixed: Envelope release
+
 **14.08.07** (356.19KB)
 * Fixed: Export for CommonJS env [#19](https://github.com/mohayonao/timbre.js/issues/19)
 
