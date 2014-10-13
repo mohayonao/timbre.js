@@ -18,7 +18,7 @@
     var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
     var ACCEPT_CELLSIZES = [32,64,128,256];
 
-    var _ver = "14.08.07";
+    var _ver = "14.10.12";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -2322,7 +2322,7 @@
 
     // player
     var ImplClass    = null;
-    var AudioContext = undefined;
+    var AudioContext;
     if (typeof window !== "undefined") {
       AudioContext = window.AudioContext || window.webkitAudioContext;
     }
@@ -3411,7 +3411,9 @@
         var b0, b1, b2, bb, x;
         var int32 = new Int32Array(uint8.length / 3);
         for (var i = 0, imax = uint8.length, j = 0; i < imax; ) {
-            b0 = uint8[i++] ,b1 = uint8[i++], b2 = uint8[i++];
+            b0 = uint8[i++];
+            b1 = uint8[i++];
+            b2 = uint8[i++];
             bb = b0 + (b1 << 8) + (b2 << 16);
             x = (bb & 0x800000) ? bb - 16777216 : bb;
             int32[j++] = x;
@@ -3735,8 +3737,9 @@
         this.status = StatusWait;
     };
     $.release = function() {
-        if (this.releaseNode !== null) {
+        if (this.releaseNode !== null && this._index <= this.releaseNode) {
             this._counter = 0;
+            this._index = this.releaseNode;
             this.status = StatusRelease;
         }
     };

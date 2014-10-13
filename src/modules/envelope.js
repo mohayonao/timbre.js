@@ -103,8 +103,9 @@
         this.status = StatusWait;
     };
     $.release = function() {
-        if (this.releaseNode !== null) {
+        if (this.releaseNode !== null && this._index <= this.releaseNode) {
             this._counter = 0;
+            this._index = this.releaseNode;
             this.status = StatusRelease;
         }
     };
