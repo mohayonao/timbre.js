@@ -65,7 +65,9 @@
         var b0, b1, b2, bb, x;
         var int32 = new Int32Array(uint8.length / 3);
         for (var i = 0, imax = uint8.length, j = 0; i < imax; ) {
-            b0 = uint8[i++] ,b1 = uint8[i++], b2 = uint8[i++];
+            b0 = uint8[i++];
+            b1 = uint8[i++];
+            b2 = uint8[i++];
             bb = b0 + (b1 << 8) + (b2 << 16);
             x = (bb & 0x800000) ? bb - 16777216 : bb;
             int32[j++] = x;
