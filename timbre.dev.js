@@ -8835,7 +8835,7 @@
                         dot = cmd.dot || status.dot;
                     }
                     duration = (60 / tempo) * (4 / len) * 1000;
-                    duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
+                    duration *= 2 - (1 / Math.pow(2, dot));
 
                     vel = status.v << 3;
                     if (status.tie) {
