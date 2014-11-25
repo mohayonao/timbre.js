@@ -19,7 +19,7 @@
         _.bufferR = new fn.SignalArray(BUFFERSIZE << 2);
         _.buffermask = _.bufferL.length - 1;
         _.node   = null;
-        _.script = context.createJavaScriptNode(BUFFERSIZE, 2, 2);
+        _.script = context.createScriptProcessor(BUFFERSIZE, 2, 2);
         _.writeIndex = 0;
         _.readIndex  = 0;
         _.totalRead  = 0;
@@ -58,7 +58,7 @@
             var _ = this._;
             _.mode = "recv";
             _.script.onaudioprocess = make_recv_process(this);
-            _.gain = context.createGainNode();
+            _.gain = context.createGain();
             _.gain.gain.value = 0;
             _.script.connect(_.gain);
         }
