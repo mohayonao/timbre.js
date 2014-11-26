@@ -53,7 +53,7 @@ MIT
 ## ChangeLog ##
 **14.11.25** (356.27KB)
 * Merge: [#33](https://github.com/mohayonao/timbre.js/pull/33) update of the note duration formula to handle more 3 dots
-* Merge: [#36](https://github.com/mohayonao/timbre.js/pull/36) use latest Web Audio API intergace
+* Merge: [#36](https://github.com/mohayonao/timbre.js/pull/36) use latest Web Audio API interfaces
 
 **14.10.12** (356.28KB)
 * Fixed: Decoding wav file
