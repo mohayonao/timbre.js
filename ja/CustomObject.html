@@ -35,8 +35,7 @@
 // usage
 T(&quot;custom-object&quot;, 
     T(&quot;audio&quot;, {load:&quot;/timbre.js/misc/audio/amen.wav&quot;, loop:true})
-).play();
-"></div>
+).play();"></div>
 <h3 id="util-functions">Util functions</h3>
 <ul>
 <li><code>timbre.Object.call(this, channels, _args)</code> <em>(line:5)</em><ul>
@@ -73,8 +72,7 @@ T(&quot;custom-object&quot;,
 
   this._.private1 =  0;
   this._.private2 = 10;
-}
-"></div>
+}"></div>
 <h3 id="stereoobject">StereoObject</h3>
 <p> ステレオ対応のオブジェクトを生成するには、<code>timbre.Object.call</code> の 2番目の引数を <code>2</code> にします。</p>
 <div class="codemirror" lang="js" source="function CustomObject(_args) {
@@ -82,8 +80,7 @@ T(&quot;custom-object&quot;,
 
   var cellL = this.cells[1]; // left channel
   var cellR = this.cells[2]; // right channel
-}
-"></div>
+}"></div>
 <h3 id="properties">Properties</h3>
 <p> <code>set()</code>, <code>get()</code> で扱えるプロパティを作成するときは <code>defineProperties</code> します。</p>
 <div class="codemirror" lang="js" source="Object.defineProperties(CustomObject.prototype, {
@@ -97,14 +94,12 @@ T(&quot;custom-object&quot;,
   }
 });
 
-T(&quot;custom-object&quot;, {property:1});
-"></div>
+T(&quot;custom-object&quot;, {property:1});"></div>
 <h3 id="case-of-coffee-script">Case of Coffee-Script</h3>
 <div class="codemirror" lang="js" source="class CustomObject extends timbre.Object
   constructor: (_args)-&gt;
     @super 1, _args
 
   process: (tickID)-&gt;
-    @
-"></div>
+    @"></div>
 </div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/xml.js"></script><script src="/timbre.js/misc/js/htmlmixed.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>

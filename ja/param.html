@@ -4,8 +4,7 @@
 <p> 時間変化する値を出力します。</p>
 <div class="codemirror" lang="timbre" source="var freq  = T(&quot;param&quot;, {value:440}).to(880, 10000);
 
-T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
-"></div>
+T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();"></div>
 <h2 id="methods">Methods</h2>
 <h3 id="setat">setAt</h3>
 <canvas id="setAt" style="width:240px;height:80px"></canvas>
@@ -13,56 +12,49 @@ T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
 
 T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
 
-freq.plot({target:setAt});
-"></div>
+freq.plot({target:setAt});"></div>
 <h3 id="linto">linTo</h3>
 <canvas id="linTo" style="width:240px;height:80px"></canvas>
 <div class="codemirror" lang="timbre" source="var freq  = T(&quot;param&quot;, {value:440}).linTo(880, &quot;BPM120 L2&quot;);
 
 T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
 
-freq.plot({target:linTo});
-"></div>
+freq.plot({target:linTo});"></div>
 <h3 id="expto">expTo</h3>
 <canvas id="expTo" style="width:240px;height:80px"></canvas>
 <div class="codemirror" lang="timbre" source="var freq  = T(&quot;param&quot;, {value:440}).expTo(880, &quot;BPM120 L2&quot;);
 
 T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
 
-freq.plot({target:expTo});
-"></div>
+freq.plot({target:expTo});"></div>
 <h3 id="sinto">sinTo</h3>
 <canvas id="sinTo" style="width:240px;height:80px"></canvas>
 <div class="codemirror" lang="timbre" source="var freq  = T(&quot;param&quot;, {value:440}).sinTo(880, &quot;BPM120 L2&quot;);
 
 T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
 
-freq.plot({target:sinTo});
-"></div>
+freq.plot({target:sinTo});"></div>
 <h3 id="welto">welTo</h3>
 <canvas id="welTo" style="width:240px;height:80px"></canvas>
 <div class="codemirror" lang="timbre" source="var freq  = T(&quot;param&quot;, {value:440}).welTo(880, &quot;BPM120 L2&quot;);
 
 T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
 
-freq.plot({target:welTo});
-"></div>
+freq.plot({target:welTo});"></div>
 <h3 id="sqrto">sqrTo</h3>
 <canvas id="sqrTo" style="width:240px;height:80px"></canvas>
 <div class="codemirror" lang="timbre" source="var freq  = T(&quot;param&quot;, {value:440}).sqrTo(880, &quot;BPM120 L2&quot;);
 
 T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
 
-freq.plot({target:sqrTo});
-"></div>
+freq.plot({target:sqrTo});"></div>
 <h3 id="cubto">cubTo</h3>
 <canvas id="cubTo" style="width:240px;height:80px"></canvas>
 <div class="codemirror" lang="timbre" source="var freq  = T(&quot;param&quot;, {value:440}).cubTo(880, &quot;BPM120 L2&quot;);
 
 T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
 
-freq.plot({target:cubTo});
-"></div>
+freq.plot({target:cubTo});"></div>
 <h3 id="to">to</h3>
 <canvas id="to" style="width:240px;height:80px"></canvas>
 <p> 3番目の引数でカーブを指定できます。</p>
@@ -73,8 +65,7 @@ freq.plot({target:cubTo});
 
 T(&quot;tri&quot;, {freq:freq, mul:0.5}).play();
 
-freq.plot({target:to});
-"></div>
+freq.plot({target:to});"></div>
 <h3 id="cancel">cancel</h3>
 <p> 値の変化を停止します。</p>
 <h2 id="events">Events</h2>

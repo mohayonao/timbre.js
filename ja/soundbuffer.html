@@ -4,8 +4,7 @@
 <div class="codemirror" lang="js" source="var soundbuffer = {
   buffer    : new Float32Array(44100),
   samplerate: 44100
-};
-"></div>
+};"></div>
 <canvas id="canvas" style="width:240px;height:80px"></canvas>
 <p> 以下の例は独自に生成したサウンドバッファーを <code>T(&quot;buffer&quot;)</code> にセットして再生しています。</p>
 <div class="codemirror" lang="timbre" source="var len    = 44100;
@@ -17,6 +16,5 @@ for (var i = 0; i &lt; buffer.length; i++) {
 
 buffer = { buffer:buffer, samplerate:22050 };
 
-T(&quot;buffer&quot;, {buffer:buffer, pitch:50, loop:true}).plot({target:canvas}).play();
-"></div>
+T(&quot;buffer&quot;, {buffer:buffer, pitch:50, loop:true}).plot({target:canvas}).play();"></div>
 </div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/xml.js"></script><script src="/timbre.js/misc/js/htmlmixed.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>

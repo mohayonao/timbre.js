@@ -8,8 +8,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 
   var biquad = T(&quot;biquad&quot;, {type:&quot;lowpass&quot;, freq:800, Q:10}, this).play();
 
-});
-"></div>
+});"></div>
 <h2 id="properties">Properties</h2>
 <ul>
 <li><code>type</code> <em>(String)</em><ul>
@@ -53,8 +52,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
   T(&quot;lowpass&quot;, {cutoff:1200, res:2}, this).plot({target:lowpass, lineWidth:2}).play();
-});
-"></div>
+});"></div>
 <p>alias: <code>lpf</code></p>
 <h3 id="high-pass-filter">High-Pass Filter</h3>
 <p>A <a href="http://en.wikipedia.org/wiki/High-pass_filter">highpass filter</a> is the opposite of a lowpass filter.</p>
@@ -71,8 +69,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
   T(&quot;highpass&quot;, {cutoff:4800, res:2}, this).plot({target:highpass, lineWidth:2}).play();
-});
-"></div>
+});"></div>
 <p>alias: <code>hpf</code></p>
 <h3 id="band-pass-filter">Band-Pass Filter</h3>
 <p>A <a href="http://en.wikipedia.org/wiki/Band-pass_filter">bandpass filter</a> allows a range of frequencies to pass through and attenuates the frequencies below and above this frequency range.</p>
@@ -93,8 +90,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
   T(&quot;bandpass&quot;, {freq:2400, Q:5}, this).plot({target:bandpass, lineWidth:2}).play();
-});
-"></div>
+});"></div>
 <p>alias: <code>bpf</code></p>
 <h3 id="lowshelf-filter">LowShelf Filter</h3>
 <p>The lowshelf filter allows all frequencies through, but adds a boost (or attenuation) to the lower frequencies.</p>
@@ -111,8 +107,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
   T(&quot;lowshelf&quot;, {freq:800, gain:18}, this).plot({target:lowshelf, lineWidth:2}).play();
-});
-"></div>
+});"></div>
 <h3 id="highshelf-filter">HighShelf Filter</h3>
 <p>The highshelf filter is the opposite of the lowshelf filter and allows all frequencies through, but adds a boost to the higher frequencies.</p>
 <canvas id="highshelf" style="width:240px;height:80px"></canvas>
@@ -128,8 +123,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
   T(&quot;highshelf&quot;, {freq:6400, gain:24}, this).plot({target:highshelf, lineWidth:2}).play();
-});
-"></div>
+});"></div>
 <h3 id="peaking-filter">Peaking Filter</h3>
 <p>The peaking filter allows all frequencies through, but adds a boost (or attenuation) to a range of frequencies.</p>
 <canvas id="peaking" style="width:240px;height:80px"></canvas>
@@ -149,8 +143,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
   T(&quot;peaking&quot;, {freq:1800, Q:2, gain:6}, this).plot({target:peaking, lineWidth:2}).play();
-});
-"></div>
+});"></div>
 <h3 id="notch-filter">Notch Filter</h3>
 <p>The notch filter (also known as a <a href="http://en.wikipedia.org/wiki/Band-stop_filter">band-stop or band-rejection filter</a>) is the opposite of a bandpass filter.</p>
 <canvas id="notch" style="width:240px;height:80px"></canvas>
@@ -166,8 +159,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
   T(&quot;notch&quot;, {freq:4800, Q:2}, this).plot({target:notch, lineWidth:2}).play();
-});
-"></div>
+});"></div>
 <p>alias: <code>bef</code>, <code>brf</code></p>
 <h3 id="allpass-filter">AllPass Filter</h3>
 <p>An <a href="http://en.wikipedia.org/wiki/All-pass_filter#Digital_Implementation">allpass filter</a> allows all frequencies through, but changes the phase relationship between the various frequencies.</p>
@@ -184,8 +176,7 @@ T(&quot;audio&quot;, {loop:true}).load(src, function(res) {
 </ul>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {loop:true}).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function(res) {
   T(&quot;allpass&quot;, {freq:2400, Q:6}, this).plot({target:allpass, lineWidth:2}).play();
-});
-"></div>
+});"></div>
 <p>alias: <code>apf</code></p>
 <h2 id="source">Source</h2>
 <p><a href="https://github.com/mohayonao/timbre.js/blob/master/src/objects/biquad.js">https://github.com/mohayonao/timbre.js/blob/master/src/objects/biquad.js</a></p>

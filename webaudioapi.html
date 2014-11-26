@@ -3,8 +3,7 @@
 <h2 id="installation">Installation</h2>
 <p>Download an additional script: <a href="http://mohayonao.github.com/timbre.js/src/extra/webaudioapi.js">webaudioapi.js</a></p>
 <div class="codemirror" lang="html" source="&lt;script src=&quot;timbre.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;webaudioapi.js&quot;&gt;&lt;/script&gt;
-"></div>
+&lt;script src=&quot;webaudioapi.js&quot;&gt;&lt;/script&gt;"></div>
 <h2 id="t-webaudioapi-recv-">T(&quot;WebAudioAPI:recv&quot;)</h2>
 <h3 id="properties">Properties</h3>
 <ul>
@@ -24,8 +23,7 @@ osc.noteOn(0);
 
 api.recv(osc);
 
-T(&quot;+sin&quot;, {freq:2}, api).play();
-"></div>
+T(&quot;+sin&quot;, {freq:2}, api).play();"></div>
 <h2 id="t-webaudioapi-send-">T(&quot;WebAudioAPI:send&quot;)</h2>
 <h3 id="properties">Properties</h3>
 <ul>
@@ -46,8 +44,7 @@ api.append(noise).send(context.destination);
 
 timbre.once(&quot;reset&quot;, function() {
   api.cancel();
-});
-"></div>
+});"></div>
 <script src="/timbre.js/src/extras/webaudioapi.js"></script>
 
 <h2 id="examples">Examples</h2>
@@ -67,6 +64,5 @@ var send = T(&quot;WebAudioAPI:send&quot;, synth).send(context.destination);
 
 timbre.once(&quot;reset&quot;, function() {
   send.cancel();
-});
-"></div>
+});"></div>
 </div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/xml.js"></script><script src="/timbre.js/misc/js/htmlmixed.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>

@@ -3,8 +3,7 @@
 <h2 id="installation">Installation</h2>
 <p>Download an extra object: <a href="http://mohayonao.github.com/timbre.js/src/extra/MoogFF.js">MoogFF.js</a></p>
 <div class="codemirror" lang="html" source="&lt;script src=&quot;timbre.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;MoogFF.js&quot;&gt;&lt;/script&gt;
-"></div>
+&lt;script src=&quot;MoogFF.js&quot;&gt;&lt;/script&gt;"></div>
 <h2 id="description">Description</h2>
 <p>A digital implementation of the Moog VCF (filter). <em>1</em> <em>2</em></p>
 <div class="codemirror" lang="timbre" source="var freqs = [440, 493, 523, 554, 587, 659, 698];
@@ -15,8 +14,7 @@ T(&quot;interval&quot;, {interval:150}, function(count) {
   var f = freqs[(Math.random() * freqs.length)|0] * 0.5;
   vco.freq.linTo(f, &quot;20ms&quot;);
   vcf.freq.sinTo(880 * 2, &quot;60ms&quot;);
-}).start();
-"></div>
+}).start();"></div>
 <h2 id="properties">Properties</h2>
 <ul>
 <li><code>freq</code><ul>

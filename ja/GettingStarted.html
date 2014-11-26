@@ -7,24 +7,20 @@
 </ul>
 <hr>
 <p> timbre.js では関数 <code>T()</code> で生成される <strong>T オブジェクト</strong> を組み合わせてプログラミングを行ないます。T オブジェクトの種類は T 関数 の最初の引数として文字列で指定します。まずは簡単な使い方としてサイン波を出力してみましょう。音量に注意して実行してみてください。音が鳴ったら今度は <code>sin</code> の部分を <code>saw</code> と変更して実行してみてください。違う種類の音 ( のこぎり波 ) が鳴ります。</p>
-<div class="codemirror" lang="timbre" source="T(&quot;sin&quot;).play();
-"></div>
+<div class="codemirror" lang="timbre" source="T(&quot;sin&quot;).play();"></div>
 <p> 二番目の引数には辞書形式でプロパティを指定します。以下の例ではサイン波を出力するオシレーターのプロパティを 880(Hz) に設定して再生しています。</p>
-<div class="codemirror" lang="timbre" source="T(&quot;sin&quot;, {freq:880}).play();
-"></div>
+<div class="codemirror" lang="timbre" source="T(&quot;sin&quot;, {freq:880}).play();"></div>
 <p> プロパティをあとから指定する場合は <code>set</code> メソッドを使用します。</p>
 <div class="codemirror" lang="timbre" source="var sin = T(&quot;sin&quot;).play();
 
-sin.set({freq:880});
-"></div>
+sin.set({freq:880});"></div>
 <p> 三番目以降には入力オブジェクトを記述します。ほとんどの T オブジェクト は自身の処理の前に入力オブジェクトの値を加算します。たとえばエンベロープオブジェクトでは自身の出力値と入力オブジェクトの値を積算して出力します。</p>
 <div class="codemirror" lang="timbre" source="var sine1 = T(&quot;sin&quot;, {freq:440, mul:0.5});
 var sine2 = T(&quot;sin&quot;, {freq:660, mul:0.5});
 
 T(&quot;perc&quot;, {r:500}, sine1, sine2).on(&quot;ended&quot;, function() {
   this.pause();
-}).bang().play();
-"></div>
+}).bang().play();"></div>
 <hr>
 <h2 id="t-">Tオブジェクトの動作の流れ</h2>
 <ul>
@@ -38,6 +34,5 @@ T(&quot;perc&quot;, {r:500}, sine1, sine2).on(&quot;ended&quot;, function() {
 </ul>
 <div class="codemirror" lang="timbre" source="var freq = T(&quot;pulse&quot;, {freq:5, add:880, mul:20}).kr();
 
-T(&quot;sin&quot;, {freq:freq, mul:0.5}).play();
-"></div>
+T(&quot;sin&quot;, {freq:freq, mul:0.5}).play();"></div>
 </div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/xml.js"></script><script src="/timbre.js/misc/js/htmlmixed.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>

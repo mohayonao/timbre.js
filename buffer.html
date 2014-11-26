@@ -4,16 +4,14 @@
 <p> <code>T(&quot;buffer&quot;)</code> contains <a href="./soundbuffer.html">SoundBuffer</a> and plays it.</p>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;, {load:&quot;/timbre.js/misc/audio/amen.wav&quot;}).on(&quot;ended&quot;, function() {
   this.pause();
-}).play();
-"></div>
+}).play();"></div>
 <div class="codemirror" lang="timbre" source="T(&quot;audio&quot;).load(&quot;/timbre.js/misc/audio/amen.wav&quot;, function() {
   var audio = this;
   var currentTime = T(&quot;param&quot;, {value:0.01, ar:true}).on(&quot;ended&quot;, function() {
     audio.pause();
   }).sinTo(audio.duration, audio.duration);
   audio.set({currentTime:currentTime}).play();
-});
-"></div>
+});"></div>
 <p> * <a href="./audio.html"><code>T(&quot;audio&quot;)</code></a> is an instance of <code>T(&quot;buffer&quot;)</code> that can load an audio file and decode it.</p>
 <h2 id="properties">Properties</h2>
 <ul>

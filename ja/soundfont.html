@@ -12,22 +12,18 @@
 &lt;script src=&quot;audio-jsonp.js&quot;&gt;&lt;/script&gt;
 &lt;script src=&quot;jsmad.js&quot;&gt;&lt;/script&gt;
 &lt;script src=&quot;mp3_decode.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;soundfont.js&quot;&gt;&lt;/script&gt;
-"></div>
+&lt;script src=&quot;soundfont.js&quot;&gt;&lt;/script&gt;"></div>
 <h2 id="description">Description</h2>
 <p>T.soundfont is a singleton object that caches various soundfont notes, and
 allows you to play them.</p>
 <div class="codemirror" lang="timbre" source="// play note 64 using the current instrument
 // NOTE: this will change whenever someone calls T.soundfont.setInstrument();
-T.soundfont.play(64);
-"></div>
+T.soundfont.play(64);"></div>
 <div class="codemirror" lang="timbre" source="// set instrument to a &quot;cello&quot;, and play note 64
 T.soundfont.setInstrument(42);
-T.soundfont.play(64);
-"></div>
+T.soundfont.play(64);"></div>
 <div class="codemirror" lang="timbre" source="// only play if this note has already been cached
-T.soundfont.play(70, false);
-"></div>
+T.soundfont.play(70, false);"></div>
 <h2 id="methods">Methods</h2>
 <ul>
 <li><code>T.soundfont.emptyCache();</code></li>

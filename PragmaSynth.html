@@ -24,11 +24,9 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
   if (midi) {
     synth.noteOff(midi, 100);
   }
-}).start();
-"></div>
+}).start();"></div>
 <h2 id="vco-voltage-controlled-oscillator-">VCO (Voltage Controlled Oscillator)</h2>
-<div class="codemirror" lang="timbre" source="var VCO = T(&quot;saw&quot;, {freq:880, mul:0.2}).play();
-"></div>
+<div class="codemirror" lang="timbre" source="var VCO = T(&quot;saw&quot;, {freq:880, mul:0.2}).play();"></div>
 <p> Frequency control by keyboard <em>(line:8)</em></p>
 <div class="codemirror" lang="timbre" source="var VCO = T(&quot;saw&quot;, {freq:880, mul:0.2}).play();
 
@@ -39,8 +37,7 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
   if (midi) {
     VCO.freq.value = midicps.at(midi);
   }
-}).start();
-"></div>
+}).start();"></div>
 <p> The property <code>T(&quot;osc&quot;).freq</code> can be enter the T-object in non-numeric <em>(line:2)</em>. In the following example, vibrato and portamento is performed by <code>.freq</code> that is the time-varying T-object.</p>
 <h3 id="vibrato">Vibrato</h3>
 <div class="codemirror" lang="timbre" source="var LFO = T(&quot;sin&quot;, {freq:&quot;250ms&quot;, mul:5, add:880}).kr();
@@ -53,8 +50,7 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
   if (midi) {
     LFO.add = midicps.at(midi);
   }
-}).start();
-"></div>
+}).start();"></div>
 <h3 id="portament">Portament</h3>
 <p> It is varied to smooth the frequency by using <code>T(&quot;param&quot;)</code> <em>(line:1,2,9)</em></p>
 <div class="codemirror" lang="timbre" source="var glide = T(&quot;param&quot;, {value:880});
@@ -67,8 +63,7 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
   if (midi) {
     glide.linTo(midicps.at(midi), &quot;100ms&quot;);
   }
-}).start();
-"></div>
+}).start();"></div>
 <h3 id="sound-effect">Sound Effect</h3>
 <p> It directly describes the change in frequency in the envelope object <code>T(&quot;env&quot;)</code>.</p>
 <div class="codemirror" lang="timbre" source="// Change from 1760Hz to 220Hz in 200ms.
@@ -85,8 +80,7 @@ var keydict = T(&quot;ndict.key&quot;);
 var midicps = T(&quot;midicps&quot;);
 T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
   freq.bang(); // Start the envelope
-}).start();
-"></div>
+}).start();"></div>
 <h2 id="vcf">VCF</h2>
 <div class="codemirror" lang="timbre" source="var VCO = T(&quot;saw&quot;, {mul:0.2});
 var VCF = T(&quot;lpf&quot;, {cutoff:1600, Q:10}, VCO).play();
@@ -98,8 +92,7 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
   if (midi) {
     VCO.freq.value = midicps.at(midi);
   }
-}).start();
-"></div>
+}).start();"></div>
 <h3 id="envelope-filtering">Envelope Filtering</h3>
 <p><em>(line:1,2,12,13)</em></p>
 <div class="codemirror" lang="timbre" source="var table = [200, [4800, 150], [2400, 500]];
@@ -116,8 +109,7 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
     VCO.freq.value = midicps.at(midi);
     cutoff.bang();
   }
-}).start();
-"></div>
+}).start();"></div>
 <h3 id="auto-wah">Auto Wah</h3>
 <p><em>(line:1,13,14)</em></p>
 <div class="codemirror" lang="timbre" source="var cutoff = T(&quot;sin&quot;, {freq:&quot;400ms&quot;, mul:300, add:1760}).kr();
@@ -135,8 +127,7 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
     cutoff.add.value = freq * 2;
     cutoff.bang();
   }
-}).start();
-"></div>
+}).start();"></div>
 <h2 id="vca">VCA</h2>
 <h3 id="amplitude-envelope">Amplitude Envelope</h3>
 <p><em>(line:2,10,15)</em></p>
@@ -156,8 +147,7 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
   if (midi) {
     EG.release();
   }
-}).start();
-"></div>
+}).start();"></div>
 <h3 id="tremolo">Tremolo</h3>
 <p><em>(line:2,3)</em></p>
 <div class="codemirror" lang="timbre" source="var VCO = T(&quot;saw&quot; , {mul:0.5});
@@ -171,8 +161,7 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
   if (midi) {
     VCO.freq.value = midicps.at(midi);
   }
-}).start();
-"></div>
+}).start();"></div>
 <h2 id="polyphonic">Polyphonic</h2>
 <div class="codemirror" lang="timbre" source="var synth = T(&quot;SynthDef&quot;).play();
 
@@ -199,7 +188,6 @@ T(&quot;keyboard&quot;).on(&quot;keydown&quot;, function(e) {
   if (midi) {
     synth.noteOff(midi);
   }
-}).start();
-"></div>
+}).start();"></div>
 <script src="/timbre.js/src/extras/keyboard.js"></script>
 </div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/xml.js"></script><script src="/timbre.js/misc/js/htmlmixed.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>

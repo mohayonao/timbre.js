@@ -2,8 +2,7 @@
 <p><span class="label ar">AR/KR</span> Interpolating wavetable oscillator</p>
 <h2 id="description">Description</h2>
 <p> 基本的な波形を出力します。</p>
-<div class="codemirror" lang="timbre" source="T(&quot;osc&quot;, {wave:&quot;sin&quot;, freq:880}).play();
-"></div>
+<div class="codemirror" lang="timbre" source="T(&quot;osc&quot;, {wave:&quot;sin&quot;, freq:880}).play();"></div>
 <h2 id="properties">Properties</h2>
 <ul>
 <li><code>wave</code> <em>(String or Function or Float32Array)</em><ul>
@@ -27,25 +26,21 @@
 <ul>
 <li>入力オブジェクトが指定されている場合はそれらを合成した後、オシレーターの値で積算します。以下の例では 440Hzのサイン波に 1秒ごとに on/off するパルス波を入力しています。</li>
 </ul>
-<div class="codemirror" lang="timbre" source="T(&quot;sin&quot;, {freq:440, mul:0.5}, T(&quot;+pulse&quot;, {freq:&quot;1sec&quot;})).play();
-"></div>
+<div class="codemirror" lang="timbre" source="T(&quot;sin&quot;, {freq:440, mul:0.5}, T(&quot;+pulse&quot;, {freq:&quot;1sec&quot;})).play();"></div>
 <h2 id="modulate-freq">Modulate freq</h2>
 <div class="codemirror" lang="timbre" source="var xline = T(&quot;param&quot;, {value:1}).expTo(1000, &quot;9sec&quot;);
 var freq  = T(&quot;sin&quot;, {freq:xline, mul:200, add:800});
 
-T(&quot;sin&quot;, {freq:freq, mul:0.25}).play();
-"></div>
+T(&quot;sin&quot;, {freq:freq, mul:0.25}).play();"></div>
 <h2 id="modulate-phase">Modulate phase</h2>
 <div class="codemirror" lang="timbre" source="var xline = T(&quot;param&quot;, {value:1}).expTo(1000, &quot;9sec&quot;);
 var phase = T(&quot;sin&quot;, {freq:xline, mul:2 * Math.PI});
 
-T(&quot;sin&quot;, {freq:800, phase:phase, mul:0.25}).play();
-"></div>
+T(&quot;sin&quot;, {freq:800, phase:phase, mul:0.25}).play();"></div>
 <h2 id="feedback">Feedback</h2>
 <div class="codemirror" lang="timbre" source="var xline = T(&quot;param&quot;, {value:0.01}).expTo(5, &quot;4sec&quot;);
 
-T(&quot;sin&quot;, {freq:800, fb:xline, mul:0.25}).play();
-"></div>
+T(&quot;sin&quot;, {freq:800, fb:xline, mul:0.25}).play();"></div>
 <h2 id="wave-functions">Wave Functions</h2>
 <p> <code>wave</code> プロパティで様々な波形を選択/作成することができます。</p>
 <canvas id="wave" style="width:240px;height:80px"></canvas>
@@ -55,8 +50,7 @@ T(&quot;sin&quot;, {freq:800, fb:xline, mul:0.25}).play();
 T(&quot;interval&quot;, {interval:1000}, function(count) {
   osc.wave = [&quot;sin&quot;, &quot;saw&quot;, &quot;tri&quot;, &quot;pulse&quot;, &quot;fami&quot;][count % 5];
   osc.plot({target:wave});
-}).start();
-"></div>
+}).start();"></div>
 <hr>
 <canvas id="width" style="width:240px;height:80px"></canvas>
 <p> <code>基本波形名(整数)</code> と書くことで波形のデューティー比を指定できます。以下の例では矩形波を基本にデューティー比を変更することで音色を変更しています。</p>
@@ -66,31 +60,26 @@ T(&quot;interval&quot;, {interval:1000}, function(count) {
   var wave = &quot;pulse(&quot; + ((count % 19) * 5 + 5) + &quot;)&quot;;
   osc.wave = wave;
   osc.plot({target:width});
-}).start();
-"></div>
+}).start();"></div>
 <hr>
 <canvas id="plus" style="width:240px;height:80px"></canvas>
 <p> <code>+基本波形名</code> と書くことで波形の形の範囲を 0-1 に矯正できます。<code>T(&quot;+sin&quot;)</code> のように生成した場合は自動的に Control Rateとなります。これはトレモロなどに使うときに便利です。</p>
-<div class="codemirror" lang="timbre" source="T(&quot;osc&quot;, {wave:&quot;+sin&quot;}).plot({target:plus});
-"></div>
+<div class="codemirror" lang="timbre" source="T(&quot;osc&quot;, {wave:&quot;+sin&quot;}).plot({target:plus});"></div>
 <canvas id="minus" style="width:240px;height:80px"></canvas>
 <p> <code>-基本波形名</code> と書くことで波形の上下を反転することができます。</p>
 <div class="codemirror" lang="timbre" source="T(&quot;osc&quot;, {wave:&quot;saw&quot;}).plot({target:minus, width:120});
-T(&quot;osc&quot;, {wave:&quot;-saw&quot;}).plot({target:minus, width:120, x:120, background:&quot;#ededed&quot;});
-"></div>
+T(&quot;osc&quot;, {wave:&quot;-saw&quot;}).plot({target:minus, width:120, x:120, background:&quot;#ededed&quot;});"></div>
 <hr>
 <h3 id="sion-">SiON記法</h3>
 <p> <a href="http://mmltalks.appspot.com/document/siopm_mml_ref_05.html">SiON</a> のテーブル定義の書き方で波形を作成します。</p>
 <canvas id="wavc" style="width:240px;height:80px"></canvas>
 <p> <code>wavc(0FFFFFFF)</code> と書くことで基音より整数倍のサイン波を合成した波形を作ることができます。値は下位から 4ビット単位で設定します。</p>
-<div class="codemirror" lang="timbre" source="T(&quot;osc&quot;, {wave:&quot;wavc(0200080f)&quot;, mul:0.15}).plot({target:wavc}).play();
-"></div>
+<div class="codemirror" lang="timbre" source="T(&quot;osc&quot;, {wave:&quot;wavc(0200080f)&quot;, mul:0.15}).plot({target:wavc}).play();"></div>
 <hr>
 <canvas id="wavb" style="width:240px;height:80px"></canvas>
 <p> <code>wavb(00112233..)</code> と書くことで波形を 16進数で定義できます。</p>
 <div class="codemirror" lang="timbre" source="var src = &quot;wavb(36454d4b41362f303639332309efd9cc362f220df2d9c8c3c6cbccc6bab0aeb7)&quot;;
-T(&quot;osc&quot;, {wave:src, mul:0.15}).plot({target:wavb}).play();
-"></div>
+T(&quot;osc&quot;, {wave:src, mul:0.15}).plot({target:wavb}).play();"></div>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>

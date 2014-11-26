@@ -19,8 +19,7 @@ T(&quot;mml&quot;, {mml:&quot;o7 q2 l8 $ e&gt;a&lt;c&gt;a&lt; r2&quot;}, osc, en
   if (type === &quot;noteOn&quot;) {
     osc.freq.midi = opts.noteNum;
   }
-}).start();
-"></div>
+}).start();"></div>
 <h2 id="properties">Properties</h2>
 <ul>
 <li><code>mml</code> <em>(String)</em></li>
@@ -41,8 +40,7 @@ var gen = T(&quot;OscGen&quot;, {wave:&quot;saw&quot;, env:{type:&quot;perc&quot
 T(&quot;mml&quot;, {mml:mml}, gen).on(&quot;ended&quot;, function() {
   gen.pause();
   this.stop();
-}).start();
-"></div>
+}).start();"></div>
 <p> chord</p>
 <div class="codemirror" lang="timbre" source="var mml = &quot;l2 g0&lt;c0e&gt; f0g0&lt;d&gt; e0g0&lt;c1&quot;;
 
@@ -51,8 +49,7 @@ var gen = T(&quot;OscGen&quot;, {wave:&quot;sin(10)&quot;, env:{type:&quot;adsr&
 T(&quot;mml&quot;, {mml:mml}, gen).on(&quot;ended&quot;, function() {
   gen.pause();
   this.stop();
-}).start();
-"></div>
+}).start();"></div>
 <h3 id="-r-"><code>r</code></h3>
 <p> rest</p>
 <div class="codemirror" lang="timbre" source="var mml = &quot;l16 o2 [ a r aa ]16&quot;;
@@ -62,8 +59,7 @@ var gen = T(&quot;OscGen&quot;, {wave:&quot;pulse&quot;, env:{type:&quot;adsr&qu
 T(&quot;mml&quot;, {mml:mml}, gen).on(&quot;ended&quot;, function() {
   gen.pause();
   this.stop();
-}).start();
-"></div>
+}).start();"></div>
 <h3 id="-"><code>&amp;</code></h3>
 <p> tie</p>
 <div class="codemirror" lang="timbre" source="var mml = &quot;l8 cc ee ff g&amp;g ee dd c2&quot;;
@@ -73,8 +69,7 @@ var gen = T(&quot;OscGen&quot;, {wave:&quot;pulse&quot;, env:{type:&quot;adsr&qu
 T(&quot;mml&quot;, {mml:mml}, gen).on(&quot;ended&quot;, function() {
   gen.pause();
   this.stop();
-}).start();
-"></div>
+}).start();"></div>
 <h3 id="-t-"><code>t</code></h3>
 <p> tempo</p>
 <h3 id="-l-"><code>l</code></h3>
@@ -96,8 +91,7 @@ var gen = T(&quot;OscGen&quot;, {wave:&quot;saw&quot;, env:{type:&quot;adsr&quot
 T(&quot;mml&quot;, {mml:mml}, gen).on(&quot;ended&quot;, function() {
   gen.pause();
   this.stop();
-}).start();
-"></div>
+}).start();"></div>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="./OscGen.html"><code>T(&quot;OscGen&quot;)</code></a></li>

@@ -3,16 +3,14 @@
 <h2 id="installation">Installation</h2>
 <p>Download an extra object: <a href="/timbre.js/src/extras/audio-jsonp.js">audio-jsonp.js</a></p>
 <div class="codemirror" lang="html" source="&lt;script src=&quot;timbre.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;audio-jsonp.js&quot;&gt;&lt;/script&gt;
-"></div>
+&lt;script src=&quot;audio-jsonp.js&quot;&gt;&lt;/script&gt;"></div>
 <h2 id="description">Description</h2>
 <p> JSONPで音声ファイルを読みこむ <code>T(&quot;buffer&quot;)</code> オブジェクトです。</p>
 <div class="codemirror" lang="timbre" source="var url = &quot;https://dl.dropbox.com/u/645229/tmp/timbre.js/base64_drum.js?_callback=drum&quot;;
 
 T(&quot;audio.jsonp&quot;).load(url, function() {
   this.play();
-});
-"></div>
+});"></div>
 <p> アンダースコア付きのURLのクエリ <code>_callback</code> はサーバーへのリクエスト時に削除されます。これはDropboxなど静的なファイルストレージを使う際に便利です。たとえば <code>&quot;../base64_drum.js?_callback=drum&quot;</code> は <code>&quot;../base64_drum.js&quot;</code> にアクセスして、<code>_callback=drum</code> の部分はコールバック関数名 (<code>window.timbrejs_audiojsonp_drum</code>) にのみ使用されます。</p>
 <h2 id="properties">Properties</h2>
 <ul>
@@ -35,13 +33,11 @@ T(&quot;audio.jsonp&quot;).load(url, function() {
 </li>
 </ul>
 <h2 id="jsonp">JSONP</h2>
-<div class="codemirror" lang="js" source="window.timbrejs_audiojsonp_CALLBACK(BASE64, EXTENSION_TYPE);
-"></div>
+<div class="codemirror" lang="js" source="window.timbrejs_audiojsonp_CALLBACK(BASE64, EXTENSION_TYPE);"></div>
 <p>sample(large file): <a href="https://dl.dropbox.com/u/645229/tmp/timbre.js/base64_drum.js">https://dl.dropbox.com/u/645229/tmp/timbre.js/base64_drum.js</a></p>
 <h2 id="tool">Tool</h2>
 <p><a href="http://127.0.0.1:3000/timbre.js/misc/audio-jsonp.js">convert an audio file to a JSONP script</a></p>
-<div class="codemirror" lang="sh" source="$ node ./audio-jsonp.js [-n CALLBACK] file &gt; audio.js
-"></div>
+<div class="codemirror" lang="sh" source="$ node ./audio-jsonp.js [-n CALLBACK] file &gt; audio.js"></div>
 <h2 id="source">Source</h2>
 <p><a href="https://github.com/mohayonao/timbre.js/blob/master/src/extras/audio-jsonp.js">https://github.com/mohayonao/timbre.js/blob/master/src/extras/audio-jsonp.js</a></p>
 <script src="/timbre.js/src/extras/audio-jsonp.js"></script>

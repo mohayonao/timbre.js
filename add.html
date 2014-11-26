@@ -4,8 +4,7 @@
 <p> <code>T(&quot;+&quot;)</code> is a signal add operator that outputs a signal which is the sum of the all inputs signals.</p>
 <div class="codemirror" lang="timbre" source="T(&quot;+&quot;, T(&quot;sin&quot;, {freq:523.35, mul:0.25}),
        T(&quot;sin&quot;, {freq:659.25, mul:0.25}),
-       T(&quot;sin&quot;, {freq:783.99, mul:0.25})).play();
-"></div>
+       T(&quot;sin&quot;, {freq:783.99, mul:0.25})).play();"></div>
 <h2 id="note">Note</h2>
 <p> Any <strong>T-Object</strong> automatically uses the sum of all signals received in that inputs. Thus, the <code>T(&quot;+&quot;)</code> object is necessary only to show signal addition explicitly, or to add an offset to a signal.</p>
 <div class="codemirror" lang="timbre" source="var chord = T(&quot;+&quot;, T(&quot;saw&quot;, {freq:523.35, mul:0.25}),
@@ -13,8 +12,7 @@
                    T(&quot;saw&quot;, {freq:783.99, mul:0.25}));
 var cutoff = T(&quot;sin&quot;, {freq:&quot;250ms&quot;, mul:800, add:1600}).kr();
 
-T(&quot;lpf&quot;, {cutoff:cutoff}, chord).play();
-"></div>
+T(&quot;lpf&quot;, {cutoff:cutoff}, chord).play();"></div>
 <p> The below example are the same as the above example.</p>
 <div class="codemirror" lang="timbre" source="var cutoff = T(&quot;sin&quot;, {freq:&quot;250ms&quot;, mul:800, add:1600}).kr();
 
@@ -22,6 +20,5 @@ T(&quot;lpf&quot;, {cutoff:cutoff},
   T(&quot;saw&quot;, {freq:523.35, mul:0.25}),
   T(&quot;saw&quot;, {freq:659.25, mul:0.25}),
   T(&quot;saw&quot;, {freq:783.99, mul:0.25})
-).play();
-"></div>
+).play();"></div>
 </div><script src="/timbre.js/misc/js/jquery.js"></script><script src="/timbre.js/misc/js/codemirror.js"></script><script src="/timbre.js/misc/js/javascript.js"></script><script src="/timbre.js/misc/js/xml.js"></script><script src="/timbre.js/misc/js/htmlmixed.js"></script><script src="/timbre.js/misc/js/subcollider.js"></script><script src="/timbre.js/misc/js/common.js"></script></body></html>
