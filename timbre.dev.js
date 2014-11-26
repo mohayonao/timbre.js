@@ -18,7 +18,7 @@
     var ACCEPT_SAMPLERATES = [8000,11025,12000,16000,22050,24000,32000,44100,48000];
     var ACCEPT_CELLSIZES = [32,64,128,256];
 
-    var _ver = "14.10.12";
+    var _ver = "14.11.25";
     var _sys = null;
     var _constructors = {};
     var _factories    = {};
@@ -237,7 +237,7 @@
             }
             if ((m = /L(\d+)?(\.*)$/i.exec(str))) {
                 ms = 60 / getbpm(str) * (4 / (m[1]||4)) * 1000;
-                ms *= [1, 1.5, 1.75, 1.875][(m[2]||"").length] || 1;
+                ms *= 2 - (1 / Math.pow(2, (m[2]||"").length));
                 return ms;
             }
             if ((m = /^(\d+(?:\.\d+)?|\.(?:\d+))(min|sec|m)s?$/i.exec(str))) {
@@ -8209,9 +8209,9 @@
         listen: function() {
             var _ = this._;
             var context = fn._audioContext;
-            _.gain = context.createGainNode();
+            _.gain = context.createGain();
             _.gain.gain.value = 0;
-            _.node = context.createJavaScriptNode(1024, 2, 2);
+            _.node = context.createScriptProcessorNode(1024, 2, 2);
             _.node.onaudioprocess = onaudioprocess(this);
             _.src.connect(_.node);
             _.node.connect(_.gain);
@@ -8835,7 +8835,7 @@
                         dot = cmd.dot || status.dot;
                     }
                     duration = (60 / tempo) * (4 / len) * 1000;
-                    duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
+                    duration *= 2 - (1 / Math.pow(2, dot));
 
                     vel = status.v << 3;
                     if (status.tie) {
@@ -8882,7 +8882,7 @@
                     }
                     if (len > 0) {
                         duration = (60 / tempo) * (4 / len) * 1000;
-                        duration *= [1, 1.5, 1.75, 1.875][dot] || 1;
+                        duration *= 2 - (1 / Math.pow(2, dot));
                         queueTime += duration;
                     }
                     break;
