@@ -237,7 +237,7 @@
             }
             if ((m = /L(\d+)?(\.*)$/i.exec(str))) {
                 ms = 60 / getbpm(str) * (4 / (m[1]||4)) * 1000;
-                ms *= [1, 1.5, 1.75, 1.875][(m[2]||"").length] || 1;
+                ms *= 2 - (1 / Math.pow(2, (m[2]||"").length));
                 return ms;
             }
             if ((m = /^(\d+(?:\.\d+)?|\.(?:\d+))(min|sec|m)s?$/i.exec(str))) {
