@@ -1,0 +1,20 @@
+{
+  "name": "timbre.js",
+  "version": "14.11.25",
+  "homepage": "https://github.com/atlastrafficmonitor/timbre.js",
+  "description": "JavaScript library for objective sound programming",
+  "main": "timbre.dev.js",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "timbre.js",
+    "timbre",
+    "audio",
+    "synth"
+  ],
+  "authors": [
+    "nao yonamine <mohayonao@gmail.com>"
+  ],
+  "license": "MIT"
+}
