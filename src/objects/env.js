@@ -296,7 +296,7 @@
         var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
         var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
         var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
-        var r  = envValue(opts,   10, 1000, "r" , "decayTime"   , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "releaseTime" , timevalue);
         var lv = envValue(opts, ZERO,    1, "lv", "level"       );
 
         opts.table = [ZERO, [lv, a], [s, d], [ZERO, r]];
@@ -315,7 +315,7 @@
         var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
         var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
         var h  = envValue(opts,   10,  500, "h" , "holdTime"    , timevalue);
-        var r  = envValue(opts,   10, 1000, "r" , "decayTime"   , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "releaseTime" , timevalue);
         var lv = envValue(opts, ZERO,    1, "lv", "level"       );
 
         opts.table = [ZERO, [lv, a], [s, d], [s, h], [ZERO, r]];
@@ -349,7 +349,7 @@
         var a  = envValue(opts,   10,   10, "a" , "attackTime"  , timevalue);
         var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
         var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
-        var r  = envValue(opts,   10, 1000, "r" , "relaseTime"  , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "releaseTime" , timevalue);
         var lv = envValue(opts, ZERO,    1, "lv", "level"       );
 
         opts.table = [ZERO, [ZERO, dl], [lv, a], [s, d], [ZERO, r]];
@@ -369,7 +369,7 @@
         var d  = envValue(opts,   10,  300, "d" , "decayTime"   , timevalue);
         var s  = envValue(opts, ZERO,  0.5, "s" , "sustainLevel");
         var f  = envValue(opts,   10, 5000, "f" , "fadeTime"    , timevalue);
-        var r  = envValue(opts,   10, 1000, "r" , "relaseTime"  , timevalue);
+        var r  = envValue(opts,   10, 1000, "r" , "releaseTime" , timevalue);
         var lv = envValue(opts, ZERO,    1, "lv", "level"       );
 
         opts.table = [ZERO, [lv, a], [lv, h], [s, d], [ZERO, f], [ZERO, r]];
@@ -415,7 +415,7 @@
         }
 
         var opts = _args[0];
-        var r  = envValue(opts,   10, 100, "r" , "relaseTime", timevalue);
+        var r  = envValue(opts,   10, 100, "r" , "releaseTime", timevalue);
         var lv = envValue(opts, ZERO,   1, "lv", "level"    );
 
         opts.table = [lv, [ZERO, r]];
