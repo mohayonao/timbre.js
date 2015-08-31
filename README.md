@@ -1,3 +1,5 @@
+# This repository is no longer maintained.
+
 timbre.js
 =========
 JavaScript library for objective sound programming
