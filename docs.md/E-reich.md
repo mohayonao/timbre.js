@@ -31,4 +31,4 @@ timbre.rec(function(output) {
 });
 ```
 
-using: [subcollider.js](http://mohayonao.github.com/subcollider.js/)
+using: [subcollider.js](http://mohayonao.github.com/subcollider/)
