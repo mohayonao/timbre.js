@@ -55,6 +55,6 @@ T("audio").load("/timbre.js/misc/audio/drumkit.wav", function() {
 });
 ```
 
-using: [subcollider.js](http://mohayonao.github.com/subcollider.js)
+using: [subcollider.js](http://mohayonao.github.com/subcollider)
 
 <script src="/timbre.js/src/extras/MoogFF.js"></script>

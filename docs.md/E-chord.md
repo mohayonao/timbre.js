@@ -31,4 +31,4 @@ T("interval", {interval:msec * 64}, function() {
 }).set({buddies:synth}).start();
 ```
 
-using: [subcollider.js](http://mohayonao.github.com/subcollider.js)
+using: [subcollider.js](http://mohayonao.github.com/subcollider)
