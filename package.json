@@ -1,6 +1,6 @@
 {
   "name": "timbre",
-  "version": "14.11.25",
+  "version": "14.11.26",
   "description": "JavaScript library for objective sound programming",
   "author": "nao yonamine <mohayonao@gmail.com>",
   "repository": {
@@ -8,6 +8,7 @@
     "url": "https://github.com/mohayonao/timbre.js.git"
   },
   "main": "timbre.node.js",
+  "browser" : "timbre.dev.js",
   "licenses": [
     {
       "type": "MIT",
