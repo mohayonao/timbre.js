@@ -93,7 +93,7 @@
             var context = fn._audioContext;
             _.gain = context.createGain();
             _.gain.gain.value = 0;
-            _.node = context.createScriptProcessorNode(1024, 2, 2);
+            _.node = context.createScriptProcessor(1024, 2, 2);
             _.node.onaudioprocess = onaudioprocess(this);
             _.src.connect(_.node);
             _.node.connect(_.gain);
