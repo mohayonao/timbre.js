@@ -2351,6 +2351,14 @@
                 var sys_streamsize = sys.streamsize;
                 var x, dx;
 
+                // https://goo.gl/7K7WLu
+                // Chrome starts AudioContext in 'suspended' state if there was no user interaction
+                // with the page before AudioContext was created. Attempt to resume(), assuming 'play'
+                // is called as a response to user action.
+                if (context.state === 'suspended') {
+                  context.resume();
+                }
+
                 if (sys.samplerate === context.sampleRate) {
                     onaudioprocess = function(e) {
                         var outs = e.outputBuffer;
